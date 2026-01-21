@@ -2,8 +2,7 @@
 package dice
 
 import (
-	crand "crypto/rand"
-	"encoding/binary"
+	"errors"
 	"math/rand"
 )
 
@@ -44,67 +43,69 @@ func (o Outcome) String() string {
 	}
 }
 
-// Action represents a single action roll.
-type Action struct {
-	rng *rand.Rand
+// ErrInvalidDifficulty indicates the difficulty is invalid for a roll.
+var ErrInvalidDifficulty = errors.New("difficulty must be non-negative")
+
+// ActionRequest describes an action roll request.
+type ActionRequest struct {
+	Modifier   int
+	Difficulty *int
+	Seed       int64
 }
 
-// NewAction creates a new Action with an optional random seed.
-func NewAction(seed *int64) Action {
-	var s int64
-	if seed != nil {
-		s = *seed
-	} else {
-		s = defaultSeed()
-	}
-	return Action{
-		rng: rand.New(rand.NewSource(s)),
-	}
+// ActionResult contains the outcome of an action roll.
+type ActionResult struct {
+	Hope    int
+	Fear    int
+	Total   int
+	Outcome Outcome
 }
 
-// Roll performs an action roll with the given modifier and difficulty.
-// Returns the hope, fear, total, and outcome of the roll.
-func (a *Action) Roll(modifier int, difficulty *int) (hope int, fear int, total int, outcome Outcome) {
-	hope = a.rollD12()
-	fear = a.rollD12()
-	total = hope + fear + modifier
-
-	unopposed := difficulty == nil
-	sucess := !unopposed && total >= *difficulty
-
-	switch {
-	case hope == fear:
-		outcome = OutcomeCriticalSuccess
-	case hope > fear && unopposed:
-		outcome = OutcomeRollWithHope
-	case fear > hope && unopposed:
-		outcome = OutcomeRollWithFear
-	case hope > fear && sucess:
-		outcome = OutcomeSuccessWithHope
-	case hope < fear && sucess:
-		outcome = OutcomeSuccessWithFear
-	case hope > fear:
-		outcome = OutcomeFailureWithHope
-	case hope < fear:
-		outcome = OutcomeFailureWithFear
-	default:
-		// Branch should be unreacheable
-		outcome = OutcomeUnspecified
+// RollAction performs an action roll from the provided request.
+func RollAction(request ActionRequest) (ActionResult, error) {
+	if request.Difficulty != nil && *request.Difficulty < 0 {
+		return ActionResult{}, ErrInvalidDifficulty
 	}
 
-	return
+	rng := rand.New(rand.NewSource(request.Seed))
+	hope := rollD12(rng)
+	fear := rollD12(rng)
+	total := hope + fear + request.Modifier
+
+	return ActionResult{
+		Hope:    hope,
+		Fear:    fear,
+		Total:   total,
+		Outcome: outcomeFor(hope, fear, total, request.Difficulty),
+	}, nil
 }
 
 // rollD12 rolls a d12 and returns the result.
-func (a *Action) rollD12() int {
-	return a.rng.Intn(12) + 1
+func rollD12(rng *rand.Rand) int {
+	return rng.Intn(12) + 1
 }
 
-// defaultSeed generates a random seed using crypto/rand.
-func defaultSeed() int64 {
-	var b [8]byte
-	if _, err := crand.Read(b[:]); err != nil {
-		panic(err)
+// outcomeFor determines the roll outcome based on totals and difficulty.
+func outcomeFor(hope int, fear int, total int, difficulty *int) Outcome {
+	unopposed := difficulty == nil
+	success := !unopposed && total >= *difficulty
+
+	switch {
+	case hope == fear:
+		return OutcomeCriticalSuccess
+	case hope > fear && unopposed:
+		return OutcomeRollWithHope
+	case fear > hope && unopposed:
+		return OutcomeRollWithFear
+	case hope > fear && success:
+		return OutcomeSuccessWithHope
+	case hope < fear && success:
+		return OutcomeSuccessWithFear
+	case hope > fear:
+		return OutcomeFailureWithHope
+	case hope < fear:
+		return OutcomeFailureWithFear
+	default:
+		return OutcomeUnspecified
 	}
-	return int64(binary.LittleEndian.Uint64(b[:]))
 }
