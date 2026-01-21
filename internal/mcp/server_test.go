@@ -43,6 +43,16 @@ func newCallToolRequest(args map[string]any) mcp.CallToolRequest {
 	}
 }
 
+// newRollDiceCallToolRequest builds a roll dice tool call request with arguments.
+func newRollDiceCallToolRequest(args map[string]any) mcp.CallToolRequest {
+	return mcp.CallToolRequest{
+		Params: mcp.CallToolParams{
+			Name:      "roll_dice",
+			Arguments: args,
+		},
+	}
+}
+
 // TestGRPCAddressPrefersEnv ensures env configuration overrides defaults.
 func TestGRPCAddressPrefersEnv(t *testing.T) {
 	t.Setenv("DUALITY_GRPC_ADDR", "env:123")
@@ -196,5 +206,111 @@ func TestActionRollHandlerMapsRequestAndResponse(t *testing.T) {
 	}
 	if structured.Difficulty == nil || *structured.Difficulty != 7 {
 		t.Fatalf("expected difficulty 7, got %v", structured.Difficulty)
+	}
+}
+
+// TestRollDiceHandlerRejectsMissingDice ensures empty dice requests return an error result.
+func TestRollDiceHandlerRejectsMissingDice(t *testing.T) {
+	client := &fakeDiceRollClient{}
+	handler := rollDiceHandler(client)
+
+	result, err := handler(context.Background(), newRollDiceCallToolRequest(map[string]any{
+		"dice": []map[string]any{},
+	}))
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if result == nil || !result.IsError {
+		t.Fatal("expected error result")
+	}
+	if client.lastRollDiceRequest != nil {
+		t.Fatal("expected no gRPC call on invalid input")
+	}
+}
+
+// TestRollDiceHandlerRejectsInvalidDice ensures invalid dice specs return an error result.
+func TestRollDiceHandlerRejectsInvalidDice(t *testing.T) {
+	client := &fakeDiceRollClient{}
+	handler := rollDiceHandler(client)
+
+	result, err := handler(context.Background(), newRollDiceCallToolRequest(map[string]any{
+		"dice": []map[string]any{{"sides": -1, "count": 2}},
+	}))
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if result == nil || !result.IsError {
+		t.Fatal("expected error result")
+	}
+	if client.lastRollDiceRequest != nil {
+		t.Fatal("expected no gRPC call on invalid input")
+	}
+}
+
+// TestRollDiceHandlerReturnsClientError ensures gRPC errors are returned as tool errors.
+func TestRollDiceHandlerReturnsClientError(t *testing.T) {
+	client := &fakeDiceRollClient{rollDiceErr: errors.New("boom")}
+	handler := rollDiceHandler(client)
+
+	result, err := handler(context.Background(), newRollDiceCallToolRequest(map[string]any{
+		"dice": []map[string]any{{"sides": 6, "count": 1}},
+	}))
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if result == nil || !result.IsError {
+		t.Fatal("expected error result")
+	}
+}
+
+// TestRollDiceHandlerMapsRequestAndResponse ensures inputs and outputs are mapped consistently.
+func TestRollDiceHandlerMapsRequestAndResponse(t *testing.T) {
+	client := &fakeDiceRollClient{rollDiceResponse: &pb.RollDiceResponse{
+		Rolls: []*pb.DiceRoll{
+			{Sides: 6, Results: []int32{2, 5}, Total: 7},
+			{Sides: 8, Results: []int32{4}, Total: 4},
+		},
+		Total: 11,
+	}}
+
+	handler := rollDiceHandler(client)
+
+	result, err := handler(context.Background(), newRollDiceCallToolRequest(map[string]any{
+		"dice": []map[string]any{{"sides": 6, "count": 2}, {"sides": 8, "count": 1}},
+	}))
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if result == nil || result.IsError {
+		t.Fatal("expected success result")
+	}
+	if client.lastRollDiceRequest == nil {
+		t.Fatal("expected gRPC request")
+	}
+	if len(client.lastRollDiceRequest.Dice) != 2 {
+		t.Fatalf("expected 2 dice specs, got %d", len(client.lastRollDiceRequest.Dice))
+	}
+	if client.lastRollDiceRequest.Dice[0].Sides != 6 || client.lastRollDiceRequest.Dice[0].Count != 2 {
+		t.Fatalf("unexpected first dice spec: %+v", client.lastRollDiceRequest.Dice[0])
+	}
+	if client.lastRollDiceRequest.Dice[1].Sides != 8 || client.lastRollDiceRequest.Dice[1].Count != 1 {
+		t.Fatalf("unexpected second dice spec: %+v", client.lastRollDiceRequest.Dice[1])
+	}
+
+	structured, ok := result.StructuredContent.(RollDiceResult)
+	if !ok {
+		t.Fatalf("expected RollDiceResult, got %T", result.StructuredContent)
+	}
+	if structured.Total != 11 {
+		t.Fatalf("expected total 11, got %d", structured.Total)
+	}
+	if len(structured.Rolls) != 2 {
+		t.Fatalf("expected 2 rolls, got %d", len(structured.Rolls))
+	}
+	if structured.Rolls[0].Sides != 6 || structured.Rolls[0].Total != 7 {
+		t.Fatalf("unexpected first roll: %+v", structured.Rolls[0])
+	}
+	if structured.Rolls[1].Sides != 8 || structured.Rolls[1].Total != 4 {
+		t.Fatalf("unexpected second roll: %+v", structured.Rolls[1])
 	}
 }

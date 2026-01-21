@@ -42,6 +42,30 @@ type ActionRollInput struct {
 	Difficulty *int `json:"difficulty"`
 }
 
+// RollDiceSpec represents an MCP die specification for a roll.
+type RollDiceSpec struct {
+	Sides int `json:"sides"`
+	Count int `json:"count"`
+}
+
+// RollDiceInput represents the MCP tool input for rolling dice.
+type RollDiceInput struct {
+	Dice []RollDiceSpec `json:"dice"`
+}
+
+// RollDiceRoll represents the results for a single dice spec.
+type RollDiceRoll struct {
+	Sides   int   `json:"sides"`
+	Results []int `json:"results"`
+	Total   int   `json:"total"`
+}
+
+// RollDiceResult represents the MCP tool output for rolling dice.
+type RollDiceResult struct {
+	Rolls []RollDiceRoll `json:"rolls"`
+	Total int            `json:"total"`
+}
+
 // New creates a configured MCP server that connects to the gRPC dice service.
 func New(addr string) (*Server, error) {
 	mcpServer := server.NewMCPServer(
@@ -57,6 +81,7 @@ func New(addr string) (*Server, error) {
 	}
 
 	mcpServer.AddTool(actionRollTool(), actionRollHandler(grpcClient))
+	mcpServer.AddTool(rollDiceTool(), rollDiceHandler(grpcClient))
 
 	return &Server{mcpServer: mcpServer}, nil
 }
@@ -87,6 +112,16 @@ func actionRollTool() mcp.Tool {
 		),
 		mcp.WithInputSchema[ActionRollInput](),
 		mcp.WithOutputSchema[ActionRollResult](),
+	)
+}
+
+// rollDiceTool defines the MCP tool schema for rolling dice.
+func rollDiceTool() mcp.Tool {
+	return mcp.NewTool(
+		"roll_dice",
+		mcp.WithDescription("Rolls arbitrary dice pools"),
+		mcp.WithInputSchema[RollDiceInput](),
+		mcp.WithOutputSchema[RollDiceResult](),
 	)
 }
 
@@ -139,6 +174,59 @@ func actionRollHandler(client pb.DiceRollServiceClient) func(context.Context, mc
 	}
 }
 
+// rollDiceHandler executes a generic dice roll.
+func rollDiceHandler(client pb.DiceRollServiceClient) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		var input RollDiceInput
+		if err := request.BindArguments(&input); err != nil {
+			return mcp.NewToolResultErrorFromErr("invalid dice roll arguments", err), nil
+		}
+		if len(input.Dice) == 0 {
+			return mcp.NewToolResultError("at least one die must be provided"), nil
+		}
+
+		diceSpecs := make([]*pb.DiceSpec, 0, len(input.Dice))
+		for _, spec := range input.Dice {
+			if spec.Sides <= 0 || spec.Count <= 0 {
+				return mcp.NewToolResultError("dice must have positive sides and count"), nil
+			}
+			diceSpecs = append(diceSpecs, &pb.DiceSpec{
+				Sides: int32(spec.Sides),
+				Count: int32(spec.Count),
+			})
+		}
+
+		runCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+
+		response, err := client.RollDice(runCtx, &pb.RollDiceRequest{
+			Dice: diceSpecs,
+		})
+		if err != nil {
+			return mcp.NewToolResultErrorFromErr("dice roll failed", err), nil
+		}
+		if response == nil {
+			return mcp.NewToolResultError("dice roll response is missing"), nil
+		}
+
+		rolls := make([]RollDiceRoll, 0, len(response.GetRolls()))
+		for _, roll := range response.GetRolls() {
+			rolls = append(rolls, RollDiceRoll{
+				Sides:   int(roll.GetSides()),
+				Results: intSlice(roll.GetResults()),
+				Total:   int(roll.GetTotal()),
+			})
+		}
+
+		result := RollDiceResult{
+			Rolls: rolls,
+			Total: int(response.GetTotal()),
+		}
+
+		return mcp.NewToolResultStructuredOnly(result), nil
+	}
+}
+
 // newDiceRollClient connects to the gRPC dice service.
 func newDiceRollClient(addr string) (pb.DiceRollServiceClient, error) {
 	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -154,4 +242,17 @@ func grpcAddress(fallback string) string {
 		return value
 	}
 	return fallback
+}
+
+// intSlice converts a slice of int32 to a slice of int.
+func intSlice(values []int32) []int {
+	if len(values) == 0 {
+		return nil
+	}
+
+	converted := make([]int, len(values))
+	for i, value := range values {
+		converted[i] = int(value)
+	}
+	return converted
 }
