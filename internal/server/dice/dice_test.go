@@ -1,24 +1,11 @@
 package dice
 
 import (
+	"errors"
 	"testing"
 )
 
-func TestNewAction(t *testing.T) {
-	action := NewAction(nil)
-	if action.rng == nil {
-		t.Errorf("NewAction(nil) = %v, want non-nil", action)
-	}
-
-	seed := int64(42)
-	action = NewAction(&seed)
-	if action.rng == nil {
-		t.Errorf("NewAction(%d) = %v, want non-nil", seed, action)
-	}
-}
-
-func TestActionRoll(t *testing.T) {
-
+func TestRollAction(t *testing.T) {
 	diff := func(d int) *int {
 		return &d
 	}
@@ -98,11 +85,28 @@ func TestActionRoll(t *testing.T) {
 	}
 
 	for _, tc := range tcs {
-		action := NewAction(&tc.seed)
-		gotHope, gotFear, gotTotal, gotOutcome := action.Roll(tc.modifier, tc.difficulty)
-		if gotHope != tc.wantHope || gotFear != tc.wantFear || gotTotal != tc.wantTotal || gotOutcome != tc.wantOutcome {
-			t.Errorf("Roll(%d, %v) = (%d, %d, %d, %v), want (%d, %d, %d, %v)", tc.modifier, tc.difficulty, gotHope, gotFear, gotTotal, gotOutcome, tc.wantHope, tc.wantFear, tc.wantTotal, tc.wantOutcome)
+		result, err := RollAction(ActionRequest{
+			Modifier:   tc.modifier,
+			Difficulty: tc.difficulty,
+			Seed:       tc.seed,
+		})
+		if err != nil {
+			t.Fatalf("RollAction returned error: %v", err)
+		}
+		if result.Hope != tc.wantHope || result.Fear != tc.wantFear || result.Total != tc.wantTotal || result.Outcome != tc.wantOutcome {
+			t.Errorf("RollAction(%d, %v) = (%d, %d, %d, %v), want (%d, %d, %d, %v)", tc.modifier, tc.difficulty, result.Hope, result.Fear, result.Total, result.Outcome, tc.wantHope, tc.wantFear, tc.wantTotal, tc.wantOutcome)
 		}
 	}
+}
 
+func TestRollActionRejectsNegativeDifficulty(t *testing.T) {
+	difficulty := -1
+	_, err := RollAction(ActionRequest{
+		Modifier:   0,
+		Difficulty: &difficulty,
+		Seed:       0,
+	})
+	if !errors.Is(err, ErrInvalidDifficulty) {
+		t.Fatalf("RollAction error = %v, want %v", err, ErrInvalidDifficulty)
+	}
 }
