@@ -107,6 +107,19 @@ func TestRollDiceReturnsResults(t *testing.T) {
 	assertRollDiceResponse(t, response, seed, []dice.DiceSpec{{Sides: 6, Count: 2}, {Sides: 8, Count: 1}})
 }
 
+func TestRollDiceSeedFailure(t *testing.T) {
+	server := &Server{
+		seedFunc: func() (int64, error) {
+			return 0, errors.New("seed failure")
+		},
+	}
+
+	_, err := server.RollDice(context.Background(), &pb.RollDiceRequest{
+		Dice: []*pb.DiceSpec{{Sides: 6, Count: 1}},
+	})
+	assertStatusCode(t, err, codes.Internal)
+}
+
 // assertStatusCode verifies the gRPC status code for an error.
 func assertStatusCode(t *testing.T, err error, want codes.Code) {
 	t.Helper()
