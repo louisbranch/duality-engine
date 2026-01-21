@@ -99,6 +99,54 @@ func (s *Server) ActionRoll(ctx context.Context, in *pb.ActionRollRequest) (*pb.
 	return response, nil
 }
 
+// RollDice handles generic dice roll requests.
+func (s *Server) RollDice(ctx context.Context, in *pb.RollDiceRequest) (*pb.RollDiceResponse, error) {
+	if in == nil {
+		return nil, status.Error(codes.InvalidArgument, "dice roll request is required")
+	}
+	if s.seedFunc == nil {
+		return nil, status.Error(codes.Internal, "seed generator is not configured")
+	}
+
+	seed, err := s.seedFunc()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to generate seed: %v", err)
+	}
+
+	request := dice.RollRequest{
+		Dice: make([]dice.DiceSpec, 0, len(in.GetDice())),
+		Seed: seed,
+	}
+	for _, spec := range in.GetDice() {
+		request.Dice = append(request.Dice, dice.DiceSpec{
+			Sides: int(spec.GetSides()),
+			Count: int(spec.GetCount()),
+		})
+	}
+
+	result, err := dice.RollDice(request)
+	if err != nil {
+		if errors.Is(err, dice.ErrMissingDice) || errors.Is(err, dice.ErrInvalidDiceSpec) {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		return nil, status.Errorf(codes.Internal, "failed to roll dice: %v", err)
+	}
+
+	response := &pb.RollDiceResponse{
+		Rolls: make([]*pb.DiceRoll, 0, len(result.Rolls)),
+		Total: int32(result.Total),
+	}
+	for _, roll := range result.Rolls {
+		response.Rolls = append(response.Rolls, &pb.DiceRoll{
+			Sides:   int32(roll.Sides),
+			Results: int32Slice(roll.Results),
+			Total:   int32(roll.Total),
+		})
+	}
+
+	return response, nil
+}
+
 // outcomeToProto maps dice outcomes to the protobuf outcome enum.
 func outcomeToProto(outcome dice.Outcome) pb.Outcome {
 	switch outcome {
@@ -119,4 +167,17 @@ func outcomeToProto(outcome dice.Outcome) pb.Outcome {
 	default:
 		return pb.Outcome_OUTCOME_UNSPECIFIED
 	}
+}
+
+// int32Slice converts a slice of ints to a slice of int32.
+func int32Slice(values []int) []int32 {
+	if len(values) == 0 {
+		return nil
+	}
+
+	converted := make([]int32, len(values))
+	for i, value := range values {
+		converted[i] = int32(value)
+	}
+	return converted
 }

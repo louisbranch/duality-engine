@@ -8,6 +8,9 @@ service DiceRollService {
   // Daggerheart-style action roll:
   // roll Hope d12 + Fear d12 + modifier, compare to optional difficulty.
   rpc ActionRoll(ActionRollRequest) returns (ActionRollResponse);
+
+  // Roll arbitrary dice sets and return the individual results.
+  rpc RollDice(RollDiceRequest) returns (RollDiceResponse);
 }
 
 message ActionRollRequest {
@@ -36,6 +39,29 @@ message DualityDice {
   int32 fear_d12 = 2; // 1..12
 }
 
+message RollDiceRequest {
+  // The dice to roll in order.
+  repeated DiceSpec dice = 1;
+}
+
+message RollDiceResponse {
+  repeated DiceRoll rolls = 1;
+
+  // The sum of all rolls.
+  int32 total = 2;
+}
+
+message DiceSpec {
+  int32 sides = 1;
+  int32 count = 2;
+}
+
+message DiceRoll {
+  int32 sides = 1;
+  repeated int32 results = 2;
+  int32 total = 3;
+}
+
 enum Outcome {
   OUTCOME_UNSPECIFIED = 0;
 
@@ -52,4 +78,3 @@ enum Outcome {
   // Matching duality dice.
   CRITICAL_SUCCESS = 7;
 }
-
