@@ -78,6 +78,47 @@ type RollResult struct {
 }
 
 // RollDice rolls dice based on the provided request.
+//
+// Determinism
+//
+// RollDice is deterministic with respect to the Seed field on RollRequest.
+// Given the same Seed and the same Dice slice (including order and values),
+// RollDice will always produce the same RollResult.
+//
+// Ordering
+//
+// Dice specs in RollRequest.Dice are processed in slice order. The resulting
+// DieRoll entries in RollResult.Rolls appear in the same order as the
+// corresponding DiceSpec entries in RollRequest.Dice.
+//
+// Totals
+//
+// For each DieRoll in RollResult.Rolls, the Total field is the sum of all
+// values in Results for that dice specification. The RollResult.Total field
+// is the sum of Total for all DieRoll entries (i.e., the sum of every die
+// rolled across the entire request).
+//
+// Constraints and errors
+//
+//   - At least one DiceSpec must be provided in RollRequest.Dice, otherwise
+//     ErrMissingDice is returned.
+//   - Each DiceSpec must have Sides > 0 and Count > 0, otherwise
+//     ErrInvalidDiceSpec is returned.
+//
+// Example:
+//
+//   req := RollRequest{
+//       Dice: []DiceSpec{
+//           {Sides: 6, Count: 2}, // roll 2d6
+//           {Sides: 8, Count: 1}, // roll 1d8
+//       },
+//       Seed: 1,
+//   }
+//   result, err := RollDice(req)
+//
+// After a successful call, result.Rolls will contain two DieRoll entries
+// (one for the d6s, one for the d8), and result.Total will equal the sum
+// of all dice rolled in those entries.
 func RollDice(request RollRequest) (RollResult, error) {
 	if len(request.Dice) == 0 {
 		return RollResult{}, ErrMissingDice
