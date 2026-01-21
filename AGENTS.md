@@ -55,7 +55,7 @@ If the project structure evolves, update this file to match the real tooling.
 ## Naming Conventions
 - Use `camelCase` for locals and parameters.
 - Use `PascalCase` for exported identifiers.
-- Use short, meaningful names; avoid single-letter names.
+- Use short, meaningful names; avoid cryptic single-letter names except for idiomatic uses (loop indices, receivers, short-lived locals).
 - Name interfaces by behavior (`Reader`, `Store`, `Validator`).
 - Name concrete types by domain (`UserStore`, `OAuthClient`).
 
