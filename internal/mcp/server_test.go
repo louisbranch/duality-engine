@@ -13,15 +13,24 @@ import (
 
 // fakeDiceRollClient implements DiceRollServiceClient for tests.
 type fakeDiceRollClient struct {
-	response    *pb.ActionRollResponse
-	err         error
-	lastRequest *pb.ActionRollRequest
+	response            *pb.ActionRollResponse
+	rollDiceResponse    *pb.RollDiceResponse
+	err                 error
+	rollDiceErr         error
+	lastRequest         *pb.ActionRollRequest
+	lastRollDiceRequest *pb.RollDiceRequest
 }
 
 // ActionRoll records the request and returns the configured response.
 func (f *fakeDiceRollClient) ActionRoll(ctx context.Context, req *pb.ActionRollRequest, opts ...grpc.CallOption) (*pb.ActionRollResponse, error) {
 	f.lastRequest = req
 	return f.response, f.err
+}
+
+// RollDice records the request and returns the configured response.
+func (f *fakeDiceRollClient) RollDice(ctx context.Context, req *pb.RollDiceRequest, opts ...grpc.CallOption) (*pb.RollDiceResponse, error) {
+	f.lastRollDiceRequest = req
+	return f.rollDiceResponse, f.rollDiceErr
 }
 
 // newCallToolRequest builds a tool call request with arguments.

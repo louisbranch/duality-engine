@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	DiceRollService_ActionRoll_FullMethodName = "/duality.v1.DiceRollService/ActionRoll"
+	DiceRollService_RollDice_FullMethodName   = "/duality.v1.DiceRollService/RollDice"
 )
 
 // DiceRollServiceClient is the client API for DiceRollService service.
@@ -29,6 +30,8 @@ type DiceRollServiceClient interface {
 	// Daggerheart-style action roll:
 	// roll Hope d12 + Fear d12 + modifier, compare to optional difficulty.
 	ActionRoll(ctx context.Context, in *ActionRollRequest, opts ...grpc.CallOption) (*ActionRollResponse, error)
+	// Roll arbitrary dice sets and return the individual results.
+	RollDice(ctx context.Context, in *RollDiceRequest, opts ...grpc.CallOption) (*RollDiceResponse, error)
 }
 
 type diceRollServiceClient struct {
@@ -49,6 +52,16 @@ func (c *diceRollServiceClient) ActionRoll(ctx context.Context, in *ActionRollRe
 	return out, nil
 }
 
+func (c *diceRollServiceClient) RollDice(ctx context.Context, in *RollDiceRequest, opts ...grpc.CallOption) (*RollDiceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RollDiceResponse)
+	err := c.cc.Invoke(ctx, DiceRollService_RollDice_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DiceRollServiceServer is the server API for DiceRollService service.
 // All implementations must embed UnimplementedDiceRollServiceServer
 // for forward compatibility.
@@ -56,6 +69,8 @@ type DiceRollServiceServer interface {
 	// Daggerheart-style action roll:
 	// roll Hope d12 + Fear d12 + modifier, compare to optional difficulty.
 	ActionRoll(context.Context, *ActionRollRequest) (*ActionRollResponse, error)
+	// Roll arbitrary dice sets and return the individual results.
+	RollDice(context.Context, *RollDiceRequest) (*RollDiceResponse, error)
 	mustEmbedUnimplementedDiceRollServiceServer()
 }
 
@@ -68,6 +83,9 @@ type UnimplementedDiceRollServiceServer struct{}
 
 func (UnimplementedDiceRollServiceServer) ActionRoll(context.Context, *ActionRollRequest) (*ActionRollResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ActionRoll not implemented")
+}
+func (UnimplementedDiceRollServiceServer) RollDice(context.Context, *RollDiceRequest) (*RollDiceResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RollDice not implemented")
 }
 func (UnimplementedDiceRollServiceServer) mustEmbedUnimplementedDiceRollServiceServer() {}
 func (UnimplementedDiceRollServiceServer) testEmbeddedByValue()                         {}
@@ -108,6 +126,24 @@ func _DiceRollService_ActionRoll_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DiceRollService_RollDice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RollDiceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DiceRollServiceServer).RollDice(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DiceRollService_RollDice_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DiceRollServiceServer).RollDice(ctx, req.(*RollDiceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DiceRollService_ServiceDesc is the grpc.ServiceDesc for DiceRollService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -118,6 +154,10 @@ var DiceRollService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ActionRoll",
 			Handler:    _DiceRollService_ActionRoll_Handler,
+		},
+		{
+			MethodName: "RollDice",
+			Handler:    _DiceRollService_RollDice_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

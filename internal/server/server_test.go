@@ -68,6 +68,58 @@ func TestActionRollSeedFailure(t *testing.T) {
 	assertStatusCode(t, err, codes.Internal)
 }
 
+func TestRollDiceRejectsNilRequest(t *testing.T) {
+	server := newTestServer(42)
+
+	_, err := server.RollDice(context.Background(), nil)
+	assertStatusCode(t, err, codes.InvalidArgument)
+}
+
+func TestRollDiceRejectsMissingDice(t *testing.T) {
+	server := newTestServer(42)
+
+	_, err := server.RollDice(context.Background(), &pb.RollDiceRequest{})
+	assertStatusCode(t, err, codes.InvalidArgument)
+}
+
+func TestRollDiceRejectsInvalidDiceSpec(t *testing.T) {
+	server := newTestServer(42)
+
+	_, err := server.RollDice(context.Background(), &pb.RollDiceRequest{
+		Dice: []*pb.DiceSpec{{Sides: 0, Count: 1}},
+	})
+	assertStatusCode(t, err, codes.InvalidArgument)
+}
+
+func TestRollDiceReturnsResults(t *testing.T) {
+	seed := int64(13)
+	server := newTestServer(seed)
+
+	response, err := server.RollDice(context.Background(), &pb.RollDiceRequest{
+		Dice: []*pb.DiceSpec{
+			{Sides: 6, Count: 2},
+			{Sides: 8, Count: 1},
+		},
+	})
+	if err != nil {
+		t.Fatalf("RollDice returned error: %v", err)
+	}
+	assertRollDiceResponse(t, response, seed, []dice.DiceSpec{{Sides: 6, Count: 2}, {Sides: 8, Count: 1}})
+}
+
+func TestRollDiceSeedFailure(t *testing.T) {
+	server := &Server{
+		seedFunc: func() (int64, error) {
+			return 0, errors.New("seed failure")
+		},
+	}
+
+	_, err := server.RollDice(context.Background(), &pb.RollDiceRequest{
+		Dice: []*pb.DiceSpec{{Sides: 6, Count: 1}},
+	})
+	assertStatusCode(t, err, codes.Internal)
+}
+
 // assertStatusCode verifies the gRPC status code for an error.
 func assertStatusCode(t *testing.T, err error, want codes.Code) {
 	t.Helper()
@@ -118,6 +170,48 @@ func assertResponseMatches(t *testing.T, response *pb.ActionRollResponse, seed i
 	}
 	if difficulty != nil && response.Difficulty != nil && *response.Difficulty != *difficulty {
 		t.Fatalf("ActionRoll difficulty = %d, want %d", *response.Difficulty, *difficulty)
+	}
+}
+
+// assertRollDiceResponse validates roll dice response fields against expectations.
+func assertRollDiceResponse(t *testing.T, response *pb.RollDiceResponse, seed int64, specs []dice.DiceSpec) {
+	t.Helper()
+
+	if response == nil {
+		t.Fatal("RollDice response is nil")
+	}
+
+	result, err := dice.RollDice(dice.RollRequest{
+		Dice: specs,
+		Seed: seed,
+	})
+	if err != nil {
+		t.Fatalf("RollDice returned error: %v", err)
+	}
+
+	if len(response.GetRolls()) != len(result.Rolls) {
+		t.Fatalf("RollDice roll count = %d, want %d", len(response.GetRolls()), len(result.Rolls))
+	}
+	if response.Total != int32(result.Total) {
+		t.Fatalf("RollDice total = %d, want %d", response.Total, result.Total)
+	}
+
+	for i, roll := range response.GetRolls() {
+		want := result.Rolls[i]
+		if roll.GetSides() != int32(want.Sides) {
+			t.Fatalf("RollDice roll[%d] sides = %d, want %d", i, roll.GetSides(), want.Sides)
+		}
+		if roll.GetTotal() != int32(want.Total) {
+			t.Fatalf("RollDice roll[%d] total = %d, want %d", i, roll.GetTotal(), want.Total)
+		}
+		if len(roll.GetResults()) != len(want.Results) {
+			t.Fatalf("RollDice roll[%d] results = %v, want %v", i, roll.GetResults(), want.Results)
+		}
+		for j, value := range roll.GetResults() {
+			if value != int32(want.Results[j]) {
+				t.Fatalf("RollDice roll[%d] result[%d] = %d, want %d", i, j, value, want.Results[j])
+			}
+		}
 	}
 }
 
