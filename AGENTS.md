@@ -124,8 +124,8 @@ If the project structure evolves, update this file to match the real tooling.
 
 ## Agent Workflow
 - Always create or switch to a new branch before making changes; never work directly on main.
-- If you are not on a feature branch, stop and switch before editing files.
-- Use branch prefixes: `feature/<name>`, `fix/<name>`, `chore/<name>`, `docs/<name>`.
+- If you are not on a prefixed work branch (for example: `feat/`, `fix/`, `chore/`, `docs/`), stop and switch before editing files.
+- Use branch prefixes: `feat/<name>`, `fix/<name>`, `chore/<name>`, `docs/<name>`.
 - Use commit prefixes: `feat:`, `fix:`, `chore:`, `docs:` with a short why-focused subject.
 - Match PR titles to the same prefix style (example: `feat: add duality outcome tool`).
 - Prefer small, focused changes per request.
