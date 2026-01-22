@@ -8,6 +8,7 @@ import (
 
 	pb "github.com/louisbranch/duality-protocol/api/gen/go/duality/v1"
 	"github.com/louisbranch/duality-protocol/internal/server/dice"
+	"github.com/louisbranch/duality-protocol/internal/server/testutil"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -449,7 +450,7 @@ func assertExplainResponse(t *testing.T, response *pb.DualityExplainResponse, re
 		}
 	}
 	if len(response.GetSteps()) > 0 {
-		baseTotal := structInt(t, response.GetSteps()[0].GetData().AsMap(), "base_total")
+		baseTotal := testutil.StructInt(t, response.GetSteps()[0].GetData().AsMap(), "base_total")
 		if baseTotal != result.Intermediates.BaseTotal {
 			t.Fatalf("DualityExplain step base_total = %d, want %d", baseTotal, result.Intermediates.BaseTotal)
 		}
@@ -559,25 +560,4 @@ func intPointer(value *int32) *int {
 
 func stringPointer(value string) *string {
 	return &value
-}
-
-func structInt(t *testing.T, data map[string]any, key string) int {
-	t.Helper()
-	value, ok := data[key]
-	if !ok {
-		t.Fatalf("step data missing %q", key)
-	}
-	switch typed := value.(type) {
-	case int:
-		return typed
-	case int32:
-		return int(typed)
-	case int64:
-		return int(typed)
-	case float64:
-		return int(typed)
-	default:
-		t.Fatalf("step data %q has type %T", key, value)
-	}
-	return 0
 }

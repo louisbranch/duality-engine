@@ -4,6 +4,8 @@ import (
 	"errors"
 	"math/rand"
 	"testing"
+
+	"github.com/louisbranch/duality-protocol/internal/server/testutil"
 )
 
 // TestRollDiceReturnsResults ensures roll results are deterministic and aggregated.
@@ -359,7 +361,7 @@ func TestExplainOutcomeProvidesSteps(t *testing.T) {
 			t.Fatalf("ExplainOutcome step %d code = %q, want %q", i, result.Steps[i].Code, code)
 		}
 	}
-	if got := stepInt(t, result.Steps[0].Data, "base_total"); got != 14 {
+	if got := testutil.StructInt(t, result.Steps[0].Data, "base_total"); got != 14 {
 		t.Fatalf("ExplainOutcome step SUM_DICE base_total = %d, want 14", got)
 	}
 }
@@ -406,27 +408,6 @@ func TestDualityProbabilityRejectsNegativeDifficulty(t *testing.T) {
 	if !errors.Is(err, ErrInvalidDifficulty) {
 		t.Fatalf("DualityProbability error = %v, want %v", err, ErrInvalidDifficulty)
 	}
-}
-
-func stepInt(t *testing.T, data map[string]any, key string) int {
-	t.Helper()
-	value, ok := data[key]
-	if !ok {
-		t.Fatalf("step data missing %q", key)
-	}
-	switch typed := value.(type) {
-	case int:
-		return typed
-	case int32:
-		return int(typed)
-	case int64:
-		return int(typed)
-	case float64:
-		return int(typed)
-	default:
-		t.Fatalf("step data %q has type %T", key, value)
-	}
-	return 0
 }
 
 func intPtr(value int) *int {
