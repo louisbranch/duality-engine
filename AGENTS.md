@@ -40,6 +40,7 @@ If the project structure evolves, update this file to match the real tooling.
 - Keep shared logic in `internal/` (preferred) or `pkg/`.
 - Keep package names short and descriptive.
 - Keep files focused; split large files by responsibility.
+- Treat the MCP layer as a thin transport wrapper; keep rule validation and game logic in the gRPC server/dice packages.
 
 ## Imports
 - Group imports: standard library, third-party, local.

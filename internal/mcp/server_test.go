@@ -97,9 +97,9 @@ func TestNewConfiguresServer(t *testing.T) {
 	}
 }
 
-// TestActionRollHandlerRejectsNegativeDifficulty ensures invalid difficulty returns an error result.
-func TestActionRollHandlerRejectsNegativeDifficulty(t *testing.T) {
-	client := &fakeDiceRollClient{}
+// TestActionRollHandlerPassesNegativeDifficulty ensures gRPC receives invalid difficulty.
+func TestActionRollHandlerPassesNegativeDifficulty(t *testing.T) {
+	client := &fakeDiceRollClient{err: errors.New("boom")}
 	handler := actionRollHandler(client)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, ActionRollInput{
@@ -112,8 +112,11 @@ func TestActionRollHandlerRejectsNegativeDifficulty(t *testing.T) {
 	if result != nil {
 		t.Fatal("expected nil result on error")
 	}
-	if client.lastRequest != nil {
-		t.Fatal("expected no gRPC call on invalid input")
+	if client.lastRequest == nil {
+		t.Fatal("expected gRPC call on invalid input")
+	}
+	if client.lastRequest.Difficulty == nil || *client.lastRequest.Difficulty != -1 {
+		t.Fatalf("expected difficulty -1, got %v", client.lastRequest.Difficulty)
 	}
 }
 
@@ -188,9 +191,9 @@ func TestActionRollHandlerMapsRequestAndResponse(t *testing.T) {
 	}
 }
 
-// TestDualityOutcomeHandlerRejectsInvalidDice ensures invalid dice return errors.
-func TestDualityOutcomeHandlerRejectsInvalidDice(t *testing.T) {
-	client := &fakeDiceRollClient{}
+// TestDualityOutcomeHandlerPassesInvalidDice ensures gRPC receives invalid dice.
+func TestDualityOutcomeHandlerPassesInvalidDice(t *testing.T) {
+	client := &fakeDiceRollClient{dualityOutcomeErr: errors.New("boom")}
 	handler := dualityOutcomeHandler(client)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, DualityOutcomeInput{
@@ -203,14 +206,17 @@ func TestDualityOutcomeHandlerRejectsInvalidDice(t *testing.T) {
 	if result != nil {
 		t.Fatal("expected nil result on error")
 	}
-	if client.lastDualityOutcomeRequest != nil {
-		t.Fatal("expected no gRPC call on invalid input")
+	if client.lastDualityOutcomeRequest == nil {
+		t.Fatal("expected gRPC call on invalid input")
+	}
+	if client.lastDualityOutcomeRequest.GetHope() != 0 || client.lastDualityOutcomeRequest.GetFear() != 12 {
+		t.Fatalf("unexpected dice in request: %+v", client.lastDualityOutcomeRequest)
 	}
 }
 
-// TestDualityOutcomeHandlerRejectsNegativeDifficulty ensures invalid difficulty returns errors.
-func TestDualityOutcomeHandlerRejectsNegativeDifficulty(t *testing.T) {
-	client := &fakeDiceRollClient{}
+// TestDualityOutcomeHandlerPassesNegativeDifficulty ensures gRPC receives invalid difficulty.
+func TestDualityOutcomeHandlerPassesNegativeDifficulty(t *testing.T) {
+	client := &fakeDiceRollClient{dualityOutcomeErr: errors.New("boom")}
 	handler := dualityOutcomeHandler(client)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, DualityOutcomeInput{
@@ -224,8 +230,11 @@ func TestDualityOutcomeHandlerRejectsNegativeDifficulty(t *testing.T) {
 	if result != nil {
 		t.Fatal("expected nil result on error")
 	}
-	if client.lastDualityOutcomeRequest != nil {
-		t.Fatal("expected no gRPC call on invalid input")
+	if client.lastDualityOutcomeRequest == nil {
+		t.Fatal("expected gRPC call on invalid input")
+	}
+	if client.lastDualityOutcomeRequest.Difficulty == nil || *client.lastDualityOutcomeRequest.Difficulty != -1 {
+		t.Fatalf("expected difficulty -1, got %v", client.lastDualityOutcomeRequest.Difficulty)
 	}
 }
 
@@ -292,9 +301,9 @@ func TestDualityOutcomeHandlerMapsRequestAndResponse(t *testing.T) {
 	}
 }
 
-// TestDualityProbabilityHandlerRejectsNegativeDifficulty ensures invalid difficulty returns errors.
-func TestDualityProbabilityHandlerRejectsNegativeDifficulty(t *testing.T) {
-	client := &fakeDiceRollClient{}
+// TestDualityProbabilityHandlerPassesNegativeDifficulty ensures gRPC receives invalid difficulty.
+func TestDualityProbabilityHandlerPassesNegativeDifficulty(t *testing.T) {
+	client := &fakeDiceRollClient{dualityProbabilityErr: errors.New("boom")}
 	handler := dualityProbabilityHandler(client)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, DualityProbabilityInput{
@@ -307,8 +316,11 @@ func TestDualityProbabilityHandlerRejectsNegativeDifficulty(t *testing.T) {
 	if result != nil {
 		t.Fatal("expected nil result on error")
 	}
-	if client.lastDualityProbabilityRequest != nil {
-		t.Fatal("expected no gRPC call on invalid input")
+	if client.lastDualityProbabilityRequest == nil {
+		t.Fatal("expected gRPC call on invalid input")
+	}
+	if client.lastDualityProbabilityRequest.GetDifficulty() != -1 {
+		t.Fatalf("expected difficulty -1, got %d", client.lastDualityProbabilityRequest.GetDifficulty())
 	}
 }
 
@@ -370,9 +382,9 @@ func TestDualityProbabilityHandlerMapsRequestAndResponse(t *testing.T) {
 	}
 }
 
-// TestRollDiceHandlerRejectsMissingDice ensures empty dice requests return an error result.
-func TestRollDiceHandlerRejectsMissingDice(t *testing.T) {
-	client := &fakeDiceRollClient{}
+// TestRollDiceHandlerPassesMissingDice ensures gRPC receives empty dice.
+func TestRollDiceHandlerPassesMissingDice(t *testing.T) {
+	client := &fakeDiceRollClient{rollDiceErr: errors.New("boom")}
 	handler := rollDiceHandler(client)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, RollDiceInput{})
@@ -382,14 +394,17 @@ func TestRollDiceHandlerRejectsMissingDice(t *testing.T) {
 	if result != nil {
 		t.Fatal("expected nil result on error")
 	}
-	if client.lastRollDiceRequest != nil {
-		t.Fatal("expected no gRPC call on invalid input")
+	if client.lastRollDiceRequest == nil {
+		t.Fatal("expected gRPC call on invalid input")
+	}
+	if len(client.lastRollDiceRequest.GetDice()) != 0 {
+		t.Fatalf("expected empty dice, got %d", len(client.lastRollDiceRequest.GetDice()))
 	}
 }
 
-// TestRollDiceHandlerRejectsInvalidDice ensures invalid dice specs return an error result.
-func TestRollDiceHandlerRejectsInvalidDice(t *testing.T) {
-	client := &fakeDiceRollClient{}
+// TestRollDiceHandlerPassesInvalidDice ensures gRPC receives invalid dice specs.
+func TestRollDiceHandlerPassesInvalidDice(t *testing.T) {
+	client := &fakeDiceRollClient{rollDiceErr: errors.New("boom")}
 	handler := rollDiceHandler(client)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, RollDiceInput{
@@ -401,8 +416,14 @@ func TestRollDiceHandlerRejectsInvalidDice(t *testing.T) {
 	if result != nil {
 		t.Fatal("expected nil result on error")
 	}
-	if client.lastRollDiceRequest != nil {
-		t.Fatal("expected no gRPC call on invalid input")
+	if client.lastRollDiceRequest == nil {
+		t.Fatal("expected gRPC call on invalid input")
+	}
+	if len(client.lastRollDiceRequest.GetDice()) != 1 {
+		t.Fatalf("expected 1 dice spec, got %d", len(client.lastRollDiceRequest.GetDice()))
+	}
+	if client.lastRollDiceRequest.Dice[0].Sides != -1 || client.lastRollDiceRequest.Dice[0].Count != 2 {
+		t.Fatalf("unexpected dice spec: %+v", client.lastRollDiceRequest.Dice[0])
 	}
 }
 

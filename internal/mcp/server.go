@@ -164,9 +164,6 @@ func dualityProbabilityTool() *mcp.Tool {
 func actionRollHandler(client pb.DiceRollServiceClient) mcp.ToolHandlerFor[ActionRollInput, ActionRollResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input ActionRollInput) (*mcp.CallToolResult, ActionRollResult, error) {
 		modifier := input.Modifier
-		if input.Difficulty != nil && *input.Difficulty < 0 {
-			return nil, ActionRollResult{}, fmt.Errorf("difficulty must be non-negative")
-		}
 
 		var difficulty *int32
 		if input.Difficulty != nil {
@@ -206,13 +203,6 @@ func actionRollHandler(client pb.DiceRollServiceClient) mcp.ToolHandlerFor[Actio
 // dualityOutcomeHandler executes a deterministic outcome evaluation.
 func dualityOutcomeHandler(client pb.DiceRollServiceClient) mcp.ToolHandlerFor[DualityOutcomeInput, DualityOutcomeResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input DualityOutcomeInput) (*mcp.CallToolResult, DualityOutcomeResult, error) {
-		if input.Hope < 1 || input.Hope > 12 || input.Fear < 1 || input.Fear > 12 {
-			return nil, DualityOutcomeResult{}, fmt.Errorf("hope and fear must be between 1 and 12")
-		}
-		if input.Difficulty != nil && *input.Difficulty < 0 {
-			return nil, DualityOutcomeResult{}, fmt.Errorf("difficulty must be non-negative")
-		}
-
 		var difficulty *int32
 		if input.Difficulty != nil {
 			value := int32(*input.Difficulty)
@@ -253,10 +243,6 @@ func dualityOutcomeHandler(client pb.DiceRollServiceClient) mcp.ToolHandlerFor[D
 // dualityProbabilityHandler executes the deterministic probability evaluation.
 func dualityProbabilityHandler(client pb.DiceRollServiceClient) mcp.ToolHandlerFor[DualityProbabilityInput, DualityProbabilityResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input DualityProbabilityInput) (*mcp.CallToolResult, DualityProbabilityResult, error) {
-		if input.Difficulty < 0 {
-			return nil, DualityProbabilityResult{}, fmt.Errorf("difficulty must be non-negative")
-		}
-
 		runCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
 
@@ -294,15 +280,8 @@ func dualityProbabilityHandler(client pb.DiceRollServiceClient) mcp.ToolHandlerF
 // rollDiceHandler executes a generic dice roll.
 func rollDiceHandler(client pb.DiceRollServiceClient) mcp.ToolHandlerFor[RollDiceInput, RollDiceResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input RollDiceInput) (*mcp.CallToolResult, RollDiceResult, error) {
-		if len(input.Dice) == 0 {
-			return nil, RollDiceResult{}, fmt.Errorf("at least one die must be provided")
-		}
-
 		diceSpecs := make([]*pb.DiceSpec, 0, len(input.Dice))
 		for _, spec := range input.Dice {
-			if spec.Sides <= 0 || spec.Count <= 0 {
-				return nil, RollDiceResult{}, fmt.Errorf("dice must have positive sides and count")
-			}
 			diceSpecs = append(diceSpecs, &pb.DiceSpec{
 				Sides: int32(spec.Sides),
 				Count: int32(spec.Count),
