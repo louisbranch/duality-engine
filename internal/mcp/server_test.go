@@ -501,6 +501,20 @@ func TestRollDiceHandlerMapsRequestAndResponse(t *testing.T) {
 	}
 }
 
+// TestRulesVersionHandlerReturnsClientError ensures gRPC errors are returned as tool errors.
+func TestRulesVersionHandlerReturnsClientError(t *testing.T) {
+	client := &fakeDiceRollClient{rulesVersionErr: errors.New("boom")}
+	handler := rulesVersionHandler(client)
+
+	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, RulesVersionInput{})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if result != nil {
+		t.Fatal("expected nil result on error")
+	}
+}
+
 // TestRulesVersionHandlerMapsResponse ensures metadata is passed through.
 func TestRulesVersionHandlerMapsResponse(t *testing.T) {
 	client := &fakeDiceRollClient{rulesVersionResponse: &pb.RulesVersionResponse{
