@@ -316,6 +316,54 @@ func TestEvaluateOutcomeRejectsNegativeDifficulty(t *testing.T) {
 	}
 }
 
+func TestExplainOutcomeProvidesSteps(t *testing.T) {
+	difficulty := 10
+	request := OutcomeRequest{
+		Hope:       10,
+		Fear:       4,
+		Modifier:   1,
+		Difficulty: &difficulty,
+	}
+
+	result, err := ExplainOutcome(request)
+	if err != nil {
+		t.Fatalf("ExplainOutcome returned error: %v", err)
+	}
+
+	expected, err := EvaluateOutcome(request)
+	if err != nil {
+		t.Fatalf("EvaluateOutcome returned error: %v", err)
+	}
+	if result.Outcome != expected.Outcome || result.Total != expected.Total || result.IsCrit != expected.IsCrit || result.MeetsDifficulty != expected.MeetsDifficulty {
+		t.Fatalf("ExplainOutcome result mismatch with EvaluateOutcome")
+	}
+	if result.RulesVersion != RulesVersion().RulesVersion {
+		t.Fatalf("ExplainOutcome rules version = %q, want %q", result.RulesVersion, RulesVersion().RulesVersion)
+	}
+	if result.Intermediates.BaseTotal != 14 {
+		t.Fatalf("ExplainOutcome base_total = %d, want 14", result.Intermediates.BaseTotal)
+	}
+	if result.Intermediates.Total != 15 {
+		t.Fatalf("ExplainOutcome total = %d, want 15", result.Intermediates.Total)
+	}
+	if !result.Intermediates.HopeGtFear || result.Intermediates.FearGtHope {
+		t.Fatalf("ExplainOutcome hope/fear comparison mismatch")
+	}
+	if len(result.Steps) != 5 {
+		t.Fatalf("ExplainOutcome steps = %d, want 5", len(result.Steps))
+	}
+
+	wantCodes := []string{"SUM_DICE", "APPLY_MODIFIER", "CHECK_CRIT", "CHECK_DIFFICULTY", "SELECT_OUTCOME"}
+	for i, code := range wantCodes {
+		if result.Steps[i].Code != code {
+			t.Fatalf("ExplainOutcome step %d code = %q, want %q", i, result.Steps[i].Code, code)
+		}
+	}
+	if got := stepInt(t, result.Steps[0].Data, "base_total"); got != 14 {
+		t.Fatalf("ExplainOutcome step SUM_DICE base_total = %d, want 14", got)
+	}
+}
+
 func TestDualityProbabilityCounts(t *testing.T) {
 	result, err := DualityProbability(ProbabilityRequest{Modifier: 0, Difficulty: 10})
 	if err != nil {
@@ -358,6 +406,27 @@ func TestDualityProbabilityRejectsNegativeDifficulty(t *testing.T) {
 	if !errors.Is(err, ErrInvalidDifficulty) {
 		t.Fatalf("DualityProbability error = %v, want %v", err, ErrInvalidDifficulty)
 	}
+}
+
+func stepInt(t *testing.T, data map[string]any, key string) int {
+	t.Helper()
+	value, ok := data[key]
+	if !ok {
+		t.Fatalf("step data missing %q", key)
+	}
+	switch typed := value.(type) {
+	case int:
+		return typed
+	case int32:
+		return int(typed)
+	case int64:
+		return int(typed)
+	case float64:
+		return int(typed)
+	default:
+		t.Fatalf("step data %q has type %T", key, value)
+	}
+	return 0
 }
 
 func intPtr(value int) *int {
