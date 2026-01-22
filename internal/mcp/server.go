@@ -18,7 +18,32 @@ const (
 	serverName = "Duality Engine MCP"
 	// serverVersion identifies the MCP server version.
 	serverVersion = "0.1.0"
+	// rulesSystem identifies the ruleset game system name.
+	rulesSystem = "Daggerheart"
+	// rulesModule identifies the ruleset module name.
+	rulesModule = "Duality"
+	// rulesVersion identifies the semantic ruleset version.
+	rulesVersion = "1.0.0"
+	// rulesDiceModel describes the dice model used for rolls.
+	rulesDiceModel = "2d12"
+	// rulesTotalFormula describes how totals are computed.
+	rulesTotalFormula = "hope + fear + modifier"
+	// rulesCritRule describes the critical success rule.
+	rulesCritRule = "critical success on matching hope/fear; overrides difficulty"
+	// rulesDifficultyRule describes difficulty handling.
+	rulesDifficultyRule = "difficulty optional; total >= difficulty succeeds; critical success always succeeds"
 )
+
+// rulesOutcomes lists the supported outcome enums for Duality rolls.
+var rulesOutcomes = []string{
+	"CRITICAL_SUCCESS",
+	"SUCCESS_WITH_HOPE",
+	"SUCCESS_WITH_FEAR",
+	"FAILURE_WITH_HOPE",
+	"FAILURE_WITH_FEAR",
+	"ROLL_WITH_HOPE",
+	"ROLL_WITH_FEAR",
+}
 
 // Server hosts the MCP server.
 type Server struct {
@@ -75,6 +100,21 @@ type DualityProbabilityResult struct {
 	OutcomeCounts []ProbabilityOutcomeCount `json:"outcome_counts" jsonschema:"counts per outcome"`
 }
 
+// RulesVersionInput represents the MCP tool input for ruleset metadata.
+type RulesVersionInput struct{}
+
+// RulesVersionResult represents the MCP tool output for ruleset metadata.
+type RulesVersionResult struct {
+	System         string   `json:"system" jsonschema:"game system name"`
+	Module         string   `json:"module" jsonschema:"ruleset module name"`
+	RulesVersion   string   `json:"rules_version" jsonschema:"semantic ruleset version"`
+	DiceModel      string   `json:"dice_model" jsonschema:"dice model description"`
+	TotalFormula   string   `json:"total_formula" jsonschema:"total calculation expression"`
+	CritRule       string   `json:"crit_rule" jsonschema:"critical success rule"`
+	DifficultyRule string   `json:"difficulty_rule" jsonschema:"difficulty handling rule"`
+	Outcomes       []string `json:"outcomes" jsonschema:"supported outcome enums"`
+}
+
 // RollDiceSpec represents an MCP die specification for a roll.
 type RollDiceSpec struct {
 	Sides int `json:"sides" jsonschema:"number of sides for the die"`
@@ -112,6 +152,7 @@ func New(addr string) (*Server, error) {
 	mcp.AddTool(mcpServer, actionRollTool(), actionRollHandler(grpcClient))
 	mcp.AddTool(mcpServer, dualityOutcomeTool(), dualityOutcomeHandler(grpcClient))
 	mcp.AddTool(mcpServer, dualityProbabilityTool(), dualityProbabilityHandler(grpcClient))
+	mcp.AddTool(mcpServer, rulesVersionTool(), rulesVersionHandler())
 	mcp.AddTool(mcpServer, rollDiceTool(), rollDiceHandler(grpcClient))
 
 	return &Server{mcpServer: mcpServer}, nil
@@ -157,6 +198,14 @@ func dualityProbabilityTool() *mcp.Tool {
 	return &mcp.Tool{
 		Name:        "duality_probability",
 		Description: "Computes outcome probabilities across duality dice",
+	}
+}
+
+// rulesVersionTool defines the MCP tool schema for ruleset metadata.
+func rulesVersionTool() *mcp.Tool {
+	return &mcp.Tool{
+		Name:        "duality_rules_version",
+		Description: "Describes the Duality ruleset semantics",
 	}
 }
 
@@ -274,6 +323,25 @@ func dualityProbabilityHandler(client pb.DiceRollServiceClient) mcp.ToolHandlerF
 		}
 
 		return nil, result, nil
+	}
+}
+
+// rulesVersionHandler returns static ruleset metadata.
+func rulesVersionHandler() mcp.ToolHandlerFor[RulesVersionInput, RulesVersionResult] {
+	return func(_ context.Context, _ *mcp.CallToolRequest, _ RulesVersionInput) (*mcp.CallToolResult, RulesVersionResult, error) {
+		outcomes := make([]string, len(rulesOutcomes))
+		copy(outcomes, rulesOutcomes)
+
+		return nil, RulesVersionResult{
+			System:         rulesSystem,
+			Module:         rulesModule,
+			RulesVersion:   rulesVersion,
+			DiceModel:      rulesDiceModel,
+			TotalFormula:   rulesTotalFormula,
+			CritRule:       rulesCritRule,
+			DifficultyRule: rulesDifficultyRule,
+			Outcomes:       outcomes,
+		}, nil
 	}
 }
 
