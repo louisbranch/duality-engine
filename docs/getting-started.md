@@ -12,8 +12,8 @@ Start the gRPC server and MCP bridge together:
 make run
 ```
 
-This runs the gRPC server on `localhost:8080`, waits for it to accept
-connections, and then starts the MCP server on stdio.
+This runs the gRPC server on `localhost:8080` and the MCP server on stdio.
+The MCP server will wait for the gRPC server to be healthy before accepting requests.
 
 ## Run services individually
 
