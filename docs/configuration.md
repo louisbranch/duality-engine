@@ -7,10 +7,6 @@
 
 ## MCP address overrides
 
-The MCP server accepts a flag for the gRPC address:
-
-```sh
-go run ./cmd/mcp -addr localhost:8080
-```
-
-If `DUALITY_GRPC_ADDR` is set, it takes precedence over the flag value.
+The MCP server accepts a flag for the gRPC address. If `DUALITY_GRPC_ADDR`
+is set, it takes precedence over the flag value. See `mcp.md` for the
+run command.

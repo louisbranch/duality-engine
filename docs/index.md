@@ -8,6 +8,6 @@ User-facing documentation is published from this folder via GitHub Pages.
 
 ## Docs
 
-- Getting started: `getting-started.md`
-- Configuration: `configuration.md`
-- MCP tools and resources: `mcp.md`
+- [Getting started](getting-started.md)
+- [Configuration](configuration.md)
+- [MCP tools and resources](mcp.md)

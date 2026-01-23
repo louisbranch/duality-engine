@@ -10,10 +10,10 @@ Documentation: https://louisbranch.github.io/duality-engine/
 
 ## Docs
 
-- Overview: https://louisbranch.github.io/duality-engine/
-- Getting started: https://louisbranch.github.io/duality-engine/getting-started.html
-- Configuration: https://louisbranch.github.io/duality-engine/configuration.html
-- MCP tools and resources: https://louisbranch.github.io/duality-engine/mcp.html
+- [Overview](https://louisbranch.github.io/duality-engine/)
+- [Getting started](https://louisbranch.github.io/duality-engine/getting-started.html)
+- [Configuration](https://louisbranch.github.io/duality-engine/configuration.html)
+- [MCP tools and resources](https://louisbranch.github.io/duality-engine/mcp.html)
 
 ## MCP overview
 
