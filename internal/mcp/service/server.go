@@ -42,7 +42,7 @@ type Server struct {
 	conn      *grpc.ClientConn
 }
 
-// New creates a configured MCP server that connects to the gRPC dice service.
+// New creates a configured MCP server that connects to Duality and Campaign gRPC services.
 func New(grpcAddr string) (*Server, error) {
 	mcpServer := mcp.NewServer(&mcp.Implementation{Name: serverName, Version: serverVersion}, nil)
 
@@ -127,7 +127,7 @@ func runWithTransport(ctx context.Context, grpcAddr string, transport mcp.Transp
 	return mcpServer.serveWithTransport(ctx, transport)
 }
 
-// newDualityClient connects to the gRPC Duality service.
+// newGRPCConn connects to the gRPC server shared by MCP services.
 func newGRPCConn(addr string) (*grpc.ClientConn, error) {
 	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
