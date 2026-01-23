@@ -1,5 +1,5 @@
-// Package mcp tests the MCP server wiring.
-package mcp
+// Package service tests the MCP server wiring.
+package service
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"time"
 
 	pb "github.com/louisbranch/duality-engine/api/gen/go/duality/v1"
+	"github.com/louisbranch/duality-engine/internal/mcp/domain"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -208,9 +209,9 @@ func TestNewConfiguresServer(t *testing.T) {
 // TestActionRollHandlerPassesNegativeDifficulty ensures gRPC receives invalid difficulty.
 func TestActionRollHandlerPassesNegativeDifficulty(t *testing.T) {
 	client := &fakeDualityClient{err: errors.New("boom")}
-	handler := actionRollHandler(client)
+	handler := domain.ActionRollHandler(client)
 
-	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, ActionRollInput{
+	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.ActionRollInput{
 		Modifier:   1,
 		Difficulty: intPointer(-1),
 	})
@@ -231,9 +232,9 @@ func TestActionRollHandlerPassesNegativeDifficulty(t *testing.T) {
 // TestActionRollHandlerReturnsClientError ensures gRPC errors are returned as tool errors.
 func TestActionRollHandlerReturnsClientError(t *testing.T) {
 	client := &fakeDualityClient{err: errors.New("boom")}
-	handler := actionRollHandler(client)
+	handler := domain.ActionRollHandler(client)
 
-	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, ActionRollInput{Modifier: 2})
+	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.ActionRollInput{Modifier: 2})
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -257,9 +258,9 @@ func TestActionRollHandlerMapsRequestAndResponse(t *testing.T) {
 			Outcome:         pb.Outcome_SUCCESS_WITH_FEAR,
 		},
 	}
-	handler := actionRollHandler(client)
+	handler := domain.ActionRollHandler(client)
 
-	result, output, err := handler(context.Background(), &mcp.CallToolRequest{}, ActionRollInput{
+	result, output, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.ActionRollInput{
 		Modifier:   7,
 		Difficulty: intPointer(7),
 	})
@@ -302,9 +303,9 @@ func TestActionRollHandlerMapsRequestAndResponse(t *testing.T) {
 // TestDualityOutcomeHandlerPassesInvalidDice ensures gRPC receives invalid dice.
 func TestDualityOutcomeHandlerPassesInvalidDice(t *testing.T) {
 	client := &fakeDualityClient{dualityOutcomeErr: errors.New("boom")}
-	handler := dualityOutcomeHandler(client)
+	handler := domain.DualityOutcomeHandler(client)
 
-	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, DualityOutcomeInput{
+	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.DualityOutcomeInput{
 		Hope: 0,
 		Fear: 12,
 	})
@@ -325,9 +326,9 @@ func TestDualityOutcomeHandlerPassesInvalidDice(t *testing.T) {
 // TestDualityOutcomeHandlerPassesNegativeDifficulty ensures gRPC receives invalid difficulty.
 func TestDualityOutcomeHandlerPassesNegativeDifficulty(t *testing.T) {
 	client := &fakeDualityClient{dualityOutcomeErr: errors.New("boom")}
-	handler := dualityOutcomeHandler(client)
+	handler := domain.DualityOutcomeHandler(client)
 
-	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, DualityOutcomeInput{
+	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.DualityOutcomeInput{
 		Hope:       6,
 		Fear:       5,
 		Difficulty: intPointer(-1),
@@ -349,9 +350,9 @@ func TestDualityOutcomeHandlerPassesNegativeDifficulty(t *testing.T) {
 // TestDualityOutcomeHandlerReturnsClientError ensures gRPC errors are returned as tool errors.
 func TestDualityOutcomeHandlerReturnsClientError(t *testing.T) {
 	client := &fakeDualityClient{dualityOutcomeErr: errors.New("boom")}
-	handler := dualityOutcomeHandler(client)
+	handler := domain.DualityOutcomeHandler(client)
 
-	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, DualityOutcomeInput{
+	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.DualityOutcomeInput{
 		Hope:     6,
 		Fear:     5,
 		Modifier: 1,
@@ -378,9 +379,9 @@ func TestDualityOutcomeHandlerMapsRequestAndResponse(t *testing.T) {
 		Outcome:         pb.Outcome_SUCCESS_WITH_HOPE,
 	}}
 
-	handler := dualityOutcomeHandler(client)
+	handler := domain.DualityOutcomeHandler(client)
 
-	result, output, err := handler(context.Background(), &mcp.CallToolRequest{}, DualityOutcomeInput{
+	result, output, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.DualityOutcomeInput{
 		Hope:       10,
 		Fear:       4,
 		Modifier:   1,
@@ -412,9 +413,9 @@ func TestDualityOutcomeHandlerMapsRequestAndResponse(t *testing.T) {
 // TestDualityExplainHandlerReturnsClientError ensures gRPC errors are returned as tool errors.
 func TestDualityExplainHandlerReturnsClientError(t *testing.T) {
 	client := &fakeDualityClient{dualityExplainErr: errors.New("boom")}
-	handler := dualityExplainHandler(client)
+	handler := domain.DualityExplainHandler(client)
 
-	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, DualityExplainInput{
+	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.DualityExplainInput{
 		Hope:     6,
 		Fear:     5,
 		Modifier: 1,
@@ -460,9 +461,9 @@ func TestDualityExplainHandlerMapsRequestAndResponse(t *testing.T) {
 	}}
 
 	requestID := "trace-123"
-	handler := dualityExplainHandler(client)
+	handler := domain.DualityExplainHandler(client)
 
-	result, output, err := handler(context.Background(), &mcp.CallToolRequest{}, DualityExplainInput{
+	result, output, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.DualityExplainInput{
 		Hope:       10,
 		Fear:       4,
 		Modifier:   1,
@@ -504,9 +505,9 @@ func TestDualityExplainHandlerMapsRequestAndResponse(t *testing.T) {
 // TestDualityProbabilityHandlerPassesNegativeDifficulty ensures gRPC receives invalid difficulty.
 func TestDualityProbabilityHandlerPassesNegativeDifficulty(t *testing.T) {
 	client := &fakeDualityClient{dualityProbabilityErr: errors.New("boom")}
-	handler := dualityProbabilityHandler(client)
+	handler := domain.DualityProbabilityHandler(client)
 
-	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, DualityProbabilityInput{
+	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.DualityProbabilityInput{
 		Modifier:   1,
 		Difficulty: -1,
 	})
@@ -527,9 +528,9 @@ func TestDualityProbabilityHandlerPassesNegativeDifficulty(t *testing.T) {
 // TestDualityProbabilityHandlerReturnsClientError ensures gRPC errors are returned as tool errors.
 func TestDualityProbabilityHandlerReturnsClientError(t *testing.T) {
 	client := &fakeDualityClient{dualityProbabilityErr: errors.New("boom")}
-	handler := dualityProbabilityHandler(client)
+	handler := domain.DualityProbabilityHandler(client)
 
-	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, DualityProbabilityInput{
+	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.DualityProbabilityInput{
 		Modifier:   0,
 		Difficulty: 10,
 	})
@@ -556,9 +557,9 @@ func TestDualityProbabilityHandlerMapsRequestAndResponse(t *testing.T) {
 			{Outcome: pb.Outcome_FAILURE_WITH_FEAR, Count: 34},
 		},
 	}}
-	handler := dualityProbabilityHandler(client)
+	handler := domain.DualityProbabilityHandler(client)
 
-	result, output, err := handler(context.Background(), &mcp.CallToolRequest{}, DualityProbabilityInput{
+	result, output, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.DualityProbabilityInput{
 		Modifier:   1,
 		Difficulty: 10,
 	})
@@ -585,9 +586,9 @@ func TestDualityProbabilityHandlerMapsRequestAndResponse(t *testing.T) {
 // TestRollDiceHandlerPassesMissingDice ensures gRPC receives empty dice.
 func TestRollDiceHandlerPassesMissingDice(t *testing.T) {
 	client := &fakeDualityClient{rollDiceErr: errors.New("boom")}
-	handler := rollDiceHandler(client)
+	handler := domain.RollDiceHandler(client)
 
-	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, RollDiceInput{})
+	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.RollDiceInput{})
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -605,10 +606,10 @@ func TestRollDiceHandlerPassesMissingDice(t *testing.T) {
 // TestRollDiceHandlerPassesInvalidDice ensures gRPC receives invalid dice specs.
 func TestRollDiceHandlerPassesInvalidDice(t *testing.T) {
 	client := &fakeDualityClient{rollDiceErr: errors.New("boom")}
-	handler := rollDiceHandler(client)
+	handler := domain.RollDiceHandler(client)
 
-	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, RollDiceInput{
-		Dice: []RollDiceSpec{{Sides: -1, Count: 2}},
+	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.RollDiceInput{
+		Dice: []domain.RollDiceSpec{{Sides: -1, Count: 2}},
 	})
 	if err == nil {
 		t.Fatal("expected error")
@@ -630,10 +631,10 @@ func TestRollDiceHandlerPassesInvalidDice(t *testing.T) {
 // TestRollDiceHandlerReturnsClientError ensures gRPC errors are returned as tool errors.
 func TestRollDiceHandlerReturnsClientError(t *testing.T) {
 	client := &fakeDualityClient{rollDiceErr: errors.New("boom")}
-	handler := rollDiceHandler(client)
+	handler := domain.RollDiceHandler(client)
 
-	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, RollDiceInput{
-		Dice: []RollDiceSpec{{Sides: 6, Count: 1}},
+	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.RollDiceInput{
+		Dice: []domain.RollDiceSpec{{Sides: 6, Count: 1}},
 	})
 	if err == nil {
 		t.Fatal("expected error")
@@ -653,10 +654,10 @@ func TestRollDiceHandlerMapsRequestAndResponse(t *testing.T) {
 		Total: 11,
 	}}
 
-	handler := rollDiceHandler(client)
+	handler := domain.RollDiceHandler(client)
 
-	result, output, err := handler(context.Background(), &mcp.CallToolRequest{}, RollDiceInput{
-		Dice: []RollDiceSpec{{Sides: 6, Count: 2}, {Sides: 8, Count: 1}},
+	result, output, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.RollDiceInput{
+		Dice: []domain.RollDiceSpec{{Sides: 6, Count: 2}, {Sides: 8, Count: 1}},
 	})
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
@@ -694,9 +695,9 @@ func TestRollDiceHandlerMapsRequestAndResponse(t *testing.T) {
 // TestRulesVersionHandlerReturnsClientError ensures gRPC errors are returned as tool errors.
 func TestRulesVersionHandlerReturnsClientError(t *testing.T) {
 	client := &fakeDualityClient{rulesVersionErr: errors.New("boom")}
-	handler := rulesVersionHandler(client)
+	handler := domain.RulesVersionHandler(client)
 
-	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, RulesVersionInput{})
+	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.RulesVersionInput{})
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -725,9 +726,9 @@ func TestRulesVersionHandlerMapsResponse(t *testing.T) {
 			pb.Outcome_CRITICAL_SUCCESS,
 		},
 	}}
-	handler := rulesVersionHandler(client)
+	handler := domain.RulesVersionHandler(client)
 
-	result, output, err := handler(context.Background(), &mcp.CallToolRequest{}, RulesVersionInput{})
+	result, output, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.RulesVersionInput{})
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
