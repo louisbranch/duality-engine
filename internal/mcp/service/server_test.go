@@ -4,6 +4,7 @@ package service
 import (
 	"context"
 	"errors"
+	"net"
 	"reflect"
 	"testing"
 	"time"
@@ -13,6 +14,8 @@ import (
 	"github.com/louisbranch/duality-engine/internal/mcp/domain"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	grpc_health_v1 "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -173,10 +176,13 @@ func TestRunStopsOnContext(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	addr, stop := startHealthServer(t)
+	defer stop()
+
 	serverTransport, clientTransport := mcp.NewInMemoryTransports()
 	serveErr := make(chan error, 1)
 	go func() {
-		serveErr <- runWithTransport(ctx, "localhost:8080", serverTransport)
+		serveErr <- runWithTransport(ctx, addr, serverTransport)
 	}()
 
 	client := mcp.NewClient(&mcp.Implementation{Name: "client", Version: "v0.0.1"}, nil)
@@ -205,7 +211,10 @@ func TestRunReturnsTransportError(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	if err := runWithTransport(ctx, "localhost:8080", failingTransport{}); err == nil {
+	addr, stop := startHealthServer(t)
+	defer stop()
+
+	if err := runWithTransport(ctx, addr, failingTransport{}); err == nil {
 		t.Fatal("expected transport error")
 	}
 }
@@ -857,4 +866,30 @@ func TestCampaignCreateHandlerMapsRequestAndResponse(t *testing.T) {
 // intPointer returns an int pointer for test inputs.
 func intPointer(value int) *int {
 	return &value
+}
+
+func startHealthServer(t *testing.T) (string, func()) {
+	t.Helper()
+
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+
+	grpcServer := grpc.NewServer()
+	healthServer := health.NewServer()
+	grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
+	healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
+
+	go func() {
+		_ = grpcServer.Serve(listener)
+	}()
+
+	stop := func() {
+		healthServer.Shutdown()
+		grpcServer.GracefulStop()
+		_ = listener.Close()
+	}
+
+	return listener.Addr().String(), stop
 }
