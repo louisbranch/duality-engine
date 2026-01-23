@@ -36,6 +36,10 @@ func (s *CampaignService) CreateCampaign(ctx context.Context, in *campaignpb.Cre
 		return nil, status.Error(codes.InvalidArgument, "create campaign request is required")
 	}
 
+	if s.store == nil {
+		return nil, status.Error(codes.Internal, "campaign store is not configured")
+	}
+
 	campaign, err := domain.CreateCampaign(domain.CreateCampaignInput{
 		Name:        in.GetName(),
 		GmMode:      gmModeFromProto(in.GetGmMode()),
@@ -48,14 +52,10 @@ func (s *CampaignService) CreateCampaign(ctx context.Context, in *campaignpb.Cre
 		}
 		return nil, status.Errorf(codes.Internal, "create campaign: %v", err)
 	}
-	if s.store == nil {
-		return nil, status.Error(codes.Internal, "campaign store is not configured")
-	}
 	if err := s.store.Put(ctx, campaign); err != nil {
 		return nil, status.Errorf(codes.Internal, "persist campaign: %v", err)
 	}
 
-	// TODO: Persist campaign metadata to key "campaign/{campaign_id}" once storage is available.
 	// TODO: Persist session state to key "session/{campaign_id}/{session_id}" when sessions exist.
 	// TODO: Persist GM state to key "gm/{campaign_id}/{session_id}" when GM state is added.
 	// TODO: Consider removing warnings from the gRPC response when the API stabilizes.

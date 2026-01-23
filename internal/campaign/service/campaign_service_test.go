@@ -200,3 +200,28 @@ func TestCreateCampaignStoreFailure(t *testing.T) {
 		t.Fatalf("expected internal error, got %v", st.Code())
 	}
 }
+
+func TestCreateCampaignMissingStore(t *testing.T) {
+	service := &CampaignService{
+		clock: time.Now,
+		idGenerator: func() (string, error) {
+			return "camp-123", nil
+		},
+	}
+
+	_, err := service.CreateCampaign(context.Background(), &campaignpb.CreateCampaignRequest{
+		Name:        "Campaign",
+		GmMode:      campaignpb.GmMode_AI,
+		PlayerSlots: 2,
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	st, ok := status.FromError(err)
+	if !ok {
+		t.Fatalf("expected grpc status error, got %v", err)
+	}
+	if st.Code() != codes.Internal {
+		t.Fatalf("expected internal error, got %v", st.Code())
+	}
+}

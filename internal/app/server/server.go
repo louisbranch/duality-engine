@@ -106,8 +106,10 @@ func openCampaignStore() (*storagebbolt.Store, error) {
 	if path == "" {
 		path = filepath.Join("data", "duality.db")
 	}
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-		return nil, fmt.Errorf("create storage dir: %w", err)
+	if dir := filepath.Dir(path); dir != "." {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return nil, fmt.Errorf("create storage dir: %w", err)
+		}
 	}
 	store, err := storagebbolt.Open(path)
 	if err != nil {

@@ -105,7 +105,7 @@ func (s *Store) Get(ctx context.Context, id string) (domain.Campaign, error) {
 	})
 	if err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
-			return domain.Campaign{}, storage.ErrNotFound
+			return domain.Campaign{}, err
 		}
 		return domain.Campaign{}, err
 	}
@@ -124,7 +124,7 @@ func (s *Store) ensureBuckets() error {
 }
 
 func campaignKey(id string) []byte {
-	return []byte("campaign/" + id)
+	return []byte(id)
 }
 
 // TODO: Reserve index keys such as idx/creator/{creator_id}/campaign/{campaign_id}.
