@@ -1,8 +1,12 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/louisbranch/duality-protocol/internal/app/server"
 )
@@ -13,11 +17,10 @@ var (
 
 func main() {
 	flag.Parse()
-	grpcServer, err := server.New(*port)
-	if err != nil {
-		log.Fatalf("failed to initialize server: %v", err)
-	}
-	if err := grpcServer.Serve(); err != nil {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	if err := server.Run(ctx, *port); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }
