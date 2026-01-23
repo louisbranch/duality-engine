@@ -8,11 +8,13 @@ import (
 	"testing"
 	"time"
 
+	campaignpb "github.com/louisbranch/duality-engine/api/gen/go/campaign/v1"
 	pb "github.com/louisbranch/duality-engine/api/gen/go/duality/v1"
 	"github.com/louisbranch/duality-engine/internal/mcp/domain"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/structpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // fakeDualityClient implements DualityServiceClient for tests.
@@ -35,6 +37,13 @@ type fakeDualityClient struct {
 	lastDualityExplainRequest     *pb.DualityExplainRequest
 	lastDualityProbabilityRequest *pb.DualityProbabilityRequest
 	lastRulesVersionRequest       *pb.RulesVersionRequest
+}
+
+// fakeCampaignClient implements CampaignServiceClient for tests.
+type fakeCampaignClient struct {
+	response    *campaignpb.CreateCampaignResponse
+	err         error
+	lastRequest *campaignpb.CreateCampaignRequest
 }
 
 // failingTransport returns a connection error for tests.
@@ -79,6 +88,12 @@ func (f *fakeDualityClient) RulesVersion(ctx context.Context, req *pb.RulesVersi
 func (f *fakeDualityClient) RollDice(ctx context.Context, req *pb.RollDiceRequest, opts ...grpc.CallOption) (*pb.RollDiceResponse, error) {
 	f.lastRollDiceRequest = req
 	return f.rollDiceResponse, f.rollDiceErr
+}
+
+// CreateCampaign records the request and returns the configured response.
+func (f *fakeCampaignClient) CreateCampaign(ctx context.Context, req *campaignpb.CreateCampaignRequest, opts ...grpc.CallOption) (*campaignpb.CreateCampaignResponse, error) {
+	f.lastRequest = req
+	return f.response, f.err
 }
 
 // TestGRPCAddressPrefersEnv ensures env configuration overrides defaults.
@@ -771,6 +786,71 @@ func TestRulesVersionHandlerMapsResponse(t *testing.T) {
 	}
 	if output.DifficultyRule != client.rulesVersionResponse.DifficultyRule {
 		t.Fatalf("expected difficulty rule %q, got %q", client.rulesVersionResponse.DifficultyRule, output.DifficultyRule)
+	}
+}
+
+// TestCampaignCreateHandlerReturnsClientError ensures gRPC errors are returned as tool errors.
+func TestCampaignCreateHandlerReturnsClientError(t *testing.T) {
+	client := &fakeCampaignClient{err: errors.New("boom")}
+	handler := domain.CampaignCreateHandler(client)
+
+	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.CampaignCreateInput{
+		Name:        "New Campaign",
+		GmMode:      "HUMAN",
+		PlayerSlots: 4,
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if result != nil {
+		t.Fatal("expected nil result on error")
+	}
+}
+
+// TestCampaignCreateHandlerMapsRequestAndResponse ensures inputs and outputs map consistently.
+func TestCampaignCreateHandlerMapsRequestAndResponse(t *testing.T) {
+	now := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	client := &fakeCampaignClient{response: &campaignpb.CreateCampaignResponse{
+		Campaign: &campaignpb.Campaign{
+			Id:          "camp-123",
+			Name:        "Snowbound",
+			GmMode:      campaignpb.GmMode_AI,
+			PlayerSlots: 5,
+			ThemePrompt: "ice and steel",
+			CreatedAt:   timestamppb.New(now),
+			UpdatedAt:   timestamppb.New(now),
+		},
+	}}
+	result, output, err := domain.CampaignCreateHandler(client)(
+		context.Background(),
+		&mcp.CallToolRequest{},
+		domain.CampaignCreateInput{
+			Name:        "Snowbound",
+			GmMode:      "HUMAN",
+			PlayerSlots: 5,
+			ThemePrompt: "ice and steel",
+		},
+	)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if result != nil {
+		t.Fatal("expected nil result on success")
+	}
+	if client.lastRequest == nil {
+		t.Fatal("expected gRPC request")
+	}
+	if client.lastRequest.GetGmMode() != campaignpb.GmMode_HUMAN {
+		t.Fatalf("expected gm mode HUMAN, got %v", client.lastRequest.GetGmMode())
+	}
+	if output.ID != "camp-123" {
+		t.Fatalf("expected id camp-123, got %q", output.ID)
+	}
+	if output.GmMode != "AI" {
+		t.Fatalf("expected gm mode AI, got %q", output.GmMode)
+	}
+	if output.PlayerSlots != 5 {
+		t.Fatalf("expected player slots 5, got %d", output.PlayerSlots)
 	}
 }
 
