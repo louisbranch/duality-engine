@@ -21,6 +21,7 @@ import (
 type Server struct {
 	listener   net.Listener
 	grpcServer *grpc.Server
+	health     *health.Server
 }
 
 // New creates a configured gRPC server listening on the provided port.
@@ -44,6 +45,7 @@ func New(port int) (*Server, error) {
 	return &Server{
 		listener:   listener,
 		grpcServer: grpcServer,
+		health:     healthServer,
 	}, nil
 }
 
@@ -77,6 +79,9 @@ func (s *Server) Serve(ctx context.Context) error {
 
 	select {
 	case <-ctx.Done():
+		if s.health != nil {
+			s.health.Shutdown()
+		}
 		s.grpcServer.GracefulStop()
 		err := <-serveErr
 		return handleErr(err)
