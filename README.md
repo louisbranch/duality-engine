@@ -1,5 +1,7 @@
 # Duality Engine
 
+![Coverage](../../raw/badges/coverage.svg)
+
 Duality Engine is a small, server-authoritative mechanics service
 compatible with the Daggerheart Duality Dice system.
 
