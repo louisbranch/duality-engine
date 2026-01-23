@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	campaignpb "github.com/louisbranch/duality-engine/api/gen/go/campaign/v1"
+	campaignv1 "github.com/louisbranch/duality-engine/api/gen/go/campaign/v1"
 	pb "github.com/louisbranch/duality-engine/api/gen/go/duality/v1"
 	"github.com/louisbranch/duality-engine/internal/mcp/domain"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -44,12 +44,12 @@ type fakeDualityClient struct {
 
 // fakeCampaignClient implements CampaignServiceClient for tests.
 type fakeCampaignClient struct {
-	response        *campaignpb.CreateCampaignResponse
-	listResponse    *campaignpb.ListCampaignsResponse
+	response        *campaignv1.CreateCampaignResponse
+	listResponse    *campaignv1.ListCampaignsResponse
 	err             error
 	listErr         error
-	lastRequest     *campaignpb.CreateCampaignRequest
-	lastListRequest *campaignpb.ListCampaignsRequest
+	lastRequest     *campaignv1.CreateCampaignRequest
+	lastListRequest *campaignv1.ListCampaignsRequest
 }
 
 // failingTransport returns a connection error for tests.
@@ -97,13 +97,13 @@ func (f *fakeDualityClient) RollDice(ctx context.Context, req *pb.RollDiceReques
 }
 
 // CreateCampaign records the request and returns the configured response.
-func (f *fakeCampaignClient) CreateCampaign(ctx context.Context, req *campaignpb.CreateCampaignRequest, opts ...grpc.CallOption) (*campaignpb.CreateCampaignResponse, error) {
+func (f *fakeCampaignClient) CreateCampaign(ctx context.Context, req *campaignv1.CreateCampaignRequest, opts ...grpc.CallOption) (*campaignv1.CreateCampaignResponse, error) {
 	f.lastRequest = req
 	return f.response, f.err
 }
 
 // ListCampaigns records the request and returns the configured response.
-func (f *fakeCampaignClient) ListCampaigns(ctx context.Context, req *campaignpb.ListCampaignsRequest, opts ...grpc.CallOption) (*campaignpb.ListCampaignsResponse, error) {
+func (f *fakeCampaignClient) ListCampaigns(ctx context.Context, req *campaignv1.ListCampaignsRequest, opts ...grpc.CallOption) (*campaignv1.ListCampaignsResponse, error) {
 	f.lastListRequest = req
 	return f.listResponse, f.listErr
 }
@@ -828,11 +828,11 @@ func TestCampaignCreateHandlerReturnsClientError(t *testing.T) {
 // TestCampaignCreateHandlerMapsRequestAndResponse ensures inputs and outputs map consistently.
 func TestCampaignCreateHandlerMapsRequestAndResponse(t *testing.T) {
 	now := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
-	client := &fakeCampaignClient{response: &campaignpb.CreateCampaignResponse{
-		Campaign: &campaignpb.Campaign{
+	client := &fakeCampaignClient{response: &campaignv1.CreateCampaignResponse{
+		Campaign: &campaignv1.Campaign{
 			Id:          "camp-123",
 			Name:        "Snowbound",
-			GmMode:      campaignpb.GmMode_AI,
+			GmMode:      campaignv1.GmMode_AI,
 			PlayerSlots: 5,
 			ThemePrompt: "ice and steel",
 			CreatedAt:   timestamppb.New(now),
@@ -858,7 +858,7 @@ func TestCampaignCreateHandlerMapsRequestAndResponse(t *testing.T) {
 	if client.lastRequest == nil {
 		t.Fatal("expected gRPC request")
 	}
-	if client.lastRequest.GetGmMode() != campaignpb.GmMode_HUMAN {
+	if client.lastRequest.GetGmMode() != campaignv1.GmMode_HUMAN {
 		t.Fatalf("expected gm mode HUMAN, got %v", client.lastRequest.GetGmMode())
 	}
 	if output.ID != "camp-123" {

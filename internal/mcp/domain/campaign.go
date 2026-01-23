@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	campaignpb "github.com/louisbranch/duality-engine/api/gen/go/campaign/v1"
+	campaignv1 "github.com/louisbranch/duality-engine/api/gen/go/campaign/v1"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -65,12 +65,12 @@ func CampaignListResource() *mcp.Resource {
 }
 
 // CampaignCreateHandler executes a campaign creation request.
-func CampaignCreateHandler(client campaignpb.CampaignServiceClient) mcp.ToolHandlerFor[CampaignCreateInput, CampaignCreateResult] {
+func CampaignCreateHandler(client campaignv1.CampaignServiceClient) mcp.ToolHandlerFor[CampaignCreateInput, CampaignCreateResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input CampaignCreateInput) (*mcp.CallToolResult, CampaignCreateResult, error) {
 		runCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
 
-		response, err := client.CreateCampaign(runCtx, &campaignpb.CreateCampaignRequest{
+		response, err := client.CreateCampaign(runCtx, &campaignv1.CreateCampaignRequest{
 			Name:        input.Name,
 			GmMode:      gmModeFromString(input.GmMode),
 			PlayerSlots: int32(input.PlayerSlots),
@@ -96,7 +96,7 @@ func CampaignCreateHandler(client campaignpb.CampaignServiceClient) mcp.ToolHand
 }
 
 // CampaignListResourceHandler returns a readable campaign listing resource.
-func CampaignListResourceHandler(client campaignpb.CampaignServiceClient) mcp.ResourceHandler {
+func CampaignListResourceHandler(client campaignv1.CampaignServiceClient) mcp.ResourceHandler {
 	return func(ctx context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
 		if client == nil {
 			return nil, fmt.Errorf("campaign list client is not configured")
@@ -113,7 +113,7 @@ func CampaignListResourceHandler(client campaignpb.CampaignServiceClient) mcp.Re
 		payload := CampaignListPayload{}
 		pageToken := ""
 		for {
-			response, err := client.ListCampaigns(runCtx, &campaignpb.ListCampaignsRequest{
+			response, err := client.ListCampaigns(runCtx, &campaignv1.ListCampaignsRequest{
 				PageSize:  10,
 				PageToken: pageToken,
 			})
@@ -167,26 +167,26 @@ func formatTimestamp(ts *timestamppb.Timestamp) string {
 	return ts.AsTime().Format(time.RFC3339)
 }
 
-func gmModeFromString(value string) campaignpb.GmMode {
+func gmModeFromString(value string) campaignv1.GmMode {
 	switch strings.ToUpper(strings.TrimSpace(value)) {
 	case "HUMAN":
-		return campaignpb.GmMode_HUMAN
+		return campaignv1.GmMode_HUMAN
 	case "AI":
-		return campaignpb.GmMode_AI
+		return campaignv1.GmMode_AI
 	case "HYBRID":
-		return campaignpb.GmMode_HYBRID
+		return campaignv1.GmMode_HYBRID
 	default:
-		return campaignpb.GmMode_GM_MODE_UNSPECIFIED
+		return campaignv1.GmMode_GM_MODE_UNSPECIFIED
 	}
 }
 
-func gmModeToString(mode campaignpb.GmMode) string {
+func gmModeToString(mode campaignv1.GmMode) string {
 	switch mode {
-	case campaignpb.GmMode_HUMAN:
+	case campaignv1.GmMode_HUMAN:
 		return "HUMAN"
-	case campaignpb.GmMode_AI:
+	case campaignv1.GmMode_AI:
 		return "AI"
-	case campaignpb.GmMode_HYBRID:
+	case campaignv1.GmMode_HYBRID:
 		return "HYBRID"
 	default:
 		return "UNSPECIFIED"
