@@ -49,6 +49,7 @@ func (s *CampaignService) CreateCampaign(ctx context.Context, in *campaignpb.Cre
 	// TODO: Persist campaign metadata to key "campaign/{campaign_id}" once storage is available.
 	// TODO: Persist session state to key "session/{campaign_id}/{session_id}" when sessions exist.
 	// TODO: Persist GM state to key "gm/{campaign_id}/{session_id}" when GM state is added.
+	// TODO: Consider removing warnings from the gRPC response when the API stabilizes.
 
 	response := &campaignpb.CreateCampaignResponse{
 		Campaign: &campaignpb.Campaign{

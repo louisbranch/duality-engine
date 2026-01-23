@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/louisbranch/duality-engine/api/gen/go/duality/v1"
+	campaignpb "github.com/louisbranch/duality-engine/api/gen/go/campaign/v1"
+	dualityv1 "github.com/louisbranch/duality-engine/api/gen/go/duality/v1"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -41,17 +42,20 @@ type Server struct {
 	conn      *grpc.ClientConn
 }
 
-// New creates a configured MCP server that connects to the gRPC dice service.
+// New creates a configured MCP server that connects to Duality and Campaign gRPC services.
 func New(grpcAddr string) (*Server, error) {
 	mcpServer := mcp.NewServer(&mcp.Implementation{Name: serverName, Version: serverVersion}, nil)
 
 	addr := grpcAddress(grpcAddr)
-	conn, grpcClient, err := newDualityClient(addr)
+	conn, err := newGRPCConn(addr)
 	if err != nil {
 		return nil, fmt.Errorf("connect to gRPC server at %s: %w", addr, err)
 	}
 
-	registerDualityTools(mcpServer, grpcClient)
+	dualityClient := dualityv1.NewDualityServiceClient(conn)
+	campaignClient := campaignpb.NewCampaignServiceClient(conn)
+	registerDualityTools(mcpServer, dualityClient)
+	registerCampaignTools(mcpServer, campaignClient)
 
 	return &Server{mcpServer: mcpServer, conn: conn}, nil
 }
@@ -123,13 +127,13 @@ func runWithTransport(ctx context.Context, grpcAddr string, transport mcp.Transp
 	return mcpServer.serveWithTransport(ctx, transport)
 }
 
-// newDualityClient connects to the gRPC Duality service.
-func newDualityClient(addr string) (*grpc.ClientConn, dualityv1.DualityServiceClient, error) {
+// newGRPCConn connects to the gRPC server shared by MCP services.
+func newGRPCConn(addr string) (*grpc.ClientConn, error) {
 	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	return conn, dualityv1.NewDualityServiceClient(conn), nil
+	return conn, nil
 }
 
 // grpcAddress resolves the gRPC address from env or defaults.
