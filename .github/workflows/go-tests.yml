@@ -7,7 +7,7 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   test:
@@ -21,19 +21,49 @@ jobs:
           go-version: "1.25.6"
       - name: Run tests and generate coverage report
         run: make cover
+      - name: Upload coverage artifact
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.out
+
+  coverage-badge:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage
       - name: Generate and push coverage badge
-        if: github.ref == 'refs/heads/main'
         run: |
           COVERAGE_PERCENT=$(go tool cover -func=coverage.out | awk '/total/ {print substr($3, 1, length($3)-1)}')
+          if [ -z "$COVERAGE_PERCENT" ] || ! printf '%s\n' "$COVERAGE_PERCENT" | grep -Eq '^[0-9]+(\.[0-9]+)?$'; then
+            echo "Failed to extract valid coverage percentage"
+            exit 1
+          fi
+          COLOR=red
+          if awk "BEGIN {exit !($COVERAGE_PERCENT >= 80)}"; then
+            COLOR=brightgreen
+          elif awk "BEGIN {exit !($COVERAGE_PERCENT >= 50)}"; then
+            COLOR=yellow
+          fi
           if git ls-remote --exit-code --heads origin badges; then
-            git fetch origin badges:badges
-            git checkout badges
+            git fetch origin badges
+            git checkout -B badges origin/badges
           else
             git checkout --orphan badges
+            git rm -rf .
             git clean -fdx
             git commit --allow-empty -m "chore: initialize badges branch"
           fi
-          curl -o coverage.svg "https://img.shields.io/badge/coverage-${COVERAGE_PERCENT}%25-brightgreen"
+          curl -f -o coverage.svg "https://img.shields.io/badge/coverage-${COVERAGE_PERCENT}%25-${COLOR}"
           if git diff --quiet -- coverage.svg; then
             echo "No changes to coverage badge."
             exit 0
@@ -42,4 +72,13 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add coverage.svg
           git commit -m "chore: update coverage badge"
-          git push origin HEAD:refs/heads/badges
+          for attempt in 1 2 3; do
+            if git push --force-with-lease origin HEAD:refs/heads/badges; then
+              echo "Successfully pushed coverage badge on attempt ${attempt}."
+              exit 0
+            fi
+            echo "Push failed on attempt ${attempt}, retrying in 5 seconds..."
+            sleep 5
+          done
+          echo "Failed to push coverage badge after 3 attempts."
+          exit 1
