@@ -176,7 +176,7 @@ func TestRunStopsOnContext(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	addr, stop := startHealthServer(t)
+	addr, _, stop := startHealthServer(t, grpc_health_v1.HealthCheckResponse_SERVING)
 	defer stop()
 
 	serverTransport, clientTransport := mcp.NewInMemoryTransports()
@@ -211,7 +211,7 @@ func TestRunReturnsTransportError(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	addr, stop := startHealthServer(t)
+	addr, _, stop := startHealthServer(t, grpc_health_v1.HealthCheckResponse_SERVING)
 	defer stop()
 
 	if err := runWithTransport(ctx, addr, failingTransport{}); err == nil {
@@ -868,7 +868,78 @@ func intPointer(value int) *int {
 	return &value
 }
 
-func startHealthServer(t *testing.T) (string, func()) {
+func TestWaitForHealthSuccess(t *testing.T) {
+	addr, _, stop := startHealthServer(t, grpc_health_v1.HealthCheckResponse_SERVING)
+	defer stop()
+
+	conn, err := newGRPCConn(addr)
+	if err != nil {
+		t.Fatalf("dial health server: %v", err)
+	}
+	defer conn.Close()
+
+	server := &Server{conn: conn}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	if err := server.waitForHealth(ctx); err != nil {
+		t.Fatalf("wait for health: %v", err)
+	}
+}
+
+func TestWaitForHealthRetriesUntilServing(t *testing.T) {
+	addr, setStatus, stop := startHealthServer(t, grpc_health_v1.HealthCheckResponse_NOT_SERVING)
+	defer stop()
+
+	conn, err := newGRPCConn(addr)
+	if err != nil {
+		t.Fatalf("dial health server: %v", err)
+	}
+	defer conn.Close()
+
+	server := &Server{conn: conn}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	setStatusTimer := time.NewTimer(200 * time.Millisecond)
+	defer setStatusTimer.Stop()
+	go func() {
+		<-setStatusTimer.C
+		setStatus(grpc_health_v1.HealthCheckResponse_SERVING)
+	}()
+
+	if err := server.waitForHealth(ctx); err != nil {
+		t.Fatalf("wait for health: %v", err)
+	}
+}
+
+func TestWaitForHealthTimeout(t *testing.T) {
+	addr, _, stop := startHealthServer(t, grpc_health_v1.HealthCheckResponse_NOT_SERVING)
+	defer stop()
+
+	conn, err := newGRPCConn(addr)
+	if err != nil {
+		t.Fatalf("dial health server: %v", err)
+	}
+	defer conn.Close()
+
+	server := &Server{conn: conn}
+	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
+	defer cancel()
+	if err := server.waitForHealth(ctx); err == nil {
+		t.Fatal("expected timeout error")
+	}
+}
+
+func TestWaitForHealthMissingConn(t *testing.T) {
+	server := &Server{}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	if err := server.waitForHealth(ctx); err == nil {
+		t.Fatal("expected error for missing connection")
+	}
+}
+
+func startHealthServer(t *testing.T, status grpc_health_v1.HealthCheckResponse_ServingStatus) (string, func(grpc_health_v1.HealthCheckResponse_ServingStatus), func()) {
 	t.Helper()
 
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
@@ -879,11 +950,15 @@ func startHealthServer(t *testing.T) (string, func()) {
 	grpcServer := grpc.NewServer()
 	healthServer := health.NewServer()
 	grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
-	healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
+	healthServer.SetServingStatus("", status)
 
 	go func() {
 		_ = grpcServer.Serve(listener)
 	}()
+
+	setStatus := func(next grpc_health_v1.HealthCheckResponse_ServingStatus) {
+		healthServer.SetServingStatus("", next)
+	}
 
 	stop := func() {
 		healthServer.Shutdown()
@@ -891,5 +966,5 @@ func startHealthServer(t *testing.T) (string, func()) {
 		_ = listener.Close()
 	}
 
-	return listener.Addr().String(), stop
+	return listener.Addr().String(), setStatus, stop
 }
