@@ -7,6 +7,7 @@ import (
 
 	campaignpb "github.com/louisbranch/duality-engine/api/gen/go/campaign/v1"
 	"github.com/louisbranch/duality-engine/internal/campaign/domain"
+	"github.com/louisbranch/duality-engine/internal/storage"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -15,13 +16,15 @@ import (
 // CampaignService implements the CampaignService gRPC API.
 type CampaignService struct {
 	campaignpb.UnimplementedCampaignServiceServer
+	store       storage.CampaignStore
 	clock       func() time.Time
 	idGenerator func() (string, error)
 }
 
 // NewCampaignService creates a CampaignService with default dependencies.
-func NewCampaignService() *CampaignService {
+func NewCampaignService(store storage.CampaignStore) *CampaignService {
 	return &CampaignService{
+		store:       store,
 		clock:       time.Now,
 		idGenerator: domain.NewCampaignID,
 	}
@@ -44,6 +47,12 @@ func (s *CampaignService) CreateCampaign(ctx context.Context, in *campaignpb.Cre
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		return nil, status.Errorf(codes.Internal, "create campaign: %v", err)
+	}
+	if s.store == nil {
+		return nil, status.Error(codes.Internal, "campaign store is not configured")
+	}
+	if err := s.store.Put(ctx, campaign); err != nil {
+		return nil, status.Errorf(codes.Internal, "persist campaign: %v", err)
 	}
 
 	// TODO: Persist campaign metadata to key "campaign/{campaign_id}" once storage is available.
