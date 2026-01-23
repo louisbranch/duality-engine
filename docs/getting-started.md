@@ -2,7 +2,10 @@
 
 ## Prerequisites
 
-- Go 1.21+
+- Go 1.25.6
+- protoc (required until binaries are published)
+- BoltDB (embedded; the server creates `data/duality.db` by default)
+- Make (for `make run`)
 
 ## Run locally
 
@@ -23,8 +26,5 @@ Start the gRPC server:
 go run ./cmd/server
 ```
 
-Start the MCP server (requires the gRPC server running):
-
-```sh
-go run ./cmd/mcp
-```
+Start the MCP server after the gRPC server starts. See
+[MCP tools and resources](mcp.md) for the MCP run command.
