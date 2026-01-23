@@ -170,6 +170,7 @@ func (s *Server) waitForHealth(ctx context.Context) error {
 		response, err := healthClient.Check(callCtx, &grpc_health_v1.HealthCheckRequest{Service: ""})
 		cancel()
 		if err == nil && response.GetStatus() == grpc_health_v1.HealthCheckResponse_SERVING {
+			log.Printf("gRPC health check is SERVING")
 			return nil
 		}
 		if err != nil {
