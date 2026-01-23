@@ -162,10 +162,6 @@ func (s *Server) waitForHealth(ctx context.Context) error {
 	healthClient := grpc_health_v1.NewHealthClient(s.conn)
 	backoff := 200 * time.Millisecond
 	for {
-		if ctx.Err() != nil {
-			return fmt.Errorf("wait for gRPC health: %w", ctx.Err())
-		}
-
 		callCtx, cancel := context.WithTimeout(ctx, time.Second)
 		response, err := healthClient.Check(callCtx, &grpc_health_v1.HealthCheckRequest{Service: ""})
 		cancel()
