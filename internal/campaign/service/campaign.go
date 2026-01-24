@@ -14,8 +14,10 @@ import (
 )
 
 const (
-	defaultListCampaignsPageSize = 10
-	maxListCampaignsPageSize     = 10
+	defaultListCampaignsPageSize    = 10
+	maxListCampaignsPageSize        = 10
+	defaultListParticipantsPageSize = 10
+	maxListParticipantsPageSize     = 10
 )
 
 // CampaignService implements the CampaignService gRPC API.

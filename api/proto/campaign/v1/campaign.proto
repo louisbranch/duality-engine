@@ -15,6 +15,9 @@ service CampaignService {
 
   // Register a participant (GM or player) for a campaign.
   rpc RegisterParticipant(RegisterParticipantRequest) returns (RegisterParticipantResponse);
+
+  // List participants for a campaign.
+  rpc ListParticipants(ListParticipantsRequest) returns (ListParticipantsResponse);
 }
 
 message CreateCampaignRequest {
@@ -105,4 +108,21 @@ enum Controller {
   CONTROLLER_UNSPECIFIED = 0;
   CONTROLLER_HUMAN = 1;
   CONTROLLER_AI = 2;
+}
+
+message ListParticipantsRequest {
+  // The campaign ID to list participants for.
+  string campaign_id = 1;
+
+  // The maximum number of participants to return.
+  // If zero, the server defaults to 10. The server clamps values above 10 to 10.
+  int32 page_size = 2;
+
+  // A page token received from a prior ListParticipantsResponse.
+  string page_token = 3;
+}
+
+message ListParticipantsResponse {
+  repeated Participant participants = 1;
+  string next_page_token = 2;
 }

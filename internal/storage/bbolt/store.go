@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	campaignBucket   = "campaign"
+	campaignBucket    = "campaign"
 	participantBucket = "participant"
 )
 
@@ -303,6 +303,72 @@ func (s *Store) ListParticipantsByCampaign(ctx context.Context, campaignID strin
 	}
 
 	return participants, nil
+}
+
+// ListParticipants returns a page of participant records for a campaign ordered by storage key (implements storage.ParticipantStore).
+func (s *Store) ListParticipants(ctx context.Context, campaignID string, pageSize int, pageToken string) (storage.ParticipantPage, error) {
+	if err := ctx.Err(); err != nil {
+		return storage.ParticipantPage{}, err
+	}
+	if s == nil || s.db == nil {
+		return storage.ParticipantPage{}, fmt.Errorf("storage is not configured")
+	}
+	if strings.TrimSpace(campaignID) == "" {
+		return storage.ParticipantPage{}, fmt.Errorf("campaign id is required")
+	}
+	if pageSize <= 0 {
+		return storage.ParticipantPage{}, fmt.Errorf("page size must be greater than zero")
+	}
+
+	prefix := campaignID + "/"
+	page := storage.ParticipantPage{}
+	var lastKey string
+	viewErr := s.db.View(func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket([]byte(participantBucket))
+		if bucket == nil {
+			return fmt.Errorf("participant bucket is missing")
+		}
+
+		cursor := bucket.Cursor()
+		prefixBytes := []byte(prefix)
+		var key, payload []byte
+		if pageToken == "" {
+			key, payload = cursor.Seek(prefixBytes)
+			if key != nil && !bytes.HasPrefix(key, prefixBytes) {
+				key = nil
+			}
+		} else {
+			key, payload = cursor.Seek([]byte(pageToken))
+			if key != nil && string(key) == pageToken && bytes.HasPrefix(key, prefixBytes) {
+				key, payload = cursor.Next()
+			} else if key != nil && !bytes.HasPrefix(key, prefixBytes) {
+				key = nil
+			}
+		}
+
+		for key != nil && bytes.HasPrefix(key, prefixBytes) && len(page.Participants) < pageSize {
+			if err := ctx.Err(); err != nil {
+				return err
+			}
+			var participant domain.Participant
+			if err := json.Unmarshal(payload, &participant); err != nil {
+				return fmt.Errorf("unmarshal participant: %w", err)
+			}
+			page.Participants = append(page.Participants, participant)
+			lastKey = string(key)
+			key, payload = cursor.Next()
+		}
+
+		if key != nil && bytes.HasPrefix(key, prefixBytes) && len(page.Participants) > 0 {
+			page.NextPageToken = lastKey
+		}
+		return nil
+	})
+	if viewErr != nil {
+		return storage.ParticipantPage{}, viewErr
+	}
+
+	return page, nil
 }
 
 // TODO: Reserve index keys such as idx/creator/{creator_id}/campaign/{campaign_id}.
