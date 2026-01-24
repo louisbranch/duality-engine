@@ -45,13 +45,16 @@ type fakeDualityClient struct {
 
 // fakeCampaignClient implements CampaignServiceClient for tests.
 type fakeCampaignClient struct {
-	response        *campaignv1.CreateCampaignResponse
-	listResponse    *campaignv1.ListCampaignsResponse
-	err             error
-	listErr         error
-	lastRequest     *campaignv1.CreateCampaignRequest
-	lastListRequest *campaignv1.ListCampaignsRequest
-	listCalls       int
+	response            *campaignv1.CreateCampaignResponse
+	listResponse        *campaignv1.ListCampaignsResponse
+	registerResponse    *campaignv1.RegisterParticipantResponse
+	err                 error
+	listErr             error
+	registerErr         error
+	lastRequest         *campaignv1.CreateCampaignRequest
+	lastListRequest     *campaignv1.ListCampaignsRequest
+	lastRegisterRequest *campaignv1.RegisterParticipantRequest
+	listCalls           int
 }
 
 // failingTransport returns a connection error for tests.
@@ -109,6 +112,12 @@ func (f *fakeCampaignClient) ListCampaigns(ctx context.Context, req *campaignv1.
 	f.lastListRequest = req
 	f.listCalls++
 	return f.listResponse, f.listErr
+}
+
+// RegisterParticipant records the request and returns the configured response.
+func (f *fakeCampaignClient) RegisterParticipant(ctx context.Context, req *campaignv1.RegisterParticipantRequest, opts ...grpc.CallOption) (*campaignv1.RegisterParticipantResponse, error) {
+	f.lastRegisterRequest = req
+	return f.registerResponse, f.registerErr
 }
 
 // TestGRPCAddressPrefersEnv ensures env configuration overrides defaults.

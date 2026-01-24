@@ -233,3 +233,228 @@ func TestCampaignStoreListCanceledContext(t *testing.T) {
 		t.Fatal("expected error")
 	}
 }
+
+func TestParticipantStorePutGet(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	now := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	participant := domain.Participant{
+		ID:          "part-123",
+		CampaignID:  "camp-456",
+		DisplayName: "Alice",
+		Role:        domain.ParticipantRolePlayer,
+		Controller:  domain.ControllerHuman,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	}
+
+	if err := store.PutParticipant(context.Background(), participant); err != nil {
+		t.Fatalf("put participant: %v", err)
+	}
+
+	loaded, err := store.GetParticipant(context.Background(), "camp-456", "part-123")
+	if err != nil {
+		t.Fatalf("get participant: %v", err)
+	}
+	if loaded.DisplayName != participant.DisplayName {
+		t.Fatalf("expected display name %q, got %q", participant.DisplayName, loaded.DisplayName)
+	}
+	if loaded.ID != participant.ID {
+		t.Fatalf("expected id %q, got %q", participant.ID, loaded.ID)
+	}
+	if loaded.CampaignID != participant.CampaignID {
+		t.Fatalf("expected campaign id %q, got %q", participant.CampaignID, loaded.CampaignID)
+	}
+	if loaded.Role != participant.Role {
+		t.Fatalf("expected role %v, got %v", participant.Role, loaded.Role)
+	}
+	if loaded.Controller != participant.Controller {
+		t.Fatalf("expected controller %v, got %v", participant.Controller, loaded.Controller)
+	}
+	if !loaded.CreatedAt.Equal(now) {
+		t.Fatalf("expected created_at %v, got %v", now, loaded.CreatedAt)
+	}
+	if !loaded.UpdatedAt.Equal(now) {
+		t.Fatalf("expected updated_at %v, got %v", now, loaded.UpdatedAt)
+	}
+}
+
+func TestParticipantStoreGetNotFound(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	_, err = store.GetParticipant(context.Background(), "camp-123", "missing")
+	if !errors.Is(err, storage.ErrNotFound) {
+		t.Fatalf("expected not found error, got %v", err)
+	}
+}
+
+func TestParticipantStorePutEmptyID(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	if err := store.PutParticipant(context.Background(), domain.Participant{}); err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestParticipantStorePutCanceledContext(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if err := store.PutParticipant(ctx, domain.Participant{ID: "part-123", CampaignID: "camp-123"}); err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestParticipantStoreGetEmptyID(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	_, err = store.GetParticipant(context.Background(), "", "part-123")
+	if err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestParticipantStoreGetCanceledContext(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	_, err = store.GetParticipant(ctx, "camp-123", "part-123")
+	if err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestParticipantStoreListByCampaign(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	now := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	participants := []domain.Participant{
+		{
+			ID:          "part-1",
+			CampaignID:  "camp-123",
+			DisplayName: "Alice",
+			Role:        domain.ParticipantRolePlayer,
+			Controller:  domain.ControllerHuman,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		},
+		{
+			ID:          "part-2",
+			CampaignID:  "camp-123",
+			DisplayName: "Bob",
+			Role:        domain.ParticipantRoleGM,
+			Controller:  domain.ControllerHuman,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		},
+		{
+			ID:          "part-3",
+			CampaignID:  "camp-456",
+			DisplayName: "Charlie",
+			Role:        domain.ParticipantRolePlayer,
+			Controller:  domain.ControllerAI,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		},
+	}
+
+	for _, participant := range participants {
+		if err := store.PutParticipant(context.Background(), participant); err != nil {
+			t.Fatalf("put participant: %v", err)
+		}
+	}
+
+	list, err := store.ListParticipantsByCampaign(context.Background(), "camp-123")
+	if err != nil {
+		t.Fatalf("list participants: %v", err)
+	}
+	if len(list) != 2 {
+		t.Fatalf("expected 2 participants, got %d", len(list))
+	}
+	foundAlice := false
+	foundBob := false
+	for _, p := range list {
+		if p.ID == "part-1" && p.DisplayName == "Alice" {
+			foundAlice = true
+		}
+		if p.ID == "part-2" && p.DisplayName == "Bob" {
+			foundBob = true
+		}
+	}
+	if !foundAlice {
+		t.Fatal("expected to find Alice")
+	}
+	if !foundBob {
+		t.Fatal("expected to find Bob")
+	}
+}
+
+func TestParticipantStoreListByCampaignEmpty(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	list, err := store.ListParticipantsByCampaign(context.Background(), "camp-123")
+	if err != nil {
+		t.Fatalf("list participants: %v", err)
+	}
+	if len(list) != 0 {
+		t.Fatalf("expected 0 participants, got %d", len(list))
+	}
+}
+
+func TestParticipantStoreListByCampaignCanceledContext(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	_, err = store.ListParticipantsByCampaign(ctx, "camp-123")
+	if err == nil {
+		t.Fatal("expected error")
+	}
+}
