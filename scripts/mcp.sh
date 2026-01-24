@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # script to run the mcp server from the repo root regardless of working directory
-# useful for running the mcp server from the cursor extension 
+# useful for running the MCP server from the Cursor extension
 set -e
 
 # Resolve repo root relative to this script
