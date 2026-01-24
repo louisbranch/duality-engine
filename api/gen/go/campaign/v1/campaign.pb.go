@@ -74,6 +74,104 @@ func (GmMode) EnumDescriptor() ([]byte, []int) {
 	return file_campaign_v1_campaign_proto_rawDescGZIP(), []int{0}
 }
 
+type ParticipantRole int32
+
+const (
+	ParticipantRole_ROLE_UNSPECIFIED ParticipantRole = 0
+	ParticipantRole_GM               ParticipantRole = 1
+	ParticipantRole_PLAYER           ParticipantRole = 2
+)
+
+// Enum value maps for ParticipantRole.
+var (
+	ParticipantRole_name = map[int32]string{
+		0: "ROLE_UNSPECIFIED",
+		1: "GM",
+		2: "PLAYER",
+	}
+	ParticipantRole_value = map[string]int32{
+		"ROLE_UNSPECIFIED": 0,
+		"GM":               1,
+		"PLAYER":           2,
+	}
+)
+
+func (x ParticipantRole) Enum() *ParticipantRole {
+	p := new(ParticipantRole)
+	*p = x
+	return p
+}
+
+func (x ParticipantRole) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ParticipantRole) Descriptor() protoreflect.EnumDescriptor {
+	return file_campaign_v1_campaign_proto_enumTypes[1].Descriptor()
+}
+
+func (ParticipantRole) Type() protoreflect.EnumType {
+	return &file_campaign_v1_campaign_proto_enumTypes[1]
+}
+
+func (x ParticipantRole) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ParticipantRole.Descriptor instead.
+func (ParticipantRole) EnumDescriptor() ([]byte, []int) {
+	return file_campaign_v1_campaign_proto_rawDescGZIP(), []int{1}
+}
+
+type Controller int32
+
+const (
+	Controller_CONTROLLER_UNSPECIFIED Controller = 0
+	Controller_CONTROLLER_HUMAN       Controller = 1
+	Controller_CONTROLLER_AI          Controller = 2
+)
+
+// Enum value maps for Controller.
+var (
+	Controller_name = map[int32]string{
+		0: "CONTROLLER_UNSPECIFIED",
+		1: "CONTROLLER_HUMAN",
+		2: "CONTROLLER_AI",
+	}
+	Controller_value = map[string]int32{
+		"CONTROLLER_UNSPECIFIED": 0,
+		"CONTROLLER_HUMAN":       1,
+		"CONTROLLER_AI":          2,
+	}
+)
+
+func (x Controller) Enum() *Controller {
+	p := new(Controller)
+	*p = x
+	return p
+}
+
+func (x Controller) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (Controller) Descriptor() protoreflect.EnumDescriptor {
+	return file_campaign_v1_campaign_proto_enumTypes[2].Descriptor()
+}
+
+func (Controller) Type() protoreflect.EnumType {
+	return &file_campaign_v1_campaign_proto_enumTypes[2]
+}
+
+func (x Controller) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use Controller.Descriptor instead.
+func (Controller) EnumDescriptor() ([]byte, []int) {
+	return file_campaign_v1_campaign_proto_rawDescGZIP(), []int{2}
+}
+
 type CreateCampaignRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Display name for the campaign.
@@ -397,6 +495,214 @@ func (x *Campaign) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+type RegisterParticipantRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The campaign ID to register the participant for.
+	CampaignId string `protobuf:"bytes,1,opt,name=campaign_id,json=campaignId,proto3" json:"campaign_id,omitempty"`
+	// Display name for the participant.
+	DisplayName string `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	// The role of the participant.
+	Role ParticipantRole `protobuf:"varint,3,opt,name=role,proto3,enum=campaign.v1.ParticipantRole" json:"role,omitempty"`
+	// The controller type (defaults to HUMAN if unspecified).
+	Controller    Controller `protobuf:"varint,4,opt,name=controller,proto3,enum=campaign.v1.Controller" json:"controller,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RegisterParticipantRequest) Reset() {
+	*x = RegisterParticipantRequest{}
+	mi := &file_campaign_v1_campaign_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RegisterParticipantRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RegisterParticipantRequest) ProtoMessage() {}
+
+func (x *RegisterParticipantRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_campaign_v1_campaign_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RegisterParticipantRequest.ProtoReflect.Descriptor instead.
+func (*RegisterParticipantRequest) Descriptor() ([]byte, []int) {
+	return file_campaign_v1_campaign_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *RegisterParticipantRequest) GetCampaignId() string {
+	if x != nil {
+		return x.CampaignId
+	}
+	return ""
+}
+
+func (x *RegisterParticipantRequest) GetDisplayName() string {
+	if x != nil {
+		return x.DisplayName
+	}
+	return ""
+}
+
+func (x *RegisterParticipantRequest) GetRole() ParticipantRole {
+	if x != nil {
+		return x.Role
+	}
+	return ParticipantRole_ROLE_UNSPECIFIED
+}
+
+func (x *RegisterParticipantRequest) GetController() Controller {
+	if x != nil {
+		return x.Controller
+	}
+	return Controller_CONTROLLER_UNSPECIFIED
+}
+
+type RegisterParticipantResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Participant   *Participant           `protobuf:"bytes,1,opt,name=participant,proto3" json:"participant,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RegisterParticipantResponse) Reset() {
+	*x = RegisterParticipantResponse{}
+	mi := &file_campaign_v1_campaign_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RegisterParticipantResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RegisterParticipantResponse) ProtoMessage() {}
+
+func (x *RegisterParticipantResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_campaign_v1_campaign_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RegisterParticipantResponse.ProtoReflect.Descriptor instead.
+func (*RegisterParticipantResponse) Descriptor() ([]byte, []int) {
+	return file_campaign_v1_campaign_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *RegisterParticipantResponse) GetParticipant() *Participant {
+	if x != nil {
+		return x.Participant
+	}
+	return nil
+}
+
+type Participant struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CampaignId    string                 `protobuf:"bytes,2,opt,name=campaign_id,json=campaignId,proto3" json:"campaign_id,omitempty"`
+	DisplayName   string                 `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	Role          ParticipantRole        `protobuf:"varint,4,opt,name=role,proto3,enum=campaign.v1.ParticipantRole" json:"role,omitempty"`
+	Controller    Controller             `protobuf:"varint,5,opt,name=controller,proto3,enum=campaign.v1.Controller" json:"controller,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Participant) Reset() {
+	*x = Participant{}
+	mi := &file_campaign_v1_campaign_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Participant) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Participant) ProtoMessage() {}
+
+func (x *Participant) ProtoReflect() protoreflect.Message {
+	mi := &file_campaign_v1_campaign_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Participant.ProtoReflect.Descriptor instead.
+func (*Participant) Descriptor() ([]byte, []int) {
+	return file_campaign_v1_campaign_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *Participant) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Participant) GetCampaignId() string {
+	if x != nil {
+		return x.CampaignId
+	}
+	return ""
+}
+
+func (x *Participant) GetDisplayName() string {
+	if x != nil {
+		return x.DisplayName
+	}
+	return ""
+}
+
+func (x *Participant) GetRole() ParticipantRole {
+	if x != nil {
+		return x.Role
+	}
+	return ParticipantRole_ROLE_UNSPECIFIED
+}
+
+func (x *Participant) GetController() Controller {
+	if x != nil {
+		return x.Controller
+	}
+	return Controller_CONTROLLER_UNSPECIFIED
+}
+
+func (x *Participant) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *Participant) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
 var File_campaign_v1_campaign_proto protoreflect.FileDescriptor
 
 const file_campaign_v1_campaign_proto_rawDesc = "" +
@@ -426,16 +732,50 @@ const file_campaign_v1_campaign_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
+	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xcb\x01\n" +
+	"\x1aRegisterParticipantRequest\x12\x1f\n" +
+	"\vcampaign_id\x18\x01 \x01(\tR\n" +
+	"campaignId\x12!\n" +
+	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x120\n" +
+	"\x04role\x18\x03 \x01(\x0e2\x1c.campaign.v1.ParticipantRoleR\x04role\x127\n" +
+	"\n" +
+	"controller\x18\x04 \x01(\x0e2\x17.campaign.v1.ControllerR\n" +
+	"controller\"Y\n" +
+	"\x1bRegisterParticipantResponse\x12:\n" +
+	"\vparticipant\x18\x01 \x01(\v2\x18.campaign.v1.ParticipantR\vparticipant\"\xc2\x02\n" +
+	"\vParticipant\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1f\n" +
+	"\vcampaign_id\x18\x02 \x01(\tR\n" +
+	"campaignId\x12!\n" +
+	"\fdisplay_name\x18\x03 \x01(\tR\vdisplayName\x120\n" +
+	"\x04role\x18\x04 \x01(\x0e2\x1c.campaign.v1.ParticipantRoleR\x04role\x127\n" +
+	"\n" +
+	"controller\x18\x05 \x01(\x0e2\x17.campaign.v1.ControllerR\n" +
+	"controller\x129\n" +
+	"\n" +
+	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
 	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt*@\n" +
 	"\x06GmMode\x12\x17\n" +
 	"\x13GM_MODE_UNSPECIFIED\x10\x00\x12\t\n" +
 	"\x05HUMAN\x10\x01\x12\x06\n" +
 	"\x02AI\x10\x02\x12\n" +
 	"\n" +
-	"\x06HYBRID\x10\x032\xc4\x01\n" +
+	"\x06HYBRID\x10\x03*;\n" +
+	"\x0fParticipantRole\x12\x14\n" +
+	"\x10ROLE_UNSPECIFIED\x10\x00\x12\x06\n" +
+	"\x02GM\x10\x01\x12\n" +
+	"\n" +
+	"\x06PLAYER\x10\x02*Q\n" +
+	"\n" +
+	"Controller\x12\x1a\n" +
+	"\x16CONTROLLER_UNSPECIFIED\x10\x00\x12\x14\n" +
+	"\x10CONTROLLER_HUMAN\x10\x01\x12\x11\n" +
+	"\rCONTROLLER_AI\x10\x022\xae\x02\n" +
 	"\x0fCampaignService\x12Y\n" +
 	"\x0eCreateCampaign\x12\".campaign.v1.CreateCampaignRequest\x1a#.campaign.v1.CreateCampaignResponse\x12V\n" +
-	"\rListCampaigns\x12!.campaign.v1.ListCampaignsRequest\x1a\".campaign.v1.ListCampaignsResponseBIZGgithub.com/louisbranch/duality-engine/api/gen/go/campaign/v1;campaignv1b\x06proto3"
+	"\rListCampaigns\x12!.campaign.v1.ListCampaignsRequest\x1a\".campaign.v1.ListCampaignsResponse\x12h\n" +
+	"\x13RegisterParticipant\x12'.campaign.v1.RegisterParticipantRequest\x1a(.campaign.v1.RegisterParticipantResponseBIZGgithub.com/louisbranch/duality-engine/api/gen/go/campaign/v1;campaignv1b\x06proto3"
 
 var (
 	file_campaign_v1_campaign_proto_rawDescOnce sync.Once
@@ -449,33 +789,47 @@ func file_campaign_v1_campaign_proto_rawDescGZIP() []byte {
 	return file_campaign_v1_campaign_proto_rawDescData
 }
 
-var file_campaign_v1_campaign_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_campaign_v1_campaign_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_campaign_v1_campaign_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_campaign_v1_campaign_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_campaign_v1_campaign_proto_goTypes = []any{
-	(GmMode)(0),                    // 0: campaign.v1.GmMode
-	(*CreateCampaignRequest)(nil),  // 1: campaign.v1.CreateCampaignRequest
-	(*CreateCampaignResponse)(nil), // 2: campaign.v1.CreateCampaignResponse
-	(*ListCampaignsRequest)(nil),   // 3: campaign.v1.ListCampaignsRequest
-	(*ListCampaignsResponse)(nil),  // 4: campaign.v1.ListCampaignsResponse
-	(*Campaign)(nil),               // 5: campaign.v1.Campaign
-	(*timestamppb.Timestamp)(nil),  // 6: google.protobuf.Timestamp
+	(GmMode)(0),                         // 0: campaign.v1.GmMode
+	(ParticipantRole)(0),                // 1: campaign.v1.ParticipantRole
+	(Controller)(0),                     // 2: campaign.v1.Controller
+	(*CreateCampaignRequest)(nil),       // 3: campaign.v1.CreateCampaignRequest
+	(*CreateCampaignResponse)(nil),      // 4: campaign.v1.CreateCampaignResponse
+	(*ListCampaignsRequest)(nil),        // 5: campaign.v1.ListCampaignsRequest
+	(*ListCampaignsResponse)(nil),       // 6: campaign.v1.ListCampaignsResponse
+	(*Campaign)(nil),                    // 7: campaign.v1.Campaign
+	(*RegisterParticipantRequest)(nil),  // 8: campaign.v1.RegisterParticipantRequest
+	(*RegisterParticipantResponse)(nil), // 9: campaign.v1.RegisterParticipantResponse
+	(*Participant)(nil),                 // 10: campaign.v1.Participant
+	(*timestamppb.Timestamp)(nil),       // 11: google.protobuf.Timestamp
 }
 var file_campaign_v1_campaign_proto_depIdxs = []int32{
-	0, // 0: campaign.v1.CreateCampaignRequest.gm_mode:type_name -> campaign.v1.GmMode
-	5, // 1: campaign.v1.CreateCampaignResponse.campaign:type_name -> campaign.v1.Campaign
-	5, // 2: campaign.v1.ListCampaignsResponse.campaigns:type_name -> campaign.v1.Campaign
-	0, // 3: campaign.v1.Campaign.gm_mode:type_name -> campaign.v1.GmMode
-	6, // 4: campaign.v1.Campaign.created_at:type_name -> google.protobuf.Timestamp
-	6, // 5: campaign.v1.Campaign.updated_at:type_name -> google.protobuf.Timestamp
-	1, // 6: campaign.v1.CampaignService.CreateCampaign:input_type -> campaign.v1.CreateCampaignRequest
-	3, // 7: campaign.v1.CampaignService.ListCampaigns:input_type -> campaign.v1.ListCampaignsRequest
-	2, // 8: campaign.v1.CampaignService.CreateCampaign:output_type -> campaign.v1.CreateCampaignResponse
-	4, // 9: campaign.v1.CampaignService.ListCampaigns:output_type -> campaign.v1.ListCampaignsResponse
-	8, // [8:10] is the sub-list for method output_type
-	6, // [6:8] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	0,  // 0: campaign.v1.CreateCampaignRequest.gm_mode:type_name -> campaign.v1.GmMode
+	7,  // 1: campaign.v1.CreateCampaignResponse.campaign:type_name -> campaign.v1.Campaign
+	7,  // 2: campaign.v1.ListCampaignsResponse.campaigns:type_name -> campaign.v1.Campaign
+	0,  // 3: campaign.v1.Campaign.gm_mode:type_name -> campaign.v1.GmMode
+	11, // 4: campaign.v1.Campaign.created_at:type_name -> google.protobuf.Timestamp
+	11, // 5: campaign.v1.Campaign.updated_at:type_name -> google.protobuf.Timestamp
+	1,  // 6: campaign.v1.RegisterParticipantRequest.role:type_name -> campaign.v1.ParticipantRole
+	2,  // 7: campaign.v1.RegisterParticipantRequest.controller:type_name -> campaign.v1.Controller
+	10, // 8: campaign.v1.RegisterParticipantResponse.participant:type_name -> campaign.v1.Participant
+	1,  // 9: campaign.v1.Participant.role:type_name -> campaign.v1.ParticipantRole
+	2,  // 10: campaign.v1.Participant.controller:type_name -> campaign.v1.Controller
+	11, // 11: campaign.v1.Participant.created_at:type_name -> google.protobuf.Timestamp
+	11, // 12: campaign.v1.Participant.updated_at:type_name -> google.protobuf.Timestamp
+	3,  // 13: campaign.v1.CampaignService.CreateCampaign:input_type -> campaign.v1.CreateCampaignRequest
+	5,  // 14: campaign.v1.CampaignService.ListCampaigns:input_type -> campaign.v1.ListCampaignsRequest
+	8,  // 15: campaign.v1.CampaignService.RegisterParticipant:input_type -> campaign.v1.RegisterParticipantRequest
+	4,  // 16: campaign.v1.CampaignService.CreateCampaign:output_type -> campaign.v1.CreateCampaignResponse
+	6,  // 17: campaign.v1.CampaignService.ListCampaigns:output_type -> campaign.v1.ListCampaignsResponse
+	9,  // 18: campaign.v1.CampaignService.RegisterParticipant:output_type -> campaign.v1.RegisterParticipantResponse
+	16, // [16:19] is the sub-list for method output_type
+	13, // [13:16] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_campaign_v1_campaign_proto_init() }
@@ -488,8 +842,8 @@ func file_campaign_v1_campaign_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_campaign_v1_campaign_proto_rawDesc), len(file_campaign_v1_campaign_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   5,
+			NumEnums:      3,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

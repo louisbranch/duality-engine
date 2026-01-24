@@ -14,7 +14,10 @@ import (
 	"go.etcd.io/bbolt"
 )
 
-const campaignBucket = "campaign"
+const (
+	campaignBucket   = "campaign"
+	participantBucket = "participant"
+)
 
 // Store provides a BoltDB-backed campaign store.
 type Store struct {
@@ -175,12 +178,130 @@ func (s *Store) ensureBuckets() error {
 		if err != nil {
 			return fmt.Errorf("create campaign bucket: %w", err)
 		}
+		_, err = tx.CreateBucketIfNotExists([]byte(participantBucket))
+		if err != nil {
+			return fmt.Errorf("create participant bucket: %w", err)
+		}
 		return nil
 	})
 }
 
 func campaignKey(id string) []byte {
 	return []byte(id)
+}
+
+func participantKey(campaignID, participantID string) []byte {
+	return []byte(fmt.Sprintf("%s/%s", campaignID, participantID))
+}
+
+// Put persists a participant record (implements storage.ParticipantStore).
+func (s *Store) PutParticipant(ctx context.Context, participant domain.Participant) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if s == nil || s.db == nil {
+		return fmt.Errorf("storage is not configured")
+	}
+	if strings.TrimSpace(participant.CampaignID) == "" {
+		return fmt.Errorf("campaign id is required")
+	}
+	if strings.TrimSpace(participant.ID) == "" {
+		return fmt.Errorf("participant id is required")
+	}
+
+	payload, err := json.Marshal(participant)
+	if err != nil {
+		return fmt.Errorf("marshal participant: %w", err)
+	}
+
+	return s.db.Update(func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket([]byte(participantBucket))
+		if bucket == nil {
+			return fmt.Errorf("participant bucket is missing")
+		}
+		return bucket.Put(participantKey(participant.CampaignID, participant.ID), payload)
+	})
+}
+
+// Get fetches a participant record by campaign ID and participant ID (implements storage.ParticipantStore).
+func (s *Store) GetParticipant(ctx context.Context, campaignID, participantID string) (domain.Participant, error) {
+	if err := ctx.Err(); err != nil {
+		return domain.Participant{}, err
+	}
+	if s == nil || s.db == nil {
+		return domain.Participant{}, fmt.Errorf("storage is not configured")
+	}
+	if strings.TrimSpace(campaignID) == "" {
+		return domain.Participant{}, fmt.Errorf("campaign id is required")
+	}
+	if strings.TrimSpace(participantID) == "" {
+		return domain.Participant{}, fmt.Errorf("participant id is required")
+	}
+
+	var participant domain.Participant
+	err := s.db.View(func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket([]byte(participantBucket))
+		if bucket == nil {
+			return fmt.Errorf("participant bucket is missing")
+		}
+		payload := bucket.Get(participantKey(campaignID, participantID))
+		if payload == nil {
+			return storage.ErrNotFound
+		}
+		if err := json.Unmarshal(payload, &participant); err != nil {
+			return fmt.Errorf("unmarshal participant: %w", err)
+		}
+		return nil
+	})
+	if err != nil {
+		if errors.Is(err, storage.ErrNotFound) {
+			return domain.Participant{}, err
+		}
+		return domain.Participant{}, err
+	}
+
+	return participant, nil
+}
+
+// ListByCampaign returns all participants for a campaign (implements storage.ParticipantStore).
+func (s *Store) ListParticipantsByCampaign(ctx context.Context, campaignID string) ([]domain.Participant, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if s == nil || s.db == nil {
+		return nil, fmt.Errorf("storage is not configured")
+	}
+	if strings.TrimSpace(campaignID) == "" {
+		return nil, fmt.Errorf("campaign id is required")
+	}
+
+	prefix := campaignID + "/"
+	var participants []domain.Participant
+	err := s.db.View(func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket([]byte(participantBucket))
+		if bucket == nil {
+			return fmt.Errorf("participant bucket is missing")
+		}
+
+		cursor := bucket.Cursor()
+		prefixBytes := []byte(prefix)
+		for key, payload := cursor.Seek(prefixBytes); key != nil && strings.HasPrefix(string(key), prefix); key, payload = cursor.Next() {
+			if err := ctx.Err(); err != nil {
+				return err
+			}
+			var participant domain.Participant
+			if err := json.Unmarshal(payload, &participant); err != nil {
+				return fmt.Errorf("unmarshal participant: %w", err)
+			}
+			participants = append(participants, participant)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return participants, nil
 }
 
 // TODO: Reserve index keys such as idx/creator/{creator_id}/campaign/{campaign_id}.

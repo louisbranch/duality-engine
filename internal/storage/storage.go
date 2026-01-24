@@ -23,3 +23,11 @@ type CampaignPage struct {
 	Campaigns     []domain.Campaign
 	NextPageToken string
 }
+
+// ParticipantStore persists participant records.
+type ParticipantStore interface {
+	PutParticipant(ctx context.Context, participant domain.Participant) error
+	GetParticipant(ctx context.Context, campaignID, participantID string) (domain.Participant, error)
+	// ListParticipantsByCampaign returns all participants for a campaign.
+	ListParticipantsByCampaign(ctx context.Context, campaignID string) ([]domain.Participant, error)
+}
