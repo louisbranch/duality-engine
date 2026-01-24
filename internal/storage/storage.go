@@ -30,4 +30,12 @@ type ParticipantStore interface {
 	GetParticipant(ctx context.Context, campaignID, participantID string) (domain.Participant, error)
 	// ListParticipantsByCampaign returns all participants for a campaign.
 	ListParticipantsByCampaign(ctx context.Context, campaignID string) ([]domain.Participant, error)
+	// ListParticipants returns a page of participant records for a campaign starting after the page token.
+	ListParticipants(ctx context.Context, campaignID string, pageSize int, pageToken string) (ParticipantPage, error)
+}
+
+// ParticipantPage describes a page of participant records.
+type ParticipantPage struct {
+	Participants  []domain.Participant
+	NextPageToken string
 }

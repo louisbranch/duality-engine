@@ -458,3 +458,372 @@ func TestParticipantStoreListByCampaignCanceledContext(t *testing.T) {
 		t.Fatal("expected error")
 	}
 }
+
+func TestParticipantStoreListPagination(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	now := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	participants := []domain.Participant{
+		{
+			ID:          "part-1",
+			CampaignID:  "camp-123",
+			DisplayName: "Alice",
+			Role:        domain.ParticipantRolePlayer,
+			Controller:  domain.ControllerHuman,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		},
+		{
+			ID:          "part-2",
+			CampaignID:  "camp-123",
+			DisplayName: "Bob",
+			Role:        domain.ParticipantRoleGM,
+			Controller:  domain.ControllerHuman,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		},
+		{
+			ID:          "part-3",
+			CampaignID:  "camp-123",
+			DisplayName: "Charlie",
+			Role:        domain.ParticipantRolePlayer,
+			Controller:  domain.ControllerAI,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		},
+	}
+
+	for _, participant := range participants {
+		if err := store.PutParticipant(context.Background(), participant); err != nil {
+			t.Fatalf("put participant: %v", err)
+		}
+	}
+
+	page, err := store.ListParticipants(context.Background(), "camp-123", 2, "")
+	if err != nil {
+		t.Fatalf("list participants: %v", err)
+	}
+	if len(page.Participants) != 2 {
+		t.Fatalf("expected 2 participants, got %d", len(page.Participants))
+	}
+	if page.Participants[0].ID != "part-1" {
+		t.Fatalf("expected first id part-1, got %q", page.Participants[0].ID)
+	}
+	if page.Participants[1].ID != "part-2" {
+		t.Fatalf("expected second id part-2, got %q", page.Participants[1].ID)
+	}
+	expectedToken := "camp-123/part-2"
+	if page.NextPageToken != expectedToken {
+		t.Fatalf("expected next page token %q, got %q", expectedToken, page.NextPageToken)
+	}
+
+	page, err = store.ListParticipants(context.Background(), "camp-123", 2, page.NextPageToken)
+	if err != nil {
+		t.Fatalf("list participants: %v", err)
+	}
+	if len(page.Participants) != 1 {
+		t.Fatalf("expected 1 participant, got %d", len(page.Participants))
+	}
+	if page.Participants[0].ID != "part-3" {
+		t.Fatalf("expected id part-3, got %q", page.Participants[0].ID)
+	}
+	if page.NextPageToken != "" {
+		t.Fatalf("expected empty next page token, got %q", page.NextPageToken)
+	}
+}
+
+func TestParticipantStoreListPaginationPrefixFiltering(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	now := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	participants := []domain.Participant{
+		{
+			ID:          "part-1",
+			CampaignID:  "camp-123",
+			DisplayName: "Alice",
+			Role:        domain.ParticipantRolePlayer,
+			Controller:  domain.ControllerHuman,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		},
+		{
+			ID:          "part-2",
+			CampaignID:  "camp-456",
+			DisplayName: "Bob",
+			Role:        domain.ParticipantRolePlayer,
+			Controller:  domain.ControllerHuman,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		},
+		{
+			ID:          "part-3",
+			CampaignID:  "camp-123",
+			DisplayName: "Charlie",
+			Role:        domain.ParticipantRolePlayer,
+			Controller:  domain.ControllerHuman,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		},
+	}
+
+	for _, participant := range participants {
+		if err := store.PutParticipant(context.Background(), participant); err != nil {
+			t.Fatalf("put participant: %v", err)
+		}
+	}
+
+	page, err := store.ListParticipants(context.Background(), "camp-123", 10, "")
+	if err != nil {
+		t.Fatalf("list participants: %v", err)
+	}
+	if len(page.Participants) != 2 {
+		t.Fatalf("expected 2 participants for camp-123, got %d", len(page.Participants))
+	}
+	foundAlice := false
+	foundCharlie := false
+	for _, p := range page.Participants {
+		if p.ID == "part-1" && p.DisplayName == "Alice" {
+			foundAlice = true
+		}
+		if p.ID == "part-3" && p.DisplayName == "Charlie" {
+			foundCharlie = true
+		}
+		if p.CampaignID != "camp-123" {
+			t.Fatalf("expected campaign id camp-123, got %q", p.CampaignID)
+		}
+	}
+	if !foundAlice {
+		t.Fatal("expected to find Alice")
+	}
+	if !foundCharlie {
+		t.Fatal("expected to find Charlie")
+	}
+}
+
+func TestParticipantStoreListEmptyPageToken(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	now := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	participant := domain.Participant{
+		ID:          "part-1",
+		CampaignID:  "camp-123",
+		DisplayName: "Alice",
+		Role:        domain.ParticipantRolePlayer,
+		Controller:  domain.ControllerHuman,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	}
+
+	if err := store.PutParticipant(context.Background(), participant); err != nil {
+		t.Fatalf("put participant: %v", err)
+	}
+
+	page, err := store.ListParticipants(context.Background(), "camp-123", 10, "")
+	if err != nil {
+		t.Fatalf("list participants: %v", err)
+	}
+	if len(page.Participants) != 1 {
+		t.Fatalf("expected 1 participant, got %d", len(page.Participants))
+	}
+	if page.Participants[0].ID != "part-1" {
+		t.Fatalf("expected id part-1, got %q", page.Participants[0].ID)
+	}
+	if page.NextPageToken != "" {
+		t.Fatalf("expected empty next page token, got %q", page.NextPageToken)
+	}
+}
+
+func TestParticipantStoreListEmptyResult(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	page, err := store.ListParticipants(context.Background(), "camp-123", 10, "")
+	if err != nil {
+		t.Fatalf("list participants: %v", err)
+	}
+	if len(page.Participants) != 0 {
+		t.Fatalf("expected 0 participants, got %d", len(page.Participants))
+	}
+	if page.NextPageToken != "" {
+		t.Fatalf("expected empty next page token, got %q", page.NextPageToken)
+	}
+}
+
+func TestParticipantStoreListInvalidPageSize(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	_, err = store.ListParticipants(context.Background(), "camp-123", 0, "")
+	if err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestParticipantStoreListEmptyCampaignID(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	_, err = store.ListParticipants(context.Background(), "", 10, "")
+	if err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestParticipantStoreListCanceledContext(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	_, err = store.ListParticipants(ctx, "camp-123", 10, "")
+	if err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestParticipantStoreListExactPageSize(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	now := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	participants := []domain.Participant{
+		{
+			ID:          "part-1",
+			CampaignID:  "camp-123",
+			DisplayName: "Alice",
+			Role:        domain.ParticipantRolePlayer,
+			Controller:  domain.ControllerHuman,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		},
+		{
+			ID:          "part-2",
+			CampaignID:  "camp-123",
+			DisplayName: "Bob",
+			Role:        domain.ParticipantRolePlayer,
+			Controller:  domain.ControllerHuman,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		},
+	}
+
+	for _, participant := range participants {
+		if err := store.PutParticipant(context.Background(), participant); err != nil {
+			t.Fatalf("put participant: %v", err)
+		}
+	}
+
+	page, err := store.ListParticipants(context.Background(), "camp-123", 2, "")
+	if err != nil {
+		t.Fatalf("list participants: %v", err)
+	}
+	if len(page.Participants) != 2 {
+		t.Fatalf("expected 2 participants, got %d", len(page.Participants))
+	}
+	if page.NextPageToken != "" {
+		t.Fatalf("expected empty next page token when exactly page size matches, got %q", page.NextPageToken)
+	}
+}
+
+func TestParticipantStoreListPageTokenResume(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	now := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	participants := []domain.Participant{
+		{
+			ID:          "part-1",
+			CampaignID:  "camp-123",
+			DisplayName: "Alice",
+			Role:        domain.ParticipantRolePlayer,
+			Controller:  domain.ControllerHuman,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		},
+		{
+			ID:          "part-2",
+			CampaignID:  "camp-123",
+			DisplayName: "Bob",
+			Role:        domain.ParticipantRolePlayer,
+			Controller:  domain.ControllerHuman,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		},
+		{
+			ID:          "part-3",
+			CampaignID:  "camp-123",
+			DisplayName: "Charlie",
+			Role:        domain.ParticipantRolePlayer,
+			Controller:  domain.ControllerHuman,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		},
+	}
+
+	for _, participant := range participants {
+		if err := store.PutParticipant(context.Background(), participant); err != nil {
+			t.Fatalf("put participant: %v", err)
+		}
+	}
+
+	firstPage, err := store.ListParticipants(context.Background(), "camp-123", 1, "")
+	if err != nil {
+		t.Fatalf("list participants: %v", err)
+	}
+	if len(firstPage.Participants) != 1 {
+		t.Fatalf("expected 1 participant, got %d", len(firstPage.Participants))
+	}
+	if firstPage.NextPageToken == "" {
+		t.Fatal("expected next page token")
+	}
+
+	secondPage, err := store.ListParticipants(context.Background(), "camp-123", 1, firstPage.NextPageToken)
+	if err != nil {
+		t.Fatalf("list participants: %v", err)
+	}
+	if len(secondPage.Participants) != 1 {
+		t.Fatalf("expected 1 participant, got %d", len(secondPage.Participants))
+	}
+	if secondPage.Participants[0].ID == firstPage.Participants[0].ID {
+		t.Fatal("expected different participant on second page")
+	}
+}

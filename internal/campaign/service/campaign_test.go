@@ -44,12 +44,17 @@ func (f *fakeCampaignStore) List(ctx context.Context, pageSize int, pageToken st
 }
 
 type fakeParticipantStore struct {
-	putParticipant   domain.Participant
-	putErr           error
-	getParticipant   domain.Participant
-	getErr           error
-	listParticipants []domain.Participant
-	listErr          error
+	putParticipant     domain.Participant
+	putErr             error
+	getParticipant     domain.Participant
+	getErr             error
+	listParticipants   []domain.Participant
+	listErr            error
+	listPage           storage.ParticipantPage
+	listPageErr        error
+	listPageSize       int
+	listPageToken      string
+	listPageCampaignID string
 }
 
 func (f *fakeParticipantStore) PutParticipant(ctx context.Context, participant domain.Participant) error {
@@ -63,6 +68,13 @@ func (f *fakeParticipantStore) GetParticipant(ctx context.Context, campaignID, p
 
 func (f *fakeParticipantStore) ListParticipantsByCampaign(ctx context.Context, campaignID string) ([]domain.Participant, error) {
 	return f.listParticipants, f.listErr
+}
+
+func (f *fakeParticipantStore) ListParticipants(ctx context.Context, campaignID string, pageSize int, pageToken string) (storage.ParticipantPage, error) {
+	f.listPageCampaignID = campaignID
+	f.listPageSize = pageSize
+	f.listPageToken = pageToken
+	return f.listPage, f.listPageErr
 }
 
 func TestCreateCampaignSuccess(t *testing.T) {

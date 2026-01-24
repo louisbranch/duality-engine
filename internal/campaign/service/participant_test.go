@@ -231,3 +231,329 @@ func TestRegisterParticipantStoreFailure(t *testing.T) {
 		t.Fatalf("expected internal error, got %v", st.Code())
 	}
 }
+
+func TestListParticipantsSuccess(t *testing.T) {
+	fixedTime := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	campaignStore := &fakeCampaignStore{}
+	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
+		if id == "camp-123" {
+			return domain.Campaign{ID: "camp-123", Name: "Test Campaign"}, nil
+		}
+		return domain.Campaign{}, storage.ErrNotFound
+	}
+	participantStore := &fakeParticipantStore{
+		listPage: storage.ParticipantPage{
+			Participants: []domain.Participant{
+				{
+					ID:          "part-1",
+					CampaignID:  "camp-123",
+					DisplayName: "Alice",
+					Role:        domain.ParticipantRolePlayer,
+					Controller:  domain.ControllerHuman,
+					CreatedAt:   fixedTime,
+					UpdatedAt:   fixedTime,
+				},
+				{
+					ID:          "part-2",
+					CampaignID:  "camp-123",
+					DisplayName: "Bob",
+					Role:        domain.ParticipantRoleGM,
+					Controller:  domain.ControllerHuman,
+					CreatedAt:   fixedTime,
+					UpdatedAt:   fixedTime,
+				},
+			},
+			NextPageToken: "next-token",
+		},
+	}
+	service := &CampaignService{
+		store:            campaignStore,
+		participantStore: participantStore,
+		clock:            time.Now,
+	}
+
+	response, err := service.ListParticipants(context.Background(), &campaignv1.ListParticipantsRequest{
+		CampaignId: "camp-123",
+		PageSize:   10,
+	})
+	if err != nil {
+		t.Fatalf("list participants: %v", err)
+	}
+	if response == nil {
+		t.Fatal("expected response")
+	}
+	if len(response.Participants) != 2 {
+		t.Fatalf("expected 2 participants, got %d", len(response.Participants))
+	}
+	if response.NextPageToken != "next-token" {
+		t.Fatalf("expected next page token next-token, got %q", response.NextPageToken)
+	}
+	if response.Participants[0].Id != "part-1" {
+		t.Fatalf("expected first participant id part-1, got %q", response.Participants[0].Id)
+	}
+	if response.Participants[0].DisplayName != "Alice" {
+		t.Fatalf("expected first participant name Alice, got %q", response.Participants[0].DisplayName)
+	}
+	if response.Participants[0].Role != campaignv1.ParticipantRole_PLAYER {
+		t.Fatalf("expected first participant role PLAYER, got %v", response.Participants[0].Role)
+	}
+	if response.Participants[1].Id != "part-2" {
+		t.Fatalf("expected second participant id part-2, got %q", response.Participants[1].Id)
+	}
+	if response.Participants[1].Role != campaignv1.ParticipantRole_GM {
+		t.Fatalf("expected second participant role GM, got %v", response.Participants[1].Role)
+	}
+	if response.Participants[0].CreatedAt.AsTime() != fixedTime {
+		t.Fatalf("expected created_at %v, got %v", fixedTime, response.Participants[0].CreatedAt.AsTime())
+	}
+}
+
+func TestListParticipantsDefaults(t *testing.T) {
+	fixedTime := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	campaignStore := &fakeCampaignStore{}
+	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
+		return domain.Campaign{ID: "camp-123"}, nil
+	}
+	participantStore := &fakeParticipantStore{
+		listPage: storage.ParticipantPage{
+			Participants: []domain.Participant{
+				{
+					ID:          "part-1",
+					CampaignID:  "camp-123",
+					DisplayName: "Alice",
+					Role:        domain.ParticipantRolePlayer,
+					Controller:  domain.ControllerHuman,
+					CreatedAt:   fixedTime,
+					UpdatedAt:   fixedTime,
+				},
+			},
+			NextPageToken: "next-token",
+		},
+	}
+	service := &CampaignService{
+		store:            campaignStore,
+		participantStore: participantStore,
+		clock:            time.Now,
+	}
+
+	response, err := service.ListParticipants(context.Background(), &campaignv1.ListParticipantsRequest{
+		CampaignId: "camp-123",
+		PageSize:   0,
+	})
+	if err != nil {
+		t.Fatalf("list participants: %v", err)
+	}
+	if response == nil {
+		t.Fatal("expected response")
+	}
+	if participantStore.listPageSize != defaultListParticipantsPageSize {
+		t.Fatalf("expected default page size %d, got %d", defaultListParticipantsPageSize, participantStore.listPageSize)
+	}
+	if response.NextPageToken != "next-token" {
+		t.Fatalf("expected next page token, got %q", response.NextPageToken)
+	}
+	if len(response.Participants) != 1 {
+		t.Fatalf("expected 1 participant, got %d", len(response.Participants))
+	}
+}
+
+func TestListParticipantsEmpty(t *testing.T) {
+	campaignStore := &fakeCampaignStore{}
+	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
+		return domain.Campaign{ID: "camp-123"}, nil
+	}
+	participantStore := &fakeParticipantStore{
+		listPage: storage.ParticipantPage{},
+	}
+	service := &CampaignService{
+		store:            campaignStore,
+		participantStore: participantStore,
+		clock:            time.Now,
+	}
+
+	response, err := service.ListParticipants(context.Background(), &campaignv1.ListParticipantsRequest{
+		CampaignId: "camp-123",
+		PageSize:   10,
+	})
+	if err != nil {
+		t.Fatalf("list participants: %v", err)
+	}
+	if response == nil {
+		t.Fatal("expected response")
+	}
+	if len(response.Participants) != 0 {
+		t.Fatalf("expected 0 participants, got %d", len(response.Participants))
+	}
+}
+
+func TestListParticipantsClampPageSize(t *testing.T) {
+	campaignStore := &fakeCampaignStore{}
+	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
+		return domain.Campaign{ID: "camp-123"}, nil
+	}
+	participantStore := &fakeParticipantStore{listPage: storage.ParticipantPage{}}
+	service := &CampaignService{
+		store:            campaignStore,
+		participantStore: participantStore,
+		clock:            time.Now,
+	}
+
+	_, err := service.ListParticipants(context.Background(), &campaignv1.ListParticipantsRequest{
+		CampaignId: "camp-123",
+		PageSize:   25,
+	})
+	if err != nil {
+		t.Fatalf("list participants: %v", err)
+	}
+	if participantStore.listPageSize != maxListParticipantsPageSize {
+		t.Fatalf("expected max page size %d, got %d", maxListParticipantsPageSize, participantStore.listPageSize)
+	}
+}
+
+func TestListParticipantsPassesToken(t *testing.T) {
+	campaignStore := &fakeCampaignStore{}
+	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
+		return domain.Campaign{ID: "camp-123"}, nil
+	}
+	participantStore := &fakeParticipantStore{listPage: storage.ParticipantPage{}}
+	service := &CampaignService{
+		store:            campaignStore,
+		participantStore: participantStore,
+		clock:            time.Now,
+	}
+
+	_, err := service.ListParticipants(context.Background(), &campaignv1.ListParticipantsRequest{
+		CampaignId: "camp-123",
+		PageSize:   1,
+		PageToken:  "next",
+	})
+	if err != nil {
+		t.Fatalf("list participants: %v", err)
+	}
+	if participantStore.listPageToken != "next" {
+		t.Fatalf("expected page token next, got %q", participantStore.listPageToken)
+	}
+	if participantStore.listPageCampaignID != "camp-123" {
+		t.Fatalf("expected campaign id camp-123, got %q", participantStore.listPageCampaignID)
+	}
+}
+
+func TestListParticipantsNilRequest(t *testing.T) {
+	service := NewCampaignService(&fakeCampaignStore{}, &fakeParticipantStore{})
+
+	_, err := service.ListParticipants(context.Background(), nil)
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	st, ok := status.FromError(err)
+	if !ok {
+		t.Fatalf("expected grpc status error, got %v", err)
+	}
+	if st.Code() != codes.InvalidArgument {
+		t.Fatalf("expected invalid argument, got %v", st.Code())
+	}
+}
+
+func TestListParticipantsCampaignNotFound(t *testing.T) {
+	campaignStore := &fakeCampaignStore{}
+	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
+		return domain.Campaign{}, storage.ErrNotFound
+	}
+	service := &CampaignService{
+		store:            campaignStore,
+		participantStore: &fakeParticipantStore{},
+		clock:            time.Now,
+	}
+
+	_, err := service.ListParticipants(context.Background(), &campaignv1.ListParticipantsRequest{
+		CampaignId: "missing",
+		PageSize:   10,
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	st, ok := status.FromError(err)
+	if !ok {
+		t.Fatalf("expected grpc status error, got %v", err)
+	}
+	if st.Code() != codes.NotFound {
+		t.Fatalf("expected not found, got %v", st.Code())
+	}
+}
+
+func TestListParticipantsStoreFailure(t *testing.T) {
+	campaignStore := &fakeCampaignStore{}
+	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
+		return domain.Campaign{ID: "camp-123"}, nil
+	}
+	participantStore := &fakeParticipantStore{listPageErr: errors.New("boom")}
+	service := &CampaignService{
+		store:            campaignStore,
+		participantStore: participantStore,
+		clock:            time.Now,
+	}
+
+	_, err := service.ListParticipants(context.Background(), &campaignv1.ListParticipantsRequest{
+		CampaignId: "camp-123",
+		PageSize:   10,
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	st, ok := status.FromError(err)
+	if !ok {
+		t.Fatalf("expected grpc status error, got %v", err)
+	}
+	if st.Code() != codes.Internal {
+		t.Fatalf("expected internal error, got %v", st.Code())
+	}
+}
+
+func TestListParticipantsMissingStore(t *testing.T) {
+	campaignStore := &fakeCampaignStore{}
+	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
+		return domain.Campaign{ID: "camp-123"}, nil
+	}
+	service := &CampaignService{
+		store: campaignStore,
+	}
+
+	_, err := service.ListParticipants(context.Background(), &campaignv1.ListParticipantsRequest{
+		CampaignId: "camp-123",
+		PageSize:   10,
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	st, ok := status.FromError(err)
+	if !ok {
+		t.Fatalf("expected grpc status error, got %v", err)
+	}
+	if st.Code() != codes.Internal {
+		t.Fatalf("expected internal error, got %v", st.Code())
+	}
+}
+
+func TestListParticipantsEmptyCampaignID(t *testing.T) {
+	campaignStore := &fakeCampaignStore{}
+	service := &CampaignService{
+		store:            campaignStore,
+		participantStore: &fakeParticipantStore{},
+		clock:            time.Now,
+	}
+
+	_, err := service.ListParticipants(context.Background(), &campaignv1.ListParticipantsRequest{
+		CampaignId: "  ",
+		PageSize:   10,
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	st, ok := status.FromError(err)
+	if !ok {
+		t.Fatalf("expected grpc status error, got %v", err)
+	}
+	if st.Code() != codes.InvalidArgument {
+		t.Fatalf("expected invalid argument, got %v", st.Code())
+	}
+}

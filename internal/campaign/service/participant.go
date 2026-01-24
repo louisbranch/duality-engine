@@ -71,6 +71,68 @@ func (s *CampaignService) RegisterParticipant(ctx context.Context, in *campaignv
 	return response, nil
 }
 
+// ListParticipants returns a page of participant records for a campaign.
+func (s *CampaignService) ListParticipants(ctx context.Context, in *campaignv1.ListParticipantsRequest) (*campaignv1.ListParticipantsResponse, error) {
+	if in == nil {
+		return nil, status.Error(codes.InvalidArgument, "list participants request is required")
+	}
+
+	if s.store == nil {
+		return nil, status.Error(codes.Internal, "campaign store is not configured")
+	}
+	if s.participantStore == nil {
+		return nil, status.Error(codes.Internal, "participant store is not configured")
+	}
+
+	// Validate campaign exists
+	campaignID := strings.TrimSpace(in.GetCampaignId())
+	if campaignID == "" {
+		return nil, status.Error(codes.InvalidArgument, "campaign id is required")
+	}
+	_, err := s.store.Get(ctx, campaignID)
+	if err != nil {
+		if errors.Is(err, storage.ErrNotFound) {
+			return nil, status.Error(codes.NotFound, "campaign not found")
+		}
+		return nil, status.Errorf(codes.Internal, "check campaign: %v", err)
+	}
+
+	pageSize := int(in.GetPageSize())
+	if pageSize <= 0 {
+		pageSize = defaultListParticipantsPageSize
+	}
+	if pageSize > maxListParticipantsPageSize {
+		pageSize = maxListParticipantsPageSize
+	}
+
+	page, err := s.participantStore.ListParticipants(ctx, campaignID, pageSize, in.GetPageToken())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list participants: %v", err)
+	}
+
+	response := &campaignv1.ListParticipantsResponse{
+		NextPageToken: page.NextPageToken,
+	}
+	if len(page.Participants) == 0 {
+		return response, nil
+	}
+
+	response.Participants = make([]*campaignv1.Participant, 0, len(page.Participants))
+	for _, participant := range page.Participants {
+		response.Participants = append(response.Participants, &campaignv1.Participant{
+			Id:          participant.ID,
+			CampaignId:  participant.CampaignID,
+			DisplayName: participant.DisplayName,
+			Role:        participantRoleToProto(participant.Role),
+			Controller:  controllerToProto(participant.Controller),
+			CreatedAt:   timestamppb.New(participant.CreatedAt),
+			UpdatedAt:   timestamppb.New(participant.UpdatedAt),
+		})
+	}
+
+	return response, nil
+}
+
 // participantRoleFromProto maps a protobuf participant role to the domain representation.
 func participantRoleFromProto(role campaignv1.ParticipantRole) domain.ParticipantRole {
 	switch role {

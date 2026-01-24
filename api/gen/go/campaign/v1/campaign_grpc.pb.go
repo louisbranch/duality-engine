@@ -22,6 +22,7 @@ const (
 	CampaignService_CreateCampaign_FullMethodName      = "/campaign.v1.CampaignService/CreateCampaign"
 	CampaignService_ListCampaigns_FullMethodName       = "/campaign.v1.CampaignService/ListCampaigns"
 	CampaignService_RegisterParticipant_FullMethodName = "/campaign.v1.CampaignService/RegisterParticipant"
+	CampaignService_ListParticipants_FullMethodName    = "/campaign.v1.CampaignService/ListParticipants"
 )
 
 // CampaignServiceClient is the client API for CampaignService service.
@@ -34,6 +35,8 @@ type CampaignServiceClient interface {
 	ListCampaigns(ctx context.Context, in *ListCampaignsRequest, opts ...grpc.CallOption) (*ListCampaignsResponse, error)
 	// Register a participant (GM or player) for a campaign.
 	RegisterParticipant(ctx context.Context, in *RegisterParticipantRequest, opts ...grpc.CallOption) (*RegisterParticipantResponse, error)
+	// List participants for a campaign.
+	ListParticipants(ctx context.Context, in *ListParticipantsRequest, opts ...grpc.CallOption) (*ListParticipantsResponse, error)
 }
 
 type campaignServiceClient struct {
@@ -74,6 +77,16 @@ func (c *campaignServiceClient) RegisterParticipant(ctx context.Context, in *Reg
 	return out, nil
 }
 
+func (c *campaignServiceClient) ListParticipants(ctx context.Context, in *ListParticipantsRequest, opts ...grpc.CallOption) (*ListParticipantsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListParticipantsResponse)
+	err := c.cc.Invoke(ctx, CampaignService_ListParticipants_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CampaignServiceServer is the server API for CampaignService service.
 // All implementations must embed UnimplementedCampaignServiceServer
 // for forward compatibility.
@@ -84,6 +97,8 @@ type CampaignServiceServer interface {
 	ListCampaigns(context.Context, *ListCampaignsRequest) (*ListCampaignsResponse, error)
 	// Register a participant (GM or player) for a campaign.
 	RegisterParticipant(context.Context, *RegisterParticipantRequest) (*RegisterParticipantResponse, error)
+	// List participants for a campaign.
+	ListParticipants(context.Context, *ListParticipantsRequest) (*ListParticipantsResponse, error)
 	mustEmbedUnimplementedCampaignServiceServer()
 }
 
@@ -102,6 +117,9 @@ func (UnimplementedCampaignServiceServer) ListCampaigns(context.Context, *ListCa
 }
 func (UnimplementedCampaignServiceServer) RegisterParticipant(context.Context, *RegisterParticipantRequest) (*RegisterParticipantResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RegisterParticipant not implemented")
+}
+func (UnimplementedCampaignServiceServer) ListParticipants(context.Context, *ListParticipantsRequest) (*ListParticipantsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListParticipants not implemented")
 }
 func (UnimplementedCampaignServiceServer) mustEmbedUnimplementedCampaignServiceServer() {}
 func (UnimplementedCampaignServiceServer) testEmbeddedByValue()                         {}
@@ -178,6 +196,24 @@ func _CampaignService_RegisterParticipant_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CampaignService_ListParticipants_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListParticipantsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampaignServiceServer).ListParticipants(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CampaignService_ListParticipants_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampaignServiceServer).ListParticipants(ctx, req.(*ListParticipantsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CampaignService_ServiceDesc is the grpc.ServiceDesc for CampaignService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -196,6 +232,10 @@ var CampaignService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RegisterParticipant",
 			Handler:    _CampaignService_RegisterParticipant_Handler,
+		},
+		{
+			MethodName: "ListParticipants",
+			Handler:    _CampaignService_ListParticipants_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
