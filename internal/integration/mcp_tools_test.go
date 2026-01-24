@@ -4,6 +4,7 @@ package integration
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"testing"
 )
@@ -77,10 +78,17 @@ func assertStringSet(t *testing.T, label string, actual []string, expected []str
 
 	sort.Strings(missing)
 	sort.Strings(extra)
-	if len(missing) > 0 {
-		t.Fatalf("missing %s: %v", label, missing)
-	}
-	if len(extra) > 0 {
-		t.Fatalf("unexpected %s: %v", label, extra)
+	if len(missing) > 0 || len(extra) > 0 {
+		message := ""
+		if len(missing) > 0 {
+			message = fmt.Sprintf("missing %s: %v", label, missing)
+		}
+		if len(extra) > 0 {
+			if message != "" {
+				message += "; "
+			}
+			message += fmt.Sprintf("unexpected %s: %v", label, extra)
+		}
+		t.Fatalf("%s", message)
 	}
 }
