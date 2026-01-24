@@ -6,7 +6,7 @@ PROTO_FILES := \
 	$(PROTO_DIR)/campaign/v1/campaign.proto \
 	$(PROTO_DIR)/duality/v1/duality.proto
 
-.PHONY: all proto clean run cover
+.PHONY: all proto clean run cover test integration
 
 all: proto
 
@@ -32,7 +32,13 @@ run:
 	'
 
 cover:
-	go test -v -coverpkg=./... -coverprofile=coverage.raw ./...
+	go test -tags=integration -v -coverpkg=./... -coverprofile=coverage.raw ./...
 	awk -v exclude='$(COVER_EXCLUDE_REGEX)' 'NR==1 || $$1 !~ exclude' coverage.raw > coverage.out
 	go tool cover -func coverage.out
 	go tool cover -html=coverage.out -o coverage.html
+
+test:
+	go test ./...
+
+integration:
+	go test -tags=integration ./...

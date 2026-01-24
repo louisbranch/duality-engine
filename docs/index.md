@@ -11,3 +11,4 @@ User-facing documentation is published from this folder via GitHub Pages.
 - [Getting started](getting-started.md)
 - [Configuration](configuration.md)
 - [MCP tools and resources](mcp.md)
+- [Integration tests](integration-tests.md)

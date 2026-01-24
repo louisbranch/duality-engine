@@ -59,6 +59,14 @@ func New(port int) (*Server, error) {
 	}, nil
 }
 
+// Addr returns the listener address for the gRPC server.
+func (s *Server) Addr() string {
+	if s == nil || s.listener == nil {
+		return ""
+	}
+	return s.listener.Addr().String()
+}
+
 // Run creates and serves a gRPC server until the context ends.
 func Run(ctx context.Context, port int) error {
 	grpcServer, err := New(port)
