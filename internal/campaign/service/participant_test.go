@@ -308,6 +308,55 @@ func TestListParticipantsSuccess(t *testing.T) {
 	}
 }
 
+func TestListParticipantsDefaults(t *testing.T) {
+	fixedTime := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	campaignStore := &fakeCampaignStore{}
+	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
+		return domain.Campaign{ID: "camp-123"}, nil
+	}
+	participantStore := &fakeParticipantStore{
+		listPage: storage.ParticipantPage{
+			Participants: []domain.Participant{
+				{
+					ID:          "part-1",
+					CampaignID:  "camp-123",
+					DisplayName: "Alice",
+					Role:        domain.ParticipantRolePlayer,
+					Controller:  domain.ControllerHuman,
+					CreatedAt:   fixedTime,
+					UpdatedAt:   fixedTime,
+				},
+			},
+			NextPageToken: "next-token",
+		},
+	}
+	service := &CampaignService{
+		store:            campaignStore,
+		participantStore: participantStore,
+		clock:            time.Now,
+	}
+
+	response, err := service.ListParticipants(context.Background(), &campaignv1.ListParticipantsRequest{
+		CampaignId: "camp-123",
+		PageSize:   0,
+	})
+	if err != nil {
+		t.Fatalf("list participants: %v", err)
+	}
+	if response == nil {
+		t.Fatal("expected response")
+	}
+	if participantStore.listPageSize != defaultListParticipantsPageSize {
+		t.Fatalf("expected default page size %d, got %d", defaultListParticipantsPageSize, participantStore.listPageSize)
+	}
+	if response.NextPageToken != "next-token" {
+		t.Fatalf("expected next page token, got %q", response.NextPageToken)
+	}
+	if len(response.Participants) != 1 {
+		t.Fatalf("expected 1 participant, got %d", len(response.Participants))
+	}
+}
+
 func TestListParticipantsEmpty(t *testing.T) {
 	campaignStore := &fakeCampaignStore{}
 	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
