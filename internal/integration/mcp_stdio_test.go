@@ -12,7 +12,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strconv"
 	"testing"
 	"time"
 
@@ -20,6 +19,9 @@ import (
 	dualitydomain "github.com/louisbranch/duality-engine/internal/duality/domain"
 	"github.com/louisbranch/duality-engine/internal/mcp/domain"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	grpc_health_v1 "google.golang.org/grpc/health/grpc_health_v1"
 )
 
 // TestMCPStdioEndToEnd validates MCP stdio integration end-to-end.
@@ -234,11 +236,10 @@ func integrationTimeout() time.Duration {
 func startGRPCServer(t *testing.T) (string, func()) {
 	t.Helper()
 
-	port := pickUnusedPort(t)
 	setTempDBPath(t)
 
 	ctx, cancel := context.WithCancel(context.Background())
-	grpcServer, err := server.New(port)
+	grpcServer, err := server.New(0)
 	if err != nil {
 		cancel()
 		t.Fatalf("new gRPC server: %v", err)
@@ -249,7 +250,8 @@ func startGRPCServer(t *testing.T) (string, func()) {
 		serveErr <- grpcServer.Serve(ctx)
 	}()
 
-	addr := net.JoinHostPort("127.0.0.1", strconv.Itoa(port))
+	addr := normalizeAddress(t, grpcServer.Addr())
+	waitForGRPCHealth(t, addr)
 	stop := func() {
 		cancel()
 		select {
@@ -344,31 +346,6 @@ func parseRFC3339(t *testing.T, value string) time.Time {
 	return parsed
 }
 
-// pickUnusedPort reserves an ephemeral port and returns it for test use.
-func pickUnusedPort(t *testing.T) int {
-	t.Helper()
-
-	listener, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatalf("listen for port: %v", err)
-	}
-	defer func() {
-		if err := listener.Close(); err != nil {
-			t.Fatalf("close port listener: %v", err)
-		}
-	}()
-
-	_, port, err := net.SplitHostPort(listener.Addr().String())
-	if err != nil {
-		t.Fatalf("split port: %v", err)
-	}
-	portNumber, err := strconv.Atoi(port)
-	if err != nil {
-		t.Fatalf("parse port %q: %v", port, err)
-	}
-	return portNumber
-}
-
 // setTempDBPath configures a temporary database for integration tests.
 func setTempDBPath(t *testing.T) {
 	t.Helper()
@@ -401,6 +378,65 @@ func repoRoot(t *testing.T) string {
 
 	t.Fatalf("go.mod not found from %s", filename)
 	return ""
+}
+
+// normalizeAddress maps wildcard listener hosts to localhost.
+func normalizeAddress(t *testing.T, addr string) string {
+	t.Helper()
+
+	host, port, err := net.SplitHostPort(addr)
+	if err != nil {
+		t.Fatalf("split address %q: %v", addr, err)
+	}
+	if host == "" || host == "0.0.0.0" || host == "::" {
+		host = "127.0.0.1"
+	}
+	return net.JoinHostPort(host, port)
+}
+
+// waitForGRPCHealth waits for the gRPC health check to report SERVING.
+func waitForGRPCHealth(t *testing.T, addr string) {
+	t.Helper()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	conn, err := grpc.NewClient(
+		addr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(grpc.WaitForReady(true)),
+	)
+	if err != nil {
+		t.Fatalf("dial gRPC server: %v", err)
+	}
+	defer conn.Close()
+
+	healthClient := grpc_health_v1.NewHealthClient(conn)
+	backoff := 100 * time.Millisecond
+	for {
+		callCtx, callCancel := context.WithTimeout(ctx, time.Second)
+		response, err := healthClient.Check(callCtx, &grpc_health_v1.HealthCheckRequest{Service: ""})
+		callCancel()
+		if err == nil && response.GetStatus() == grpc_health_v1.HealthCheckResponse_SERVING {
+			return
+		}
+
+		select {
+		case <-ctx.Done():
+			if err != nil {
+				t.Fatalf("wait for gRPC health: %v", err)
+			}
+			t.Fatalf("wait for gRPC health: %v", ctx.Err())
+		case <-time.After(backoff):
+		}
+
+		if backoff < time.Second {
+			backoff *= 2
+			if backoff > time.Second {
+				backoff = time.Second
+			}
+		}
+	}
 }
 
 // intPointer returns a pointer to the provided int value.

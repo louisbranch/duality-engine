@@ -50,4 +50,12 @@ meant to increase trust in end-to-end behavior and backward compatibility.
 go test -tags=integration ./...
 ```
 
-- CI should run the same command in addition to the default unit tests.
+- Make targets:
+
+```sh
+make test
+make integration
+make cover
+```
+
+- CI should run the integration tag via make (for example: make cover).
