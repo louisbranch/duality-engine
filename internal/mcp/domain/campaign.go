@@ -17,7 +17,7 @@ type CampaignCreateInput struct {
 	Name        string `json:"name" jsonschema:"campaign name"`
 	GmMode      string `json:"gm_mode" jsonschema:"gm mode (HUMAN, AI, HYBRID)"`
 	PlayerSlots int    `json:"player_slots" jsonschema:"number of player slots"`
-	ThemePrompt string `json:"theme_prompt" jsonschema:"optional theme prompt"`
+	ThemePrompt string `json:"theme_prompt,omitempty" jsonschema:"optional theme prompt"`
 }
 
 // CampaignCreateResult represents the MCP tool output for campaign creation.
@@ -45,11 +45,38 @@ type CampaignListPayload struct {
 	Campaigns []CampaignListEntry `json:"campaigns"`
 }
 
+// ParticipantCreateInput represents the MCP tool input for participant registration.
+type ParticipantCreateInput struct {
+	CampaignID  string `json:"campaign_id" jsonschema:"campaign identifier"`
+	DisplayName string `json:"display_name" jsonschema:"display name for the participant"`
+	Role        string `json:"role" jsonschema:"participant role (GM, PLAYER)"`
+	Controller  string `json:"controller,omitempty" jsonschema:"controller type (HUMAN, AI); optional, defaults to HUMAN if unspecified"`
+}
+
+// ParticipantCreateResult represents the MCP tool output for participant registration.
+type ParticipantCreateResult struct {
+	ID          string `json:"id" jsonschema:"participant identifier"`
+	CampaignID  string `json:"campaign_id" jsonschema:"campaign identifier"`
+	DisplayName string `json:"display_name" jsonschema:"display name for the participant"`
+	Role        string `json:"role" jsonschema:"participant role"`
+	Controller  string `json:"controller" jsonschema:"controller type"`
+	CreatedAt   string `json:"created_at" jsonschema:"RFC3339 timestamp when participant was created"`
+	UpdatedAt   string `json:"updated_at" jsonschema:"RFC3339 timestamp when participant was last updated"`
+}
+
 // CampaignCreateTool defines the MCP tool schema for creating campaigns.
 func CampaignCreateTool() *mcp.Tool {
 	return &mcp.Tool{
 		Name:        "campaign_create",
 		Description: "Creates a new campaign metadata record",
+	}
+}
+
+// ParticipantCreateTool defines the MCP tool schema for registering participants.
+func ParticipantCreateTool() *mcp.Tool {
+	return &mcp.Tool{
+		Name:        "participant_create",
+		Description: "Registers a participant (GM or player) for a campaign",
 	}
 }
 
@@ -180,6 +207,89 @@ func gmModeToString(mode campaignv1.GmMode) string {
 		return "AI"
 	case campaignv1.GmMode_HYBRID:
 		return "HYBRID"
+	default:
+		return "UNSPECIFIED"
+	}
+}
+
+// ParticipantCreateHandler executes a participant registration request.
+func ParticipantCreateHandler(client campaignv1.CampaignServiceClient) mcp.ToolHandlerFor[ParticipantCreateInput, ParticipantCreateResult] {
+	return func(ctx context.Context, _ *mcp.CallToolRequest, input ParticipantCreateInput) (*mcp.CallToolResult, ParticipantCreateResult, error) {
+		runCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+
+		req := &campaignv1.RegisterParticipantRequest{
+			CampaignId:  input.CampaignID,
+			DisplayName: input.DisplayName,
+			Role:        participantRoleFromString(input.Role),
+		}
+
+		// Controller is optional; only set if provided
+		if input.Controller != "" {
+			req.Controller = controllerFromString(input.Controller)
+		}
+
+		response, err := client.RegisterParticipant(runCtx, req)
+		if err != nil {
+			return nil, ParticipantCreateResult{}, fmt.Errorf("participant create failed: %w", err)
+		}
+		if response == nil || response.Participant == nil {
+			return nil, ParticipantCreateResult{}, fmt.Errorf("participant create response is missing")
+		}
+
+		result := ParticipantCreateResult{
+			ID:          response.Participant.GetId(),
+			CampaignID:  response.Participant.GetCampaignId(),
+			DisplayName: response.Participant.GetDisplayName(),
+			Role:        participantRoleToString(response.Participant.GetRole()),
+			Controller:  controllerToString(response.Participant.GetController()),
+			CreatedAt:   formatTimestamp(response.Participant.GetCreatedAt()),
+			UpdatedAt:   formatTimestamp(response.Participant.GetUpdatedAt()),
+		}
+
+		return nil, result, nil
+	}
+}
+
+func participantRoleFromString(value string) campaignv1.ParticipantRole {
+	switch strings.ToUpper(strings.TrimSpace(value)) {
+	case "GM":
+		return campaignv1.ParticipantRole_GM
+	case "PLAYER":
+		return campaignv1.ParticipantRole_PLAYER
+	default:
+		return campaignv1.ParticipantRole_ROLE_UNSPECIFIED
+	}
+}
+
+func participantRoleToString(role campaignv1.ParticipantRole) string {
+	switch role {
+	case campaignv1.ParticipantRole_GM:
+		return "GM"
+	case campaignv1.ParticipantRole_PLAYER:
+		return "PLAYER"
+	default:
+		return "UNSPECIFIED"
+	}
+}
+
+func controllerFromString(value string) campaignv1.Controller {
+	switch strings.ToUpper(strings.TrimSpace(value)) {
+	case "HUMAN":
+		return campaignv1.Controller_CONTROLLER_HUMAN
+	case "AI":
+		return campaignv1.Controller_CONTROLLER_AI
+	default:
+		return campaignv1.Controller_CONTROLLER_UNSPECIFIED
+	}
+}
+
+func controllerToString(controller campaignv1.Controller) string {
+	switch controller {
+	case campaignv1.Controller_CONTROLLER_HUMAN:
+		return "HUMAN"
+	case campaignv1.Controller_CONTROLLER_AI:
+		return "AI"
 	default:
 		return "UNSPECIFIED"
 	}

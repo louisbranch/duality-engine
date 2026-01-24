@@ -983,6 +983,153 @@ func TestCampaignListResourceHandlerMapsResponse(t *testing.T) {
 	}
 }
 
+// TestParticipantCreateHandlerReturnsClientError ensures gRPC errors are returned as tool errors.
+func TestParticipantCreateHandlerReturnsClientError(t *testing.T) {
+	client := &fakeCampaignClient{registerErr: errors.New("boom")}
+	handler := domain.ParticipantCreateHandler(client)
+
+	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.ParticipantCreateInput{
+		CampaignID:  "camp-123",
+		DisplayName: "Test Player",
+		Role:        "PLAYER",
+		Controller:  "HUMAN",
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if result != nil {
+		t.Fatal("expected nil result on error")
+	}
+}
+
+// TestParticipantCreateHandlerMapsRequestAndResponse ensures inputs and outputs map consistently.
+func TestParticipantCreateHandlerMapsRequestAndResponse(t *testing.T) {
+	now := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	client := &fakeCampaignClient{registerResponse: &campaignv1.RegisterParticipantResponse{
+		Participant: &campaignv1.Participant{
+			Id:          "part-456",
+			CampaignId:  "camp-123",
+			DisplayName: "Test Player",
+			Role:        campaignv1.ParticipantRole_PLAYER,
+			Controller:  campaignv1.Controller_CONTROLLER_HUMAN,
+			CreatedAt:   timestamppb.New(now),
+			UpdatedAt:   timestamppb.New(now.Add(time.Hour)),
+		},
+	}}
+	result, output, err := domain.ParticipantCreateHandler(client)(
+		context.Background(),
+		&mcp.CallToolRequest{},
+		domain.ParticipantCreateInput{
+			CampaignID:  "camp-123",
+			DisplayName: "Test Player",
+			Role:        "PLAYER",
+			Controller:  "HUMAN",
+		},
+	)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if result != nil {
+		t.Fatal("expected nil result on success")
+	}
+	if client.lastRegisterRequest == nil {
+		t.Fatal("expected gRPC request")
+	}
+	if client.lastRegisterRequest.GetCampaignId() != "camp-123" {
+		t.Fatalf("expected campaign id camp-123, got %q", client.lastRegisterRequest.GetCampaignId())
+	}
+	if client.lastRegisterRequest.GetDisplayName() != "Test Player" {
+		t.Fatalf("expected display name Test Player, got %q", client.lastRegisterRequest.GetDisplayName())
+	}
+	if client.lastRegisterRequest.GetRole() != campaignv1.ParticipantRole_PLAYER {
+		t.Fatalf("expected role PLAYER, got %v", client.lastRegisterRequest.GetRole())
+	}
+	if client.lastRegisterRequest.GetController() != campaignv1.Controller_CONTROLLER_HUMAN {
+		t.Fatalf("expected controller HUMAN, got %v", client.lastRegisterRequest.GetController())
+	}
+	if output.ID != "part-456" {
+		t.Fatalf("expected id part-456, got %q", output.ID)
+	}
+	if output.CampaignID != "camp-123" {
+		t.Fatalf("expected campaign id camp-123, got %q", output.CampaignID)
+	}
+	if output.DisplayName != "Test Player" {
+		t.Fatalf("expected display name Test Player, got %q", output.DisplayName)
+	}
+	if output.Role != "PLAYER" {
+		t.Fatalf("expected role PLAYER, got %q", output.Role)
+	}
+	if output.Controller != "HUMAN" {
+		t.Fatalf("expected controller HUMAN, got %q", output.Controller)
+	}
+	if output.CreatedAt != now.Format(time.RFC3339) {
+		t.Fatalf("expected created_at %q, got %q", now.Format(time.RFC3339), output.CreatedAt)
+	}
+	if output.UpdatedAt != now.Add(time.Hour).Format(time.RFC3339) {
+		t.Fatalf("expected updated_at %q, got %q", now.Add(time.Hour).Format(time.RFC3339), output.UpdatedAt)
+	}
+}
+
+// TestParticipantCreateHandlerOptionalController ensures optional controller field works.
+func TestParticipantCreateHandlerOptionalController(t *testing.T) {
+	now := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	client := &fakeCampaignClient{registerResponse: &campaignv1.RegisterParticipantResponse{
+		Participant: &campaignv1.Participant{
+			Id:          "part-789",
+			CampaignId:  "camp-123",
+			DisplayName: "Test GM",
+			Role:        campaignv1.ParticipantRole_GM,
+			Controller:  campaignv1.Controller_CONTROLLER_HUMAN,
+			CreatedAt:   timestamppb.New(now),
+			UpdatedAt:   timestamppb.New(now),
+		},
+	}}
+	result, output, err := domain.ParticipantCreateHandler(client)(
+		context.Background(),
+		&mcp.CallToolRequest{},
+		domain.ParticipantCreateInput{
+			CampaignID:  "camp-123",
+			DisplayName: "Test GM",
+			Role:        "GM",
+			// Controller omitted
+		},
+	)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if result != nil {
+		t.Fatal("expected nil result on success")
+	}
+	if client.lastRegisterRequest == nil {
+		t.Fatal("expected gRPC request")
+	}
+	// Controller should be unspecified when not provided
+	if client.lastRegisterRequest.GetController() != campaignv1.Controller_CONTROLLER_UNSPECIFIED {
+		t.Fatalf("expected controller UNSPECIFIED when omitted, got %v", client.lastRegisterRequest.GetController())
+	}
+	if output.Role != "GM" {
+		t.Fatalf("expected role GM, got %q", output.Role)
+	}
+}
+
+// TestParticipantCreateHandlerRejectsEmptyResponse ensures nil responses are rejected.
+func TestParticipantCreateHandlerRejectsEmptyResponse(t *testing.T) {
+	client := &fakeCampaignClient{}
+	handler := domain.ParticipantCreateHandler(client)
+
+	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.ParticipantCreateInput{
+		CampaignID:  "camp-123",
+		DisplayName: "Test Player",
+		Role:        "PLAYER",
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if result != nil {
+		t.Fatal("expected nil result on error")
+	}
+}
+
 // intPointer returns an int pointer for test inputs.
 func intPointer(value int) *int {
 	return &value

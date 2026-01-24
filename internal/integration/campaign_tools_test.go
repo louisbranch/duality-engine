@@ -74,4 +74,77 @@ func runCampaignToolsTests(t *testing.T, suite *integrationSuite) {
 			t.Fatalf("expected updated_at after created_at: %v < %v", updatedAt, createdAt)
 		}
 	})
+
+	t.Run("participant create", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), integrationTimeout())
+		defer cancel()
+
+		// First create a campaign
+		campaignParams := &mcp.CallToolParams{
+			Name: "campaign_create",
+			Arguments: map[string]any{
+				"name":         "Test Campaign",
+				"gm_mode":      "HUMAN",
+				"player_slots": 4,
+				"theme_prompt": "",
+			},
+		}
+		campaignResult, err := suite.client.CallTool(ctx, campaignParams)
+		if err != nil {
+			t.Fatalf("call campaign_create: %v", err)
+		}
+		if campaignResult == nil || campaignResult.IsError {
+			t.Fatalf("campaign_create failed: %+v", campaignResult)
+		}
+		campaignOutput := decodeStructuredContent[domain.CampaignCreateResult](t, campaignResult.StructuredContent)
+
+		// Now register a participant
+		participantParams := &mcp.CallToolParams{
+			Name: "participant_create",
+			Arguments: map[string]any{
+				"campaign_id":  campaignOutput.ID,
+				"display_name": "Test Player",
+				"role":         "PLAYER",
+				"controller":   "HUMAN",
+			},
+		}
+		participantResult, err := suite.client.CallTool(ctx, participantParams)
+		if err != nil {
+			t.Fatalf("call participant_create: %v", err)
+		}
+		if participantResult == nil {
+			t.Fatal("call participant_create returned nil")
+		}
+		if participantResult.IsError {
+			t.Fatalf("participant_create returned error content: %+v", participantResult.Content)
+		}
+
+		output := decodeStructuredContent[domain.ParticipantCreateResult](t, participantResult.StructuredContent)
+		if output.ID == "" {
+			t.Fatal("participant_create returned empty id")
+		}
+		if output.CampaignID != campaignOutput.ID {
+			t.Fatalf("expected campaign id %q, got %q", campaignOutput.ID, output.CampaignID)
+		}
+		if output.DisplayName != "Test Player" {
+			t.Fatalf("expected display name Test Player, got %q", output.DisplayName)
+		}
+		if output.Role != "PLAYER" {
+			t.Fatalf("expected role PLAYER, got %q", output.Role)
+		}
+		if output.Controller != "HUMAN" {
+			t.Fatalf("expected controller HUMAN, got %q", output.Controller)
+		}
+		if output.CreatedAt == "" {
+			t.Fatal("participant_create returned empty created_at")
+		}
+		if output.UpdatedAt == "" {
+			t.Fatal("participant_create returned empty updated_at")
+		}
+		createdAt := parseRFC3339(t, output.CreatedAt)
+		updatedAt := parseRFC3339(t, output.UpdatedAt)
+		if updatedAt.Before(createdAt) {
+			t.Fatalf("expected updated_at after created_at: %v < %v", updatedAt, createdAt)
+		}
+	})
 }
