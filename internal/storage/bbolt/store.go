@@ -1,6 +1,7 @@
 package bbolt
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -285,7 +286,7 @@ func (s *Store) ListParticipantsByCampaign(ctx context.Context, campaignID strin
 
 		cursor := bucket.Cursor()
 		prefixBytes := []byte(prefix)
-		for key, payload := cursor.Seek(prefixBytes); key != nil && strings.HasPrefix(string(key), prefix); key, payload = cursor.Next() {
+		for key, payload := cursor.Seek(prefixBytes); key != nil && bytes.HasPrefix(key, prefixBytes); key, payload = cursor.Next() {
 			if err := ctx.Err(); err != nil {
 				return err
 			}
