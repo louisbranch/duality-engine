@@ -1,2 +1,2 @@
-// Package campaign contains campaign orchestration primitives.
+// Package campaign contains campaign domain models and service implementations.
 package campaign
