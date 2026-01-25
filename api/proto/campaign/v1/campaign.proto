@@ -22,6 +22,9 @@ service CampaignService {
   // List participants for a campaign.
   rpc ListParticipants(ListParticipantsRequest) returns (ListParticipantsResponse);
 
+  // Get a participant by campaign ID and participant ID.
+  rpc GetParticipant(GetParticipantRequest) returns (GetParticipantResponse);
+
   // Create an actor (PC/NPC/etc) for a campaign.
   rpc CreateActor(CreateActorRequest) returns (CreateActorResponse);
 
@@ -144,6 +147,18 @@ message ListParticipantsRequest {
 message ListParticipantsResponse {
   repeated Participant participants = 1;
   string next_page_token = 2;
+}
+
+message GetParticipantRequest {
+  // The campaign ID.
+  string campaign_id = 1;
+
+  // The participant ID.
+  string participant_id = 2;
+}
+
+message GetParticipantResponse {
+  Participant participant = 1;
 }
 
 message CreateActorRequest {

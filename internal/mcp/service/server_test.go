@@ -51,6 +51,7 @@ type fakeCampaignClient struct {
 	getCampaignResponse           *campaignv1.GetCampaignResponse
 	createParticipantResponse    *campaignv1.CreateParticipantResponse
 	listParticipantsResponse     *campaignv1.ListParticipantsResponse
+	getParticipantResponse       *campaignv1.GetParticipantResponse
 	createActorResponse          *campaignv1.CreateActorResponse
 	listActorsResponse           *campaignv1.ListActorsResponse
 	setDefaultControlResponse    *campaignv1.SetDefaultControlResponse
@@ -59,6 +60,7 @@ type fakeCampaignClient struct {
 	getCampaignErr               error
 	createParticipantErr         error
 	listParticipantsErr          error
+	getParticipantErr            error
 	createActorErr               error
 	listActorsErr                error
 	setDefaultControlErr         error
@@ -67,6 +69,7 @@ type fakeCampaignClient struct {
 	lastGetCampaignRequest       *campaignv1.GetCampaignRequest
 	lastCreateParticipantRequest *campaignv1.CreateParticipantRequest
 	lastListParticipantsRequest  *campaignv1.ListParticipantsRequest
+	lastGetParticipantRequest    *campaignv1.GetParticipantRequest
 	lastCreateActorRequest       *campaignv1.CreateActorRequest
 	lastListActorsRequest        *campaignv1.ListActorsRequest
 	lastSetDefaultControlRequest *campaignv1.SetDefaultControlRequest
@@ -146,6 +149,12 @@ func (f *fakeCampaignClient) CreateParticipant(ctx context.Context, req *campaig
 func (f *fakeCampaignClient) ListParticipants(ctx context.Context, req *campaignv1.ListParticipantsRequest, opts ...grpc.CallOption) (*campaignv1.ListParticipantsResponse, error) {
 	f.lastListParticipantsRequest = req
 	return f.listParticipantsResponse, f.listParticipantsErr
+}
+
+// GetParticipant records the request and returns the configured response.
+func (f *fakeCampaignClient) GetParticipant(ctx context.Context, req *campaignv1.GetParticipantRequest, opts ...grpc.CallOption) (*campaignv1.GetParticipantResponse, error) {
+	f.lastGetParticipantRequest = req
+	return f.getParticipantResponse, f.getParticipantErr
 }
 
 // CreateActor records the request and returns the configured response.
