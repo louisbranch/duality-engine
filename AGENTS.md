@@ -91,6 +91,7 @@ If the project structure evolves, update this file to match the real tooling.
 - Prefer `t.Helper` for helper functions.
 - Keep tests deterministic; avoid real network calls.
 - Use fake implementations over heavy mocks.
+- When adding a new MCP tool, update the expected tools list in `internal/integration/mcp_tools_test.go` to include the new tool name.
 
 ## Dependency Management
 - Avoid adding heavy dependencies without justification.
