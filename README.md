@@ -2,48 +2,131 @@
 
 ![Coverage](../../raw/badges/coverage.svg)
 
-Duality Engine is a small, server-authoritative mechanics service
-compatible with the Daggerheart Duality Dice system. It provides auditable
-mechanical outcomes via gRPC and MCP tools, not narrative content.
+Duality Engine is a server-authoritative implementation of the Duality
+Dice system used in Daggerheart. It provides deterministic, auditable
+mechanical outcomes via gRPC and an MCP (stdio JSON-RPC) bridge.
+
+This project focuses on rules adjudication and campaign state
+management. It does not generate narrative content and does not bundle
+Daggerheart SRD material.
 
 Documentation: https://louisbranch.github.io/duality-engine/
 
-## Docs
+------------------------------------------------------------------------
 
-- [Overview](https://louisbranch.github.io/duality-engine/)
-- [Getting started](https://louisbranch.github.io/duality-engine/getting-started.html)
-- [Configuration](https://louisbranch.github.io/duality-engine/configuration.html)
-- [MCP tools and resources](https://louisbranch.github.io/duality-engine/mcp.html)
-- [Integration tests](https://louisbranch.github.io/duality-engine/integration-tests.html)
+## Quickstart
 
-## MCP overview
+Run gRPC server and MCP bridge:
 
-The MCP server lets an LLM connect to Duality Engine tools to assist a GM with
-mechanical adjudication, roll outcomes, and campaign setup. Near term, the goal
-is to expand this tool set so the MCP layer can help manage and run campaigns
-alongside the GM.
+    make run
 
----
+Run individually:
 
-## Attribution
+    go run ./cmd/server
+    go run ./cmd/mcp
+    ./scripts/mcp.sh
 
-This project uses material from the Daggerheart System Reference Document (SRD).
+Default endpoints:
 
-Daggerheart is © 2025 Critical Role LLC.
-Used under the Darrington Press Community Gaming License.
+-   gRPC: localhost:8080
+-   MCP: stdio
 
-## Disclaimer
+------------------------------------------------------------------------
 
-Duality Engine is an independent, fan-made project.
+## Capabilities
 
-It is not affiliated with, endorsed by, or sponsored by Critical Role LLC
-or Darrington Press.
+### Mechanics
 
-Daggerheart is a trademark of Critical Role LLC.
+-   duality_action_roll
+-   duality_outcome
+-   duality_explain
+-   duality_probability
+-   duality_rules_version
+-   roll_dice
 
-## SRD Content
+### Campaign Runtime
 
-This repository does not include Daggerheart SRD content.
+Tools:
 
-Users are responsible for providing any SRD-derived data
-in accordance with the Darrington Press Community Gaming License.
+-   campaign_create
+-   participant_create
+-   actor_create
+-   actor_control_set
+-   session_start
+
+Resources:
+
+-   campaigns://list
+-   campaign://{campaign_id}
+-   campaign://{campaign_id}/participants
+-   campaign://{campaign_id}/actors
+-   campaign://{campaign_id}/sessions
+
+### MCP Context
+
+Tools:
+
+-   set_context (in-memory, resets on restart)
+
+Resources:
+
+-   context://current (current MCP execution context; ephemeral, resets on restart)
+------------------------------------------------------------------------
+
+## State Model
+
+Persisted (BoltDB):
+
+-   Campaigns
+-   Participants
+-   Actors
+-   Sessions
+
+Ephemeral:
+
+-   MCP execution context
+
+------------------------------------------------------------------------
+
+## Configuration
+
+See: [Configuration](docs/configuration.md)
+
+Environment variables:
+
+-   DUALITY_DB_PATH (default: data/duality.db)
+-   DUALITY_GRPC_ADDR (default: localhost:8080)
+
+------------------------------------------------------------------------
+
+## Documentation
+
+-   [Getting started](docs/getting-started.md)
+-   [Configuration](docs/configuration.md)
+-   [MCP tools and resources](docs/mcp.md)
+-   [Integration tests](docs/integration-tests.md)
+
+------------------------------------------------------------------------
+
+## Near-term Roadmap
+
+-   Publish prebuilt binaries
+-   Add HTTP transport alongside gRPC
+-   Complete campaign lifecycle tools
+-   Improve MCP context handling for multi-client use
+-   Expand telemetry and request tracing
+
+------------------------------------------------------------------------
+
+## Attribution and Licensing
+
+Duality Engine is an independent, fan-made project and is not affiliated
+with Critical Role Productions LLC, Darrington Press, or their partners.
+
+Daggerheart is a trademark of Critical Role Productions LLC.
+
+This project is intended for use under the Darrington Press Community
+Gaming License.
+
+All trademarks, artwork, and copyrighted material remain the property of
+their respective owners.
