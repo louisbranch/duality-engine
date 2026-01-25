@@ -27,8 +27,10 @@ func TestCreateParticipantSuccess(t *testing.T) {
 	}
 	participantStore := &fakeParticipantStore{}
 	service := &CampaignService{
-		store:            campaignStore,
-		participantStore: participantStore,
+		stores: Stores{
+			Campaign:    campaignStore,
+			Participant: participantStore,
+		},
 		clock: func() time.Time {
 			return fixedTime
 		},
@@ -87,8 +89,10 @@ func TestCreateParticipantIncrementsPlayerCount(t *testing.T) {
 	}
 	participantStore := &fakeParticipantStore{}
 	service := &CampaignService{
-		store:            campaignStore,
-		participantStore: participantStore,
+		stores: Stores{
+			Campaign:    campaignStore,
+			Participant: participantStore,
+		},
 		clock: func() time.Time {
 			return fixedTime
 		},
@@ -130,8 +134,10 @@ func TestCreateParticipantDoesNotIncrementForGM(t *testing.T) {
 	}
 	participantStore := &fakeParticipantStore{}
 	service := &CampaignService{
-		store:            campaignStore,
-		participantStore: participantStore,
+		stores: Stores{
+			Campaign:    campaignStore,
+			Participant: participantStore,
+		},
 		clock:            time.Now,
 		participantIDGen: func() (string, error) {
 			return "part-999", nil
@@ -161,8 +167,10 @@ func TestCreateParticipantDefaultsController(t *testing.T) {
 	}
 	participantStore := &fakeParticipantStore{}
 	service := &CampaignService{
-		store:            campaignStore,
-		participantStore: participantStore,
+		stores: Stores{
+			Campaign:    campaignStore,
+			Participant: participantStore,
+		},
 		clock:            time.Now,
 		participantIDGen: func() (string, error) { return "part-1", nil },
 	}
@@ -217,8 +225,10 @@ func TestCreateParticipantValidationErrors(t *testing.T) {
 		return domain.Campaign{ID: id}, nil
 	}
 	service := &CampaignService{
-		store:            campaignStore,
-		participantStore: &fakeParticipantStore{},
+		stores: Stores{
+			Campaign:    campaignStore,
+			Participant: &fakeParticipantStore{},
+		},
 		clock:            time.Now,
 		participantIDGen: func() (string, error) { return "part-1", nil },
 	}
@@ -246,8 +256,10 @@ func TestCreateParticipantCampaignNotFound(t *testing.T) {
 		return domain.Campaign{}, storage.ErrNotFound
 	}
 	service := &CampaignService{
-		store:            campaignStore,
-		participantStore: &fakeParticipantStore{},
+		stores: Stores{
+			Campaign:    campaignStore,
+			Participant: &fakeParticipantStore{},
+		},
 		clock:            time.Now,
 		participantIDGen: func() (string, error) { return "part-1", nil },
 	}
@@ -270,7 +282,11 @@ func TestCreateParticipantCampaignNotFound(t *testing.T) {
 }
 
 func TestCreateParticipantNilRequest(t *testing.T) {
-	service := NewCampaignService(&fakeCampaignStore{}, &fakeParticipantStore{}, &fakeActorStore{})
+	service := NewCampaignService(Stores{
+		Campaign:    &fakeCampaignStore{},
+		Participant: &fakeParticipantStore{},
+		Actor:       &fakeActorStore{},
+	})
 
 	_, err := service.CreateParticipant(context.Background(), nil)
 	if err == nil {
@@ -292,8 +308,10 @@ func TestCreateParticipantStoreFailure(t *testing.T) {
 	}
 	participantStore := &fakeParticipantStore{putErr: errors.New("boom")}
 	service := &CampaignService{
-		store:            campaignStore,
-		participantStore: participantStore,
+		stores: Stores{
+			Campaign:    campaignStore,
+			Participant: participantStore,
+		},
 		clock:            time.Now,
 		participantIDGen: func() (string, error) { return "part-123", nil },
 	}
@@ -330,8 +348,10 @@ func TestCreateParticipantCampaignUpdateFailure(t *testing.T) {
 	}
 	participantStore := &fakeParticipantStore{}
 	service := &CampaignService{
-		store:            campaignStore,
-		participantStore: participantStore,
+		stores: Stores{
+			Campaign:    campaignStore,
+			Participant: participantStore,
+		},
 		clock: func() time.Time {
 			return fixedTime
 		},
@@ -404,9 +424,11 @@ func TestListParticipantsSuccess(t *testing.T) {
 		},
 	}
 	service := &CampaignService{
-		store:            campaignStore,
-		participantStore: participantStore,
-		clock:            time.Now,
+		stores: Stores{
+			Campaign:    campaignStore,
+			Participant: participantStore,
+		},
+		clock: time.Now,
 	}
 
 	response, err := service.ListParticipants(context.Background(), &campaignv1.ListParticipantsRequest{
@@ -468,9 +490,11 @@ func TestListParticipantsDefaults(t *testing.T) {
 		},
 	}
 	service := &CampaignService{
-		store:            campaignStore,
-		participantStore: participantStore,
-		clock:            time.Now,
+		stores: Stores{
+			Campaign:    campaignStore,
+			Participant: participantStore,
+		},
+		clock: time.Now,
 	}
 
 	response, err := service.ListParticipants(context.Background(), &campaignv1.ListParticipantsRequest{
@@ -503,9 +527,11 @@ func TestListParticipantsEmpty(t *testing.T) {
 		listPage: storage.ParticipantPage{},
 	}
 	service := &CampaignService{
-		store:            campaignStore,
-		participantStore: participantStore,
-		clock:            time.Now,
+		stores: Stores{
+			Campaign:    campaignStore,
+			Participant: participantStore,
+		},
+		clock: time.Now,
 	}
 
 	response, err := service.ListParticipants(context.Background(), &campaignv1.ListParticipantsRequest{
@@ -530,9 +556,11 @@ func TestListParticipantsClampPageSize(t *testing.T) {
 	}
 	participantStore := &fakeParticipantStore{listPage: storage.ParticipantPage{}}
 	service := &CampaignService{
-		store:            campaignStore,
-		participantStore: participantStore,
-		clock:            time.Now,
+		stores: Stores{
+			Campaign:    campaignStore,
+			Participant: participantStore,
+		},
+		clock: time.Now,
 	}
 
 	_, err := service.ListParticipants(context.Background(), &campaignv1.ListParticipantsRequest{
@@ -554,9 +582,11 @@ func TestListParticipantsPassesToken(t *testing.T) {
 	}
 	participantStore := &fakeParticipantStore{listPage: storage.ParticipantPage{}}
 	service := &CampaignService{
-		store:            campaignStore,
-		participantStore: participantStore,
-		clock:            time.Now,
+		stores: Stores{
+			Campaign:    campaignStore,
+			Participant: participantStore,
+		},
+		clock: time.Now,
 	}
 
 	_, err := service.ListParticipants(context.Background(), &campaignv1.ListParticipantsRequest{
@@ -576,7 +606,11 @@ func TestListParticipantsPassesToken(t *testing.T) {
 }
 
 func TestListParticipantsNilRequest(t *testing.T) {
-	service := NewCampaignService(&fakeCampaignStore{}, &fakeParticipantStore{}, &fakeActorStore{})
+	service := NewCampaignService(Stores{
+		Campaign:    &fakeCampaignStore{},
+		Participant: &fakeParticipantStore{},
+		Actor:       &fakeActorStore{},
+	})
 
 	_, err := service.ListParticipants(context.Background(), nil)
 	if err == nil {
@@ -597,9 +631,11 @@ func TestListParticipantsCampaignNotFound(t *testing.T) {
 		return domain.Campaign{}, storage.ErrNotFound
 	}
 	service := &CampaignService{
-		store:            campaignStore,
-		participantStore: &fakeParticipantStore{},
-		clock:            time.Now,
+		stores: Stores{
+			Campaign:    campaignStore,
+			Participant: &fakeParticipantStore{},
+		},
+		clock: time.Now,
 	}
 
 	_, err := service.ListParticipants(context.Background(), &campaignv1.ListParticipantsRequest{
@@ -625,9 +661,11 @@ func TestListParticipantsStoreFailure(t *testing.T) {
 	}
 	participantStore := &fakeParticipantStore{listPageErr: errors.New("boom")}
 	service := &CampaignService{
-		store:            campaignStore,
-		participantStore: participantStore,
-		clock:            time.Now,
+		stores: Stores{
+			Campaign:    campaignStore,
+			Participant: participantStore,
+		},
+		clock: time.Now,
 	}
 
 	_, err := service.ListParticipants(context.Background(), &campaignv1.ListParticipantsRequest{
@@ -652,7 +690,9 @@ func TestListParticipantsMissingStore(t *testing.T) {
 		return domain.Campaign{ID: "camp-123"}, nil
 	}
 	service := &CampaignService{
-		store: campaignStore,
+		stores: Stores{
+			Campaign: campaignStore,
+		},
 	}
 
 	_, err := service.ListParticipants(context.Background(), &campaignv1.ListParticipantsRequest{
@@ -674,9 +714,11 @@ func TestListParticipantsMissingStore(t *testing.T) {
 func TestListParticipantsEmptyCampaignID(t *testing.T) {
 	campaignStore := &fakeCampaignStore{}
 	service := &CampaignService{
-		store:            campaignStore,
-		participantStore: &fakeParticipantStore{},
-		clock:            time.Now,
+		stores: Stores{
+			Campaign:    campaignStore,
+			Participant: &fakeParticipantStore{},
+		},
+		clock: time.Now,
 	}
 
 	_, err := service.ListParticipants(context.Background(), &campaignv1.ListParticipantsRequest{
