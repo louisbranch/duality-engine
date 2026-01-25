@@ -434,12 +434,14 @@ func (c *httpConnection) Read(ctx context.Context) (jsonrpc.Message, error) {
 // For HTTP transport, this writes responses to the connection's response channel,
 // routing them to the correct pending request or to the notification channel.
 func (c *httpConnection) Write(ctx context.Context, msg jsonrpc.Message) error {
+	// Check closed flag and hold lock throughout to prevent race with Close()
 	c.mu.Lock()
-	if c.closedFlag {
-		c.mu.Unlock()
+	closed := c.closedFlag
+	c.mu.Unlock()
+
+	if closed {
 		return fmt.Errorf("connection closed")
 	}
-	c.mu.Unlock()
 
 	// Check if this is a response with an ID that matches a pending request
 	if resp, ok := msg.(*jsonrpc.Response); ok && resp.ID != (jsonrpc.ID{}) {
@@ -449,6 +451,14 @@ func (c *httpConnection) Write(ctx context.Context, msg jsonrpc.Message) error {
 
 		if exists {
 			// Route to the specific pending request
+			// Check closed again before writing to prevent writing to closed channel
+			c.mu.Lock()
+			closed = c.closedFlag
+			c.mu.Unlock()
+			if closed {
+				return fmt.Errorf("connection closed")
+			}
+
 			select {
 			case respChan <- msg:
 				return nil
@@ -462,6 +472,14 @@ func (c *httpConnection) Write(ctx context.Context, msg jsonrpc.Message) error {
 	}
 
 	// For notifications or unmatched responses, send to notification channel
+	// Check closed again before writing
+	c.mu.Lock()
+	closed = c.closedFlag
+	c.mu.Unlock()
+	if closed {
+		return fmt.Errorf("connection closed")
+	}
+
 	select {
 	case c.notifyChan <- msg:
 		return nil
