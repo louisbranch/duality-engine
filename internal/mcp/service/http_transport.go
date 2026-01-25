@@ -381,13 +381,40 @@ func (t *HTTPTransport) handleSSE(w http.ResponseWriter, r *http.Request) {
 	// Stream notifications from the connection's notification channel
 	// SSE is for streaming notifications, not request/response pairs
 	ctx := r.Context()
+	
+	// Update session activity timestamp so active SSE connections
+	// are not considered idle by the cleanup goroutine
+	t.sessionsMu.Lock()
+	if s, ok := t.sessions[sessionID]; ok && s != nil {
+		s.lastUsed = time.Now()
+	}
+	t.sessionsMu.Unlock()
+	
+	// Set up a ticker to periodically update lastUsed for long-lived SSE connections
+	ticker := time.NewTicker(30 * time.Second)
+	defer ticker.Stop()
+	
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		case <-session.conn.closed:
 			return
+		case <-ticker.C:
+			// Periodically update lastUsed to prevent cleanup of active SSE connections
+			t.sessionsMu.Lock()
+			if s, ok := t.sessions[sessionID]; ok && s != nil {
+				s.lastUsed = time.Now()
+			}
+			t.sessionsMu.Unlock()
 		case msg := <-session.conn.notifyChan:
+			// Update lastUsed on each message
+			t.sessionsMu.Lock()
+			if s, ok := t.sessions[sessionID]; ok && s != nil {
+				s.lastUsed = time.Now()
+			}
+			t.sessionsMu.Unlock()
+			
 			// Send as SSE event
 			data, err := json.Marshal(msg)
 			if err != nil {
