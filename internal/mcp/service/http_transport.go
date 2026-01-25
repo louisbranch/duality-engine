@@ -119,6 +119,9 @@ func (t *HTTPTransport) Start(ctx context.Context) error {
 	// Update server context to use the provided context
 	t.serverCtx, t.serverCancel = context.WithCancel(ctx)
 
+	// Start session cleanup goroutine
+	go t.cleanupSessions(ctx)
+
 	mux := http.NewServeMux()
 
 	// POST /mcp/messages - JSON-RPC request/response
@@ -161,6 +164,36 @@ func (t *HTTPTransport) Start(ctx context.Context) error {
 		return nil
 	case err := <-errChan:
 		return fmt.Errorf("HTTP server error: %w", err)
+	}
+}
+
+// cleanupSessions periodically removes expired sessions from the sessions map.
+// Sessions expire after 1 hour of inactivity.
+func (t *HTTPTransport) cleanupSessions(ctx context.Context) {
+	ticker := time.NewTicker(5 * time.Minute)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			t.sessionsMu.Lock()
+			now := time.Now()
+			expirationTime := now.Add(-1 * time.Hour)
+			
+			for id, session := range t.sessions {
+				if session.lastUsed.Before(expirationTime) {
+					// Close the connection
+					session.conn.Close()
+					// Remove from map
+					delete(t.sessions, id)
+					// Clean up serverOnce entry
+					delete(t.serverOnce, id)
+				}
+			}
+			t.sessionsMu.Unlock()
+		}
 	}
 }
 
@@ -216,8 +249,16 @@ func (t *HTTPTransport) handleMessages(w http.ResponseWriter, r *http.Request) {
 
 	// Update last used time (protected by mutex)
 	t.sessionsMu.Lock()
-	session.lastUsed = time.Now()
+	if session != nil {
+		session.lastUsed = time.Now()
+	}
 	t.sessionsMu.Unlock()
+	
+	// Nil check after session lookup
+	if session == nil {
+		http.Error(w, "Failed to retrieve session after creation", http.StatusInternalServerError)
+		return
+	}
 
 	// Ensure MCP server is running for this connection
 	// Start processing goroutine if not already started
