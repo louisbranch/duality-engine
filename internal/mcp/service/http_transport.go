@@ -43,12 +43,15 @@ type httpSession struct {
 
 // httpConnection implements mcp.Connection for HTTP-based communication.
 type httpConnection struct {
-	sessionID  string
-	reqChan    chan jsonrpc.Message
-	respChan   chan jsonrpc.Message
-	closed     chan struct{}
-	mu         sync.Mutex
-	closedFlag bool
+	sessionID   string
+	reqChan     chan jsonrpc.Message
+	respChan    chan jsonrpc.Message
+	notifyChan  chan jsonrpc.Message // Separate channel for notifications (SSE)
+	closed      chan struct{}
+	mu          sync.Mutex
+	closedFlag  bool
+	pendingReqs map[jsonrpc.ID]chan jsonrpc.Message // Map request ID to response channel
+	pendingMu   sync.Mutex
 }
 
 // NewHTTPTransport creates a new HTTP transport that will serve MCP over HTTP.
@@ -82,10 +85,12 @@ func (t *HTTPTransport) Connect(ctx context.Context) (mcp.Connection, error) {
 	sessionID := generateSessionID()
 
 	conn := &httpConnection{
-		sessionID: sessionID,
-		reqChan:   make(chan jsonrpc.Message, 10),
-		respChan:  make(chan jsonrpc.Message, 10),
-		closed:    make(chan struct{}),
+		sessionID:   sessionID,
+		reqChan:     make(chan jsonrpc.Message, 10),
+		respChan:    make(chan jsonrpc.Message, 10),
+		notifyChan:  make(chan jsonrpc.Message, 10),
+		closed:      make(chan struct{}),
+		pendingReqs: make(map[jsonrpc.ID]chan jsonrpc.Message),
 	}
 
 	session := &httpSession{
@@ -244,15 +249,44 @@ func (t *HTTPTransport) handleMessages(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if isRequest {
-		// Request - wait for response
+		// Request - wait for response matching this request ID
+		req, ok := msg.(*jsonrpc.Request)
+		if !ok {
+			http.Error(w, "Invalid request type", http.StatusBadRequest)
+			return
+		}
+
+		// Create a channel to receive the response for this specific request
+		respChan := make(chan jsonrpc.Message, 1)
+		session.conn.pendingMu.Lock()
+		session.conn.pendingReqs[req.ID] = respChan
+		session.conn.pendingMu.Unlock()
+
+		// Wait for response with timeout
 		select {
-		case resp := <-session.conn.respChan:
+		case resp := <-respChan:
+			// Clean up pending request
+			session.conn.pendingMu.Lock()
+			delete(session.conn.pendingReqs, req.ID)
+			session.conn.pendingMu.Unlock()
+
 			w.Header().Set("Content-Type", "application/json")
 			if err := json.NewEncoder(w).Encode(resp); err != nil {
 				log.Printf("Failed to encode response: %v", err)
 			}
 		case <-r.Context().Done():
+			// Clean up pending request
+			session.conn.pendingMu.Lock()
+			delete(session.conn.pendingReqs, req.ID)
+			session.conn.pendingMu.Unlock()
 			http.Error(w, "Request cancelled", http.StatusRequestTimeout)
+			return
+		case <-time.After(30 * time.Second):
+			// Clean up pending request
+			session.conn.pendingMu.Lock()
+			delete(session.conn.pendingReqs, req.ID)
+			session.conn.pendingMu.Unlock()
+			http.Error(w, "Request timeout", http.StatusRequestTimeout)
 			return
 		}
 	} else {
@@ -304,7 +338,8 @@ func (t *HTTPTransport) handleSSE(w http.ResponseWriter, r *http.Request) {
 		flusher.Flush()
 	}
 
-	// Stream messages from the connection's response channel
+	// Stream notifications from the connection's notification channel
+	// SSE is for streaming notifications, not request/response pairs
 	ctx := r.Context()
 	for {
 		select {
@@ -312,7 +347,7 @@ func (t *HTTPTransport) handleSSE(w http.ResponseWriter, r *http.Request) {
 			return
 		case <-session.conn.closed:
 			return
-		case msg := <-session.conn.respChan:
+		case msg := <-session.conn.notifyChan:
 			// Send as SSE event
 			data, err := json.Marshal(msg)
 			if err != nil {
@@ -343,7 +378,10 @@ func (t *HTTPTransport) handleHealth(w http.ResponseWriter, r *http.Request) {
 // sent to the connection's request channel.
 func (c *httpConnection) Read(ctx context.Context) (jsonrpc.Message, error) {
 	select {
-	case msg := <-c.reqChan:
+	case msg, ok := <-c.reqChan:
+		if !ok {
+			return nil, fmt.Errorf("connection closed")
+		}
 		return msg, nil
 	case <-c.closed:
 		return nil, fmt.Errorf("connection closed")
@@ -354,17 +392,38 @@ func (c *httpConnection) Read(ctx context.Context) (jsonrpc.Message, error) {
 
 // Write implements mcp.Connection.Write.
 // For HTTP transport, this writes responses to the connection's response channel,
-// which are then sent back to HTTP clients.
+// routing them to the correct pending request or to the notification channel.
 func (c *httpConnection) Write(ctx context.Context, msg jsonrpc.Message) error {
 	c.mu.Lock()
-	defer c.mu.Unlock()
-
 	if c.closedFlag {
+		c.mu.Unlock()
 		return fmt.Errorf("connection closed")
 	}
+	c.mu.Unlock()
 
+	// Check if this is a response with an ID that matches a pending request
+	if resp, ok := msg.(*jsonrpc.Response); ok && resp.ID != (jsonrpc.ID{}) {
+		c.pendingMu.Lock()
+		respChan, exists := c.pendingReqs[resp.ID]
+		c.pendingMu.Unlock()
+
+		if exists {
+			// Route to the specific pending request
+			select {
+			case respChan <- msg:
+				return nil
+			case <-c.closed:
+				return fmt.Errorf("connection closed")
+			case <-ctx.Done():
+				return ctx.Err()
+			}
+		}
+		// If no pending request found, treat as notification
+	}
+
+	// For notifications or unmatched responses, send to notification channel
 	select {
-	case c.respChan <- msg:
+	case c.notifyChan <- msg:
 		return nil
 	case <-c.closed:
 		return fmt.Errorf("connection closed")
@@ -384,6 +443,20 @@ func (c *httpConnection) Close() error {
 
 	c.closedFlag = true
 	close(c.closed)
+	
+	// Close channels to unblock any waiting goroutines
+	close(c.reqChan)
+	close(c.respChan)
+	close(c.notifyChan)
+	
+	// Close all pending request channels
+	c.pendingMu.Lock()
+	for _, respChan := range c.pendingReqs {
+		close(respChan)
+	}
+	c.pendingReqs = nil
+	c.pendingMu.Unlock()
+	
 	return nil
 }
 

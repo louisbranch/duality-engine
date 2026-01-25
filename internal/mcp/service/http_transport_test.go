@@ -124,26 +124,23 @@ func TestHTTPTransport_handleSSE_InvalidMethod(t *testing.T) {
 }
 
 func TestHTTPConnection_ReadWrite(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	conn := &httpConnection{
-		sessionID: "test_session",
-		reqChan:   make(chan jsonrpc.Message, 1),
-		respChan:  make(chan jsonrpc.Message, 1),
-		closed:    make(chan struct{}),
+		sessionID:   "test_session",
+		reqChan:     make(chan jsonrpc.Message, 1),
+		respChan:    make(chan jsonrpc.Message, 1),
+		notifyChan:  make(chan jsonrpc.Message, 1),
+		closed:      make(chan struct{}),
+		pendingReqs: make(map[jsonrpc.ID]chan jsonrpc.Message),
 	}
 	
-	ctx := context.Background()
-	
-	// Test Write
+	// Test Read (reads from reqChan)
 	request := &jsonrpc.Request{
 		Method: "test",
 		ID:     jsonrpc.ID{},
 	}
-	if err := conn.Write(ctx, request); err != nil {
-		t.Errorf("Write() error = %v", err)
-	}
-	
-	// Test Read (should read what we wrote, but Read reads from reqChan, not respChan)
-	// So we need to write to reqChan directly
 	conn.reqChan <- request
 	
 	msg, err := conn.Read(ctx)
@@ -153,14 +150,24 @@ func TestHTTPConnection_ReadWrite(t *testing.T) {
 	if msg == nil {
 		t.Error("Read() returned nil message")
 	}
+	
+	// Test Write (writes to notifyChan for notifications)
+	if err := conn.Write(ctx, request); err != nil {
+		t.Errorf("Write() error = %v", err)
+	}
 }
 
 func TestHTTPConnection_Close(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	conn := &httpConnection{
-		sessionID: "test_session",
-		reqChan:   make(chan jsonrpc.Message, 1),
-		respChan:  make(chan jsonrpc.Message, 1),
-		closed:    make(chan struct{}),
+		sessionID:   "test_session",
+		reqChan:     make(chan jsonrpc.Message, 1),
+		respChan:    make(chan jsonrpc.Message, 1),
+		notifyChan:  make(chan jsonrpc.Message, 1),
+		closed:      make(chan struct{}),
+		pendingReqs: make(map[jsonrpc.ID]chan jsonrpc.Message),
 	}
 	
 	// Close should not error
@@ -174,7 +181,6 @@ func TestHTTPConnection_Close(t *testing.T) {
 	}
 	
 	// Write after close should error
-	ctx := context.Background()
 	request := &jsonrpc.Request{
 		Method: "test",
 		ID:     jsonrpc.ID{},
