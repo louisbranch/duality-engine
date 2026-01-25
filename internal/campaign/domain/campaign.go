@@ -32,13 +32,14 @@ var (
 
 // Campaign represents metadata for a campaign.
 type Campaign struct {
-	ID          string
-	Name        string
-	GmMode      GmMode
-	PlayerCount int
-	ThemePrompt string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID              string
+	Name            string
+	GmMode          GmMode
+	ParticipantCount int
+	ActorCount      int
+	ThemePrompt     string
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 }
 
 // CreateCampaignInput describes the metadata needed to create a campaign.
@@ -69,13 +70,14 @@ func CreateCampaign(input CreateCampaignInput, now func() time.Time, idGenerator
 
 	createdAt := now().UTC()
 	return Campaign{
-		ID:          campaignID,
-		Name:        normalized.Name,
-		GmMode:      normalized.GmMode,
-		PlayerCount: 0,
-		ThemePrompt: normalized.ThemePrompt,
-		CreatedAt:   createdAt,
-		UpdatedAt:   createdAt,
+		ID:              campaignID,
+		Name:            normalized.Name,
+		GmMode:          normalized.GmMode,
+		ParticipantCount: 0,
+		ActorCount:      0,
+		ThemePrompt:     normalized.ThemePrompt,
+		CreatedAt:       createdAt,
+		UpdatedAt:       createdAt,
 	}, nil
 }
 

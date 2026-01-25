@@ -79,11 +79,13 @@ type Campaign struct {
 	Id     string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name   string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	GmMode GmMode                 `protobuf:"varint,3,opt,name=gm_mode,json=gmMode,proto3,enum=campaign.v1.GmMode" json:"gm_mode,omitempty"`
-	// Number of registered players for this campaign.
-	PlayerCount   int32                  `protobuf:"varint,4,opt,name=player_count,json=playerCount,proto3" json:"player_count,omitempty"`
-	ThemePrompt   string                 `protobuf:"bytes,5,opt,name=theme_prompt,json=themePrompt,proto3" json:"theme_prompt,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	// Number of all participants (GM + PLAYER + future roles) for this campaign.
+	ParticipantCount int32 `protobuf:"varint,4,opt,name=participant_count,json=participantCount,proto3" json:"participant_count,omitempty"`
+	// Number of all actors (PC + NPC + future kinds) for this campaign.
+	ActorCount    int32                  `protobuf:"varint,5,opt,name=actor_count,json=actorCount,proto3" json:"actor_count,omitempty"`
+	ThemePrompt   string                 `protobuf:"bytes,6,opt,name=theme_prompt,json=themePrompt,proto3" json:"theme_prompt,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -139,9 +141,16 @@ func (x *Campaign) GetGmMode() GmMode {
 	return GmMode_GM_MODE_UNSPECIFIED
 }
 
-func (x *Campaign) GetPlayerCount() int32 {
+func (x *Campaign) GetParticipantCount() int32 {
 	if x != nil {
-		return x.PlayerCount
+		return x.ParticipantCount
+	}
+	return 0
+}
+
+func (x *Campaign) GetActorCount() int32 {
+	if x != nil {
+		return x.ActorCount
 	}
 	return 0
 }
@@ -171,17 +180,19 @@ var File_campaign_v1_campaign_proto protoreflect.FileDescriptor
 
 const file_campaign_v1_campaign_proto_rawDesc = "" +
 	"\n" +
-	"\x1acampaign/v1/campaign.proto\x12\vcampaign.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x98\x02\n" +
+	"\x1acampaign/v1/campaign.proto\x12\vcampaign.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc3\x02\n" +
 	"\bCampaign\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12,\n" +
-	"\agm_mode\x18\x03 \x01(\x0e2\x13.campaign.v1.GmModeR\x06gmMode\x12!\n" +
-	"\fplayer_count\x18\x04 \x01(\x05R\vplayerCount\x12!\n" +
-	"\ftheme_prompt\x18\x05 \x01(\tR\vthemePrompt\x129\n" +
+	"\agm_mode\x18\x03 \x01(\x0e2\x13.campaign.v1.GmModeR\x06gmMode\x12+\n" +
+	"\x11participant_count\x18\x04 \x01(\x05R\x10participantCount\x12\x1f\n" +
+	"\vactor_count\x18\x05 \x01(\x05R\n" +
+	"actorCount\x12!\n" +
+	"\ftheme_prompt\x18\x06 \x01(\tR\vthemePrompt\x129\n" +
 	"\n" +
-	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt*@\n" +
+	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt*@\n" +
 	"\x06GmMode\x12\x17\n" +
 	"\x13GM_MODE_UNSPECIFIED\x10\x00\x12\t\n" +
 	"\x05HUMAN\x10\x01\x12\x06\n" +

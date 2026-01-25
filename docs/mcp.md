@@ -83,7 +83,8 @@ Creates a new campaign metadata record.
   "id": "camp_abc123",
   "name": "The Lost Expedition",
   "gm_mode": "HUMAN",
-  "player_count": 0,
+  "participant_count": 0,
+  "actor_count": 0,
   "theme_prompt": "A dark fantasy campaign set in a cursed forest"
 }
 ```
@@ -433,7 +434,8 @@ Returns a JSON object with a `campaigns` array of campaign metadata records. No 
       "id": "camp_abc123",
       "name": "The Lost Expedition",
       "gm_mode": "HUMAN",
-      "player_count": 3,
+      "participant_count": 3,
+      "actor_count": 2,
       "theme_prompt": "A dark fantasy campaign set in a cursed forest",
       "created_at": "2025-01-15T10:00:00Z",
       "updated_at": "2025-01-15T10:00:00Z"

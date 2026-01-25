@@ -112,8 +112,11 @@ func TestCreateCampaignSuccess(t *testing.T) {
 	if response.Campaign.GmMode != campaignv1.GmMode_HYBRID {
 		t.Fatalf("expected hybrid gm mode, got %v", response.Campaign.GmMode)
 	}
-	if response.Campaign.PlayerCount != 0 {
-		t.Fatalf("expected 0 player count, got %d", response.Campaign.PlayerCount)
+	if response.Campaign.ParticipantCount != 0 {
+		t.Fatalf("expected 0 participant count, got %d", response.Campaign.ParticipantCount)
+	}
+	if response.Campaign.ActorCount != 0 {
+		t.Fatalf("expected 0 actor count, got %d", response.Campaign.ActorCount)
 	}
 	if response.Campaign.ThemePrompt != "gentle hills" {
 		t.Fatalf("expected theme prompt preserved, got %q", response.Campaign.ThemePrompt)
@@ -281,12 +284,13 @@ func TestListCampaignsDefaults(t *testing.T) {
 		listPage: storage.CampaignPage{
 			Campaigns: []domain.Campaign{
 				{
-					ID:          "camp-10",
-					Name:        "Wayfarers",
-					GmMode:      domain.GmModeAI,
-					PlayerCount: 3,
-					ThemePrompt: "windswept",
-					CreatedAt:   fixedTime,
+					ID:              "camp-10",
+					Name:            "Wayfarers",
+					GmMode:          domain.GmModeAI,
+					ParticipantCount: 3,
+					ActorCount:      2,
+					ThemePrompt:     "windswept",
+					CreatedAt:       fixedTime,
 					UpdatedAt:   fixedTime,
 				},
 			},
@@ -429,13 +433,14 @@ func TestGetCampaignSuccess(t *testing.T) {
 	fixedTime := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
 	store := &fakeCampaignStore{
 		getCampaign: domain.Campaign{
-			ID:          "camp-123",
-			Name:        "Test Campaign",
-			GmMode:      domain.GmModeHybrid,
-			PlayerCount: 5,
-			ThemePrompt: "fantasy adventure",
-			CreatedAt:   fixedTime,
-			UpdatedAt:   fixedTime,
+			ID:              "camp-123",
+			Name:            "Test Campaign",
+			GmMode:          domain.GmModeHybrid,
+			ParticipantCount: 5,
+			ActorCount:      3,
+			ThemePrompt:     "fantasy adventure",
+			CreatedAt:       fixedTime,
+			UpdatedAt:       fixedTime,
 		},
 	}
 	service := NewCampaignService(Stores{
@@ -462,8 +467,11 @@ func TestGetCampaignSuccess(t *testing.T) {
 	if response.Campaign.GmMode != campaignv1.GmMode_HYBRID {
 		t.Fatalf("expected hybrid gm mode, got %v", response.Campaign.GmMode)
 	}
-	if response.Campaign.PlayerCount != 5 {
-		t.Fatalf("expected 5 player count, got %d", response.Campaign.PlayerCount)
+	if response.Campaign.ParticipantCount != 5 {
+		t.Fatalf("expected 5 participant count, got %d", response.Campaign.ParticipantCount)
+	}
+	if response.Campaign.ActorCount != 3 {
+		t.Fatalf("expected 3 actor count, got %d", response.Campaign.ActorCount)
 	}
 	if response.Campaign.ThemePrompt != "fantasy adventure" {
 		t.Fatalf("expected theme prompt fantasy adventure, got %q", response.Campaign.ThemePrompt)

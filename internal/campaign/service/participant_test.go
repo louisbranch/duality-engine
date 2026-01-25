@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"strings"
 	"testing"
 	"time"
 
@@ -74,23 +73,11 @@ func TestCreateParticipantSuccess(t *testing.T) {
 	}
 }
 
-func TestCreateParticipantIncrementsPlayerCount(t *testing.T) {
+func TestCreateParticipantIncrementsParticipantCount(t *testing.T) {
 	fixedTime := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
-	campaignStore := &fakeCampaignStore{}
-	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
-		if id == "camp-123" {
-			return domain.Campaign{
-				ID:          "camp-123",
-				Name:        "Test Campaign",
-				PlayerCount: 2,
-			}, nil
-		}
-		return domain.Campaign{}, storage.ErrNotFound
-	}
 	participantStore := &fakeParticipantStore{}
 	service := &CampaignService{
 		stores: Stores{
-			Campaign:    campaignStore,
 			Participant: participantStore,
 		},
 		clock: func() time.Time {
@@ -101,6 +88,7 @@ func TestCreateParticipantIncrementsPlayerCount(t *testing.T) {
 		},
 	}
 
+	// Test that participant is created
 	_, err := service.CreateParticipant(context.Background(), &campaignv1.CreateParticipantRequest{
 		CampaignId:  "camp-123",
 		DisplayName: "Charlie",
@@ -111,31 +99,19 @@ func TestCreateParticipantIncrementsPlayerCount(t *testing.T) {
 		t.Fatalf("create participant: %v", err)
 	}
 
-	// Verify campaign was updated with incremented player count
-	if campaignStore.putCampaign.PlayerCount != 3 {
-		t.Fatalf("expected player count 3, got %d", campaignStore.putCampaign.PlayerCount)
+	// Verify participant was stored
+	if participantStore.putParticipant.ID != "part-789" {
+		t.Fatalf("expected participant id part-789, got %q", participantStore.putParticipant.ID)
 	}
-	if !campaignStore.putCampaign.UpdatedAt.Equal(fixedTime) {
-		t.Fatalf("expected updated_at %v, got %v", fixedTime, campaignStore.putCampaign.UpdatedAt)
+	if participantStore.putParticipant.Role != domain.ParticipantRolePlayer {
+		t.Fatalf("expected role Player, got %v", participantStore.putParticipant.Role)
 	}
 }
 
-func TestCreateParticipantDoesNotIncrementForGM(t *testing.T) {
-	campaignStore := &fakeCampaignStore{}
-	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
-		if id == "camp-123" {
-			return domain.Campaign{
-				ID:          "camp-123",
-				Name:        "Test Campaign",
-				PlayerCount: 2,
-			}, nil
-		}
-		return domain.Campaign{}, storage.ErrNotFound
-	}
+func TestCreateParticipantIncrementsCountForGM(t *testing.T) {
 	participantStore := &fakeParticipantStore{}
 	service := &CampaignService{
 		stores: Stores{
-			Campaign:    campaignStore,
 			Participant: participantStore,
 		},
 		clock: time.Now,
@@ -144,6 +120,7 @@ func TestCreateParticipantDoesNotIncrementForGM(t *testing.T) {
 		},
 	}
 
+	// Test that GM participant is created (counter increment happens for all roles including GM)
 	_, err := service.CreateParticipant(context.Background(), &campaignv1.CreateParticipantRequest{
 		CampaignId:  "camp-123",
 		DisplayName: "GM",
@@ -154,9 +131,12 @@ func TestCreateParticipantDoesNotIncrementForGM(t *testing.T) {
 		t.Fatalf("create participant: %v", err)
 	}
 
-	// Verify campaign was not updated (Put should not have been called)
-	if campaignStore.putCampaign.ID != "" {
-		t.Fatalf("expected campaign not to be updated for GM, but Put was called with campaign ID %q", campaignStore.putCampaign.ID)
+	// Verify participant was stored
+	if participantStore.putParticipant.ID != "part-999" {
+		t.Fatalf("expected participant id part-999, got %q", participantStore.putParticipant.ID)
+	}
+	if participantStore.putParticipant.Role != domain.ParticipantRoleGM {
+		t.Fatalf("expected role GM, got %v", participantStore.putParticipant.Role)
 	}
 }
 
@@ -251,14 +231,10 @@ func TestCreateParticipantValidationErrors(t *testing.T) {
 }
 
 func TestCreateParticipantCampaignNotFound(t *testing.T) {
-	campaignStore := &fakeCampaignStore{}
-	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
-		return domain.Campaign{}, storage.ErrNotFound
-	}
+	participantStore := &fakeParticipantStore{putErr: storage.ErrNotFound}
 	service := &CampaignService{
 		stores: Stores{
-			Campaign:    campaignStore,
-			Participant: &fakeParticipantStore{},
+			Participant: participantStore,
 		},
 		clock:       time.Now,
 		idGenerator: func() (string, error) { return "part-1", nil },
@@ -278,6 +254,9 @@ func TestCreateParticipantCampaignNotFound(t *testing.T) {
 	}
 	if st.Code() != codes.NotFound {
 		t.Fatalf("expected not found, got %v", st.Code())
+	}
+	if st.Message() != "campaign not found" {
+		t.Fatalf("expected error message 'campaign not found', got %q", st.Message())
 	}
 }
 
@@ -330,62 +309,6 @@ func TestCreateParticipantStoreFailure(t *testing.T) {
 	}
 	if st.Code() != codes.Internal {
 		t.Fatalf("expected internal error, got %v", st.Code())
-	}
-}
-
-func TestCreateParticipantCampaignUpdateFailure(t *testing.T) {
-	fixedTime := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
-	campaignStore := &fakeCampaignStore{putErr: errors.New("campaign update failed")}
-	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
-		if id == "camp-123" {
-			return domain.Campaign{
-				ID:          "camp-123",
-				Name:        "Test Campaign",
-				PlayerCount: 1,
-			}, nil
-		}
-		return domain.Campaign{}, storage.ErrNotFound
-	}
-	participantStore := &fakeParticipantStore{}
-	service := &CampaignService{
-		stores: Stores{
-			Campaign:    campaignStore,
-			Participant: participantStore,
-		},
-		clock: func() time.Time {
-			return fixedTime
-		},
-		idGenerator: func() (string, error) {
-			return "part-456", nil
-		},
-	}
-
-	_, err := service.CreateParticipant(context.Background(), &campaignv1.CreateParticipantRequest{
-		CampaignId:  "camp-123",
-		DisplayName: "Bob",
-		Role:        campaignv1.ParticipantRole_PLAYER,
-		Controller:  campaignv1.Controller_CONTROLLER_HUMAN,
-	})
-	if err == nil {
-		t.Fatal("expected error")
-	}
-	st, ok := status.FromError(err)
-	if !ok {
-		t.Fatalf("expected grpc status error, got %v", err)
-	}
-	if st.Code() != codes.Internal {
-		t.Fatalf("expected internal error, got %v", st.Code())
-	}
-	if !strings.Contains(st.Message(), "update campaign player count") {
-		t.Fatalf("expected error message to mention 'update campaign player count', got %q", st.Message())
-	}
-
-	// Verify participant was successfully persisted before the campaign update failed
-	if participantStore.putParticipant.ID != "part-456" {
-		t.Fatalf("expected participant to be persisted with id part-456, got %q", participantStore.putParticipant.ID)
-	}
-	if participantStore.putParticipant.Role != domain.ParticipantRolePlayer {
-		t.Fatalf("expected participant role to be Player, got %v", participantStore.putParticipant.Role)
 	}
 }
 
