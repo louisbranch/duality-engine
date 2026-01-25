@@ -9,6 +9,8 @@ import (
 
 	campaignv1 "github.com/louisbranch/duality-engine/api/gen/go/campaign/v1"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -44,6 +46,11 @@ type CampaignListEntry struct {
 // CampaignListPayload represents the MCP resource payload for campaign listings.
 type CampaignListPayload struct {
 	Campaigns []CampaignListEntry `json:"campaigns"`
+}
+
+// CampaignPayload represents the MCP resource payload for a single campaign.
+type CampaignPayload struct {
+	Campaign CampaignListEntry `json:"campaign"`
 }
 
 // ParticipantCreateInput represents the MCP tool input for participant creation.
@@ -198,6 +205,20 @@ func ActorListResource() *mcp.Resource {
 		Description: "Readable listing of actors for a campaign. URI format: campaign://{campaign_id}/actors",
 		MIMEType:    "application/json",
 		URI:         "campaign://_/actors", // Placeholder; actual format: campaign://{campaign_id}/actors
+	}
+}
+
+// CampaignResource defines the MCP resource for a single campaign.
+// The effective URI template is campaign://{campaign_id}, but the
+// SDK requires a valid URI for registration, so we use a placeholder here.
+// Clients must provide the full URI with actual campaign_id when reading.
+func CampaignResource() *mcp.Resource {
+	return &mcp.Resource{
+		Name:        "campaign",
+		Title:       "Campaign",
+		Description: "Readable campaign metadata record. URI format: campaign://{campaign_id}",
+		MIMEType:    "application/json",
+		URI:         "campaign://_", // Placeholder; actual format: campaign://{campaign_id}
 	}
 }
 
@@ -697,4 +718,107 @@ func ActorListResourceHandler(client campaignv1.CampaignServiceClient) mcp.Resou
 // It parses URIs of the expected format but requires an actual campaign ID and rejects the placeholder (campaign://_/actors).
 func parseCampaignIDFromActorURI(uri string) (string, error) {
 	return parseCampaignIDFromResourceURI(uri, "actors")
+}
+
+// parseCampaignIDFromCampaignURI extracts the campaign ID from a URI of the form campaign://{campaign_id}.
+// It parses URIs of the expected format but requires an actual campaign ID and rejects the placeholder (campaign://_).
+func parseCampaignIDFromCampaignURI(uri string) (string, error) {
+	prefix := "campaign://"
+
+	if !strings.HasPrefix(uri, prefix) {
+		return "", fmt.Errorf("URI must start with %q", prefix)
+	}
+
+	campaignID := strings.TrimPrefix(uri, prefix)
+	campaignID = strings.TrimSpace(campaignID)
+
+	if campaignID == "" {
+		return "", fmt.Errorf("campaign ID is required in URI")
+	}
+
+	// Reject the placeholder value - actual campaign IDs must be provided
+	if campaignID == "_" {
+		return "", fmt.Errorf("campaign ID placeholder '_' is not a valid campaign ID")
+	}
+
+	return campaignID, nil
+}
+
+// CampaignResourceHandler returns a readable single campaign resource.
+func CampaignResourceHandler(client campaignv1.CampaignServiceClient) mcp.ResourceHandler {
+	return func(ctx context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
+		if client == nil {
+			return nil, fmt.Errorf("campaign client is not configured")
+		}
+
+		uri := CampaignResource().URI
+		if req != nil && req.Params != nil && req.Params.URI != "" {
+			uri = req.Params.URI
+		}
+
+		// Parse campaign_id from URI: expected format is campaign://{campaign_id}.
+		// If the URI is the registered placeholder, return an error requiring a concrete campaign ID.
+		// Otherwise, parse the campaign ID from the URI.
+		var campaignID string
+		var err error
+		if uri == CampaignResource().URI {
+			// Using registered placeholder URI - this shouldn't happen in practice
+			// but handle it gracefully by requiring campaign_id in a different way
+			return nil, fmt.Errorf("campaign ID is required; use URI format campaign://{campaign_id}")
+		}
+		campaignID, err = parseCampaignIDFromCampaignURI(uri)
+		if err != nil {
+			return nil, fmt.Errorf("parse campaign ID from URI: %w", err)
+		}
+
+		runCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+
+		response, err := client.GetCampaign(runCtx, &campaignv1.GetCampaignRequest{
+			CampaignId: campaignID,
+		})
+		if err != nil {
+			if s, ok := status.FromError(err); ok {
+				if s.Code() == codes.NotFound {
+					return nil, fmt.Errorf("campaign not found")
+				}
+				if s.Code() == codes.InvalidArgument {
+					return nil, fmt.Errorf("invalid campaign_id: %s", s.Message())
+				}
+			}
+			return nil, fmt.Errorf("get campaign failed: %w", err)
+		}
+		if response == nil || response.Campaign == nil {
+			return nil, fmt.Errorf("campaign response is missing")
+		}
+
+		campaign := response.Campaign
+		payload := CampaignPayload{
+			Campaign: CampaignListEntry{
+				ID:              campaign.GetId(),
+				Name:            campaign.GetName(),
+				GmMode:          gmModeToString(campaign.GetGmMode()),
+				ParticipantCount: int(campaign.GetParticipantCount()),
+				ActorCount:       int(campaign.GetActorCount()),
+				ThemePrompt:     campaign.GetThemePrompt(),
+				CreatedAt:       formatTimestamp(campaign.GetCreatedAt()),
+				UpdatedAt:       formatTimestamp(campaign.GetUpdatedAt()),
+			},
+		}
+
+		data, err := json.MarshalIndent(payload, "", "  ")
+		if err != nil {
+			return nil, fmt.Errorf("marshal campaign: %w", err)
+		}
+
+		return &mcp.ReadResourceResult{
+			Contents: []*mcp.ResourceContents{
+				{
+					URI:      uri,
+					MIMEType: "application/json",
+					Text:     string(data),
+				},
+			},
+		}, nil
+	}
 }
