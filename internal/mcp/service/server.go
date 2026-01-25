@@ -72,6 +72,7 @@ func New(grpcAddr string) (*Server, error) {
 	registerContextTools(mcpServer, campaignClient, sessionClient, server)
 	registerCampaignResources(mcpServer, campaignClient)
 	registerSessionResources(mcpServer, sessionClient)
+	registerContextResources(mcpServer, server)
 
 	return server, nil
 }

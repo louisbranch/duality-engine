@@ -55,3 +55,8 @@ func registerCampaignResources(mcpServer *mcp.Server, client campaignv1.Campaign
 func registerSessionResources(mcpServer *mcp.Server, client sessionv1.SessionServiceClient) {
 	mcpServer.AddResource(domain.SessionListResource(), domain.SessionListResourceHandler(client))
 }
+
+// registerContextResources registers readable context MCP resources.
+func registerContextResources(mcpServer *mcp.Server, server *Server) {
+	mcpServer.AddResource(domain.ContextResource(), domain.ContextResourceHandler(server.getContext))
+}

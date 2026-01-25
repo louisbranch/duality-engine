@@ -4,6 +4,7 @@ package integration
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 	"testing"
 
@@ -89,6 +90,17 @@ func runMCPResourcesTests(t *testing.T, suite *integrationSuite) {
 		}
 		if sessionResource.MIMEType != "application/json" {
 			t.Fatalf("expected resource MIME application/json, got %q", sessionResource.MIMEType)
+		}
+
+		contextResource, found := findResource(result.Resources, "context_current")
+		if !found {
+			t.Fatal("expected context_current resource")
+		}
+		if contextResource.URI != "context://current" {
+			t.Fatalf("expected resource URI context://current, got %q", contextResource.URI)
+		}
+		if contextResource.MIMEType != "application/json" {
+			t.Fatalf("expected resource MIME application/json, got %q", contextResource.MIMEType)
 		}
 	})
 
@@ -291,6 +303,97 @@ func runMCPResourcesTests(t *testing.T, suite *integrationSuite) {
 			if !strings.Contains(err.Error(), "campaign ID") {
 				t.Fatalf("read session list resource: expected campaign ID error, got %v", err)
 			}
+		}
+	})
+
+	t.Run("read context resource", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), integrationTimeout())
+		defer cancel()
+
+		// Read context resource with empty context (should return all null fields)
+		result, err := suite.client.ReadResource(ctx, &mcp.ReadResourceParams{URI: "context://current"})
+		if err != nil {
+			t.Fatalf("read context resource: %v", err)
+		}
+		if result == nil || len(result.Contents) != 1 {
+			t.Fatalf("expected 1 content item, got %v", result)
+		}
+		if result.Contents[0].URI != "context://current" {
+			t.Fatalf("expected URI context://current, got %q", result.Contents[0].URI)
+		}
+		if result.Contents[0].MIMEType != "application/json" {
+			t.Fatalf("expected MIME application/json, got %q", result.Contents[0].MIMEType)
+		}
+
+		// Verify JSON structure with all null fields
+		var payload domain.ContextResourcePayload
+		if err := json.Unmarshal([]byte(result.Contents[0].Text), &payload); err != nil {
+			t.Fatalf("unmarshal context JSON: %v", err)
+		}
+		if payload.Context.CampaignID != nil {
+			t.Fatalf("expected null campaign_id for empty context, got %v", payload.Context.CampaignID)
+		}
+		if payload.Context.SessionID != nil {
+			t.Fatalf("expected null session_id for empty context, got %v", payload.Context.SessionID)
+		}
+		if payload.Context.ParticipantID != nil {
+			t.Fatalf("expected null participant_id for empty context, got %v", payload.Context.ParticipantID)
+		}
+
+		// Set context and read again
+		campaignParams := &mcp.CallToolParams{
+			Name: "campaign_create",
+			Arguments: map[string]any{
+				"name":         "Context Test Campaign",
+				"gm_mode":      "AI",
+				"theme_prompt": "test theme",
+			},
+		}
+		campaignResult, err := suite.client.CallTool(ctx, campaignParams)
+		if err != nil {
+			t.Fatalf("call campaign_create: %v", err)
+		}
+		if campaignResult == nil || campaignResult.IsError {
+			t.Fatalf("campaign_create failed: %+v", campaignResult)
+		}
+		campaignOutput := decodeStructuredContent[domain.CampaignCreateResult](t, campaignResult.StructuredContent)
+		if campaignOutput.ID == "" {
+			t.Fatal("campaign_create returned empty id")
+		}
+
+		// Set context
+		setContextParams := &mcp.CallToolParams{
+			Name: "set_context",
+			Arguments: map[string]any{
+				"campaign_id": campaignOutput.ID,
+			},
+		}
+		_, err = suite.client.CallTool(ctx, setContextParams)
+		if err != nil {
+			t.Fatalf("call set_context: %v", err)
+		}
+
+		// Read context resource again (should return campaign_id)
+		result2, err := suite.client.ReadResource(ctx, &mcp.ReadResourceParams{URI: "context://current"})
+		if err != nil {
+			t.Fatalf("read context resource after set: %v", err)
+		}
+		if result2 == nil || len(result2.Contents) != 1 {
+			t.Fatalf("expected 1 content item, got %v", result2)
+		}
+
+		var payload2 domain.ContextResourcePayload
+		if err := json.Unmarshal([]byte(result2.Contents[0].Text), &payload2); err != nil {
+			t.Fatalf("unmarshal context JSON: %v", err)
+		}
+		if payload2.Context.CampaignID == nil || *payload2.Context.CampaignID != campaignOutput.ID {
+			t.Fatalf("expected campaign_id %q, got %v", campaignOutput.ID, payload2.Context.CampaignID)
+		}
+		if payload2.Context.SessionID != nil {
+			t.Fatalf("expected null session_id, got %v", payload2.Context.SessionID)
+		}
+		if payload2.Context.ParticipantID != nil {
+			t.Fatalf("expected null participant_id, got %v", payload2.Context.ParticipantID)
 		}
 	})
 }

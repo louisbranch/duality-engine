@@ -2758,6 +2758,159 @@ func TestSetContextHandlerGetSetContextIntegration(t *testing.T) {
 	}
 }
 
+// TestContextResourceHandlerRejectsNilGetter ensures nil getContextFunc is rejected.
+func TestContextResourceHandlerRejectsNilGetter(t *testing.T) {
+	handler := domain.ContextResourceHandler(nil)
+
+	result, err := handler(context.Background(), &mcp.ReadResourceRequest{
+		Params: &mcp.ReadResourceParams{URI: "context://current"},
+	})
+	if err == nil {
+		t.Fatal("expected error for nil getContextFunc")
+	}
+	if result != nil {
+		t.Fatal("expected nil result on error")
+	}
+}
+
+// TestContextResourceHandlerRejectsInvalidURI ensures invalid URI is rejected.
+func TestContextResourceHandlerRejectsInvalidURI(t *testing.T) {
+	server := &Server{}
+	handler := domain.ContextResourceHandler(server.getContext)
+
+	result, err := handler(context.Background(), &mcp.ReadResourceRequest{
+		Params: &mcp.ReadResourceParams{URI: "context://invalid"},
+	})
+	if err == nil {
+		t.Fatal("expected error for invalid URI")
+	}
+	if result != nil {
+		t.Fatal("expected nil result on error")
+	}
+	if !strings.Contains(err.Error(), "context://current") {
+		t.Fatalf("expected error to mention context://current, got %q", err.Error())
+	}
+}
+
+// TestContextResourceHandlerReturnsEmptyContext ensures empty context returns all null fields.
+func TestContextResourceHandlerReturnsEmptyContext(t *testing.T) {
+	server := &Server{}
+	handler := domain.ContextResourceHandler(server.getContext)
+
+	result, err := handler(context.Background(), &mcp.ReadResourceRequest{
+		Params: &mcp.ReadResourceParams{URI: "context://current"},
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if result == nil || len(result.Contents) != 1 {
+		t.Fatalf("expected 1 content item, got %v", result)
+	}
+
+	var payload domain.ContextResourcePayload
+	if err := json.Unmarshal([]byte(result.Contents[0].Text), &payload); err != nil {
+		t.Fatalf("unmarshal JSON: %v", err)
+	}
+
+	if payload.Context.CampaignID != nil {
+		t.Fatalf("expected null campaign_id, got %v", payload.Context.CampaignID)
+	}
+	if payload.Context.SessionID != nil {
+		t.Fatalf("expected null session_id, got %v", payload.Context.SessionID)
+	}
+	if payload.Context.ParticipantID != nil {
+		t.Fatalf("expected null participant_id, got %v", payload.Context.ParticipantID)
+	}
+}
+
+// TestContextResourceHandlerReturnsAllFields ensures all fields are returned when set.
+func TestContextResourceHandlerReturnsAllFields(t *testing.T) {
+	server := &Server{}
+	server.setContext(domain.Context{
+		CampaignID:    "camp-123",
+		SessionID:     "sess-456",
+		ParticipantID: "part-789",
+	})
+	handler := domain.ContextResourceHandler(server.getContext)
+
+	result, err := handler(context.Background(), &mcp.ReadResourceRequest{
+		Params: &mcp.ReadResourceParams{URI: "context://current"},
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if result == nil || len(result.Contents) != 1 {
+		t.Fatalf("expected 1 content item, got %v", result)
+	}
+
+	var payload domain.ContextResourcePayload
+	if err := json.Unmarshal([]byte(result.Contents[0].Text), &payload); err != nil {
+		t.Fatalf("unmarshal JSON: %v", err)
+	}
+
+	if payload.Context.CampaignID == nil || *payload.Context.CampaignID != "camp-123" {
+		t.Fatalf("expected campaign_id camp-123, got %v", payload.Context.CampaignID)
+	}
+	if payload.Context.SessionID == nil || *payload.Context.SessionID != "sess-456" {
+		t.Fatalf("expected session_id sess-456, got %v", payload.Context.SessionID)
+	}
+	if payload.Context.ParticipantID == nil || *payload.Context.ParticipantID != "part-789" {
+		t.Fatalf("expected participant_id part-789, got %v", payload.Context.ParticipantID)
+	}
+}
+
+// TestContextResourceHandlerReturnsPartialFields ensures partial fields return null for unset values.
+func TestContextResourceHandlerReturnsPartialFields(t *testing.T) {
+	server := &Server{}
+	server.setContext(domain.Context{
+		CampaignID: "camp-123",
+		// SessionID and ParticipantID are empty
+	})
+	handler := domain.ContextResourceHandler(server.getContext)
+
+	result, err := handler(context.Background(), &mcp.ReadResourceRequest{
+		Params: &mcp.ReadResourceParams{URI: "context://current"},
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if result == nil || len(result.Contents) != 1 {
+		t.Fatalf("expected 1 content item, got %v", result)
+	}
+
+	var payload domain.ContextResourcePayload
+	if err := json.Unmarshal([]byte(result.Contents[0].Text), &payload); err != nil {
+		t.Fatalf("unmarshal JSON: %v", err)
+	}
+
+	if payload.Context.CampaignID == nil || *payload.Context.CampaignID != "camp-123" {
+		t.Fatalf("expected campaign_id camp-123, got %v", payload.Context.CampaignID)
+	}
+	if payload.Context.SessionID != nil {
+		t.Fatalf("expected null session_id, got %v", payload.Context.SessionID)
+	}
+	if payload.Context.ParticipantID != nil {
+		t.Fatalf("expected null participant_id, got %v", payload.Context.ParticipantID)
+	}
+}
+
+// TestContextResourceHandlerUsesDefaultURI ensures default URI is used when not provided.
+func TestContextResourceHandlerUsesDefaultURI(t *testing.T) {
+	server := &Server{}
+	handler := domain.ContextResourceHandler(server.getContext)
+
+	result, err := handler(context.Background(), &mcp.ReadResourceRequest{})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if result == nil || len(result.Contents) != 1 {
+		t.Fatalf("expected 1 content item, got %v", result)
+	}
+	if result.Contents[0].URI != "context://current" {
+		t.Fatalf("expected URI context://current, got %q", result.Contents[0].URI)
+	}
+}
+
 // intPointer returns an int pointer for test inputs.
 func intPointer(value int) *int {
 	return &value
