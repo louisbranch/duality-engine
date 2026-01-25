@@ -615,30 +615,7 @@ func ParticipantListResourceHandler(client campaignv1.CampaignServiceClient) mcp
 // parseCampaignIDFromURI extracts the campaign ID from a URI of the form campaign://{campaign_id}/participants.
 // It parses URIs of the expected format but requires an actual campaign ID and rejects the placeholder (campaign://_/participants).
 func parseCampaignIDFromURI(uri string) (string, error) {
-	prefix := "campaign://"
-	suffix := "/participants"
-
-	if !strings.HasPrefix(uri, prefix) {
-		return "", fmt.Errorf("URI must start with %q", prefix)
-	}
-	if !strings.HasSuffix(uri, suffix) {
-		return "", fmt.Errorf("URI must end with %q", suffix)
-	}
-
-	campaignID := strings.TrimPrefix(uri, prefix)
-	campaignID = strings.TrimSuffix(campaignID, suffix)
-	campaignID = strings.TrimSpace(campaignID)
-
-	if campaignID == "" {
-		return "", fmt.Errorf("campaign ID is required in URI")
-	}
-
-	// Reject the placeholder value - actual campaign IDs must be provided
-	if campaignID == "_" {
-		return "", fmt.Errorf("campaign ID placeholder '_' is not a valid campaign ID")
-	}
-
-	return campaignID, nil
+	return parseCampaignIDFromResourceURI(uri, "participants")
 }
 
 // ActorListResourceHandler returns a readable actor listing resource.
@@ -715,28 +692,5 @@ func ActorListResourceHandler(client campaignv1.CampaignServiceClient) mcp.Resou
 // parseCampaignIDFromActorURI extracts the campaign ID from a URI of the form campaign://{campaign_id}/actors.
 // It parses URIs of the expected format but requires an actual campaign ID and rejects the placeholder (campaign://_/actors).
 func parseCampaignIDFromActorURI(uri string) (string, error) {
-	prefix := "campaign://"
-	suffix := "/actors"
-
-	if !strings.HasPrefix(uri, prefix) {
-		return "", fmt.Errorf("URI must start with %q", prefix)
-	}
-	if !strings.HasSuffix(uri, suffix) {
-		return "", fmt.Errorf("URI must end with %q", suffix)
-	}
-
-	campaignID := strings.TrimPrefix(uri, prefix)
-	campaignID = strings.TrimSuffix(campaignID, suffix)
-	campaignID = strings.TrimSpace(campaignID)
-
-	if campaignID == "" {
-		return "", fmt.Errorf("campaign ID is required in URI")
-	}
-
-	// Reject the placeholder value - actual campaign IDs must be provided
-	if campaignID == "_" {
-		return "", fmt.Errorf("campaign ID placeholder '_' is not a valid campaign ID")
-	}
-
-	return campaignID, nil
+	return parseCampaignIDFromResourceURI(uri, "actors")
 }
