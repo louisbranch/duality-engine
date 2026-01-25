@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -311,6 +312,60 @@ func TestRegisterParticipantStoreFailure(t *testing.T) {
 	}
 	if st.Code() != codes.Internal {
 		t.Fatalf("expected internal error, got %v", st.Code())
+	}
+}
+
+func TestRegisterParticipantCampaignUpdateFailure(t *testing.T) {
+	fixedTime := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	campaignStore := &fakeCampaignStore{putErr: errors.New("campaign update failed")}
+	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
+		if id == "camp-123" {
+			return domain.Campaign{
+				ID:          "camp-123",
+				Name:        "Test Campaign",
+				PlayerCount: 1,
+			}, nil
+		}
+		return domain.Campaign{}, storage.ErrNotFound
+	}
+	participantStore := &fakeParticipantStore{}
+	service := &CampaignService{
+		store:            campaignStore,
+		participantStore: participantStore,
+		clock: func() time.Time {
+			return fixedTime
+		},
+		participantIDGen: func() (string, error) {
+			return "part-456", nil
+		},
+	}
+
+	_, err := service.RegisterParticipant(context.Background(), &campaignv1.RegisterParticipantRequest{
+		CampaignId:  "camp-123",
+		DisplayName: "Bob",
+		Role:        campaignv1.ParticipantRole_PLAYER,
+		Controller:  campaignv1.Controller_CONTROLLER_HUMAN,
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	st, ok := status.FromError(err)
+	if !ok {
+		t.Fatalf("expected grpc status error, got %v", err)
+	}
+	if st.Code() != codes.Internal {
+		t.Fatalf("expected internal error, got %v", st.Code())
+	}
+	if !strings.Contains(st.Message(), "update campaign player count") {
+		t.Fatalf("expected error message to mention 'update campaign player count', got %q", st.Message())
+	}
+
+	// Verify participant was successfully persisted before the campaign update failed
+	if participantStore.putParticipant.ID != "part-456" {
+		t.Fatalf("expected participant to be persisted with id part-456, got %q", participantStore.putParticipant.ID)
+	}
+	if participantStore.putParticipant.Role != domain.ParticipantRolePlayer {
+		t.Fatalf("expected participant role to be Player, got %v", participantStore.putParticipant.Role)
 	}
 }
 

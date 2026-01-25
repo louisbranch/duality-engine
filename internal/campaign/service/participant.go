@@ -58,6 +58,9 @@ func (s *CampaignService) RegisterParticipant(ctx context.Context, in *campaignv
 
 	// Increment player count if the participant is a player
 	if participant.Role == domain.ParticipantRolePlayer {
+		// TODO: Fix race condition - Get and Put are not atomic. If multiple players
+		// register concurrently, the player count may be incorrect. Consider using
+		// transactions or atomic increment operations if the storage layer supports them.
 		campaign.PlayerCount++
 		campaign.UpdatedAt = s.clock().UTC()
 		if err := s.store.Put(ctx, campaign); err != nil {
