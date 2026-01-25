@@ -225,7 +225,8 @@ func (t *HTTPTransport) handleMessages(w http.ResponseWriter, r *http.Request) {
 		// Create new session for this request
 		conn, err := t.Connect(r.Context())
 		if err != nil {
-			http.Error(w, fmt.Sprintf("Failed to create session: %v", err), http.StatusInternalServerError)
+			log.Printf("Failed to create session: %v", err)
+			http.Error(w, "Failed to create session", http.StatusInternalServerError)
 			return
 		}
 		sessionID = conn.SessionID()
@@ -238,7 +239,8 @@ func (t *HTTPTransport) handleMessages(w http.ResponseWriter, r *http.Request) {
 	// Read request body
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to read request: %v", err), http.StatusBadRequest)
+		log.Printf("Failed to read request body: %v", err)
+		http.Error(w, "Failed to read request", http.StatusBadRequest)
 		return
 	}
 	defer r.Body.Close()
@@ -246,7 +248,8 @@ func (t *HTTPTransport) handleMessages(w http.ResponseWriter, r *http.Request) {
 	// Parse JSON-RPC message
 	var msg jsonrpc.Message
 	if err := json.Unmarshal(body, &msg); err != nil {
-		http.Error(w, fmt.Sprintf("Invalid JSON-RPC message: %v", err), http.StatusBadRequest)
+		log.Printf("Invalid JSON-RPC message: %v", err)
+		http.Error(w, "Invalid JSON-RPC message", http.StatusBadRequest)
 		return
 	}
 
@@ -362,7 +365,8 @@ func (t *HTTPTransport) handleSSE(w http.ResponseWriter, r *http.Request) {
 	if !exists || session == nil {
 		conn, err := t.Connect(r.Context())
 		if err != nil {
-			http.Error(w, fmt.Sprintf("Failed to create session: %v", err), http.StatusInternalServerError)
+			log.Printf("Failed to create session: %v", err)
+			http.Error(w, "Failed to create session", http.StatusInternalServerError)
 			return
 		}
 		sessionID = conn.SessionID()
