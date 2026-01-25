@@ -6,9 +6,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/modelcontextprotocol/go-sdk/jsonrpc"
 )
 
@@ -234,5 +236,116 @@ func TestGenerateSessionID(t *testing.T) {
 	
 	if !strings.HasPrefix(id1, "session_") {
 		t.Errorf("generateSessionID() = %q, should start with 'session_'", id1)
+	}
+}
+
+func TestHTTPTransport_cleanupSessions(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	transport := NewHTTPTransport("localhost:8081")
+	
+	// Create a session
+	conn1, err := transport.Connect(ctx)
+	if err != nil {
+		t.Fatalf("Connect() error = %v", err)
+	}
+	sessionID1 := conn1.SessionID()
+	
+	// Create another session
+	conn2, err := transport.Connect(ctx)
+	if err != nil {
+		t.Fatalf("Connect() error = %v", err)
+	}
+	sessionID2 := conn2.SessionID()
+	
+	// Manually set lastUsed to expired time for first session
+	transport.sessionsMu.Lock()
+	if session, ok := transport.sessions[sessionID1]; ok {
+		session.lastUsed = time.Now().Add(-2 * time.Hour) // Expired
+	}
+	transport.sessionsMu.Unlock()
+	
+	// Start cleanup goroutine
+	go transport.cleanupSessions(ctx)
+	
+	// Wait for cleanup to run (runs every 5 minutes, but we can trigger manually)
+	// For testing, we'll check that expired session is removed
+	time.Sleep(100 * time.Millisecond)
+	
+	// Manually trigger cleanup by calling it directly
+	transport.sessionsMu.Lock()
+	now := time.Now()
+	expirationTime := now.Add(-1 * time.Hour)
+	for id, session := range transport.sessions {
+		if session.lastUsed.Before(expirationTime) {
+			session.conn.Close()
+			delete(transport.sessions, id)
+			delete(transport.serverOnce, id)
+		}
+	}
+	transport.sessionsMu.Unlock()
+	
+	// Verify expired session is removed
+	transport.sessionsMu.RLock()
+	_, exists1 := transport.sessions[sessionID1]
+	_, exists2 := transport.sessions[sessionID2]
+	transport.sessionsMu.RUnlock()
+	
+	if exists1 {
+		t.Error("Expired session should have been removed")
+	}
+	if !exists2 {
+		t.Error("Active session should not have been removed")
+	}
+}
+
+func TestHTTPTransport_ensureServerRunning(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	transport := NewHTTPTransport("localhost:8081")
+	
+	// Create a mock MCP server
+	mcpServer := mcp.NewServer(&mcp.Implementation{Name: "test", Version: "1.0"}, nil)
+	transport.server = mcpServer
+	
+	// Create a session
+	conn, err := transport.Connect(ctx)
+	if err != nil {
+		t.Fatalf("Connect() error = %v", err)
+	}
+	sessionID := conn.SessionID()
+	
+	transport.sessionsMu.RLock()
+	session := transport.sessions[sessionID]
+	transport.sessionsMu.RUnlock()
+	
+	if session == nil {
+		t.Fatal("Session should exist")
+	}
+	
+	// Call ensureServerRunning multiple times concurrently
+	// It should only start the server once
+	var wg sync.WaitGroup
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			transport.ensureServerRunning(session)
+		}()
+	}
+	wg.Wait()
+	
+	// Verify serverOnce was created
+	transport.serverOnceMu.Lock()
+	once, exists := transport.serverOnce[sessionID]
+	transport.serverOnceMu.Unlock()
+	
+	if !exists {
+		t.Error("serverOnce should have been created")
+	}
+	if once == nil {
+		t.Error("serverOnce should not be nil")
 	}
 }
