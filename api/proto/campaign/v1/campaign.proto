@@ -10,11 +10,13 @@ message Campaign {
   string id = 1;
   string name = 2;
   GmMode gm_mode = 3;
-  // Number of registered players for this campaign.
-  int32 player_count = 4;
-  string theme_prompt = 5;
-  google.protobuf.Timestamp created_at = 6;
-  google.protobuf.Timestamp updated_at = 7;
+  // Number of all participants (GM + PLAYER + future roles) for this campaign.
+  int32 participant_count = 4;
+  // Number of all actors (PC + NPC + future kinds) for this campaign.
+  int32 actor_count = 5;
+  string theme_prompt = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
 }
 
 enum GmMode {

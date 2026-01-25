@@ -941,13 +941,14 @@ func TestCampaignCreateHandlerMapsRequestAndResponse(t *testing.T) {
 	now := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
 	client := &fakeCampaignClient{response: &campaignv1.CreateCampaignResponse{
 		Campaign: &campaignv1.Campaign{
-			Id:          "camp-123",
-			Name:        "Snowbound",
-			GmMode:      campaignv1.GmMode_AI,
-			PlayerCount: 5,
-			ThemePrompt: "ice and steel",
-			CreatedAt:   timestamppb.New(now),
-			UpdatedAt:   timestamppb.New(now),
+			Id:              "camp-123",
+			Name:            "Snowbound",
+			GmMode:          campaignv1.GmMode_AI,
+			ParticipantCount: 5,
+			ActorCount:      3,
+			ThemePrompt:     "ice and steel",
+			CreatedAt:       timestamppb.New(now),
+			UpdatedAt:       timestamppb.New(now),
 		},
 	}}
 	result, output, err := domain.CampaignCreateHandler(client)(
@@ -977,8 +978,11 @@ func TestCampaignCreateHandlerMapsRequestAndResponse(t *testing.T) {
 	if output.GmMode != "AI" {
 		t.Fatalf("expected gm mode AI, got %q", output.GmMode)
 	}
-	if output.PlayerCount != 5 {
-		t.Fatalf("expected player count 5, got %d", output.PlayerCount)
+	if output.ParticipantCount != 5 {
+		t.Fatalf("expected participant count 5, got %d", output.ParticipantCount)
+	}
+	if output.ActorCount != 3 {
+		t.Fatalf("expected actor count 3, got %d", output.ActorCount)
 	}
 }
 
@@ -1018,13 +1022,14 @@ func TestCampaignListResourceHandlerMapsResponse(t *testing.T) {
 	now := time.Date(2026, 1, 23, 13, 0, 0, 0, time.UTC)
 	client := &fakeCampaignClient{listResponse: &campaignv1.ListCampaignsResponse{
 		Campaigns: []*campaignv1.Campaign{{
-			Id:          "camp-1",
-			Name:        "Red Sands",
-			GmMode:      campaignv1.GmMode_HUMAN,
-			PlayerCount: 4,
-			ThemePrompt: "desert skies",
-			CreatedAt:   timestamppb.New(now),
-			UpdatedAt:   timestamppb.New(now.Add(time.Hour)),
+			Id:              "camp-1",
+			Name:            "Red Sands",
+			GmMode:          campaignv1.GmMode_HUMAN,
+			ParticipantCount: 4,
+			ActorCount:      2,
+			ThemePrompt:     "desert skies",
+			CreatedAt:       timestamppb.New(now),
+			UpdatedAt:       timestamppb.New(now.Add(time.Hour)),
 		}},
 		NextPageToken: "next",
 	}}
@@ -1052,13 +1057,14 @@ func TestCampaignListResourceHandlerMapsResponse(t *testing.T) {
 
 	var payload struct {
 		Campaigns []struct {
-			ID          string `json:"id"`
-			Name        string `json:"name"`
-			GmMode      string `json:"gm_mode"`
-			PlayerCount int    `json:"player_count"`
-			ThemePrompt string `json:"theme_prompt"`
-			CreatedAt   string `json:"created_at"`
-			UpdatedAt   string `json:"updated_at"`
+			ID              string `json:"id"`
+			Name            string `json:"name"`
+			GmMode          string `json:"gm_mode"`
+			ParticipantCount int    `json:"participant_count"`
+			ActorCount      int    `json:"actor_count"`
+			ThemePrompt     string `json:"theme_prompt"`
+			CreatedAt       string `json:"created_at"`
+			UpdatedAt       string `json:"updated_at"`
 		} `json:"campaigns"`
 	}
 	if err := json.Unmarshal([]byte(result.Contents[0].Text), &payload); err != nil {

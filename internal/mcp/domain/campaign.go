@@ -21,22 +21,24 @@ type CampaignCreateInput struct {
 
 // CampaignCreateResult represents the MCP tool output for campaign creation.
 type CampaignCreateResult struct {
-	ID          string `json:"id" jsonschema:"campaign identifier"`
-	Name        string `json:"name" jsonschema:"campaign name"`
-	GmMode      string `json:"gm_mode" jsonschema:"gm mode"`
-	PlayerCount int    `json:"player_count" jsonschema:"number of registered players"`
-	ThemePrompt string `json:"theme_prompt" jsonschema:"theme prompt"`
+	ID              string `json:"id" jsonschema:"campaign identifier"`
+	Name            string `json:"name" jsonschema:"campaign name"`
+	GmMode          string `json:"gm_mode" jsonschema:"gm mode"`
+	ParticipantCount int    `json:"participant_count" jsonschema:"number of all participants (GM + PLAYER + future roles)"`
+	ActorCount      int    `json:"actor_count" jsonschema:"number of all actors (PC + NPC + future kinds)"`
+	ThemePrompt     string `json:"theme_prompt" jsonschema:"theme prompt"`
 }
 
 // CampaignListEntry represents a readable campaign metadata entry.
 type CampaignListEntry struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	GmMode      string `json:"gm_mode"`
-	PlayerCount int    `json:"player_count"`
-	ThemePrompt string `json:"theme_prompt"`
-	CreatedAt   string `json:"created_at"`
-	UpdatedAt   string `json:"updated_at"`
+	ID              string `json:"id"`
+	Name            string `json:"name"`
+	GmMode          string `json:"gm_mode"`
+	ParticipantCount int    `json:"participant_count"`
+	ActorCount      int    `json:"actor_count"`
+	ThemePrompt     string `json:"theme_prompt"`
+	CreatedAt       string `json:"created_at"`
+	UpdatedAt       string `json:"updated_at"`
 }
 
 // CampaignListPayload represents the MCP resource payload for campaign listings.
@@ -218,11 +220,12 @@ func CampaignCreateHandler(client campaignv1.CampaignServiceClient) mcp.ToolHand
 		}
 
 		result := CampaignCreateResult{
-			ID:          response.Campaign.GetId(),
-			Name:        response.Campaign.GetName(),
-			GmMode:      gmModeToString(response.Campaign.GetGmMode()),
-			PlayerCount: int(response.Campaign.GetPlayerCount()),
-			ThemePrompt: response.Campaign.GetThemePrompt(),
+			ID:              response.Campaign.GetId(),
+			Name:            response.Campaign.GetName(),
+			GmMode:          gmModeToString(response.Campaign.GetGmMode()),
+			ParticipantCount: int(response.Campaign.GetParticipantCount()),
+			ActorCount:       int(response.Campaign.GetActorCount()),
+			ThemePrompt:     response.Campaign.GetThemePrompt(),
 		}
 
 		return nil, result, nil
@@ -258,13 +261,14 @@ func CampaignListResourceHandler(client campaignv1.CampaignServiceClient) mcp.Re
 
 		for _, campaign := range response.GetCampaigns() {
 			payload.Campaigns = append(payload.Campaigns, CampaignListEntry{
-				ID:          campaign.GetId(),
-				Name:        campaign.GetName(),
-				GmMode:      gmModeToString(campaign.GetGmMode()),
-				PlayerCount: int(campaign.GetPlayerCount()),
-				ThemePrompt: campaign.GetThemePrompt(),
-				CreatedAt:   formatTimestamp(campaign.GetCreatedAt()),
-				UpdatedAt:   formatTimestamp(campaign.GetUpdatedAt()),
+				ID:              campaign.GetId(),
+				Name:            campaign.GetName(),
+				GmMode:          gmModeToString(campaign.GetGmMode()),
+				ParticipantCount: int(campaign.GetParticipantCount()),
+				ActorCount:       int(campaign.GetActorCount()),
+				ThemePrompt:     campaign.GetThemePrompt(),
+				CreatedAt:       formatTimestamp(campaign.GetCreatedAt()),
+				UpdatedAt:       formatTimestamp(campaign.GetUpdatedAt()),
 			})
 		}
 

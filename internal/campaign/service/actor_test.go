@@ -162,14 +162,10 @@ func TestCreateActorValidationErrors(t *testing.T) {
 }
 
 func TestCreateActorCampaignNotFound(t *testing.T) {
-	campaignStore := &fakeCampaignStore{}
-	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
-		return domain.Campaign{}, storage.ErrNotFound
-	}
+	actorStore := &fakeActorStore{putErr: storage.ErrNotFound}
 	service := &CampaignService{
 		stores: Stores{
-			Campaign: campaignStore,
-			Actor:    &fakeActorStore{},
+			Actor: actorStore,
 		},
 		clock:       time.Now,
 		idGenerator: func() (string, error) { return "actor-1", nil },

@@ -233,6 +233,7 @@ func activeSessionKey(campaignID string) []byte {
 }
 
 // Put persists a participant record (implements storage.ParticipantStore).
+// Atomically increments the campaign's participant_count within the same transaction.
 func (s *Store) PutParticipant(ctx context.Context, participant domain.Participant) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -247,17 +248,46 @@ func (s *Store) PutParticipant(ctx context.Context, participant domain.Participa
 		return fmt.Errorf("participant id is required")
 	}
 
-	payload, err := json.Marshal(participant)
+	participantPayload, err := json.Marshal(participant)
 	if err != nil {
 		return fmt.Errorf("marshal participant: %w", err)
 	}
 
 	return s.db.Update(func(tx *bbolt.Tx) error {
-		bucket := tx.Bucket([]byte(participantBucket))
-		if bucket == nil {
+		// Load campaign to verify it exists and update counter
+		campaignBucket := tx.Bucket([]byte(campaignBucket))
+		if campaignBucket == nil {
+			return fmt.Errorf("campaign bucket is missing")
+		}
+		campaignPayload := campaignBucket.Get(campaignKey(participant.CampaignID))
+		if campaignPayload == nil {
+			return storage.ErrNotFound
+		}
+
+		var campaign domain.Campaign
+		if err := json.Unmarshal(campaignPayload, &campaign); err != nil {
+			return fmt.Errorf("unmarshal campaign: %w", err)
+		}
+
+		// Increment participant count and update timestamp
+		campaign.ParticipantCount++
+		campaign.UpdatedAt = time.Now().UTC()
+
+		// Persist updated campaign
+		updatedCampaignPayload, err := json.Marshal(campaign)
+		if err != nil {
+			return fmt.Errorf("marshal campaign: %w", err)
+		}
+		if err := campaignBucket.Put(campaignKey(participant.CampaignID), updatedCampaignPayload); err != nil {
+			return fmt.Errorf("put campaign: %w", err)
+		}
+
+		// Store the participant
+		participantBucket := tx.Bucket([]byte(participantBucket))
+		if participantBucket == nil {
 			return fmt.Errorf("participant bucket is missing")
 		}
-		return bucket.Put(participantKey(participant.CampaignID, participant.ID), payload)
+		return participantBucket.Put(participantKey(participant.CampaignID, participant.ID), participantPayload)
 	})
 }
 
@@ -409,6 +439,7 @@ func (s *Store) ListParticipants(ctx context.Context, campaignID string, pageSiz
 }
 
 // PutActor persists an actor record (implements storage.ActorStore).
+// Atomically increments the campaign's actor_count within the same transaction.
 func (s *Store) PutActor(ctx context.Context, actor domain.Actor) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -423,17 +454,46 @@ func (s *Store) PutActor(ctx context.Context, actor domain.Actor) error {
 		return fmt.Errorf("actor id is required")
 	}
 
-	payload, err := json.Marshal(actor)
+	actorPayload, err := json.Marshal(actor)
 	if err != nil {
 		return fmt.Errorf("marshal actor: %w", err)
 	}
 
 	return s.db.Update(func(tx *bbolt.Tx) error {
-		bucket := tx.Bucket([]byte(actorBucket))
-		if bucket == nil {
+		// Load campaign to verify it exists and update counter
+		campaignBucket := tx.Bucket([]byte(campaignBucket))
+		if campaignBucket == nil {
+			return fmt.Errorf("campaign bucket is missing")
+		}
+		campaignPayload := campaignBucket.Get(campaignKey(actor.CampaignID))
+		if campaignPayload == nil {
+			return storage.ErrNotFound
+		}
+
+		var campaign domain.Campaign
+		if err := json.Unmarshal(campaignPayload, &campaign); err != nil {
+			return fmt.Errorf("unmarshal campaign: %w", err)
+		}
+
+		// Increment actor count and update timestamp
+		campaign.ActorCount++
+		campaign.UpdatedAt = time.Now().UTC()
+
+		// Persist updated campaign
+		updatedCampaignPayload, err := json.Marshal(campaign)
+		if err != nil {
+			return fmt.Errorf("marshal campaign: %w", err)
+		}
+		if err := campaignBucket.Put(campaignKey(actor.CampaignID), updatedCampaignPayload); err != nil {
+			return fmt.Errorf("put campaign: %w", err)
+		}
+
+		// Store the actor
+		actorBucket := tx.Bucket([]byte(actorBucket))
+		if actorBucket == nil {
 			return fmt.Errorf("actor bucket is missing")
 		}
-		return bucket.Put(actorKey(actor.CampaignID, actor.ID), payload)
+		return actorBucket.Put(actorKey(actor.CampaignID, actor.ID), actorPayload)
 	})
 }
 

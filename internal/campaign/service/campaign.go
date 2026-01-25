@@ -80,13 +80,14 @@ func (s *CampaignService) CreateCampaign(ctx context.Context, in *campaignv1.Cre
 
 	response := &campaignv1.CreateCampaignResponse{
 		Campaign: &campaignv1.Campaign{
-			Id:          campaign.ID,
-			Name:        campaign.Name,
-			GmMode:      gmModeToProto(campaign.GmMode),
-			PlayerCount: int32(campaign.PlayerCount),
-			ThemePrompt: campaign.ThemePrompt,
-			CreatedAt:   timestamppb.New(campaign.CreatedAt),
-			UpdatedAt:   timestamppb.New(campaign.UpdatedAt),
+			Id:              campaign.ID,
+			Name:            campaign.Name,
+			GmMode:          gmModeToProto(campaign.GmMode),
+			ParticipantCount: int32(campaign.ParticipantCount),
+			ActorCount:       int32(campaign.ActorCount),
+			ThemePrompt:     campaign.ThemePrompt,
+			CreatedAt:       timestamppb.New(campaign.CreatedAt),
+			UpdatedAt:       timestamppb.New(campaign.UpdatedAt),
 		},
 	}
 
@@ -126,13 +127,14 @@ func (s *CampaignService) ListCampaigns(ctx context.Context, in *campaignv1.List
 	response.Campaigns = make([]*campaignv1.Campaign, 0, len(page.Campaigns))
 	for _, campaign := range page.Campaigns {
 		response.Campaigns = append(response.Campaigns, &campaignv1.Campaign{
-			Id:          campaign.ID,
-			Name:        campaign.Name,
-			GmMode:      gmModeToProto(campaign.GmMode),
-			PlayerCount: int32(campaign.PlayerCount),
-			ThemePrompt: campaign.ThemePrompt,
-			CreatedAt:   timestamppb.New(campaign.CreatedAt),
-			UpdatedAt:   timestamppb.New(campaign.UpdatedAt),
+			Id:              campaign.ID,
+			Name:            campaign.Name,
+			GmMode:          gmModeToProto(campaign.GmMode),
+			ParticipantCount: int32(campaign.ParticipantCount),
+			ActorCount:       int32(campaign.ActorCount),
+			ThemePrompt:     campaign.ThemePrompt,
+			CreatedAt:       timestamppb.New(campaign.CreatedAt),
+			UpdatedAt:       timestamppb.New(campaign.UpdatedAt),
 		})
 	}
 
@@ -164,13 +166,14 @@ func (s *CampaignService) GetCampaign(ctx context.Context, in *campaignv1.GetCam
 
 	response := &campaignv1.GetCampaignResponse{
 		Campaign: &campaignv1.Campaign{
-			Id:          campaign.ID,
-			Name:        campaign.Name,
-			GmMode:      gmModeToProto(campaign.GmMode),
-			PlayerCount: int32(campaign.PlayerCount),
-			ThemePrompt: campaign.ThemePrompt,
-			CreatedAt:   timestamppb.New(campaign.CreatedAt),
-			UpdatedAt:   timestamppb.New(campaign.UpdatedAt),
+			Id:              campaign.ID,
+			Name:            campaign.Name,
+			GmMode:          gmModeToProto(campaign.GmMode),
+			ParticipantCount: int32(campaign.ParticipantCount),
+			ActorCount:       int32(campaign.ActorCount),
+			ThemePrompt:     campaign.ThemePrompt,
+			CreatedAt:       timestamppb.New(campaign.CreatedAt),
+			UpdatedAt:       timestamppb.New(campaign.UpdatedAt),
 		},
 	}
 
@@ -211,24 +214,13 @@ func (s *CampaignService) CreateActor(ctx context.Context, in *campaignv1.Create
 		return nil, status.Error(codes.InvalidArgument, "create actor request is required")
 	}
 
-	if s.stores.Campaign == nil {
-		return nil, status.Error(codes.Internal, "campaign store is not configured")
-	}
 	if s.stores.Actor == nil {
 		return nil, status.Error(codes.Internal, "actor store is not configured")
 	}
 
-	// Validate campaign exists
 	campaignID := strings.TrimSpace(in.GetCampaignId())
 	if campaignID == "" {
 		return nil, status.Error(codes.InvalidArgument, "campaign id is required")
-	}
-	_, err := s.stores.Campaign.Get(ctx, campaignID)
-	if err != nil {
-		if errors.Is(err, storage.ErrNotFound) {
-			return nil, status.Error(codes.NotFound, "campaign not found")
-		}
-		return nil, status.Errorf(codes.Internal, "check campaign: %v", err)
 	}
 
 	actor, err := domain.CreateActor(domain.CreateActorInput{
@@ -245,6 +237,9 @@ func (s *CampaignService) CreateActor(ctx context.Context, in *campaignv1.Create
 	}
 
 	if err := s.stores.Actor.PutActor(ctx, actor); err != nil {
+		if errors.Is(err, storage.ErrNotFound) {
+			return nil, status.Error(codes.NotFound, "campaign not found")
+		}
 		return nil, status.Errorf(codes.Internal, "persist actor: %v", err)
 	}
 
