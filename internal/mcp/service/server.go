@@ -98,7 +98,6 @@ func Run(ctx context.Context, cfg Config) error {
 
 // runWithHTTPTransport creates a server and serves it over HTTP transport.
 func runWithHTTPTransport(ctx context.Context, cfg Config) error {
-	// TODO: Bind HTTP server to localhost only by default (not 0.0.0.0) for security
 	httpAddr := cfg.HTTPAddr
 	if httpAddr == "" {
 		httpAddr = "localhost:8081"
@@ -108,11 +107,9 @@ func runWithHTTPTransport(ctx context.Context, cfg Config) error {
 	if err != nil {
 		return err
 	}
+	defer mcpServer.Close()
+
 	if err := mcpServer.waitForHealth(ctx); err != nil {
-		closeErr := mcpServer.Close()
-		if closeErr != nil {
-			return fmt.Errorf("wait for gRPC health: %v; close gRPC connection: %w", err, closeErr)
-		}
 		return err
 	}
 
