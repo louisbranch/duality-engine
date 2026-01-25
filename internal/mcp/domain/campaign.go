@@ -337,9 +337,9 @@ func ParticipantListResourceHandler(client campaignv1.CampaignServiceClient) mcp
 			uri = req.Params.URI
 		}
 
-		// Parse campaign_id from URI: campaign://{campaign_id}/participants
-		// If the URI is the registered placeholder, try to extract from query parameter
-		// Otherwise, parse the campaign ID from the URI path
+		// Parse campaign_id from URI: expected format is campaign://{campaign_id}/participants.
+		// If the URI is the registered placeholder, return an error requiring a concrete campaign ID.
+		// Otherwise, parse the campaign ID from the URI path.
 		var campaignID string
 		var err error
 		if uri == ParticipantListResource().URI {
@@ -397,7 +397,7 @@ func ParticipantListResourceHandler(client campaignv1.CampaignServiceClient) mcp
 }
 
 // parseCampaignIDFromURI extracts the campaign ID from a URI of the form campaign://{campaign_id}/participants.
-// It accepts both the registered placeholder URI (campaign://_/participants) and actual campaign IDs.
+// It parses URIs of the expected format but requires an actual campaign ID and rejects the placeholder (campaign://_/participants).
 func parseCampaignIDFromURI(uri string) (string, error) {
 	prefix := "campaign://"
 	suffix := "/participants"

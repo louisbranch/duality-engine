@@ -134,23 +134,3 @@ func findResource(resources []*mcp.Resource, name string) (*mcp.Resource, bool) 
 	return nil, false
 }
 
-// parseParticipantListPayload decodes a participant list JSON payload.
-func parseParticipantListPayload(t *testing.T, raw string) domain.ParticipantListPayload {
-	t.Helper()
-
-	var payload domain.ParticipantListPayload
-	if err := json.Unmarshal([]byte(raw), &payload); err != nil {
-		t.Fatalf("unmarshal participant list payload: %v", err)
-	}
-	return payload
-}
-
-// findParticipantByID searches for a participant entry by ID.
-func findParticipantByID(payload domain.ParticipantListPayload, id string) (domain.ParticipantListEntry, bool) {
-	for _, participant := range payload.Participants {
-		if participant.ID == id {
-			return participant, true
-		}
-	}
-	return domain.ParticipantListEntry{}, false
-}
