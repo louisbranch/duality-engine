@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -170,4 +171,73 @@ func validateParticipantExists(ctx context.Context, client campaignv1.CampaignSe
 		return fmt.Errorf("get participant: %w", err)
 	}
 	return nil
+}
+
+// ContextResourcePayload represents the MCP resource payload for the current context.
+type ContextResourcePayload struct {
+	Context struct {
+		CampaignID    *string `json:"campaign_id"`
+		SessionID     *string `json:"session_id"`
+		ParticipantID *string `json:"participant_id"`
+	} `json:"context"`
+}
+
+// ContextResource defines the MCP resource for the current context.
+func ContextResource() *mcp.Resource {
+	return &mcp.Resource{
+		Name:        "context_current",
+		Title:       "Current Context",
+		Description: "Readable current MCP context (campaign_id, session_id, participant_id)",
+		MIMEType:    "application/json",
+		URI:         "context://current",
+	}
+}
+
+// ContextResourceHandler returns a readable current context resource.
+func ContextResourceHandler(getContextFunc func() Context) mcp.ResourceHandler {
+	return func(ctx context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
+		if getContextFunc == nil {
+			return nil, fmt.Errorf("context getter function is not configured")
+		}
+
+		uri := ContextResource().URI
+		if req != nil && req.Params != nil && req.Params.URI != "" {
+			uri = req.Params.URI
+		}
+
+		// Validate URI matches context://current
+		if uri != "context://current" {
+			return nil, fmt.Errorf("invalid URI: expected context://current, got %q", uri)
+		}
+
+		// Get current context
+		currentCtx := getContextFunc()
+
+		// Build payload with null for empty strings
+		payload := ContextResourcePayload{}
+		if currentCtx.CampaignID != "" {
+			payload.Context.CampaignID = &currentCtx.CampaignID
+		}
+		if currentCtx.SessionID != "" {
+			payload.Context.SessionID = &currentCtx.SessionID
+		}
+		if currentCtx.ParticipantID != "" {
+			payload.Context.ParticipantID = &currentCtx.ParticipantID
+		}
+
+		data, err := json.MarshalIndent(payload, "", "  ")
+		if err != nil {
+			return nil, fmt.Errorf("marshal context: %w", err)
+		}
+
+		return &mcp.ReadResourceResult{
+			Contents: []*mcp.ResourceContents{
+				{
+					URI:      uri,
+					MIMEType: "application/json",
+					Text:     string(data),
+				},
+			},
+		}, nil
+	}
 }
