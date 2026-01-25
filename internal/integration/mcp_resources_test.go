@@ -4,7 +4,6 @@ package integration
 
 import (
 	"context"
-	"encoding/json"
 	"strings"
 	"testing"
 
@@ -133,4 +132,3 @@ func findResource(resources []*mcp.Resource, name string) (*mcp.Resource, bool) 
 	}
 	return nil, false
 }
-
