@@ -12,6 +12,7 @@ import (
 
 	campaignv1 "github.com/louisbranch/duality-engine/api/gen/go/campaign/v1"
 	pb "github.com/louisbranch/duality-engine/api/gen/go/duality/v1"
+	sessionv1 "github.com/louisbranch/duality-engine/api/gen/go/session/v1"
 	"github.com/louisbranch/duality-engine/internal/mcp/domain"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/grpc"
@@ -154,6 +155,19 @@ func (f *fakeCampaignClient) ListActors(ctx context.Context, req *campaignv1.Lis
 func (f *fakeCampaignClient) SetDefaultControl(ctx context.Context, req *campaignv1.SetDefaultControlRequest, opts ...grpc.CallOption) (*campaignv1.SetDefaultControlResponse, error) {
 	f.lastSetDefaultControlRequest = req
 	return f.setDefaultControlResponse, f.setDefaultControlErr
+}
+
+// fakeSessionClient implements SessionServiceClient for tests.
+type fakeSessionClient struct {
+	startSessionResponse *sessionv1.StartSessionResponse
+	err                 error
+	lastRequest         *sessionv1.StartSessionRequest
+}
+
+// StartSession records the request and returns the configured response.
+func (f *fakeSessionClient) StartSession(ctx context.Context, req *sessionv1.StartSessionRequest, opts ...grpc.CallOption) (*sessionv1.StartSessionResponse, error) {
+	f.lastRequest = req
+	return f.startSessionResponse, f.err
 }
 
 // TestGRPCAddressPrefersEnv ensures env configuration overrides defaults.
@@ -1518,6 +1532,174 @@ func TestActorControlSetHandlerRejectsEmptyController(t *testing.T) {
 	}
 	if result != nil {
 		t.Fatal("expected nil result on error")
+	}
+}
+
+// TestSessionStartHandlerReturnsClientError ensures gRPC errors are returned as tool errors.
+func TestSessionStartHandlerReturnsClientError(t *testing.T) {
+	client := &fakeSessionClient{err: errors.New("boom")}
+	handler := domain.SessionStartHandler(client)
+
+	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SessionStartInput{
+		CampaignID: "camp-123",
+		Name:       "Test Session",
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if result != nil {
+		t.Fatal("expected nil result on error")
+	}
+}
+
+// TestSessionStartHandlerMapsRequestAndResponse ensures inputs and outputs map consistently.
+func TestSessionStartHandlerMapsRequestAndResponse(t *testing.T) {
+	now := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	client := &fakeSessionClient{startSessionResponse: &sessionv1.StartSessionResponse{
+		Session: &sessionv1.Session{
+			Id:         "sess-456",
+			CampaignId: "camp-123",
+			Name:       "Test Session",
+			Status:     sessionv1.SessionStatus_ACTIVE,
+			StartedAt:  timestamppb.New(now),
+			UpdatedAt:  timestamppb.New(now.Add(time.Hour)),
+		},
+	}}
+	result, output, err := domain.SessionStartHandler(client)(
+		context.Background(),
+		&mcp.CallToolRequest{},
+		domain.SessionStartInput{
+			CampaignID: "camp-123",
+			Name:       "Test Session",
+		},
+	)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if result != nil {
+		t.Fatal("expected nil result on success")
+	}
+	if client.lastRequest == nil {
+		t.Fatal("expected gRPC request")
+	}
+	if client.lastRequest.GetCampaignId() != "camp-123" {
+		t.Fatalf("expected campaign id camp-123, got %q", client.lastRequest.GetCampaignId())
+	}
+	if client.lastRequest.GetName() != "Test Session" {
+		t.Fatalf("expected name Test Session, got %q", client.lastRequest.GetName())
+	}
+	if output.ID != "sess-456" {
+		t.Fatalf("expected id sess-456, got %q", output.ID)
+	}
+	if output.CampaignID != "camp-123" {
+		t.Fatalf("expected campaign id camp-123, got %q", output.CampaignID)
+	}
+	if output.Name != "Test Session" {
+		t.Fatalf("expected name Test Session, got %q", output.Name)
+	}
+	if output.Status != "ACTIVE" {
+		t.Fatalf("expected status ACTIVE, got %q", output.Status)
+	}
+	if output.StartedAt != now.Format(time.RFC3339) {
+		t.Fatalf("expected started_at %q, got %q", now.Format(time.RFC3339), output.StartedAt)
+	}
+	if output.UpdatedAt != now.Add(time.Hour).Format(time.RFC3339) {
+		t.Fatalf("expected updated_at %q, got %q", now.Add(time.Hour).Format(time.RFC3339), output.UpdatedAt)
+	}
+}
+
+// TestSessionStartHandlerOptionalName ensures optional name field works.
+func TestSessionStartHandlerOptionalName(t *testing.T) {
+	now := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	client := &fakeSessionClient{startSessionResponse: &sessionv1.StartSessionResponse{
+		Session: &sessionv1.Session{
+			Id:         "sess-789",
+			CampaignId: "camp-123",
+			Name:       "",
+			Status:     sessionv1.SessionStatus_ACTIVE,
+			StartedAt:  timestamppb.New(now),
+			UpdatedAt:  timestamppb.New(now),
+		},
+	}}
+	result, output, err := domain.SessionStartHandler(client)(
+		context.Background(),
+		&mcp.CallToolRequest{},
+		domain.SessionStartInput{
+			CampaignID: "camp-123",
+			// Name omitted
+		},
+	)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if result != nil {
+		t.Fatal("expected nil result on success")
+	}
+	if client.lastRequest == nil {
+		t.Fatal("expected gRPC request")
+	}
+	if client.lastRequest.GetName() != "" {
+		t.Fatalf("expected empty name when omitted, got %q", client.lastRequest.GetName())
+	}
+	if output.Name != "" {
+		t.Fatalf("expected empty name, got %q", output.Name)
+	}
+	if output.Status != "ACTIVE" {
+		t.Fatalf("expected status ACTIVE, got %q", output.Status)
+	}
+}
+
+// TestSessionStartHandlerRejectsEmptyResponse ensures nil responses are rejected.
+func TestSessionStartHandlerRejectsEmptyResponse(t *testing.T) {
+	client := &fakeSessionClient{}
+	handler := domain.SessionStartHandler(client)
+
+	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SessionStartInput{
+		CampaignID: "camp-123",
+		Name:       "Test Session",
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if result != nil {
+		t.Fatal("expected nil result on error")
+	}
+}
+
+// TestSessionStartHandlerMapsEndedAt ensures ended_at is mapped when present.
+func TestSessionStartHandlerMapsEndedAt(t *testing.T) {
+	now := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	endedAt := now.Add(2 * time.Hour)
+	client := &fakeSessionClient{startSessionResponse: &sessionv1.StartSessionResponse{
+		Session: &sessionv1.Session{
+			Id:         "sess-999",
+			CampaignId: "camp-123",
+			Name:       "Ended Session",
+			Status:     sessionv1.SessionStatus_ENDED,
+			StartedAt:  timestamppb.New(now),
+			UpdatedAt:  timestamppb.New(endedAt),
+			EndedAt:    timestamppb.New(endedAt),
+		},
+	}}
+	result, output, err := domain.SessionStartHandler(client)(
+		context.Background(),
+		&mcp.CallToolRequest{},
+		domain.SessionStartInput{
+			CampaignID: "camp-123",
+			Name:       "Ended Session",
+		},
+	)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if result != nil {
+		t.Fatal("expected nil result on success")
+	}
+	if output.EndedAt != endedAt.Format(time.RFC3339) {
+		t.Fatalf("expected ended_at %q, got %q", endedAt.Format(time.RFC3339), output.EndedAt)
+	}
+	if output.Status != "ENDED" {
+		t.Fatalf("expected status ENDED, got %q", output.Status)
 	}
 }
 
