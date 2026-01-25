@@ -116,16 +116,16 @@ type ActorCreateResult struct {
 
 // ActorControlSetInput represents the MCP tool input for setting actor control.
 type ActorControlSetInput struct {
-	CampaignID     string `json:"campaign_id" jsonschema:"campaign identifier"`
-	ActorID        string `json:"actor_id" jsonschema:"actor identifier"`
-	ControllerType string `json:"controller_type" jsonschema:"controller type: 'GM' for GM control, or participant ID for participant control"`
+	CampaignID string `json:"campaign_id" jsonschema:"campaign identifier"`
+	ActorID    string `json:"actor_id" jsonschema:"actor identifier"`
+	Controller string `json:"controller" jsonschema:"controller: 'GM' (case-insensitive) for GM control, or a participant ID for participant control"`
 }
 
 // ActorControlSetResult represents the MCP tool output for setting actor control.
 type ActorControlSetResult struct {
-	CampaignID     string `json:"campaign_id" jsonschema:"campaign identifier"`
-	ActorID        string `json:"actor_id" jsonschema:"actor identifier"`
-	ControllerType string `json:"controller_type" jsonschema:"controller type: 'GM' or participant ID"`
+	CampaignID string `json:"campaign_id" jsonschema:"campaign identifier"`
+	ActorID    string `json:"actor_id" jsonschema:"actor identifier"`
+	Controller string `json:"controller" jsonschema:"controller: 'GM' or the participant ID"`
 }
 
 // CampaignCreateTool defines the MCP tool schema for creating campaigns.
@@ -465,9 +465,9 @@ func ActorControlSetHandler(client campaignv1.CampaignServiceClient) mcp.ToolHan
 		runCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
 
-		controller, err := actorControllerFromString(input.ControllerType)
+		controller, err := actorControllerFromString(input.Controller)
 		if err != nil {
-			return nil, ActorControlSetResult{}, fmt.Errorf("invalid controller type: %w", err)
+			return nil, ActorControlSetResult{}, fmt.Errorf("invalid controller: %w", err)
 		}
 
 		req := &campaignv1.SetDefaultControlRequest{
@@ -485,9 +485,9 @@ func ActorControlSetHandler(client campaignv1.CampaignServiceClient) mcp.ToolHan
 		}
 
 		result := ActorControlSetResult{
-			CampaignID:     response.GetCampaignId(),
-			ActorID:        response.GetActorId(),
-			ControllerType: actorControllerToString(response.GetController()),
+			CampaignID: response.GetCampaignId(),
+			ActorID:    response.GetActorId(),
+			Controller: actorControllerToString(response.GetController()),
 		}
 
 		return nil, result, nil
@@ -496,13 +496,13 @@ func ActorControlSetHandler(client campaignv1.CampaignServiceClient) mcp.ToolHan
 
 // actorControllerFromString converts a string to a protobuf ActorController.
 // Accepts "GM" (case-insensitive) for GM control, or a participant ID for participant control.
-func actorControllerFromString(controllerType string) (*campaignv1.ActorController, error) {
-	controllerType = strings.TrimSpace(controllerType)
-	if controllerType == "" {
-		return nil, fmt.Errorf("controller type is required")
+func actorControllerFromString(controller string) (*campaignv1.ActorController, error) {
+	controller = strings.TrimSpace(controller)
+	if controller == "" {
+		return nil, fmt.Errorf("controller is required")
 	}
 
-	upper := strings.ToUpper(controllerType)
+	upper := strings.ToUpper(controller)
 	if upper == "GM" {
 		return &campaignv1.ActorController{
 			Controller: &campaignv1.ActorController_Gm{
@@ -515,7 +515,7 @@ func actorControllerFromString(controllerType string) (*campaignv1.ActorControll
 	return &campaignv1.ActorController{
 		Controller: &campaignv1.ActorController_Participant{
 			Participant: &campaignv1.ParticipantController{
-				ParticipantId: controllerType,
+				ParticipantId: controller,
 			},
 		},
 	}, nil
