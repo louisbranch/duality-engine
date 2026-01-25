@@ -38,6 +38,17 @@ func runMCPResourcesTests(t *testing.T, suite *integrationSuite) {
 			t.Fatalf("expected resource MIME application/json, got %q", resource.MIMEType)
 		}
 
+		campaignResource, found := findResource(result.Resources, "campaign")
+		if !found {
+			t.Fatal("expected campaign resource")
+		}
+		if !strings.HasPrefix(campaignResource.URI, "campaign://") {
+			t.Fatalf("expected resource URI to start with campaign://, got %q", campaignResource.URI)
+		}
+		if campaignResource.MIMEType != "application/json" {
+			t.Fatalf("expected resource MIME application/json, got %q", campaignResource.MIMEType)
+		}
+
 		participantResource, found := findResource(result.Resources, "participant_list")
 		if !found {
 			t.Fatal("expected participant_list resource")

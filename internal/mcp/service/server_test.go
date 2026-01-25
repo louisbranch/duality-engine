@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -1084,6 +1085,200 @@ func TestCampaignListResourceHandlerMapsResponse(t *testing.T) {
 	}
 	if payload.Campaigns[0].UpdatedAt != now.Add(time.Hour).Format(time.RFC3339) {
 		t.Fatalf("expected updated_at %q, got %q", now.Add(time.Hour).Format(time.RFC3339), payload.Campaigns[0].UpdatedAt)
+	}
+}
+
+// TestCampaignResourceHandlerMapsResponse ensures JSON payload is formatted.
+func TestCampaignResourceHandlerMapsResponse(t *testing.T) {
+	now := time.Date(2026, 1, 23, 13, 0, 0, 0, time.UTC)
+	client := &fakeCampaignClient{getCampaignResponse: &campaignv1.GetCampaignResponse{
+		Campaign: &campaignv1.Campaign{
+			Id:              "camp-1",
+			Name:            "Red Sands",
+			GmMode:          campaignv1.GmMode_HUMAN,
+			ParticipantCount: 4,
+			ActorCount:      2,
+			ThemePrompt:     "desert skies",
+			CreatedAt:       timestamppb.New(now),
+			UpdatedAt:       timestamppb.New(now.Add(time.Hour)),
+		},
+	}}
+
+	handler := domain.CampaignResourceHandler(client)
+	result, err := handler(context.Background(), &mcp.ReadResourceRequest{
+		Params: &mcp.ReadResourceParams{
+			URI: "campaign://camp-1",
+		},
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if result == nil || len(result.Contents) != 1 {
+		t.Fatalf("expected 1 content item, got %v", result)
+	}
+	if client.lastGetCampaignRequest == nil {
+		t.Fatal("expected get campaign request")
+	}
+	if client.lastGetCampaignRequest.GetCampaignId() != "camp-1" {
+		t.Fatalf("expected campaign id camp-1, got %q", client.lastGetCampaignRequest.GetCampaignId())
+	}
+
+	var payload struct {
+		Campaign struct {
+			ID              string `json:"id"`
+			Name            string `json:"name"`
+			GmMode          string `json:"gm_mode"`
+			ParticipantCount int    `json:"participant_count"`
+			ActorCount      int    `json:"actor_count"`
+			ThemePrompt     string `json:"theme_prompt"`
+			CreatedAt       string `json:"created_at"`
+			UpdatedAt       string `json:"updated_at"`
+		} `json:"campaign"`
+	}
+	if err := json.Unmarshal([]byte(result.Contents[0].Text), &payload); err != nil {
+		t.Fatalf("unmarshal payload: %v", err)
+	}
+	if payload.Campaign.ID != "camp-1" {
+		t.Fatalf("expected id camp-1, got %q", payload.Campaign.ID)
+	}
+	if payload.Campaign.Name != "Red Sands" {
+		t.Fatalf("expected name Red Sands, got %q", payload.Campaign.Name)
+	}
+	if payload.Campaign.GmMode != "HUMAN" {
+		t.Fatalf("expected gm mode HUMAN, got %q", payload.Campaign.GmMode)
+	}
+	if payload.Campaign.ParticipantCount != 4 {
+		t.Fatalf("expected participant_count 4, got %d", payload.Campaign.ParticipantCount)
+	}
+	if payload.Campaign.ActorCount != 2 {
+		t.Fatalf("expected actor_count 2, got %d", payload.Campaign.ActorCount)
+	}
+	if payload.Campaign.CreatedAt != now.Format(time.RFC3339) {
+		t.Fatalf("expected created_at %q, got %q", now.Format(time.RFC3339), payload.Campaign.CreatedAt)
+	}
+	if payload.Campaign.UpdatedAt != now.Add(time.Hour).Format(time.RFC3339) {
+		t.Fatalf("expected updated_at %q, got %q", now.Add(time.Hour).Format(time.RFC3339), payload.Campaign.UpdatedAt)
+	}
+}
+
+// TestCampaignResourceHandlerReturnsNotFound ensures NotFound errors are returned.
+func TestCampaignResourceHandlerReturnsNotFound(t *testing.T) {
+	client := &fakeCampaignClient{getCampaignErr: status.Error(codes.NotFound, "campaign not found")}
+	handler := domain.CampaignResourceHandler(client)
+
+	result, err := handler(context.Background(), &mcp.ReadResourceRequest{
+		Params: &mcp.ReadResourceParams{
+			URI: "campaign://camp-999",
+		},
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if result != nil {
+		t.Fatal("expected nil result on error")
+	}
+	if !strings.Contains(err.Error(), "campaign not found") {
+		t.Fatalf("expected 'campaign not found' in error, got %q", err.Error())
+	}
+}
+
+// TestCampaignResourceHandlerReturnsInvalidArgument ensures InvalidArgument errors are returned.
+func TestCampaignResourceHandlerReturnsInvalidArgument(t *testing.T) {
+	client := &fakeCampaignClient{getCampaignErr: status.Error(codes.InvalidArgument, "campaign id is required")}
+	handler := domain.CampaignResourceHandler(client)
+
+	result, err := handler(context.Background(), &mcp.ReadResourceRequest{
+		Params: &mcp.ReadResourceParams{
+			URI: "campaign://invalid-id",
+		},
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if result != nil {
+		t.Fatal("expected nil result on error")
+	}
+	if !strings.Contains(err.Error(), "invalid campaign_id") {
+		t.Fatalf("expected 'invalid campaign_id' in error, got %q", err.Error())
+	}
+}
+
+// TestCampaignResourceHandlerRejectsPlaceholder ensures placeholder URI is rejected.
+func TestCampaignResourceHandlerRejectsPlaceholder(t *testing.T) {
+	client := &fakeCampaignClient{}
+	handler := domain.CampaignResourceHandler(client)
+
+	// When the URI matches the registered placeholder, it returns early with a specific error
+	result, err := handler(context.Background(), &mcp.ReadResourceRequest{
+		Params: &mcp.ReadResourceParams{
+			URI: "campaign://_",
+		},
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if result != nil {
+		t.Fatal("expected nil result on error")
+	}
+	// The handler checks if URI matches registered placeholder first, so we get the early return message
+	if !strings.Contains(err.Error(), "campaign ID is required") {
+		t.Fatalf("expected 'campaign ID is required' in error, got %q", err.Error())
+	}
+}
+
+// TestCampaignResourceHandlerRejectsEmptyID ensures empty campaign ID is rejected.
+func TestCampaignResourceHandlerRejectsEmptyID(t *testing.T) {
+	client := &fakeCampaignClient{}
+	handler := domain.CampaignResourceHandler(client)
+
+	result, err := handler(context.Background(), &mcp.ReadResourceRequest{
+		Params: &mcp.ReadResourceParams{
+			URI: "campaign://",
+		},
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if result != nil {
+		t.Fatal("expected nil result on error")
+	}
+	if !strings.Contains(err.Error(), "campaign ID is required") {
+		t.Fatalf("expected 'campaign ID is required' in error, got %q", err.Error())
+	}
+}
+
+// TestCampaignResourceHandlerRejectsSuffixedURI ensures URIs with path segments are rejected.
+func TestCampaignResourceHandlerRejectsSuffixedURI(t *testing.T) {
+	client := &fakeCampaignClient{}
+	handler := domain.CampaignResourceHandler(client)
+
+	testCases := []struct {
+		name string
+		uri  string
+	}{
+		{"path segment", "campaign://camp-1/participants"},
+		{"query parameter", "campaign://camp-1?foo=bar"},
+		{"fragment", "campaign://camp-1#section"},
+		{"path and query", "campaign://camp-1/participants?foo=bar"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result, err := handler(context.Background(), &mcp.ReadResourceRequest{
+				Params: &mcp.ReadResourceParams{
+					URI: tc.uri,
+				},
+			})
+			if err == nil {
+				t.Fatal("expected error")
+			}
+			if result != nil {
+				t.Fatal("expected nil result on error")
+			}
+			if !strings.Contains(err.Error(), "path segments") && !strings.Contains(err.Error(), "query parameters") && !strings.Contains(err.Error(), "fragments") {
+				t.Fatalf("expected error about path segments/query parameters/fragments, got %q", err.Error())
+			}
+		})
 	}
 }
 
