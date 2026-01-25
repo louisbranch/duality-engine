@@ -13,6 +13,8 @@ The MCP server (`cmd/mcp`) accepts the following flags:
 
 - `-addr`: gRPC server address. Default: `localhost:8080`
 - `-http-addr`: HTTP server address (for HTTP transport). Default: `localhost:8081`
+  
+  When running the `cmd/mcp` binary, this value is provided by the flag definition. When constructing the MCP server programmatically and leaving the HTTP address empty in the `Config` struct, the server also falls back to `localhost:8081` internally.
 - `-transport`: Transport type (`stdio` or `http`). Default: `stdio`
 
 ### Address Overrides

@@ -49,17 +49,34 @@ go run ./cmd/mcp -transport=http -http-addr=localhost:8081 -addr=localhost:8080
 #### Example HTTP Usage
 
 ```bash
-# Send a JSON-RPC request
-curl -X POST http://localhost:8081/mcp/messages \
+# 1) First request: start a new session (no X-MCP-Session-ID header)
+#    Use -D - to print response headers so we can capture X-MCP-Session-ID.
+SESSION_ID=$(
+  curl -sS -D - http://localhost:8081/mcp/messages \
+    -H "Content-Type: application/json" \
+    -d '{
+      "jsonrpc": "2.0",
+      "id": 1,
+      "method": "tools/list",
+      "params": {}
+    }' \
+  | awk -F': ' '/^X-MCP-Session-ID:/ {print $2}' | tr -d '\r'
+)
+
+echo "Session ID: $SESSION_ID"
+
+# 2) Subsequent request: send the session ID so the server can reuse context
+curl -sS -X POST http://localhost:8081/mcp/messages \
   -H "Content-Type: application/json" \
+  -H "X-MCP-Session-ID: $SESSION_ID" \
   -d '{
     "jsonrpc": "2.0",
-    "id": 1,
+    "id": 2,
     "method": "tools/list",
     "params": {}
   }'
 
-# Check health
+# 3) Check health
 curl http://localhost:8081/mcp/health
 ```
 
