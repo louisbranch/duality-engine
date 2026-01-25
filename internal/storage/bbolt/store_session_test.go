@@ -354,7 +354,6 @@ func TestSessionStoreListSessions(t *testing.T) {
 	defer store.Close()
 
 	now := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
-	endedTime := time.Date(2026, 1, 24, 12, 0, 0, 0, time.UTC)
 	// Use different campaigns so each session can be ACTIVE (PutSession requires ACTIVE status)
 	sessions := []sessiondomain.Session{
 		{
@@ -382,7 +381,7 @@ func TestSessionStoreListSessions(t *testing.T) {
 			Status:     sessiondomain.SessionStatusActive,
 			StartedAt:  now,
 			UpdatedAt:  now,
-			EndedAt:    &endedTime,
+			EndedAt:    nil,
 		},
 	}
 
@@ -480,11 +479,11 @@ func TestSessionStoreListSessionsPagination(t *testing.T) {
 			t.Fatalf("marshal session: %v", err)
 		}
 		if err := store.db.Update(func(tx *bbolt.Tx) error {
-			bucket := tx.Bucket([]byte("sessions"))
+			bucket := tx.Bucket([]byte(sessionsBucket))
 			if bucket == nil {
 				return fmt.Errorf("sessions bucket is missing")
 			}
-			key := []byte(fmt.Sprintf("%s/%s", session.CampaignID, session.ID))
+			key := sessionKey(session.CampaignID, session.ID)
 			return bucket.Put(key, payload)
 		}); err != nil {
 			t.Fatalf("manually insert session: %v", err)
@@ -578,11 +577,11 @@ func TestSessionStoreListSessionsPrefixFiltering(t *testing.T) {
 		t.Fatalf("marshal session: %v", err)
 	}
 	if err := store.db.Update(func(tx *bbolt.Tx) error {
-		bucket := tx.Bucket([]byte("sessions"))
+		bucket := tx.Bucket([]byte(sessionsBucket))
 		if bucket == nil {
 			return fmt.Errorf("sessions bucket is missing")
 		}
-		key := []byte(fmt.Sprintf("%s/%s", sessions[2].CampaignID, sessions[2].ID))
+		key := sessionKey(sessions[2].CampaignID, sessions[2].ID)
 		return bucket.Put(key, payload)
 	}); err != nil {
 		t.Fatalf("manually insert session: %v", err)
