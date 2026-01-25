@@ -15,10 +15,15 @@ import (
 )
 
 type fakeActorStore struct {
-	putActor domain.Actor
-	putErr   error
-	getActor domain.Actor
-	getErr   error
+	putActor  domain.Actor
+	putErr    error
+	getActor  domain.Actor
+	getErr    error
+	listPage  storage.ActorPage
+	listErr   error
+	listPageSize int
+	listPageToken string
+	listPageCampaignID string
 }
 
 func (f *fakeActorStore) PutActor(ctx context.Context, actor domain.Actor) error {
@@ -28,6 +33,13 @@ func (f *fakeActorStore) PutActor(ctx context.Context, actor domain.Actor) error
 
 func (f *fakeActorStore) GetActor(ctx context.Context, campaignID, actorID string) (domain.Actor, error) {
 	return f.getActor, f.getErr
+}
+
+func (f *fakeActorStore) ListActors(ctx context.Context, campaignID string, pageSize int, pageToken string) (storage.ActorPage, error) {
+	f.listPageCampaignID = campaignID
+	f.listPageSize = pageSize
+	f.listPageToken = pageToken
+	return f.listPage, f.listErr
 }
 
 func TestCreateActorSuccess(t *testing.T) {
@@ -297,5 +309,352 @@ func TestCreateActorMissingStore(t *testing.T) {
 	}
 	if st.Code() != codes.Internal {
 		t.Fatalf("expected internal error, got %v", st.Code())
+	}
+}
+
+func TestListActorsSuccess(t *testing.T) {
+	fixedTime := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	campaignStore := &fakeCampaignStore{}
+	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
+		if id == "camp-123" {
+			return domain.Campaign{ID: "camp-123", Name: "Test Campaign"}, nil
+		}
+		return domain.Campaign{}, storage.ErrNotFound
+	}
+	actorStore := &fakeActorStore{
+		listPage: storage.ActorPage{
+			Actors: []domain.Actor{
+				{
+					ID:         "actor-1",
+					CampaignID: "camp-123",
+					Name:       "Alice",
+					Kind:       domain.ActorKindPC,
+					Notes:      "A brave warrior",
+					CreatedAt:  fixedTime,
+					UpdatedAt:  fixedTime,
+				},
+				{
+					ID:         "actor-2",
+					CampaignID: "camp-123",
+					Name:       "Goblin",
+					Kind:       domain.ActorKindNPC,
+					Notes:      "A small creature",
+					CreatedAt:  fixedTime,
+					UpdatedAt:  fixedTime,
+				},
+			},
+			NextPageToken: "next-token",
+		},
+	}
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: campaignStore,
+			Actor:    actorStore,
+		},
+		clock: time.Now,
+	}
+
+	response, err := service.ListActors(context.Background(), &campaignv1.ListActorsRequest{
+		CampaignId: "camp-123",
+		PageSize:   10,
+	})
+	if err != nil {
+		t.Fatalf("list actors: %v", err)
+	}
+	if response == nil {
+		t.Fatal("expected response")
+	}
+	if len(response.Actors) != 2 {
+		t.Fatalf("expected 2 actors, got %d", len(response.Actors))
+	}
+	if response.NextPageToken != "next-token" {
+		t.Fatalf("expected next page token next-token, got %q", response.NextPageToken)
+	}
+	if response.Actors[0].Id != "actor-1" {
+		t.Fatalf("expected first actor id actor-1, got %q", response.Actors[0].Id)
+	}
+	if response.Actors[0].Name != "Alice" {
+		t.Fatalf("expected first actor name Alice, got %q", response.Actors[0].Name)
+	}
+	if response.Actors[0].Kind != campaignv1.ActorKind_PC {
+		t.Fatalf("expected first actor kind PC, got %v", response.Actors[0].Kind)
+	}
+	if response.Actors[1].Id != "actor-2" {
+		t.Fatalf("expected second actor id actor-2, got %q", response.Actors[1].Id)
+	}
+	if response.Actors[1].Kind != campaignv1.ActorKind_NPC {
+		t.Fatalf("expected second actor kind NPC, got %v", response.Actors[1].Kind)
+	}
+	if response.Actors[0].CreatedAt.AsTime() != fixedTime {
+		t.Fatalf("expected created_at %v, got %v", fixedTime, response.Actors[0].CreatedAt.AsTime())
+	}
+}
+
+func TestListActorsDefaults(t *testing.T) {
+	fixedTime := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	campaignStore := &fakeCampaignStore{}
+	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
+		return domain.Campaign{ID: "camp-123"}, nil
+	}
+	actorStore := &fakeActorStore{
+		listPage: storage.ActorPage{
+			Actors: []domain.Actor{
+				{
+					ID:         "actor-1",
+					CampaignID: "camp-123",
+					Name:       "Alice",
+					Kind:       domain.ActorKindPC,
+					CreatedAt:  fixedTime,
+					UpdatedAt:  fixedTime,
+				},
+			},
+			NextPageToken: "next-token",
+		},
+	}
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: campaignStore,
+			Actor:    actorStore,
+		},
+		clock: time.Now,
+	}
+
+	response, err := service.ListActors(context.Background(), &campaignv1.ListActorsRequest{
+		CampaignId: "camp-123",
+		PageSize:   0,
+	})
+	if err != nil {
+		t.Fatalf("list actors: %v", err)
+	}
+	if response == nil {
+		t.Fatal("expected response")
+	}
+	if actorStore.listPageSize != defaultListActorsPageSize {
+		t.Fatalf("expected default page size %d, got %d", defaultListActorsPageSize, actorStore.listPageSize)
+	}
+	if response.NextPageToken != "next-token" {
+		t.Fatalf("expected next page token, got %q", response.NextPageToken)
+	}
+	if len(response.Actors) != 1 {
+		t.Fatalf("expected 1 actor, got %d", len(response.Actors))
+	}
+}
+
+func TestListActorsEmpty(t *testing.T) {
+	campaignStore := &fakeCampaignStore{}
+	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
+		return domain.Campaign{ID: "camp-123"}, nil
+	}
+	actorStore := &fakeActorStore{
+		listPage: storage.ActorPage{},
+	}
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: campaignStore,
+			Actor:    actorStore,
+		},
+		clock: time.Now,
+	}
+
+	response, err := service.ListActors(context.Background(), &campaignv1.ListActorsRequest{
+		CampaignId: "camp-123",
+		PageSize:   10,
+	})
+	if err != nil {
+		t.Fatalf("list actors: %v", err)
+	}
+	if response == nil {
+		t.Fatal("expected response")
+	}
+	if len(response.Actors) != 0 {
+		t.Fatalf("expected 0 actors, got %d", len(response.Actors))
+	}
+}
+
+func TestListActorsClampPageSize(t *testing.T) {
+	campaignStore := &fakeCampaignStore{}
+	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
+		return domain.Campaign{ID: "camp-123"}, nil
+	}
+	actorStore := &fakeActorStore{listPage: storage.ActorPage{}}
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: campaignStore,
+			Actor:    actorStore,
+		},
+		clock: time.Now,
+	}
+
+	_, err := service.ListActors(context.Background(), &campaignv1.ListActorsRequest{
+		CampaignId: "camp-123",
+		PageSize:   25,
+	})
+	if err != nil {
+		t.Fatalf("list actors: %v", err)
+	}
+	if actorStore.listPageSize != maxListActorsPageSize {
+		t.Fatalf("expected max page size %d, got %d", maxListActorsPageSize, actorStore.listPageSize)
+	}
+}
+
+func TestListActorsPassesToken(t *testing.T) {
+	campaignStore := &fakeCampaignStore{}
+	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
+		return domain.Campaign{ID: "camp-123"}, nil
+	}
+	actorStore := &fakeActorStore{listPage: storage.ActorPage{}}
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: campaignStore,
+			Actor:    actorStore,
+		},
+		clock: time.Now,
+	}
+
+	_, err := service.ListActors(context.Background(), &campaignv1.ListActorsRequest{
+		CampaignId: "camp-123",
+		PageSize:   1,
+		PageToken:  "next",
+	})
+	if err != nil {
+		t.Fatalf("list actors: %v", err)
+	}
+	if actorStore.listPageToken != "next" {
+		t.Fatalf("expected page token next, got %q", actorStore.listPageToken)
+	}
+	if actorStore.listPageCampaignID != "camp-123" {
+		t.Fatalf("expected campaign id camp-123, got %q", actorStore.listPageCampaignID)
+	}
+}
+
+func TestListActorsNilRequest(t *testing.T) {
+	service := NewCampaignService(Stores{
+		Campaign:    &fakeCampaignStore{},
+		Participant: &fakeParticipantStore{},
+		Actor:       &fakeActorStore{},
+	})
+
+	_, err := service.ListActors(context.Background(), nil)
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	st, ok := status.FromError(err)
+	if !ok {
+		t.Fatalf("expected grpc status error, got %v", err)
+	}
+	if st.Code() != codes.InvalidArgument {
+		t.Fatalf("expected invalid argument, got %v", st.Code())
+	}
+}
+
+func TestListActorsCampaignNotFound(t *testing.T) {
+	campaignStore := &fakeCampaignStore{}
+	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
+		return domain.Campaign{}, storage.ErrNotFound
+	}
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: campaignStore,
+			Actor:    &fakeActorStore{},
+		},
+		clock: time.Now,
+	}
+
+	_, err := service.ListActors(context.Background(), &campaignv1.ListActorsRequest{
+		CampaignId: "missing",
+		PageSize:   10,
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	st, ok := status.FromError(err)
+	if !ok {
+		t.Fatalf("expected grpc status error, got %v", err)
+	}
+	if st.Code() != codes.NotFound {
+		t.Fatalf("expected not found, got %v", st.Code())
+	}
+}
+
+func TestListActorsStoreFailure(t *testing.T) {
+	campaignStore := &fakeCampaignStore{}
+	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
+		return domain.Campaign{ID: "camp-123"}, nil
+	}
+	actorStore := &fakeActorStore{listErr: errors.New("boom")}
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: campaignStore,
+			Actor:    actorStore,
+		},
+		clock: time.Now,
+	}
+
+	_, err := service.ListActors(context.Background(), &campaignv1.ListActorsRequest{
+		CampaignId: "camp-123",
+		PageSize:   10,
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	st, ok := status.FromError(err)
+	if !ok {
+		t.Fatalf("expected grpc status error, got %v", err)
+	}
+	if st.Code() != codes.Internal {
+		t.Fatalf("expected internal error, got %v", st.Code())
+	}
+}
+
+func TestListActorsMissingStore(t *testing.T) {
+	campaignStore := &fakeCampaignStore{}
+	campaignStore.getFunc = func(ctx context.Context, id string) (domain.Campaign, error) {
+		return domain.Campaign{ID: "camp-123"}, nil
+	}
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: campaignStore,
+		},
+	}
+
+	_, err := service.ListActors(context.Background(), &campaignv1.ListActorsRequest{
+		CampaignId: "camp-123",
+		PageSize:   10,
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	st, ok := status.FromError(err)
+	if !ok {
+		t.Fatalf("expected grpc status error, got %v", err)
+	}
+	if st.Code() != codes.Internal {
+		t.Fatalf("expected internal error, got %v", st.Code())
+	}
+}
+
+func TestListActorsEmptyCampaignID(t *testing.T) {
+	campaignStore := &fakeCampaignStore{}
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: campaignStore,
+			Actor:    &fakeActorStore{},
+		},
+		clock: time.Now,
+	}
+
+	_, err := service.ListActors(context.Background(), &campaignv1.ListActorsRequest{
+		CampaignId: "  ",
+		PageSize:   10,
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	st, ok := status.FromError(err)
+	if !ok {
+		t.Fatalf("expected grpc status error, got %v", err)
+	}
+	if st.Code() != codes.InvalidArgument {
+		t.Fatalf("expected invalid argument, got %v", st.Code())
 	}
 }
