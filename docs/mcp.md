@@ -148,11 +148,11 @@ Returns the ruleset semantics used for Duality roll evaluation.
   "system": "Daggerheart",
   "module": "Duality",
   "rules_version": "1.0.0",
-  "dice_model": "Hope d12 + Fear d12",
+  "dice_model": "DUALITY_D12_V1",
   "total_formula": "hope + fear + modifier",
-  "crit_rule": "Critical success when hope == fear",
-  "difficulty_rule": "Total must meet or exceed difficulty",
-  "outcomes": ["CRITICAL_SUCCESS", "SUCCESS", "FAILURE"]
+  "crit_rule": "HOPE_EQUALS_FEAR_IS_CRITICAL",
+  "difficulty_rule": "TOTAL_MEETS_OR_EXCEEDS_DIFFICULTY",
+  "outcomes": ["SUCCESS_WITH_HOPE", "SUCCESS_WITH_FEAR", "MIXED_SUCCESS", "FAILURE", "CATASTROPHIC_FAILURE"]
 }
 ```
 
@@ -180,7 +180,7 @@ Rolls Duality dice and returns the outcome with the roll context.
   "total": 15,
   "is_crit": false,
   "meets_difficulty": true,
-  "outcome": "SUCCESS"
+  "outcome": "SUCCESS_WITH_HOPE"
 }
 ```
 
@@ -210,7 +210,7 @@ Evaluates a deterministic outcome from known Hope/Fear dice without rolling.
   "total": 15,
   "is_crit": false,
   "meets_difficulty": true,
-  "outcome": "SUCCESS"
+  "outcome": "SUCCESS_WITH_HOPE"
 }
 ```
 
@@ -241,7 +241,7 @@ Returns a deterministic explanation for a known Hope/Fear outcome.
   "total": 15,
   "is_crit": false,
   "meets_difficulty": true,
-  "outcome": "SUCCESS",
+  "outcome": "SUCCESS_WITH_HOPE",
   "rules_version": "1.0.0",
   "intermediates": {
     "base_total": 13,
@@ -253,9 +253,29 @@ Returns a deterministic explanation for a known Hope/Fear outcome.
   },
   "steps": [
     {
-      "code": "CALCULATE_BASE",
-      "message": "Calculate base total from dice",
-      "data": {"hope": 8, "fear": 5, "base_total": 13}
+      "code": "SUM_DICE",
+      "message": "Sum hope and fear dice",
+      "data": { "hope": 8, "fear": 5, "base_total": 13 }
+    },
+    {
+      "code": "APPLY_MODIFIER",
+      "message": "Apply modifier to base total",
+      "data": { "base_total": 13, "modifier": 2, "total": 15 }
+    },
+    {
+      "code": "CHECK_CRIT",
+      "message": "Check for critical outcome",
+      "data": { "hope": 8, "fear": 5, "is_crit": false }
+    },
+    {
+      "code": "CHECK_DIFFICULTY",
+      "message": "Compare total against difficulty",
+      "data": { "total": 15, "difficulty": 15, "meets_difficulty": true }
+    },
+    {
+      "code": "SELECT_OUTCOME",
+      "message": "Select final outcome based on roll",
+      "data": { "outcome": "SUCCESS" }
     }
   ]
 }
@@ -331,9 +351,9 @@ Rolls arbitrary dice pools and returns the individual results.
 
 #### campaigns://list
 
-JSON listing of campaign metadata records. No dependencies.
+Returns a JSON object with a `campaigns` array of campaign metadata records. No dependencies.
 
-Fields: `id`, `name`, `gm_mode`, `player_count`, `theme_prompt`, `created_at`, `updated_at`.
+Each entry in `campaigns` has fields: `id`, `name`, `gm_mode`, `player_count`, `theme_prompt`, `created_at`, `updated_at`.
 
 #### campaign://{campaign_id}/participants
 
