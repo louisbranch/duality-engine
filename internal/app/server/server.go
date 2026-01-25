@@ -42,7 +42,11 @@ func New(port int) (*Server, error) {
 
 	grpcServer := grpc.NewServer()
 	dualityService := dualityservice.NewDualityService(random.NewSeed)
-	campaignService := campaignservice.NewCampaignService(store, store, store)
+	campaignService := campaignservice.NewCampaignService(campaignservice.Stores{
+		Campaign:    store,
+		Participant: store,
+		Actor:       store,
+	})
 	healthServer := health.NewServer()
 	pb.RegisterDualityServiceServer(grpcServer, dualityService)
 	campaignv1.RegisterCampaignServiceServer(grpcServer, campaignService)

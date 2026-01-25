@@ -19,10 +19,10 @@ func (s *CampaignService) CreateParticipant(ctx context.Context, in *campaignv1.
 		return nil, status.Error(codes.InvalidArgument, "create participant request is required")
 	}
 
-	if s.store == nil {
+	if s.stores.Campaign == nil {
 		return nil, status.Error(codes.Internal, "campaign store is not configured")
 	}
-	if s.participantStore == nil {
+	if s.stores.Participant == nil {
 		return nil, status.Error(codes.Internal, "participant store is not configured")
 	}
 
@@ -31,7 +31,7 @@ func (s *CampaignService) CreateParticipant(ctx context.Context, in *campaignv1.
 	if campaignID == "" {
 		return nil, status.Error(codes.InvalidArgument, "campaign id is required")
 	}
-	campaign, err := s.store.Get(ctx, campaignID)
+	campaign, err := s.stores.Campaign.Get(ctx, campaignID)
 	if err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
 			return nil, status.Error(codes.NotFound, "campaign not found")
@@ -52,7 +52,7 @@ func (s *CampaignService) CreateParticipant(ctx context.Context, in *campaignv1.
 		return nil, status.Errorf(codes.Internal, "create participant: %v", err)
 	}
 
-	if err := s.participantStore.PutParticipant(ctx, participant); err != nil {
+	if err := s.stores.Participant.PutParticipant(ctx, participant); err != nil {
 		return nil, status.Errorf(codes.Internal, "persist participant: %v", err)
 	}
 
@@ -63,7 +63,7 @@ func (s *CampaignService) CreateParticipant(ctx context.Context, in *campaignv1.
 		// transactions or atomic increment operations if the storage layer supports them.
 		campaign.PlayerCount++
 		campaign.UpdatedAt = s.clock().UTC()
-		if err := s.store.Put(ctx, campaign); err != nil {
+		if err := s.stores.Campaign.Put(ctx, campaign); err != nil {
 			return nil, status.Errorf(codes.Internal, "update campaign player count: %v", err)
 		}
 	}
@@ -89,10 +89,10 @@ func (s *CampaignService) ListParticipants(ctx context.Context, in *campaignv1.L
 		return nil, status.Error(codes.InvalidArgument, "list participants request is required")
 	}
 
-	if s.store == nil {
+	if s.stores.Campaign == nil {
 		return nil, status.Error(codes.Internal, "campaign store is not configured")
 	}
-	if s.participantStore == nil {
+	if s.stores.Participant == nil {
 		return nil, status.Error(codes.Internal, "participant store is not configured")
 	}
 
@@ -101,7 +101,7 @@ func (s *CampaignService) ListParticipants(ctx context.Context, in *campaignv1.L
 	if campaignID == "" {
 		return nil, status.Error(codes.InvalidArgument, "campaign id is required")
 	}
-	_, err := s.store.Get(ctx, campaignID)
+	_, err := s.stores.Campaign.Get(ctx, campaignID)
 	if err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
 			return nil, status.Error(codes.NotFound, "campaign not found")
@@ -117,7 +117,7 @@ func (s *CampaignService) ListParticipants(ctx context.Context, in *campaignv1.L
 		pageSize = maxListParticipantsPageSize
 	}
 
-	page, err := s.participantStore.ListParticipants(ctx, campaignID, pageSize, in.GetPageToken())
+	page, err := s.stores.Participant.ListParticipants(ctx, campaignID, pageSize, in.GetPageToken())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list participants: %v", err)
 	}

@@ -81,7 +81,9 @@ func TestCreateCampaignSuccess(t *testing.T) {
 	fixedTime := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
 	store := &fakeCampaignStore{}
 	service := &CampaignService{
-		store: store,
+		stores: Stores{
+			Campaign: store,
+		},
 		clock: func() time.Time {
 			return fixedTime
 		},
@@ -149,7 +151,9 @@ func TestCreateCampaignValidationErrors(t *testing.T) {
 	}
 
 	service := &CampaignService{
-		store:       &fakeCampaignStore{},
+		stores: Stores{
+			Campaign: &fakeCampaignStore{},
+		},
 		clock:       time.Now,
 		idGenerator: func() (string, error) { return "camp-1", nil },
 	}
@@ -172,7 +176,11 @@ func TestCreateCampaignValidationErrors(t *testing.T) {
 }
 
 func TestCreateCampaignNilRequest(t *testing.T) {
-	service := NewCampaignService(&fakeCampaignStore{}, &fakeParticipantStore{}, &fakeActorStore{})
+	service := NewCampaignService(Stores{
+		Campaign:    &fakeCampaignStore{},
+		Participant: &fakeParticipantStore{},
+		Actor:       &fakeActorStore{},
+	})
 
 	_, err := service.CreateCampaign(context.Background(), nil)
 	if err == nil {
@@ -189,7 +197,9 @@ func TestCreateCampaignNilRequest(t *testing.T) {
 
 func TestCreateCampaignIDGenerationFailure(t *testing.T) {
 	service := &CampaignService{
-		store: &fakeCampaignStore{},
+		stores: Stores{
+			Campaign: &fakeCampaignStore{},
+		},
 		clock: time.Now,
 		idGenerator: func() (string, error) {
 			return "", errors.New("boom")
@@ -215,7 +225,9 @@ func TestCreateCampaignIDGenerationFailure(t *testing.T) {
 func TestCreateCampaignStoreFailure(t *testing.T) {
 	store := &fakeCampaignStore{putErr: errors.New("boom")}
 	service := &CampaignService{
-		store: store,
+		stores: Stores{
+			Campaign: store,
+		},
 		clock: time.Now,
 		idGenerator: func() (string, error) {
 			return "camp-123", nil
@@ -240,6 +252,7 @@ func TestCreateCampaignStoreFailure(t *testing.T) {
 
 func TestCreateCampaignMissingStore(t *testing.T) {
 	service := &CampaignService{
+		stores: Stores{},
 		clock: time.Now,
 		idGenerator: func() (string, error) {
 			return "camp-123", nil
@@ -280,7 +293,11 @@ func TestListCampaignsDefaults(t *testing.T) {
 			NextPageToken: "camp-11",
 		},
 	}
-	service := NewCampaignService(store, &fakeParticipantStore{}, &fakeActorStore{})
+	service := NewCampaignService(Stores{
+		Campaign:    store,
+		Participant: &fakeParticipantStore{},
+		Actor:       &fakeActorStore{},
+	})
 
 	response, err := service.ListCampaigns(context.Background(), &campaignv1.ListCampaignsRequest{})
 	if err != nil {
@@ -311,7 +328,11 @@ func TestListCampaignsDefaults(t *testing.T) {
 
 func TestListCampaignsClampPageSize(t *testing.T) {
 	store := &fakeCampaignStore{listPage: storage.CampaignPage{}}
-	service := NewCampaignService(store, &fakeParticipantStore{}, &fakeActorStore{})
+	service := NewCampaignService(Stores{
+		Campaign:    store,
+		Participant: &fakeParticipantStore{},
+		Actor:       &fakeActorStore{},
+	})
 
 	_, err := service.ListCampaigns(context.Background(), &campaignv1.ListCampaignsRequest{
 		PageSize: 25,
@@ -326,7 +347,11 @@ func TestListCampaignsClampPageSize(t *testing.T) {
 
 func TestListCampaignsPassesToken(t *testing.T) {
 	store := &fakeCampaignStore{listPage: storage.CampaignPage{}}
-	service := NewCampaignService(store, &fakeParticipantStore{}, &fakeActorStore{})
+	service := NewCampaignService(Stores{
+		Campaign:    store,
+		Participant: &fakeParticipantStore{},
+		Actor:       &fakeActorStore{},
+	})
 
 	_, err := service.ListCampaigns(context.Background(), &campaignv1.ListCampaignsRequest{
 		PageSize:  1,
@@ -341,7 +366,11 @@ func TestListCampaignsPassesToken(t *testing.T) {
 }
 
 func TestListCampaignsNilRequest(t *testing.T) {
-	service := NewCampaignService(&fakeCampaignStore{}, &fakeParticipantStore{}, &fakeActorStore{})
+	service := NewCampaignService(Stores{
+		Campaign:    &fakeCampaignStore{},
+		Participant: &fakeParticipantStore{},
+		Actor:       &fakeActorStore{},
+	})
 
 	_, err := service.ListCampaigns(context.Background(), nil)
 	if err == nil {
@@ -357,7 +386,11 @@ func TestListCampaignsNilRequest(t *testing.T) {
 }
 
 func TestListCampaignsStoreFailure(t *testing.T) {
-	service := NewCampaignService(&fakeCampaignStore{listErr: errors.New("boom")}, &fakeParticipantStore{}, &fakeActorStore{})
+	service := NewCampaignService(Stores{
+		Campaign:    &fakeCampaignStore{listErr: errors.New("boom")},
+		Participant: &fakeParticipantStore{},
+		Actor:       &fakeActorStore{},
+	})
 
 	_, err := service.ListCampaigns(context.Background(), &campaignv1.ListCampaignsRequest{
 		PageSize: 1,

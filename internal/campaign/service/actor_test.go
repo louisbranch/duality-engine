@@ -41,8 +41,10 @@ func TestCreateActorSuccess(t *testing.T) {
 	}
 	actorStore := &fakeActorStore{}
 	service := &CampaignService{
-		store:      campaignStore,
-		actorStore: actorStore,
+		stores: Stores{
+			Campaign: campaignStore,
+			Actor:    actorStore,
+		},
 		clock: func() time.Time {
 			return fixedTime
 		},
@@ -122,8 +124,10 @@ func TestCreateActorValidationErrors(t *testing.T) {
 		return domain.Campaign{ID: id}, nil
 	}
 	service := &CampaignService{
-		store:      campaignStore,
-		actorStore: &fakeActorStore{},
+		stores: Stores{
+			Campaign: campaignStore,
+			Actor:    &fakeActorStore{},
+		},
 		clock:      time.Now,
 		actorIDGen: func() (string, error) { return "actor-1", nil },
 	}
@@ -151,8 +155,10 @@ func TestCreateActorCampaignNotFound(t *testing.T) {
 		return domain.Campaign{}, storage.ErrNotFound
 	}
 	service := &CampaignService{
-		store:      campaignStore,
-		actorStore: &fakeActorStore{},
+		stores: Stores{
+			Campaign: campaignStore,
+			Actor:    &fakeActorStore{},
+		},
 		clock:      time.Now,
 		actorIDGen: func() (string, error) { return "actor-1", nil },
 	}
@@ -175,7 +181,11 @@ func TestCreateActorCampaignNotFound(t *testing.T) {
 }
 
 func TestCreateActorNilRequest(t *testing.T) {
-	service := NewCampaignService(&fakeCampaignStore{}, &fakeParticipantStore{}, &fakeActorStore{})
+	service := NewCampaignService(Stores{
+		Campaign:    &fakeCampaignStore{},
+		Participant: &fakeParticipantStore{},
+		Actor:       &fakeActorStore{},
+	})
 
 	_, err := service.CreateActor(context.Background(), nil)
 	if err == nil {
@@ -197,8 +207,10 @@ func TestCreateActorStoreFailure(t *testing.T) {
 	}
 	actorStore := &fakeActorStore{putErr: errors.New("boom")}
 	service := &CampaignService{
-		store:      campaignStore,
-		actorStore: actorStore,
+		stores: Stores{
+			Campaign: campaignStore,
+			Actor:    actorStore,
+		},
 		clock:      time.Now,
 		actorIDGen: func() (string, error) { return "actor-123", nil },
 	}
@@ -231,8 +243,10 @@ func TestCreateActorNPCKind(t *testing.T) {
 	}
 	actorStore := &fakeActorStore{}
 	service := &CampaignService{
-		store:      campaignStore,
-		actorStore: actorStore,
+		stores: Stores{
+			Campaign: campaignStore,
+			Actor:    actorStore,
+		},
 		clock: func() time.Time {
 			return fixedTime
 		},
@@ -264,7 +278,9 @@ func TestCreateActorMissingStore(t *testing.T) {
 		return domain.Campaign{ID: "camp-123"}, nil
 	}
 	service := &CampaignService{
-		store: campaignStore,
+		stores: Stores{
+			Campaign: campaignStore,
+		},
 	}
 
 	_, err := service.CreateActor(context.Background(), &campaignv1.CreateActorRequest{

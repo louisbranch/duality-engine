@@ -21,12 +21,17 @@ const (
 	maxListParticipantsPageSize     = 10
 )
 
+// Stores groups all campaign-related storage interfaces.
+type Stores struct {
+	Campaign    storage.CampaignStore
+	Participant storage.ParticipantStore
+	Actor       storage.ActorStore
+}
+
 // CampaignService implements the CampaignService gRPC API.
 type CampaignService struct {
 	campaignv1.UnimplementedCampaignServiceServer
-	store            storage.CampaignStore
-	participantStore storage.ParticipantStore
-	actorStore       storage.ActorStore
+	stores           Stores
 	clock            func() time.Time
 	idGenerator      func() (string, error)
 	participantIDGen func() (string, error)
@@ -34,11 +39,9 @@ type CampaignService struct {
 }
 
 // NewCampaignService creates a CampaignService with default dependencies.
-func NewCampaignService(store storage.CampaignStore, participantStore storage.ParticipantStore, actorStore storage.ActorStore) *CampaignService {
+func NewCampaignService(stores Stores) *CampaignService {
 	return &CampaignService{
-		store:            store,
-		participantStore: participantStore,
-		actorStore:       actorStore,
+		stores:           stores,
 		clock:            time.Now,
 		idGenerator:      domain.NewID,
 		participantIDGen: domain.NewID,
@@ -52,7 +55,7 @@ func (s *CampaignService) CreateCampaign(ctx context.Context, in *campaignv1.Cre
 		return nil, status.Error(codes.InvalidArgument, "create campaign request is required")
 	}
 
-	if s.store == nil {
+	if s.stores.Campaign == nil {
 		return nil, status.Error(codes.Internal, "campaign store is not configured")
 	}
 
@@ -67,7 +70,7 @@ func (s *CampaignService) CreateCampaign(ctx context.Context, in *campaignv1.Cre
 		}
 		return nil, status.Errorf(codes.Internal, "create campaign: %v", err)
 	}
-	if err := s.store.Put(ctx, campaign); err != nil {
+	if err := s.stores.Campaign.Put(ctx, campaign); err != nil {
 		return nil, status.Errorf(codes.Internal, "persist campaign: %v", err)
 	}
 
@@ -96,7 +99,7 @@ func (s *CampaignService) ListCampaigns(ctx context.Context, in *campaignv1.List
 		return nil, status.Error(codes.InvalidArgument, "list campaigns request is required")
 	}
 
-	if s.store == nil {
+	if s.stores.Campaign == nil {
 		return nil, status.Error(codes.Internal, "campaign store is not configured")
 	}
 
@@ -108,7 +111,7 @@ func (s *CampaignService) ListCampaigns(ctx context.Context, in *campaignv1.List
 		pageSize = maxListCampaignsPageSize
 	}
 
-	page, err := s.store.List(ctx, pageSize, in.GetPageToken())
+	page, err := s.stores.Campaign.List(ctx, pageSize, in.GetPageToken())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list campaigns: %v", err)
 	}
@@ -170,10 +173,10 @@ func (s *CampaignService) CreateActor(ctx context.Context, in *campaignv1.Create
 		return nil, status.Error(codes.InvalidArgument, "create actor request is required")
 	}
 
-	if s.store == nil {
+	if s.stores.Campaign == nil {
 		return nil, status.Error(codes.Internal, "campaign store is not configured")
 	}
-	if s.actorStore == nil {
+	if s.stores.Actor == nil {
 		return nil, status.Error(codes.Internal, "actor store is not configured")
 	}
 
@@ -182,7 +185,7 @@ func (s *CampaignService) CreateActor(ctx context.Context, in *campaignv1.Create
 	if campaignID == "" {
 		return nil, status.Error(codes.InvalidArgument, "campaign id is required")
 	}
-	_, err := s.store.Get(ctx, campaignID)
+	_, err := s.stores.Campaign.Get(ctx, campaignID)
 	if err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
 			return nil, status.Error(codes.NotFound, "campaign not found")
@@ -203,7 +206,7 @@ func (s *CampaignService) CreateActor(ctx context.Context, in *campaignv1.Create
 		return nil, status.Errorf(codes.Internal, "create actor: %v", err)
 	}
 
-	if err := s.actorStore.PutActor(ctx, actor); err != nil {
+	if err := s.stores.Actor.PutActor(ctx, actor); err != nil {
 		return nil, status.Errorf(codes.Internal, "persist actor: %v", err)
 	}
 
