@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/louisbranch/duality-engine/internal/campaign/domain"
+	sessiondomain "github.com/louisbranch/duality-engine/internal/session/domain"
 )
 
 // ErrNotFound indicates a requested record is missing.
@@ -59,4 +60,18 @@ type ControlDefaultStore interface {
 	// PutControlDefault sets the default controller for an actor in a campaign.
 	// Overwrites any existing controller for the same (campaign_id, actor_id) pair.
 	PutControlDefault(ctx context.Context, campaignID, actorID string, controller domain.ActorController) error
+}
+
+// SessionStore persists session records.
+type SessionStore interface {
+	// PutSession stores a session record.
+	PutSession(ctx context.Context, session sessiondomain.Session) error
+	// GetSession retrieves a session by campaign ID and session ID.
+	GetSession(ctx context.Context, campaignID, sessionID string) (sessiondomain.Session, error)
+	// GetActiveSession retrieves the active session for a campaign, if one exists.
+	// Returns ErrNotFound if no active session exists.
+	GetActiveSession(ctx context.Context, campaignID string) (sessiondomain.Session, error)
+	// PutSessionWithActivePointer atomically stores a session and sets it as the active session for the campaign.
+	// Returns an error if an active session already exists for the campaign.
+	PutSessionWithActivePointer(ctx context.Context, session sessiondomain.Session) error
 }

@@ -11,8 +11,10 @@ import (
 
 	campaignv1 "github.com/louisbranch/duality-engine/api/gen/go/campaign/v1"
 	pb "github.com/louisbranch/duality-engine/api/gen/go/duality/v1"
+	sessionv1 "github.com/louisbranch/duality-engine/api/gen/go/session/v1"
 	campaignservice "github.com/louisbranch/duality-engine/internal/campaign/service"
 	dualityservice "github.com/louisbranch/duality-engine/internal/duality/service"
+	sessionservice "github.com/louisbranch/duality-engine/internal/session/service"
 	"github.com/louisbranch/duality-engine/internal/random"
 	storagebbolt "github.com/louisbranch/duality-engine/internal/storage/bbolt"
 	"google.golang.org/grpc"
@@ -48,13 +50,19 @@ func New(port int) (*Server, error) {
 		Actor:          store,
 		ControlDefault: store,
 	})
+	sessionService := sessionservice.NewSessionService(sessionservice.Stores{
+		Campaign: store,
+		Session:  store,
+	})
 	healthServer := health.NewServer()
 	pb.RegisterDualityServiceServer(grpcServer, dualityService)
 	campaignv1.RegisterCampaignServiceServer(grpcServer, campaignService)
+	sessionv1.RegisterSessionServiceServer(grpcServer, sessionService)
 	grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
 	healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
 	healthServer.SetServingStatus("duality.v1.DualityService", grpc_health_v1.HealthCheckResponse_SERVING)
 	healthServer.SetServingStatus("campaign.v1.CampaignService", grpc_health_v1.HealthCheckResponse_SERVING)
+	healthServer.SetServingStatus("session.v1.SessionService", grpc_health_v1.HealthCheckResponse_SERVING)
 
 	return &Server{
 		listener:   listener,
