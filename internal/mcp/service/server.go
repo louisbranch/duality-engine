@@ -40,6 +40,9 @@ const (
 type Config struct {
 	GRPCAddr  string
 	Transport TransportKind
+	HTTPAddr  string // HTTP server address (e.g., "localhost:8081"). Defaults to localhost:8081 for HTTP transport.
+	// TODO: Add TLSConfig field for future TLS/HTTPS support
+	// TODO: Add AuthToken field for future API key authentication
 }
 
 // Server hosts the MCP server.
@@ -87,10 +90,37 @@ func Run(ctx context.Context, cfg Config) error {
 	case TransportStdio:
 		return runWithTransport(ctx, cfg.GRPCAddr, &mcp.StdioTransport{})
 	case TransportHTTP:
-		return fmt.Errorf("transport %q is not supported", cfg.Transport)
+		return runWithHTTPTransport(ctx, cfg)
 	default:
 		return fmt.Errorf("transport %q is not supported", cfg.Transport)
 	}
+}
+
+// runWithHTTPTransport creates a server and serves it over HTTP transport.
+func runWithHTTPTransport(ctx context.Context, cfg Config) error {
+	// TODO: Bind HTTP server to localhost only by default (not 0.0.0.0) for security
+	httpAddr := cfg.HTTPAddr
+	if httpAddr == "" {
+		httpAddr = "localhost:8081"
+	}
+
+	mcpServer, err := New(cfg.GRPCAddr)
+	if err != nil {
+		return err
+	}
+	if err := mcpServer.waitForHealth(ctx); err != nil {
+		closeErr := mcpServer.Close()
+		if closeErr != nil {
+			return fmt.Errorf("wait for gRPC health: %v; close gRPC connection: %w", err, closeErr)
+		}
+		return err
+	}
+
+	// Create HTTP transport with reference to MCP server
+	httpTransport := NewHTTPTransportWithServer(httpAddr, mcpServer.mcpServer)
+
+	// Start HTTP server (this will handle all HTTP requests)
+	return httpTransport.Start(ctx)
 }
 
 // Serve starts the MCP server on stdio and blocks until it stops or the context ends.
