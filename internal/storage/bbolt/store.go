@@ -254,12 +254,12 @@ func (s *Store) PutParticipant(ctx context.Context, participant domain.Participa
 	}
 
 	return s.db.Update(func(tx *bbolt.Tx) error {
-		// Load campaign to verify it exists and update counter
-		campaignBucket := tx.Bucket([]byte(campaignBucket))
-		if campaignBucket == nil {
+		// Load campaign to verify it exists
+		campBucket := tx.Bucket([]byte(campaignBucket))
+		if campBucket == nil {
 			return fmt.Errorf("campaign bucket is missing")
 		}
-		campaignPayload := campaignBucket.Get(campaignKey(participant.CampaignID))
+		campaignPayload := campBucket.Get(campaignKey(participant.CampaignID))
 		if campaignPayload == nil {
 			return storage.ErrNotFound
 		}
@@ -269,25 +269,35 @@ func (s *Store) PutParticipant(ctx context.Context, participant domain.Participa
 			return fmt.Errorf("unmarshal campaign: %w", err)
 		}
 
-		// Increment participant count and update timestamp
-		campaign.ParticipantCount++
-		campaign.UpdatedAt = time.Now().UTC()
-
-		// Persist updated campaign
-		updatedCampaignPayload, err := json.Marshal(campaign)
-		if err != nil {
-			return fmt.Errorf("marshal campaign: %w", err)
-		}
-		if err := campaignBucket.Put(campaignKey(participant.CampaignID), updatedCampaignPayload); err != nil {
-			return fmt.Errorf("put campaign: %w", err)
-		}
-
-		// Store the participant
-		participantBucket := tx.Bucket([]byte(participantBucket))
-		if participantBucket == nil {
+		// Check if participant already exists - only increment counter for new records
+		partsBucket := tx.Bucket([]byte(participantBucket))
+		if partsBucket == nil {
 			return fmt.Errorf("participant bucket is missing")
 		}
-		return participantBucket.Put(participantKey(participant.CampaignID, participant.ID), participantPayload)
+		participantKeyBytes := participantKey(participant.CampaignID, participant.ID)
+		isNewParticipant := partsBucket.Get(participantKeyBytes) == nil
+
+		// Store the participant
+		if err := partsBucket.Put(participantKeyBytes, participantPayload); err != nil {
+			return fmt.Errorf("put participant: %w", err)
+		}
+
+		// Increment participant count only for new records and update timestamp
+		if isNewParticipant {
+			campaign.ParticipantCount++
+			campaign.UpdatedAt = time.Now().UTC()
+
+			// Persist updated campaign
+			updatedCampaignPayload, err := json.Marshal(campaign)
+			if err != nil {
+				return fmt.Errorf("marshal campaign: %w", err)
+			}
+			if err := campBucket.Put(campaignKey(participant.CampaignID), updatedCampaignPayload); err != nil {
+				return fmt.Errorf("put campaign: %w", err)
+			}
+		}
+
+		return nil
 	})
 }
 
@@ -460,12 +470,12 @@ func (s *Store) PutActor(ctx context.Context, actor domain.Actor) error {
 	}
 
 	return s.db.Update(func(tx *bbolt.Tx) error {
-		// Load campaign to verify it exists and update counter
-		campaignBucket := tx.Bucket([]byte(campaignBucket))
-		if campaignBucket == nil {
+		// Load campaign to verify it exists
+		campBucket := tx.Bucket([]byte(campaignBucket))
+		if campBucket == nil {
 			return fmt.Errorf("campaign bucket is missing")
 		}
-		campaignPayload := campaignBucket.Get(campaignKey(actor.CampaignID))
+		campaignPayload := campBucket.Get(campaignKey(actor.CampaignID))
 		if campaignPayload == nil {
 			return storage.ErrNotFound
 		}
@@ -475,25 +485,35 @@ func (s *Store) PutActor(ctx context.Context, actor domain.Actor) error {
 			return fmt.Errorf("unmarshal campaign: %w", err)
 		}
 
-		// Increment actor count and update timestamp
-		campaign.ActorCount++
-		campaign.UpdatedAt = time.Now().UTC()
-
-		// Persist updated campaign
-		updatedCampaignPayload, err := json.Marshal(campaign)
-		if err != nil {
-			return fmt.Errorf("marshal campaign: %w", err)
-		}
-		if err := campaignBucket.Put(campaignKey(actor.CampaignID), updatedCampaignPayload); err != nil {
-			return fmt.Errorf("put campaign: %w", err)
-		}
-
-		// Store the actor
-		actorBucket := tx.Bucket([]byte(actorBucket))
-		if actorBucket == nil {
+		// Check if actor already exists - only increment counter for new records
+		actsBucket := tx.Bucket([]byte(actorBucket))
+		if actsBucket == nil {
 			return fmt.Errorf("actor bucket is missing")
 		}
-		return actorBucket.Put(actorKey(actor.CampaignID, actor.ID), actorPayload)
+		actorKeyBytes := actorKey(actor.CampaignID, actor.ID)
+		isNewActor := actsBucket.Get(actorKeyBytes) == nil
+
+		// Store the actor
+		if err := actsBucket.Put(actorKeyBytes, actorPayload); err != nil {
+			return fmt.Errorf("put actor: %w", err)
+		}
+
+		// Increment actor count only for new records and update timestamp
+		if isNewActor {
+			campaign.ActorCount++
+			campaign.UpdatedAt = time.Now().UTC()
+
+			// Persist updated campaign
+			updatedCampaignPayload, err := json.Marshal(campaign)
+			if err != nil {
+				return fmt.Errorf("marshal campaign: %w", err)
+			}
+			if err := campBucket.Put(campaignKey(actor.CampaignID), updatedCampaignPayload); err != nil {
+				return fmt.Errorf("put campaign: %w", err)
+			}
+		}
+
+		return nil
 	})
 }
 

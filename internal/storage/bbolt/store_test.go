@@ -280,6 +280,15 @@ func TestParticipantStorePutGet(t *testing.T) {
 		t.Fatalf("put participant: %v", err)
 	}
 
+	// Verify participant count was incremented
+	updatedCampaign, err := store.Get(context.Background(), "camp-456")
+	if err != nil {
+		t.Fatalf("get campaign: %v", err)
+	}
+	if updatedCampaign.ParticipantCount != 1 {
+		t.Fatalf("expected participant count 1, got %d", updatedCampaign.ParticipantCount)
+	}
+
 	loaded, err := store.GetParticipant(context.Background(), "camp-456", "part-123")
 	if err != nil {
 		t.Fatalf("get participant: %v", err)
@@ -304,6 +313,76 @@ func TestParticipantStorePutGet(t *testing.T) {
 	}
 	if !loaded.UpdatedAt.Equal(now) {
 		t.Fatalf("expected updated_at %v, got %v", now, loaded.UpdatedAt)
+	}
+}
+
+func TestParticipantStorePutIncrementsCounterOnlyForNewRecords(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	now := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	campaign := domain.Campaign{
+		ID:              "camp-789",
+		Name:            "Test Campaign",
+		GmMode:          domain.GmModeHuman,
+		ParticipantCount: 0,
+		ActorCount:      0,
+		CreatedAt:       now,
+		UpdatedAt:       now,
+	}
+	if err := store.Put(context.Background(), campaign); err != nil {
+		t.Fatalf("put campaign: %v", err)
+	}
+
+	participant := domain.Participant{
+		ID:          "part-999",
+		CampaignID:  "camp-789",
+		DisplayName: "Alice",
+		Role:        domain.ParticipantRolePlayer,
+		Controller:  domain.ControllerHuman,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	}
+
+	// First put should increment counter
+	if err := store.PutParticipant(context.Background(), participant); err != nil {
+		t.Fatalf("put participant: %v", err)
+	}
+
+	campaignAfterFirst, err := store.Get(context.Background(), "camp-789")
+	if err != nil {
+		t.Fatalf("get campaign: %v", err)
+	}
+	if campaignAfterFirst.ParticipantCount != 1 {
+		t.Fatalf("expected participant count 1 after first put, got %d", campaignAfterFirst.ParticipantCount)
+	}
+
+	// Update participant display name
+	participant.DisplayName = "Alice Updated"
+	if err := store.PutParticipant(context.Background(), participant); err != nil {
+		t.Fatalf("put participant update: %v", err)
+	}
+
+	// Counter should not increment on update
+	campaignAfterUpdate, err := store.Get(context.Background(), "camp-789")
+	if err != nil {
+		t.Fatalf("get campaign: %v", err)
+	}
+	if campaignAfterUpdate.ParticipantCount != 1 {
+		t.Fatalf("expected participant count 1 after update, got %d", campaignAfterUpdate.ParticipantCount)
+	}
+
+	// Verify participant was updated
+	loaded, err := store.GetParticipant(context.Background(), "camp-789", "part-999")
+	if err != nil {
+		t.Fatalf("get participant: %v", err)
+	}
+	if loaded.DisplayName != "Alice Updated" {
+		t.Fatalf("expected updated display name, got %q", loaded.DisplayName)
 	}
 }
 
@@ -998,6 +1077,15 @@ func TestActorStorePutGet(t *testing.T) {
 		t.Fatalf("put actor: %v", err)
 	}
 
+	// Verify actor count was incremented
+	updatedCampaign, err := store.Get(context.Background(), "camp-456")
+	if err != nil {
+		t.Fatalf("get campaign: %v", err)
+	}
+	if updatedCampaign.ActorCount != 1 {
+		t.Fatalf("expected actor count 1, got %d", updatedCampaign.ActorCount)
+	}
+
 	loaded, err := store.GetActor(context.Background(), "camp-456", "actor-123")
 	if err != nil {
 		t.Fatalf("get actor: %v", err)
@@ -1022,6 +1110,76 @@ func TestActorStorePutGet(t *testing.T) {
 	}
 	if !loaded.UpdatedAt.Equal(now) {
 		t.Fatalf("expected updated_at %v, got %v", now, loaded.UpdatedAt)
+	}
+}
+
+func TestActorStorePutIncrementsCounterOnlyForNewRecords(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	now := time.Date(2026, 1, 23, 12, 0, 0, 0, time.UTC)
+	campaign := domain.Campaign{
+		ID:              "camp-999",
+		Name:            "Test Campaign",
+		GmMode:          domain.GmModeHuman,
+		ParticipantCount: 0,
+		ActorCount:      0,
+		CreatedAt:       now,
+		UpdatedAt:       now,
+	}
+	if err := store.Put(context.Background(), campaign); err != nil {
+		t.Fatalf("put campaign: %v", err)
+	}
+
+	actor := domain.Actor{
+		ID:         "actor-888",
+		CampaignID: "camp-999",
+		Name:       "Hero",
+		Kind:       domain.ActorKindPC,
+		Notes:      "A brave warrior",
+		CreatedAt:  now,
+		UpdatedAt:  now,
+	}
+
+	// First put should increment counter
+	if err := store.PutActor(context.Background(), actor); err != nil {
+		t.Fatalf("put actor: %v", err)
+	}
+
+	campaignAfterFirst, err := store.Get(context.Background(), "camp-999")
+	if err != nil {
+		t.Fatalf("get campaign: %v", err)
+	}
+	if campaignAfterFirst.ActorCount != 1 {
+		t.Fatalf("expected actor count 1 after first put, got %d", campaignAfterFirst.ActorCount)
+	}
+
+	// Update actor notes
+	actor.Notes = "An even braver warrior"
+	if err := store.PutActor(context.Background(), actor); err != nil {
+		t.Fatalf("put actor update: %v", err)
+	}
+
+	// Counter should not increment on update
+	campaignAfterUpdate, err := store.Get(context.Background(), "camp-999")
+	if err != nil {
+		t.Fatalf("get campaign: %v", err)
+	}
+	if campaignAfterUpdate.ActorCount != 1 {
+		t.Fatalf("expected actor count 1 after update, got %d", campaignAfterUpdate.ActorCount)
+	}
+
+	// Verify actor was updated
+	loaded, err := store.GetActor(context.Background(), "camp-999", "actor-888")
+	if err != nil {
+		t.Fatalf("get actor: %v", err)
+	}
+	if loaded.Notes != "An even braver warrior" {
+		t.Fatalf("expected updated notes, got %q", loaded.Notes)
 	}
 }
 

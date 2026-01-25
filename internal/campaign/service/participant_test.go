@@ -88,7 +88,7 @@ func TestCreateParticipantIncrementsParticipantCount(t *testing.T) {
 		},
 	}
 
-	// Test that participant is created (counter increment is tested in bbolt store tests)
+	// Test that participant is created
 	_, err := service.CreateParticipant(context.Background(), &campaignv1.CreateParticipantRequest{
 		CampaignId:  "camp-123",
 		DisplayName: "Charlie",
