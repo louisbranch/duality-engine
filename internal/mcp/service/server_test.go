@@ -2151,8 +2151,8 @@ func TestSetContextHandlerRejectsNonExistentCampaign(t *testing.T) {
 	}
 }
 
-// TestSetContextHandlerRejectsEmptySessionIDAfterTrim validates whitespace-only session_id is treated as omitted.
-func TestSetContextHandlerRejectsEmptySessionIDAfterTrim(t *testing.T) {
+// TestSetContextHandlerTreatsWhitespaceOnlySessionIDAsOmitted validates whitespace-only session_id is treated as omitted.
+func TestSetContextHandlerTreatsWhitespaceOnlySessionIDAsOmitted(t *testing.T) {
 	campaignClient := &fakeCampaignClient{
 		getCampaignResponse: &campaignv1.GetCampaignResponse{
 			Campaign: &campaignv1.Campaign{Id: "camp-123"},
@@ -2239,8 +2239,8 @@ func TestSetContextHandlerRejectsSessionFromDifferentCampaign(t *testing.T) {
 	}
 }
 
-// TestSetContextHandlerRejectsEmptyParticipantIDAfterTrim validates whitespace-only participant_id is treated as omitted.
-func TestSetContextHandlerRejectsEmptyParticipantIDAfterTrim(t *testing.T) {
+// TestSetContextHandlerTreatsWhitespaceOnlyParticipantIDAsOmitted validates whitespace-only participant_id is treated as omitted.
+func TestSetContextHandlerTreatsWhitespaceOnlyParticipantIDAsOmitted(t *testing.T) {
 	campaignClient := &fakeCampaignClient{
 		getCampaignResponse: &campaignv1.GetCampaignResponse{
 			Campaign: &campaignv1.Campaign{Id: "camp-123"},
