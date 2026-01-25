@@ -64,6 +64,22 @@ type ParticipantCreateResult struct {
 	UpdatedAt   string `json:"updated_at" jsonschema:"RFC3339 timestamp when participant was last updated"`
 }
 
+// ParticipantListEntry represents a readable participant entry.
+type ParticipantListEntry struct {
+	ID          string `json:"id"`
+	CampaignID  string `json:"campaign_id"`
+	DisplayName string `json:"display_name"`
+	Role        string `json:"role"`
+	Controller  string `json:"controller"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
+}
+
+// ParticipantListPayload represents the MCP resource payload for participant listings.
+type ParticipantListPayload struct {
+	Participants []ParticipantListEntry `json:"participants"`
+}
+
 // CampaignCreateTool defines the MCP tool schema for creating campaigns.
 func CampaignCreateTool() *mcp.Tool {
 	return &mcp.Tool{
@@ -88,6 +104,20 @@ func CampaignListResource() *mcp.Resource {
 		Description: "Readable listing of campaign metadata records",
 		MIMEType:    "application/json",
 		URI:         "campaigns://list",
+	}
+}
+
+// ParticipantListResource defines the MCP resource for participant listings.
+// The effective URI template is campaign://{campaign_id}/participants, but the
+// SDK requires a valid URI for registration, so we use a placeholder here.
+// Clients must provide the full URI with actual campaign_id when reading.
+func ParticipantListResource() *mcp.Resource {
+	return &mcp.Resource{
+		Name:        "participant_list",
+		Title:       "Participants",
+		Description: "Readable listing of participants for a campaign. URI format: campaign://{campaign_id}/participants",
+		MIMEType:    "application/json",
+		URI:         "campaign://_/participants", // Placeholder; actual format: campaign://{campaign_id}/participants
 	}
 }
 
@@ -293,4 +323,104 @@ func controllerToString(controller campaignv1.Controller) string {
 	default:
 		return "UNSPECIFIED"
 	}
+}
+
+// ParticipantListResourceHandler returns a readable participant listing resource.
+func ParticipantListResourceHandler(client campaignv1.CampaignServiceClient) mcp.ResourceHandler {
+	return func(ctx context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
+		if client == nil {
+			return nil, fmt.Errorf("participant list client is not configured")
+		}
+
+		uri := ParticipantListResource().URI
+		if req != nil && req.Params != nil && req.Params.URI != "" {
+			uri = req.Params.URI
+		}
+
+		// Parse campaign_id from URI: expected format is campaign://{campaign_id}/participants.
+		// If the URI is the registered placeholder, return an error requiring a concrete campaign ID.
+		// Otherwise, parse the campaign ID from the URI path.
+		var campaignID string
+		var err error
+		if uri == ParticipantListResource().URI {
+			// Using registered placeholder URI - this shouldn't happen in practice
+			// but handle it gracefully by requiring campaign_id in a different way
+			return nil, fmt.Errorf("campaign ID is required; use URI format campaign://{campaign_id}/participants")
+		}
+		campaignID, err = parseCampaignIDFromURI(uri)
+		if err != nil {
+			return nil, fmt.Errorf("parse campaign ID from URI: %w", err)
+		}
+
+		runCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+
+		payload := ParticipantListPayload{}
+		response, err := client.ListParticipants(runCtx, &campaignv1.ListParticipantsRequest{
+			CampaignId: campaignID,
+			PageSize:   10,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("participant list failed: %w", err)
+		}
+		if response == nil {
+			return nil, fmt.Errorf("participant list response is missing")
+		}
+
+		for _, participant := range response.GetParticipants() {
+			payload.Participants = append(payload.Participants, ParticipantListEntry{
+				ID:          participant.GetId(),
+				CampaignID:  participant.GetCampaignId(),
+				DisplayName: participant.GetDisplayName(),
+				Role:        participantRoleToString(participant.GetRole()),
+				Controller:  controllerToString(participant.GetController()),
+				CreatedAt:   formatTimestamp(participant.GetCreatedAt()),
+				UpdatedAt:   formatTimestamp(participant.GetUpdatedAt()),
+			})
+		}
+
+		data, err := json.MarshalIndent(payload, "", "  ")
+		if err != nil {
+			return nil, fmt.Errorf("marshal participant list: %w", err)
+		}
+
+		return &mcp.ReadResourceResult{
+			Contents: []*mcp.ResourceContents{
+				{
+					URI:      uri,
+					MIMEType: "application/json",
+					Text:     string(data),
+				},
+			},
+		}, nil
+	}
+}
+
+// parseCampaignIDFromURI extracts the campaign ID from a URI of the form campaign://{campaign_id}/participants.
+// It parses URIs of the expected format but requires an actual campaign ID and rejects the placeholder (campaign://_/participants).
+func parseCampaignIDFromURI(uri string) (string, error) {
+	prefix := "campaign://"
+	suffix := "/participants"
+
+	if !strings.HasPrefix(uri, prefix) {
+		return "", fmt.Errorf("URI must start with %q", prefix)
+	}
+	if !strings.HasSuffix(uri, suffix) {
+		return "", fmt.Errorf("URI must end with %q", suffix)
+	}
+
+	campaignID := strings.TrimPrefix(uri, prefix)
+	campaignID = strings.TrimSuffix(campaignID, suffix)
+	campaignID = strings.TrimSpace(campaignID)
+
+	if campaignID == "" {
+		return "", fmt.Errorf("campaign ID is required in URI")
+	}
+
+	// Reject the placeholder value - actual campaign IDs must be provided
+	if campaignID == "_" {
+		return "", fmt.Errorf("campaign ID placeholder '_' is not a valid campaign ID")
+	}
+
+	return campaignID, nil
 }
