@@ -108,14 +108,16 @@ func CampaignListResource() *mcp.Resource {
 }
 
 // ParticipantListResource defines the MCP resource for participant listings.
-// The URI template uses a placeholder that will be replaced when reading the resource.
+// The effective URI template is campaign://{campaign_id}/participants, but the
+// SDK requires a valid URI for registration, so we use a placeholder here.
+// Clients must provide the full URI with actual campaign_id when reading.
 func ParticipantListResource() *mcp.Resource {
 	return &mcp.Resource{
 		Name:        "participant_list",
 		Title:       "Participants",
-		Description: "Readable listing of participants for a campaign",
+		Description: "Readable listing of participants for a campaign. URI format: campaign://{campaign_id}/participants",
 		MIMEType:    "application/json",
-		URI:         "campaign://participants",
+		URI:         "campaign://_/participants", // Placeholder; actual format: campaign://{campaign_id}/participants
 	}
 }
 
