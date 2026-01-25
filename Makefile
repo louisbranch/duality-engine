@@ -4,7 +4,8 @@ COVER_EXCLUDE_REGEX := api/gen/
 
 PROTO_FILES := \
 	$(PROTO_DIR)/campaign/v1/campaign.proto \
-	$(PROTO_DIR)/duality/v1/duality.proto
+	$(PROTO_DIR)/duality/v1/duality.proto \
+	$(PROTO_DIR)/session/v1/session.proto
 
 .PHONY: all proto clean run cover test integration
 

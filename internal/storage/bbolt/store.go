@@ -12,14 +12,17 @@ import (
 
 	"github.com/louisbranch/duality-engine/internal/campaign/domain"
 	"github.com/louisbranch/duality-engine/internal/storage"
+	sessiondomain "github.com/louisbranch/duality-engine/internal/session/domain"
 	"go.etcd.io/bbolt"
 )
 
 const (
-	campaignBucket       = "campaign"
-	participantBucket    = "participant"
-	actorBucket          = "actor"
-	controlDefaultBucket = "control_default"
+	campaignBucket              = "campaign"
+	participantBucket           = "participant"
+	actorBucket                 = "actor"
+	controlDefaultBucket        = "control_default"
+	sessionsBucket              = "sessions"
+	campaignActiveSessionBucket = "campaign_active_session"
 )
 
 // Store provides a BoltDB-backed campaign store.
@@ -193,6 +196,14 @@ func (s *Store) ensureBuckets() error {
 		if err != nil {
 			return fmt.Errorf("create control default bucket: %w", err)
 		}
+		_, err = tx.CreateBucketIfNotExists([]byte(sessionsBucket))
+		if err != nil {
+			return fmt.Errorf("create sessions bucket: %w", err)
+		}
+		_, err = tx.CreateBucketIfNotExists([]byte(campaignActiveSessionBucket))
+		if err != nil {
+			return fmt.Errorf("create campaign active session bucket: %w", err)
+		}
 		return nil
 	})
 }
@@ -211,6 +222,14 @@ func actorKey(campaignID, actorID string) []byte {
 
 func controlDefaultKey(campaignID, actorID string) []byte {
 	return []byte(fmt.Sprintf("%s/%s", campaignID, actorID))
+}
+
+func sessionKey(campaignID, sessionID string) []byte {
+	return []byte(fmt.Sprintf("%s/%s", campaignID, sessionID))
+}
+
+func activeSessionKey(campaignID string) []byte {
+	return []byte(campaignID)
 }
 
 // Put persists a participant record (implements storage.ParticipantStore).
@@ -551,6 +570,164 @@ func (s *Store) PutControlDefault(ctx context.Context, campaignID, actorID strin
 			return fmt.Errorf("control default bucket is missing")
 		}
 		return bucket.Put(controlDefaultKey(campaignID, actorID), payload)
+	})
+}
+
+// PutSession persists a session record (implements storage.SessionStore).
+func (s *Store) PutSession(ctx context.Context, session sessiondomain.Session) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if s == nil || s.db == nil {
+		return fmt.Errorf("storage is not configured")
+	}
+	if strings.TrimSpace(session.CampaignID) == "" {
+		return fmt.Errorf("campaign id is required")
+	}
+	if strings.TrimSpace(session.ID) == "" {
+		return fmt.Errorf("session id is required")
+	}
+
+	payload, err := json.Marshal(session)
+	if err != nil {
+		return fmt.Errorf("marshal session: %w", err)
+	}
+
+	return s.db.Update(func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket([]byte(sessionsBucket))
+		if bucket == nil {
+			return fmt.Errorf("sessions bucket is missing")
+		}
+		return bucket.Put(sessionKey(session.CampaignID, session.ID), payload)
+	})
+}
+
+// GetSession fetches a session record by campaign ID and session ID (implements storage.SessionStore).
+func (s *Store) GetSession(ctx context.Context, campaignID, sessionID string) (sessiondomain.Session, error) {
+	if err := ctx.Err(); err != nil {
+		return sessiondomain.Session{}, err
+	}
+	if s == nil || s.db == nil {
+		return sessiondomain.Session{}, fmt.Errorf("storage is not configured")
+	}
+	if strings.TrimSpace(campaignID) == "" {
+		return sessiondomain.Session{}, fmt.Errorf("campaign id is required")
+	}
+	if strings.TrimSpace(sessionID) == "" {
+		return sessiondomain.Session{}, fmt.Errorf("session id is required")
+	}
+
+	var session sessiondomain.Session
+	err := s.db.View(func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket([]byte(sessionsBucket))
+		if bucket == nil {
+			return fmt.Errorf("sessions bucket is missing")
+		}
+		payload := bucket.Get(sessionKey(campaignID, sessionID))
+		if payload == nil {
+			return storage.ErrNotFound
+		}
+		if err := json.Unmarshal(payload, &session); err != nil {
+			return fmt.Errorf("unmarshal session: %w", err)
+		}
+		return nil
+	})
+	if err != nil {
+		if errors.Is(err, storage.ErrNotFound) {
+			return sessiondomain.Session{}, err
+		}
+		return sessiondomain.Session{}, err
+	}
+
+	return session, nil
+}
+
+// GetActiveSession retrieves the active session for a campaign (implements storage.SessionStore).
+func (s *Store) GetActiveSession(ctx context.Context, campaignID string) (sessiondomain.Session, error) {
+	if err := ctx.Err(); err != nil {
+		return sessiondomain.Session{}, err
+	}
+	if s == nil || s.db == nil {
+		return sessiondomain.Session{}, fmt.Errorf("storage is not configured")
+	}
+	if strings.TrimSpace(campaignID) == "" {
+		return sessiondomain.Session{}, fmt.Errorf("campaign id is required")
+	}
+
+	var sessionID string
+	err := s.db.View(func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket([]byte(campaignActiveSessionBucket))
+		if bucket == nil {
+			return fmt.Errorf("campaign active session bucket is missing")
+		}
+		payload := bucket.Get(activeSessionKey(campaignID))
+		if payload == nil {
+			return storage.ErrNotFound
+		}
+		sessionID = string(payload)
+		return nil
+	})
+	if err != nil {
+		if errors.Is(err, storage.ErrNotFound) {
+			return sessiondomain.Session{}, err
+		}
+		return sessiondomain.Session{}, err
+	}
+
+	// Fetch the actual session record
+	return s.GetSession(ctx, campaignID, sessionID)
+}
+
+// PutSessionWithActivePointer atomically stores a session and sets it as the active session for the campaign.
+// This method ensures that only one active session exists per campaign.
+func (s *Store) PutSessionWithActivePointer(ctx context.Context, session sessiondomain.Session) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if s == nil || s.db == nil {
+		return fmt.Errorf("storage is not configured")
+	}
+	if strings.TrimSpace(session.CampaignID) == "" {
+		return fmt.Errorf("campaign id is required")
+	}
+	if strings.TrimSpace(session.ID) == "" {
+		return fmt.Errorf("session id is required")
+	}
+	if session.Status != sessiondomain.SessionStatusActive {
+		return fmt.Errorf("session must be ACTIVE to set as active session")
+	}
+
+	payload, err := json.Marshal(session)
+	if err != nil {
+		return fmt.Errorf("marshal session: %w", err)
+	}
+
+	return s.db.Update(func(tx *bbolt.Tx) error {
+		// Check if an active session already exists
+		activeBucket := tx.Bucket([]byte(campaignActiveSessionBucket))
+		if activeBucket == nil {
+			return fmt.Errorf("campaign active session bucket is missing")
+		}
+		existingActive := activeBucket.Get(activeSessionKey(session.CampaignID))
+		if existingActive != nil {
+			return storage.ErrActiveSessionExists
+		}
+
+		// Store the session
+		sessionBucket := tx.Bucket([]byte(sessionsBucket))
+		if sessionBucket == nil {
+			return fmt.Errorf("sessions bucket is missing")
+		}
+		if err := sessionBucket.Put(sessionKey(session.CampaignID, session.ID), payload); err != nil {
+			return fmt.Errorf("put session: %w", err)
+		}
+
+		// Set as active session
+		if err := activeBucket.Put(activeSessionKey(session.CampaignID), []byte(session.ID)); err != nil {
+			return fmt.Errorf("put active session pointer: %w", err)
+		}
+
+		return nil
 	})
 }
 
