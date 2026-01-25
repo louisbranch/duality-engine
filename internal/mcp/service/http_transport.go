@@ -142,7 +142,9 @@ func (t *HTTPTransport) Start(ctx context.Context) error {
 
 	mux := http.NewServeMux()
 
-	// POST /mcp/messages - JSON-RPC request/response
+	// POST /mcp - JSON-RPC request/response (MCP conformance test expects this)
+	mux.HandleFunc("/mcp", t.handleMessages)
+	// POST /mcp/messages - JSON-RPC request/response (alternative endpoint for explicit routing)
 	mux.HandleFunc("/mcp/messages", t.handleMessages)
 
 	// GET /mcp/sse - Server-Sent Events stream
