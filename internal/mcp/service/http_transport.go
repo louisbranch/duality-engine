@@ -295,8 +295,10 @@ func (t *HTTPTransport) handleMessages(w http.ResponseWriter, r *http.Request) {
 	t.ensureServerRunning(session)
 
 	// Send message to connection's request channel (will be read by MCP server)
+	log.Printf("Sending message to reqChan for session %s", session.id)
 	select {
 	case session.conn.reqChan <- msg:
+		log.Printf("Message sent to reqChan for session %s", session.id)
 	case <-r.Context().Done():
 		http.Error(w, "Request cancelled", http.StatusRequestTimeout)
 		return
@@ -497,20 +499,26 @@ func (c *httpConnection) Read(ctx context.Context) (jsonrpc.Message, error) {
 	c.readyOnce.Do(func() {
 		select {
 		case c.ready <- struct{}{}:
+			log.Printf("Connection ready signaled for session %s", c.sessionID)
 		default:
 			// Channel already has signal, ignore
 		}
 	})
 
+	log.Printf("Read() waiting for message on session %s", c.sessionID)
 	select {
 	case msg, ok := <-c.reqChan:
 		if !ok {
+			log.Printf("reqChan closed for session %s", c.sessionID)
 			return nil, fmt.Errorf("connection closed")
 		}
+		log.Printf("Read() received message for session %s", c.sessionID)
 		return msg, nil
 	case <-c.closed:
+		log.Printf("Connection closed for session %s", c.sessionID)
 		return nil, fmt.Errorf("connection closed")
 	case <-ctx.Done():
+		log.Printf("Read() context cancelled for session %s", c.sessionID)
 		return nil, ctx.Err()
 	}
 }
