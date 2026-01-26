@@ -26,7 +26,7 @@ const (
 	serverName = "Duality Engine MCP"
 	// serverVersion identifies the MCP server version.
 	serverVersion = "0.1.0"
-	// conformanceEnvVar enables MCP conformance fixtures when set.
+	// conformanceEnvVar enables MCP conformance fixtures when set to "1" or "true" (case-insensitive).
 	conformanceEnvVar = "MCP_CONFORMANCE"
 )
 
