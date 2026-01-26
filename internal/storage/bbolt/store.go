@@ -927,9 +927,6 @@ func (s *Store) GetCharacterProfile(ctx context.Context, campaignID, characterID
 		return nil
 	})
 	if err != nil {
-		if errors.Is(err, storage.ErrNotFound) {
-			return domain.CharacterProfile{}, err
-		}
 		return domain.CharacterProfile{}, err
 	}
 
@@ -996,9 +993,6 @@ func (s *Store) GetCharacterState(ctx context.Context, campaignID, characterID s
 		return nil
 	})
 	if err != nil {
-		if errors.Is(err, storage.ErrNotFound) {
-			return domain.CharacterState{}, err
-		}
 		return domain.CharacterState{}, err
 	}
 

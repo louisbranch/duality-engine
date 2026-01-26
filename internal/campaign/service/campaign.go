@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"sync"
 	"time"
 
 	campaignv1 "github.com/louisbranch/duality-engine/api/gen/go/campaign/v1"
@@ -40,6 +41,9 @@ type CampaignService struct {
 	stores      Stores
 	clock       func() time.Time
 	idGenerator func() (string, error)
+	defaults    map[domain.CharacterKind]domain.CharacterProfileDefaults
+	defaultsOnce sync.Once
+	defaultsErr  error
 }
 
 // NewCampaignService creates a CampaignService with default dependencies.
@@ -251,13 +255,15 @@ func (s *CampaignService) CreateCharacter(ctx context.Context, in *campaignv1.Cr
 		return nil, status.Errorf(codes.Internal, "persist character: %v", err)
 	}
 
-	// Load defaults and create profile
-	defaults, err := domain.LoadCharacterDefaults("")
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "load character defaults: %v", err)
+	// Load defaults (cached after first load) and create profile
+	s.defaultsOnce.Do(func() {
+		s.defaults, s.defaultsErr = domain.LoadCharacterDefaults("")
+	})
+	if s.defaultsErr != nil {
+		return nil, status.Errorf(codes.Internal, "load character defaults: %v", s.defaultsErr)
 	}
 
-	defaultProfile, err := domain.GetDefaultProfile(character.Kind, defaults)
+	defaultProfile, err := domain.GetDefaultProfile(character.Kind, s.defaults)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "get default profile: %v", err)
 	}

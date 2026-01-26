@@ -14,6 +14,8 @@ var (
 	ErrInvalidProfileHpMax = errors.New("hp_max must be at least 1")
 	// ErrInvalidProfileStressMax indicates stress_max is negative.
 	ErrInvalidProfileStressMax = errors.New("stress_max must be non-negative")
+	// ErrInvalidProfileEvasion indicates evasion is negative.
+	ErrInvalidProfileEvasion = errors.New("evasion must be non-negative")
 	// ErrInvalidProfileThresholds indicates threshold ordering is invalid.
 	ErrInvalidProfileThresholds = errors.New("severe_threshold must be >= major_threshold >= 0")
 	// ErrInvalidTraitValue indicates a trait value is outside the valid range.
@@ -62,7 +64,7 @@ type CreateCharacterProfileInput struct {
 
 // CreateCharacterProfile creates a new character profile with validation.
 func CreateCharacterProfile(input CreateCharacterProfileInput) (CharacterProfile, error) {
-	if err := ValidateCharacterProfile(input.Traits, input.HpMax, input.StressMax, input.MajorThreshold, input.SevereThreshold); err != nil {
+	if err := ValidateCharacterProfile(input.Traits, input.HpMax, input.StressMax, input.Evasion, input.MajorThreshold, input.SevereThreshold); err != nil {
 		return CharacterProfile{}, err
 	}
 
@@ -79,12 +81,15 @@ func CreateCharacterProfile(input CreateCharacterProfileInput) (CharacterProfile
 }
 
 // ValidateCharacterProfile validates profile invariants.
-func ValidateCharacterProfile(traits map[string]int, hpMax, stressMax, majorThreshold, severeThreshold int) error {
+func ValidateCharacterProfile(traits map[string]int, hpMax, stressMax, evasion, majorThreshold, severeThreshold int) error {
 	if hpMax < 1 {
 		return ErrInvalidProfileHpMax
 	}
 	if stressMax < 0 {
 		return ErrInvalidProfileStressMax
+	}
+	if evasion < 0 {
+		return ErrInvalidProfileEvasion
 	}
 	if majorThreshold < 0 || severeThreshold < majorThreshold {
 		return ErrInvalidProfileThresholds
@@ -130,7 +135,7 @@ func PatchCharacterProfile(existing CharacterProfile, patch PatchCharacterProfil
 		result.SevereThreshold = *patch.SevereThreshold
 	}
 
-	if err := ValidateCharacterProfile(result.Traits, result.HpMax, result.StressMax, result.MajorThreshold, result.SevereThreshold); err != nil {
+	if err := ValidateCharacterProfile(result.Traits, result.HpMax, result.StressMax, result.Evasion, result.MajorThreshold, result.SevereThreshold); err != nil {
 		return CharacterProfile{}, err
 	}
 

@@ -101,7 +101,7 @@ func (s *CampaignService) PatchCharacterProfile(ctx context.Context, in *campaig
 	}
 
 	patch := domain.PatchCharacterProfileInput{}
-	if in.Traits != nil {
+	if len(in.Traits) > 0 {
 		traits := make(map[string]int)
 		for k, v := range in.Traits {
 			traits[k] = int(v)
@@ -133,6 +133,7 @@ func (s *CampaignService) PatchCharacterProfile(ctx context.Context, in *campaig
 	if err != nil {
 		if errors.Is(err, domain.ErrInvalidProfileHpMax) ||
 			errors.Is(err, domain.ErrInvalidProfileStressMax) ||
+			errors.Is(err, domain.ErrInvalidProfileEvasion) ||
 			errors.Is(err, domain.ErrInvalidProfileThresholds) ||
 			errors.Is(err, domain.ErrInvalidTraitValue) {
 			return nil, status.Error(codes.InvalidArgument, err.Error())
