@@ -340,9 +340,17 @@ func (t *HTTPTransport) handleMessages(w http.ResponseWriter, r *http.Request) {
 			delete(session.conn.pendingReqs, req.ID)
 			session.conn.pendingMu.Unlock()
 
-			w.Header().Set("Content-Type", "application/json")
-			if err := json.NewEncoder(w).Encode(resp); err != nil {
+			// Encode JSON-RPC response using SDK's encoder
+			data, err := jsonrpc.EncodeMessage(resp)
+			if err != nil {
 				log.Printf("Failed to encode response: %v", err)
+				http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			if _, err := w.Write(data); err != nil {
+				log.Printf("Failed to write response: %v", err)
 			}
 		case <-r.Context().Done():
 			// Clean up pending request
