@@ -12,6 +12,7 @@ import (
 	campaignv1 "github.com/louisbranch/duality-engine/api/gen/go/campaign/v1"
 	dualityv1 "github.com/louisbranch/duality-engine/api/gen/go/duality/v1"
 	sessionv1 "github.com/louisbranch/duality-engine/api/gen/go/session/v1"
+	"github.com/louisbranch/duality-engine/internal/mcp/conformance"
 	"github.com/louisbranch/duality-engine/internal/mcp/domain"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/grpc"
@@ -55,7 +56,9 @@ type Server struct {
 
 // New creates a configured MCP server that connects to Duality, Campaign, and Session gRPC services.
 func New(grpcAddr string) (*Server, error) {
-	mcpServer := mcp.NewServer(&mcp.Implementation{Name: serverName, Version: serverVersion}, nil)
+	mcpServer := mcp.NewServer(&mcp.Implementation{Name: serverName, Version: serverVersion}, &mcp.ServerOptions{
+		CompletionHandler: completionHandler,
+	})
 
 	addr := grpcAddress(grpcAddr)
 	conn, err := newGRPCConn(addr)
@@ -76,8 +79,19 @@ func New(grpcAddr string) (*Server, error) {
 	registerCampaignResources(mcpServer, campaignClient)
 	registerSessionResources(mcpServer, sessionClient)
 	registerContextResources(mcpServer, server)
+	conformance.Register(mcpServer)
 
 	return server, nil
+}
+
+// completionHandler handles completion/complete requests with empty results.
+// TODO: Return context-aware completions for prompt arguments and resource templates.
+func completionHandler(ctx context.Context, req *mcp.CompleteRequest) (*mcp.CompleteResult, error) {
+	return &mcp.CompleteResult{
+		Completion: mcp.CompletionResultDetails{
+			Values: []string{},
+		},
+	}, nil
 }
 
 // Run creates and serves the MCP server until the context ends.
