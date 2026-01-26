@@ -20,10 +20,27 @@ jobs:
           ./scripts/mcp-http.sh &
           timeout 15 bash -c 'until curl -s http://localhost:3001/mcp/health >/dev/null; do sleep 0.5; done'
 
-      - uses: modelcontextprotocol/conformance@v0.1.11
+      - name: Server Initialize
+        uses: modelcontextprotocol/conformance@v0.1.11
         with:
           mode: server
           url: http://localhost:3001/mcp
           verbose: true
           # expected-failures: ./conformance-baseline.yml
           scenario: server-initialize
+
+      - name: Tools list
+        uses: modelcontextprotocol/conformance@v0.1.11
+        with:
+          mode: server
+          url: http://localhost:3001/mcp
+          verbose: true
+          scenario: tools-list
+
+      - name: Ping
+        uses: modelcontextprotocol/conformance@v0.1.11
+        with:
+          mode: server
+          url: http://localhost:3001/mcp
+          verbose: true
+          scenario: ping
