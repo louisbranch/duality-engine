@@ -1,3 +1,5 @@
+//go:build conformance
+
 package conformance
 
 import (
@@ -8,13 +10,14 @@ import (
 
 const simpleTextResponse = "This is a simple text response for testing."
 
-// Register adds conformance-only MCP tools to the server.
+// Register adds conformance-only MCP fixtures (tools, prompts, resources).
 func Register(mcpServer *mcp.Server) {
 	if mcpServer == nil {
 		return
 	}
 
 	mcp.AddTool(mcpServer, simpleTextTool(), simpleTextHandler())
+	mcpServer.AddPrompt(simplePrompt(), simplePromptHandler())
 }
 
 // simpleTextTool defines the MCP conformance tool schema for simple text output.
@@ -34,5 +37,27 @@ func simpleTextHandler() mcp.ToolHandlerFor[struct{}, any] {
 				&mcp.TextContent{Text: simpleTextResponse},
 			},
 		}, nil, nil
+	}
+}
+
+func simplePrompt() *mcp.Prompt {
+	return &mcp.Prompt{
+		Name:        "test_simple_prompt",
+		Description: "Conformance prompt that returns a simple text message.",
+	}
+}
+
+func simplePromptHandler() mcp.PromptHandler {
+	return func(_ context.Context, _ *mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+		return &mcp.GetPromptResult{
+			Messages: []*mcp.PromptMessage{
+				{
+					Role: "user",
+					Content: &mcp.TextContent{
+						Text: "This is a simple prompt for testing.",
+					},
+				},
+			},
+		}, nil
 	}
 }
