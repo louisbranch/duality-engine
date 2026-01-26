@@ -44,7 +44,10 @@ func New(port int) (*Server, error) {
 	}
 
 	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(grpcmeta.UnaryServerInterceptor(nil)),
+		grpc.ChainUnaryInterceptor(
+			grpcmeta.UnaryServerInterceptor(nil),
+			campaignservice.SessionLockInterceptor(store),
+		),
 		grpc.StreamInterceptor(grpcmeta.StreamServerInterceptor(nil)),
 	)
 	dualityService := dualityservice.NewDualityService(random.NewSeed)
