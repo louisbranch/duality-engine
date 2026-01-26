@@ -418,12 +418,16 @@ func (t *HTTPTransport) handleSSE(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get or create session
-	sessionID := r.URL.Query().Get("session")
+	// Get or create session from cookie (MCP spec uses cookies, not query params)
+	const cookieName = "mcp_session"
 	var session *httpSession
 	var exists bool
+	var sessionID string
 
-	if sessionID != "" {
+	// Read session ID from cookie
+	cookie, err := r.Cookie(cookieName)
+	if err == nil && cookie != nil && cookie.Value != "" {
+		sessionID = cookie.Value
 		t.sessionsMu.RLock()
 		session, exists = t.sessions[sessionID]
 		t.sessionsMu.RUnlock()
@@ -440,6 +444,15 @@ func (t *HTTPTransport) handleSSE(w http.ResponseWriter, r *http.Request) {
 		t.sessionsMu.RLock()
 		session = t.sessions[sessionID]
 		t.sessionsMu.RUnlock()
+
+		// Set cookie for subsequent requests
+		http.SetCookie(w, &http.Cookie{
+			Name:     cookieName,
+			Value:    sessionID,
+			Path:     "/",
+			HttpOnly: true,
+			SameSite: http.SameSiteStrictMode,
+		})
 	}
 
 	// Set up SSE headers
