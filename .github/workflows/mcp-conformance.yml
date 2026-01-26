@@ -6,8 +6,17 @@ on:
     branches: [main]
 
 jobs:
-  matc:
+  conformance:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario:
+          - completion-complete
+          - tools-call-simple-text
+          - resources-read-text
+          - prompts-get-simple
+          - dns-rebinding-protection
     steps:
       - uses: actions/checkout@v4
 
@@ -20,10 +29,11 @@ jobs:
           ./scripts/mcp-http.sh &
           timeout 15 bash -c 'until curl -s http://localhost:3001/mcp/health >/dev/null; do sleep 0.5; done'
 
-      - name: Run conformance
+      - name: Run conformance (${{ matrix.scenario }})
         uses: modelcontextprotocol/conformance@v0.1.11
         with:
           mode: server
           url: http://localhost:3001/mcp
           verbose: true
+          scenario: ${{ matrix.scenario }}
           # expected-failures: ./conformance-baseline.yml
