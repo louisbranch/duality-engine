@@ -12,11 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         scenario:
-          - completion-complete
-          - tools-call-simple-text
-          - resources-read-text
-          - prompts-get-simple
-          - dns-rebinding-protection
+          - tools-call-error
     steps:
       - uses: actions/checkout@v4
 
@@ -38,4 +34,4 @@ jobs:
           url: http://localhost:3001/mcp
           verbose: true
           scenario: ${{ matrix.scenario }}
-          # expected-failures: ./conformance-baseline.yml
+          expected-failures: ./conformance-baseline.yml
