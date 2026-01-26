@@ -630,7 +630,6 @@ func TestGMModeToProto(t *testing.T) {
 			proto := gmModeToProto(tt.gmMode)
 			if proto != tt.proto {
 				t.Fatalf("expected %v, got %v", tt.proto, proto)
-
 			}
 		})
 	}
