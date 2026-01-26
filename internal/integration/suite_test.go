@@ -33,4 +33,8 @@ func TestMCPStdioEndToEnd(t *testing.T) {
 	t.Run("metadata", func(t *testing.T) {
 		runMetadataTests(t, suite, grpcAddr)
 	})
+
+	t.Run("session lock", func(t *testing.T) {
+		runSessionLockTests(t, grpcAddr)
+	})
 }
