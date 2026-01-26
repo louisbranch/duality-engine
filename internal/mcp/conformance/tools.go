@@ -15,6 +15,7 @@ func Register(mcpServer *mcp.Server) {
 	}
 
 	mcp.AddTool(mcpServer, simpleTextTool(), simpleTextHandler())
+	mcpServer.AddPrompt(simplePrompt(), simplePromptHandler())
 }
 
 // simpleTextTool defines the MCP conformance tool schema for simple text output.
@@ -34,5 +35,27 @@ func simpleTextHandler() mcp.ToolHandlerFor[struct{}, any] {
 				&mcp.TextContent{Text: simpleTextResponse},
 			},
 		}, nil, nil
+	}
+}
+
+func simplePrompt() *mcp.Prompt {
+	return &mcp.Prompt{
+		Name:        "test_simple_prompt",
+		Description: "Conformance prompt that returns a simple text message.",
+	}
+}
+
+func simplePromptHandler() mcp.PromptHandler {
+	return func(_ context.Context, _ *mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+		return &mcp.GetPromptResult{
+			Messages: []*mcp.PromptMessage{
+				{
+					Role: "user",
+					Content: &mcp.TextContent{
+						Text: "This is a simple prompt for testing.",
+					},
+				},
+			},
+		}, nil
 	}
 }
