@@ -464,7 +464,9 @@ func (t *HTTPTransport) handleHealth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
+	if _, err := w.Write([]byte("OK")); err != nil {
+		log.Printf("Failed to write health response: %v", err)
+	}
 }
 
 // Read implements mcp.Connection.Read.
@@ -578,14 +580,14 @@ func (c *httpConnection) SessionID() string {
 }
 
 // ensureServerRunning ensures the MCP server is processing messages for this session.
-// It starts a goroutine that runs Server.Run with a transport that returns this session's connection.
+// It starts a goroutine that calls Server.Connect with a transport that returns this session's connection.
 // Uses sync.Once per session to prevent goroutine leaks from multiple calls.
 func (t *HTTPTransport) ensureServerRunning(session *httpSession) {
 	if t.server == nil {
 		return
 	}
 
-	// Get or create sync.Once for this session to ensure server.Run is only started once
+	// Get or create sync.Once for this session to ensure server.Connect is only started once
 	t.serverOnceMu.Lock()
 	once, exists := t.serverOnce[session.id]
 	if !exists {
@@ -595,15 +597,21 @@ func (t *HTTPTransport) ensureServerRunning(session *httpSession) {
 	t.serverOnceMu.Unlock()
 
 	// Create a single-use transport that returns this session's connection
-	// This allows Server.Run to use the connection for this session
+	// This allows Server.Connect to use the connection for this session
 	sessionTransport := &sessionTransport{conn: session.conn}
 
-	// Start the MCP server for this session only once
+	// Start the MCP server session for this connection only once
 	once.Do(func() {
 		go func() {
-			// Run the MCP server with this session's transport using the long-lived server context
+			// Connect the MCP server with this session's transport using the long-lived server context
 			// This will read from reqChan and write to respChan
-			_ = t.server.Run(t.serverCtx, sessionTransport)
+			serverSession, err := t.server.Connect(t.serverCtx, sessionTransport, nil)
+			if err != nil {
+				log.Printf("Failed to connect MCP server session %s: %v", session.id, err)
+				return
+			}
+			// Wait for the session to complete (client disconnects or context cancelled)
+			_ = serverSession.Wait()
 		}()
 	})
 }
