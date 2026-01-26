@@ -568,6 +568,8 @@ func writeSessionError(w http.ResponseWriter, message string) {
 	_, _ = w.Write(data)
 }
 
+// validateLocalRequest enforces localhost-only access to mitigate DNS rebinding.
+// This follows MCP security guidance for local servers.
 func validateLocalRequest(r *http.Request) error {
 	if r == nil {
 		return fmt.Errorf("invalid request")
@@ -599,6 +601,7 @@ func validateLocalRequest(r *http.Request) error {
 	return nil
 }
 
+// isLocalHostHeader reports whether a Host/Origin header resolves to loopback.
 func isLocalHostHeader(host string) bool {
 	resolvedHost, ok := normalizeHost(host)
 	if !ok {
@@ -614,6 +617,7 @@ func isLocalHostHeader(host string) bool {
 	}
 }
 
+// normalizeHost extracts the hostname portion from Host/Origin headers.
 func normalizeHost(host string) (string, bool) {
 	host = strings.TrimSpace(host)
 	if host == "" {
