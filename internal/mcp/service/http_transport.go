@@ -286,8 +286,13 @@ func (t *HTTPTransport) handleMessages(w http.ResponseWriter, r *http.Request) {
 		session, exists = t.sessions[sessionID]
 		t.sessionsMu.RUnlock()
 		if !exists || session == nil {
-			writeSessionError(w, "Invalid session ID")
-			return
+			if !isInitialize {
+				writeSessionError(w, "Invalid session ID")
+				return
+			}
+			session = nil
+			exists = false
+			sessionID = ""
 		}
 	} else {
 		cookie, err := r.Cookie(cookieName)
@@ -545,7 +550,7 @@ func writeSessionError(w http.ResponseWriter, message string) {
 	}
 	data, err := json.Marshal(payload)
 	if err != nil {
-		_, _ = w.Write([]byte("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32000,\"message\":\"Invalid or missing session ID\"},\"id\":null}"))
+		_, _ = w.Write([]byte("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32000,\"message\":\"Session error\"},\"id\":null}"))
 		return
 	}
 	_, _ = w.Write(data)

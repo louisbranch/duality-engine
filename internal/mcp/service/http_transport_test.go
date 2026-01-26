@@ -174,7 +174,9 @@ func TestHTTPTransport_handleMessages_HeaderSessionReuse(t *testing.T) {
 		t.Fatal("expected Mcp-Session-Id header on initialize")
 	}
 
+	transport.sessionsMu.RLock()
 	initialSessions := len(transport.sessions)
+	transport.sessionsMu.RUnlock()
 
 	listRequest := map[string]interface{}{
 		"jsonrpc": "2.0",
@@ -197,6 +199,19 @@ func TestHTTPTransport_handleMessages_HeaderSessionReuse(t *testing.T) {
 
 	if len(transport.sessions) != initialSessions {
 		t.Errorf("expected session reuse, sessions = %d, want %d", len(transport.sessions), initialSessions)
+	}
+}
+
+func TestHTTPTransport_handleSSE_MissingSession(t *testing.T) {
+	transport := NewHTTPTransport("localhost:8081")
+
+	req := httptest.NewRequest(http.MethodGet, "/mcp/sse", nil)
+	w := httptest.NewRecorder()
+
+	transport.handleSSE(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("handleSSE() status = %d, want %d", w.Code, http.StatusBadRequest)
 	}
 }
 
