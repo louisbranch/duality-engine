@@ -18,6 +18,7 @@ func Register(mcpServer *mcp.Server) {
 
 	mcp.AddTool(mcpServer, simpleTextTool(), simpleTextHandler())
 	mcpServer.AddPrompt(simplePrompt(), simplePromptHandler())
+	mcpServer.AddResource(staticTextResource(), staticTextResourceHandler())
 }
 
 // simpleTextTool defines the MCP conformance tool schema for simple text output.
@@ -56,6 +57,29 @@ func simplePromptHandler() mcp.PromptHandler {
 					Content: &mcp.TextContent{
 						Text: "This is a simple prompt for testing.",
 					},
+				},
+			},
+		}, nil
+	}
+}
+
+func staticTextResource() *mcp.Resource {
+	return &mcp.Resource{
+		URI:         "test://static-text",
+		Name:        "Conformance Static Text",
+		Description: "Conformance resource that returns fixed text content.",
+		MIMEType:    "text/plain",
+	}
+}
+
+func staticTextResourceHandler() mcp.ResourceHandler {
+	return func(_ context.Context, _ *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
+		return &mcp.ReadResourceResult{
+			Contents: []*mcp.ResourceContents{
+				{
+					URI:      "test://static-text",
+					MIMEType: "text/plain",
+					Text:     "This is the content of the static text resource.",
 				},
 			},
 		}, nil
