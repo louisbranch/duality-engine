@@ -27,6 +27,7 @@ jobs:
           verbose: true
           # expected-failures: ./conformance-baseline.yml
           scenario: tools-list
+          output: results
 
       - name: Dump conformance results (on failure)
         if: failure()
