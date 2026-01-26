@@ -31,6 +31,10 @@ go run ./cmd/mcp -transport=http -http-addr=localhost:8081 -addr=localhost:8080
 **Note**: HTTP transport is intended for local use only. Security features
 (authentication, TLS, rate limiting) are planned for future releases.
 
+**Port Configuration**: The default HTTP port is `8081`. Test scripts and CI
+use port `3001` for isolation. You can specify any port using the `-http-addr`
+flag.
+
 #### HTTP Endpoints
 
 - `POST /mcp` - Send JSON-RPC requests
@@ -45,6 +49,22 @@ go run ./cmd/mcp -transport=http -http-addr=localhost:8081 -addr=localhost:8080
 
 - `GET /mcp/health` - Health check endpoint
   - Returns: `200 OK` when server is ready
+
+#### Session Management
+
+The MCP HTTP transport uses cookie-based session management per the MCP
+specification. Sessions are **not** managed via custom headers.
+
+- **Cookie name**: `mcp_session`
+- **Cookie attributes**:
+  - `HttpOnly: true` - Prevents JavaScript access for security
+  - `SameSite: Strict` - Prevents cross-site request forgery
+  - `Path: /` - Available for all paths on the server
+- **Automatic creation**: The cookie is set automatically on the first request
+  to any endpoint. Subsequent requests must include the cookie to maintain
+  session state.
+- **Session persistence**: The same cookie value is used across all requests
+  for a given client session until the session expires (1 hour of inactivity).
 
 #### Example HTTP Usage
 
