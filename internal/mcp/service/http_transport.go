@@ -13,8 +13,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/modelcontextprotocol/go-sdk/jsonrpc"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 const (
@@ -201,7 +201,7 @@ func (t *HTTPTransport) cleanupSessions(ctx context.Context) {
 			t.sessionsMu.Lock()
 			now := time.Now()
 			expirationTime := now.Add(-sessionExpirationTime)
-			
+
 			for id, session := range t.sessions {
 				if session.lastUsed.Before(expirationTime) {
 					// Close the connection
@@ -262,9 +262,9 @@ func (t *HTTPTransport) handleMessages(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	// Parse JSON-RPC message
-	var msg jsonrpc.Message
-	if err := json.Unmarshal(body, &msg); err != nil {
+	// Parse JSON-RPC message using the SDK's decoder
+	msg, err := jsonrpc.DecodeMessage(body)
+	if err != nil {
 		log.Printf("Invalid JSON-RPC message: %v", err)
 		http.Error(w, "Invalid JSON-RPC message", http.StatusBadRequest)
 		return
@@ -276,7 +276,7 @@ func (t *HTTPTransport) handleMessages(w http.ResponseWriter, r *http.Request) {
 		session.lastUsed = time.Now()
 	}
 	t.sessionsMu.Unlock()
-	
+
 	// Nil check after session lookup
 	if session == nil {
 		http.Error(w, "Failed to retrieve session after creation", http.StatusInternalServerError)
@@ -408,7 +408,7 @@ func (t *HTTPTransport) handleSSE(w http.ResponseWriter, r *http.Request) {
 	// Stream notifications from the connection's notification channel
 	// SSE is for streaming notifications, not request/response pairs
 	ctx := r.Context()
-	
+
 	// Update session activity timestamp so active SSE connections
 	// are not considered idle by the cleanup goroutine
 	t.sessionsMu.Lock()
@@ -416,11 +416,11 @@ func (t *HTTPTransport) handleSSE(w http.ResponseWriter, r *http.Request) {
 		s.lastUsed = time.Now()
 	}
 	t.sessionsMu.Unlock()
-	
+
 	// Set up a ticker to periodically update lastUsed for long-lived SSE connections
 	ticker := time.NewTicker(sseHeartbeatInterval)
 	defer ticker.Stop()
-	
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -441,7 +441,7 @@ func (t *HTTPTransport) handleSSE(w http.ResponseWriter, r *http.Request) {
 				s.lastUsed = time.Now()
 			}
 			t.sessionsMu.Unlock()
-			
+
 			// Send as SSE event
 			data, err := json.Marshal(msg)
 			if err != nil {
@@ -557,12 +557,12 @@ func (c *httpConnection) Close() error {
 
 	c.closedFlag = true
 	close(c.closed)
-	
+
 	// Close channels to unblock any waiting goroutines
 	close(c.reqChan)
 	close(c.respChan)
 	close(c.notifyChan)
-	
+
 	// Close all pending request channels
 	c.pendingMu.Lock()
 	for _, respChan := range c.pendingReqs {
@@ -570,7 +570,7 @@ func (c *httpConnection) Close() error {
 	}
 	c.pendingReqs = nil
 	c.pendingMu.Unlock()
-	
+
 	return nil
 }
 
