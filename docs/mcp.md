@@ -33,15 +33,21 @@ go run ./cmd/mcp -transport=http -http-addr=localhost:8081 -addr=localhost:8080
 
 #### HTTP Endpoints
 
-- `POST /mcp/messages` - Send JSON-RPC requests
+- `POST /mcp` - Send JSON-RPC requests
   - Content-Type: `application/json`
   - Request body: JSON-RPC message
   - Response: JSON-RPC response
   - Headers: `X-MCP-Session-ID` (optional, for session management)
 
-- `GET /mcp/sse` - Server-Sent Events stream for streaming responses
+- `GET /mcp` - Server-Sent Events stream for streaming responses
   - Query parameter: `session` (optional session ID)
   - Response: `text/event-stream` with JSON-RPC notifications
+
+- `POST /mcp/messages` - Send JSON-RPC requests (alternative endpoint for explicit routing)
+  - Same as `POST /mcp`
+
+- `GET /mcp/sse` - Server-Sent Events stream (alternative endpoint for backward compatibility)
+  - Same as `GET /mcp`
 
 - `GET /mcp/health` - Health check endpoint
   - Returns: `200 OK` when server is ready
@@ -52,7 +58,7 @@ go run ./cmd/mcp -transport=http -http-addr=localhost:8081 -addr=localhost:8080
 # 1) First request: start a new session (no X-MCP-Session-ID header)
 #    Use -D - to print response headers so we can capture X-MCP-Session-ID.
 SESSION_ID=$(
-  curl -sS -D - http://localhost:8081/mcp/messages \
+  curl -sS -D - http://localhost:8081/mcp \
     -H "Content-Type: application/json" \
     -d '{
       "jsonrpc": "2.0",
@@ -66,7 +72,7 @@ SESSION_ID=$(
 echo "Session ID: $SESSION_ID"
 
 # 2) Subsequent request: send the session ID so the server can reuse context
-curl -sS -X POST http://localhost:8081/mcp/messages \
+curl -sS -X POST http://localhost:8081/mcp \
   -H "Content-Type: application/json" \
   -H "X-MCP-Session-ID: $SESSION_ID" \
   -d '{

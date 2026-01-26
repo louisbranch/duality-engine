@@ -142,12 +142,20 @@ func (t *HTTPTransport) Start(ctx context.Context) error {
 
 	mux := http.NewServeMux()
 
-	// POST /mcp - JSON-RPC request/response (MCP conformance test expects this)
-	mux.HandleFunc("/mcp", t.handleMessages)
+	// /mcp endpoint handles both GET (SSE) and POST (messages) based on HTTP method
+	mux.HandleFunc("/mcp", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			t.handleSSE(w, r)
+		case http.MethodPost:
+			t.handleMessages(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	})
 	// POST /mcp/messages - JSON-RPC request/response (alternative endpoint for explicit routing)
 	mux.HandleFunc("/mcp/messages", t.handleMessages)
-
-	// GET /mcp/sse - Server-Sent Events stream
+	// GET /mcp/sse - Server-Sent Events stream (alternative endpoint for backward compatibility)
 	mux.HandleFunc("/mcp/sse", t.handleSSE)
 
 	// GET /mcp/health - Health check endpoint
