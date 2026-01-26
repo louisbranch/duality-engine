@@ -312,6 +312,10 @@ func (t *HTTPTransport) handleMessages(w http.ResponseWriter, r *http.Request) {
 		// The zero value of jsonrpc.ID represents a null/empty ID (notification)
 		id := v.ID
 		isRequest = id != jsonrpc.ID{}
+		if !isRequest {
+			// This is a notification - log for debugging
+			log.Printf("Received notification: method=%s", v.Method)
+		}
 	case *jsonrpc.Response:
 		// Response shouldn't come in as a request
 		http.Error(w, "Invalid message type: response", http.StatusBadRequest)
