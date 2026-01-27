@@ -4,7 +4,7 @@
 //
 // # Campaign
 //
-// A Campaign represents the top-level entity for a game session. It maintains metadata
+// A Campaign represents the top-level entity for organizing multiple game sessions. It maintains metadata
 // such as the campaign name, GM mode (Human, AI, or Hybrid), and counts for participants
 // and characters.
 //
@@ -20,5 +20,5 @@
 //   - Character: Core metadata such as name and kind.
 //   - CharacterController: Determines if the character is controlled by the GM or a specific Participant.
 //   - CharacterProfile: Defines static attributes and maximum values (e.g., HP Max, Traits).
-//   - CharacterState: tracks mutable values during gameplay (e.g., current HP, Stress, Hope).
+//   - CharacterState: Tracks mutable values during gameplay (e.g., current HP, Stress, Hope).
 package domain
