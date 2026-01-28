@@ -5,7 +5,7 @@
 // # Campaign
 //
 // A Campaign represents the top-level entity for organizing multiple game sessions. It maintains metadata
-// such as the campaign name, GM mode (Human, AI, or Hybrid), and counts for participants
+// such as the campaign name, GM mode (Human, AI, or Hybrid), GM fear, and counts for participants
 // and characters.
 //
 // # Participants

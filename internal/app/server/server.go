@@ -60,9 +60,11 @@ func New(port int) (*Server, error) {
 		ControlDefault:   store,
 	})
 	sessionService := sessionservice.NewSessionService(sessionservice.Stores{
-		Campaign: store,
-		Session:  store,
-		Event:    store,
+		Campaign:    store,
+		Participant: store,
+		Session:     store,
+		Event:       store,
+		Outcome:     store,
 	})
 	healthServer := health.NewServer()
 	pb.RegisterDualityServiceServer(grpcServer, dualityService)

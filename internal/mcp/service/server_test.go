@@ -223,6 +223,7 @@ type fakeSessionClient struct {
 	sessionEventResponse    *sessionv1.SessionEventAppendResponse
 	sessionEventsResponse   *sessionv1.SessionEventsListResponse
 	sessionActionRollResult *sessionv1.SessionActionRollResponse
+	applyRollOutcomeResult  *sessionv1.ApplyRollOutcomeResponse
 	err                     error
 	endSessionErr           error
 	listSessionsErr         error
@@ -230,6 +231,7 @@ type fakeSessionClient struct {
 	sessionEventErr         error
 	sessionEventsErr        error
 	sessionActionRollErr    error
+	applyRollOutcomeErr     error
 	lastRequest             *sessionv1.StartSessionRequest
 	lastEndSessionRequest   *sessionv1.EndSessionRequest
 	lastListSessionsRequest *sessionv1.ListSessionsRequest
@@ -237,6 +239,7 @@ type fakeSessionClient struct {
 	lastEventRequest        *sessionv1.SessionEventAppendRequest
 	lastEventsListRequest   *sessionv1.SessionEventsListRequest
 	lastActionRollRequest   *sessionv1.SessionActionRollRequest
+	lastApplyOutcomeRequest *sessionv1.ApplyRollOutcomeRequest
 }
 
 // StartSession records the request and returns the configured response.
@@ -279,6 +282,12 @@ func (f *fakeSessionClient) SessionEventsList(ctx context.Context, req *sessionv
 func (f *fakeSessionClient) SessionActionRoll(ctx context.Context, req *sessionv1.SessionActionRollRequest, opts ...grpc.CallOption) (*sessionv1.SessionActionRollResponse, error) {
 	f.lastActionRollRequest = req
 	return f.sessionActionRollResult, f.sessionActionRollErr
+}
+
+// ApplyRollOutcome records the request and returns the configured response.
+func (f *fakeSessionClient) ApplyRollOutcome(ctx context.Context, req *sessionv1.ApplyRollOutcomeRequest, opts ...grpc.CallOption) (*sessionv1.ApplyRollOutcomeResponse, error) {
+	f.lastApplyOutcomeRequest = req
+	return f.applyRollOutcomeResult, f.applyRollOutcomeErr
 }
 
 // TestGRPCAddressPrefersEnv ensures env configuration overrides defaults.
@@ -2469,6 +2478,74 @@ func TestSessionListResourceHandlerReturnsClientError(t *testing.T) {
 	}
 	if result != nil {
 		t.Fatal("expected nil result on error")
+	}
+}
+
+// TestSessionEventsResourceHandlerReversesOrder ensures events are returned in descending sequence order.
+func TestSessionEventsResourceHandlerReversesOrder(t *testing.T) {
+	now := time.Date(2026, 1, 24, 9, 0, 0, 0, time.UTC)
+	sessionID := "sess-123"
+	client := &fakeSessionClient{sessionEventsResponse: &sessionv1.SessionEventsListResponse{
+		Events: []*sessionv1.SessionEvent{{
+			SessionId: sessionID,
+			Seq:       1,
+			Ts:        timestamppb.New(now),
+			Type:      sessionv1.SessionEventType_SESSION_STARTED,
+		}, {
+			SessionId: sessionID,
+			Seq:       2,
+			Ts:        timestamppb.New(now.Add(time.Minute)),
+			Type:      sessionv1.SessionEventType_NOTE_ADDED,
+		}, {
+			SessionId: sessionID,
+			Seq:       3,
+			Ts:        timestamppb.New(now.Add(2 * time.Minute)),
+			Type:      sessionv1.SessionEventType_SESSION_ENDED,
+		}},
+	}}
+
+	handler := domain.SessionEventsResourceHandler(client)
+	resourceURI := "session://" + sessionID + "/events"
+	result, err := handler(context.Background(), &mcp.ReadResourceRequest{
+		Params: &mcp.ReadResourceParams{URI: resourceURI},
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if result == nil || len(result.Contents) != 1 {
+		t.Fatalf("expected 1 content item, got %v", result)
+	}
+	if client.lastEventsListRequest == nil {
+		t.Fatal("expected session events list request")
+	}
+	if client.lastEventsListRequest.GetSessionId() != sessionID {
+		t.Fatalf("expected session id %q, got %q", sessionID, client.lastEventsListRequest.GetSessionId())
+	}
+
+	var payload struct {
+		Events []struct {
+			SessionID string `json:"session_id"`
+			Seq       uint64 `json:"seq"`
+			Type      string `json:"type"`
+		} `json:"events"`
+	}
+	if err := json.Unmarshal([]byte(result.Contents[0].Text), &payload); err != nil {
+		t.Fatalf("unmarshal payload: %v", err)
+	}
+	if len(payload.Events) != 3 {
+		t.Fatalf("expected 3 events, got %d", len(payload.Events))
+	}
+	if payload.Events[0].Seq != 3 {
+		t.Fatalf("expected first event seq 3, got %d", payload.Events[0].Seq)
+	}
+	if payload.Events[1].Seq != 2 {
+		t.Fatalf("expected second event seq 2, got %d", payload.Events[1].Seq)
+	}
+	if payload.Events[2].Seq != 1 {
+		t.Fatalf("expected third event seq 1, got %d", payload.Events[2].Seq)
+	}
+	if result.Contents[0].URI != resourceURI {
+		t.Fatalf("expected resource URI %q, got %q", resourceURI, result.Contents[0].URI)
 	}
 }
 

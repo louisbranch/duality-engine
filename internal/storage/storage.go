@@ -103,6 +103,43 @@ type SessionEventStore interface {
 	ListSessionEvents(ctx context.Context, sessionID string, afterSeq uint64, limit int) ([]sessiondomain.SessionEvent, error)
 }
 
+// RollOutcomeDelta describes a per-character state change.
+type RollOutcomeDelta struct {
+	CharacterID string
+	HopeDelta   int
+	StressDelta int
+}
+
+// RollOutcomeApplyInput describes the outcome application request for storage.
+type RollOutcomeApplyInput struct {
+	CampaignID           string
+	SessionID            string
+	RollSeq              uint64
+	Targets              []string
+	RequiresComplication bool
+	RequestID            string
+	InvocationID         string
+	ParticipantID        string
+	CharacterID          string
+	EventTimestamp       time.Time
+	CharacterDeltas      []RollOutcomeDelta
+	GMFearDelta          int
+}
+
+// RollOutcomeApplyResult describes the outcome application result from storage.
+type RollOutcomeApplyResult struct {
+	UpdatedCharacterStates []domain.CharacterState
+	AppliedChanges         []sessiondomain.OutcomeAppliedChange
+	GMFearChanged          bool
+	GMFearBefore           int
+	GMFearAfter            int
+}
+
+// RollOutcomeStore applies roll outcomes atomically.
+type RollOutcomeStore interface {
+	ApplyRollOutcome(ctx context.Context, input RollOutcomeApplyInput) (RollOutcomeApplyResult, error)
+}
+
 // SessionPage describes a page of session records.
 type SessionPage struct {
 	Sessions      []sessiondomain.Session

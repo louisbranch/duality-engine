@@ -10,7 +10,8 @@ import (
 	"time"
 
 	sessionv1 "github.com/louisbranch/duality-engine/api/gen/go/session/v1"
-	"github.com/louisbranch/duality-engine/internal/duality/domain"
+	campaigndomain "github.com/louisbranch/duality-engine/internal/campaign/domain"
+	dualitydomain "github.com/louisbranch/duality-engine/internal/duality/domain"
 	"github.com/louisbranch/duality-engine/internal/grpcmeta"
 	"github.com/louisbranch/duality-engine/internal/id"
 	"github.com/louisbranch/duality-engine/internal/random"
@@ -23,9 +24,11 @@ import (
 
 // Stores groups all session-related storage interfaces.
 type Stores struct {
-	Campaign storage.CampaignStore
-	Session  storage.SessionStore
-	Event    storage.SessionEventStore
+	Campaign    storage.CampaignStore
+	Participant storage.ParticipantStore
+	Session     storage.SessionStore
+	Event       storage.SessionEventStore
+	Outcome     storage.RollOutcomeStore
 }
 
 // SessionService implements the SessionService gRPC API.
@@ -523,13 +526,13 @@ func (s *SessionService) SessionActionRoll(ctx context.Context, in *sessionv1.Se
 		return nil, status.Errorf(codes.Internal, "failed to generate seed: %v", err)
 	}
 
-	result, err := domain.RollAction(domain.ActionRequest{
+	result, err := dualitydomain.RollAction(dualitydomain.ActionRequest{
 		Modifier:   modifierTotal,
 		Difficulty: &difficulty,
 		Seed:       seed,
 	})
 	if err != nil {
-		if errors.Is(err, domain.ErrInvalidDifficulty) {
+		if errors.Is(err, dualitydomain.ErrInvalidDifficulty) {
 			s.appendRequestRejected(ctx, sessionID, "session.v1.SessionService/SessionActionRoll", "INVALID_ARGUMENT", err.Error(), characterID)
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
@@ -574,6 +577,196 @@ func (s *SessionService) SessionActionRoll(ctx context.Context, in *sessionv1.Se
 		Success:    result.MeetsDifficulty,
 		Flavor:     flavor,
 		Crit:       result.IsCrit,
+	}, nil
+}
+
+const (
+	// outcomeRejectSessionNotActive indicates the session is not active.
+	outcomeRejectSessionNotActive = "SESSION_NOT_ACTIVE"
+	// outcomeRejectRollNotFound indicates the roll event was not found.
+	outcomeRejectRollNotFound = "ROLL_NOT_FOUND"
+	// outcomeRejectRollWrongType indicates the roll event was not resolved.
+	outcomeRejectRollWrongType = "ROLL_WRONG_TYPE"
+	// outcomeRejectAlreadyApplied indicates the roll outcome was already applied.
+	outcomeRejectAlreadyApplied = "OUTCOME_ALREADY_APPLIED"
+	// outcomeRejectPermissionDenied indicates the caller cannot apply the outcome.
+	outcomeRejectPermissionDenied = "PERMISSION_DENIED"
+	// outcomeRejectCharacterNotFound indicates a target character was not found.
+	outcomeRejectCharacterNotFound = "CHARACTER_NOT_FOUND"
+	// outcomeRejectInvalidState indicates an unexpected state error occurred.
+	outcomeRejectInvalidState = "INVALID_STATE"
+)
+
+// ApplyRollOutcome applies the mandatory outcome effects for a resolved action roll.
+func (s *SessionService) ApplyRollOutcome(ctx context.Context, in *sessionv1.ApplyRollOutcomeRequest) (*sessionv1.ApplyRollOutcomeResponse, error) {
+	if in == nil {
+		return nil, status.Error(codes.InvalidArgument, "apply roll outcome request is required")
+	}
+	if s.stores.Session == nil {
+		return nil, status.Error(codes.Internal, "session store is not configured")
+	}
+	if s.stores.Event == nil {
+		return nil, status.Error(codes.Internal, "session event store is not configured")
+	}
+	if s.stores.Outcome == nil {
+		return nil, status.Error(codes.Internal, "roll outcome store is not configured")
+	}
+	if s.stores.Participant == nil {
+		return nil, status.Error(codes.Internal, "participant store is not configured")
+	}
+
+	sessionID := strings.TrimSpace(in.GetSessionId())
+	if sessionID == "" {
+		return nil, status.Error(codes.InvalidArgument, "session id is required")
+	}
+
+	rollSeq := in.GetRollSeq()
+	if rollSeq == 0 {
+		s.appendOutcomeRejected(ctx, sessionID, rollSeq, outcomeRejectRollNotFound, "roll seq is required", "")
+		return nil, status.Error(codes.InvalidArgument, "roll seq is required")
+	}
+
+	rollEvent, err := s.sessionEventBySeq(ctx, sessionID, rollSeq)
+	if err != nil {
+		s.appendOutcomeRejected(ctx, sessionID, rollSeq, outcomeRejectRollNotFound, err.Error(), "")
+		return nil, status.Error(codes.NotFound, "roll event not found")
+	}
+	if rollEvent.Type != sessiondomain.SessionEventTypeActionRollResolved {
+		s.appendOutcomeRejected(ctx, sessionID, rollSeq, outcomeRejectRollWrongType, "roll event is not resolved", rollEvent.CharacterID)
+		return nil, status.Error(codes.FailedPrecondition, "roll event is not resolved")
+	}
+
+	var resolved actionRollResolvedPayload
+	if err := json.Unmarshal(rollEvent.PayloadJSON, &resolved); err != nil {
+		s.appendOutcomeRejected(ctx, sessionID, rollSeq, outcomeRejectInvalidState, "invalid roll payload", rollEvent.CharacterID)
+		return nil, status.Error(codes.Internal, "invalid roll payload")
+	}
+	rollerID := strings.TrimSpace(resolved.CharacterID)
+	if rollerID == "" {
+		s.appendOutcomeRejected(ctx, sessionID, rollSeq, outcomeRejectInvalidState, "roll payload missing character id", rollEvent.CharacterID)
+		return nil, status.Error(codes.Internal, "roll payload missing character id")
+	}
+
+	targets := normalizeOutcomeTargets(in.GetTargets(), rollerID)
+	if len(targets) == 0 {
+		s.appendOutcomeRejected(ctx, sessionID, rollSeq, outcomeRejectInvalidState, "targets are required", rollerID)
+		return nil, status.Error(codes.InvalidArgument, "targets are required")
+	}
+
+	campaignID, err := s.sessionCampaignID(ctx, sessionID)
+	if err != nil {
+		s.appendOutcomeRejected(ctx, sessionID, rollSeq, outcomeRejectInvalidState, "session campaign not found", rollerID)
+		return nil, status.Error(codes.Internal, "session campaign not found")
+	}
+
+	session, err := s.stores.Session.GetSession(ctx, campaignID, sessionID)
+	if err != nil {
+		s.appendOutcomeRejected(ctx, sessionID, rollSeq, outcomeRejectSessionNotActive, "session not found", rollerID)
+		return nil, status.Error(codes.NotFound, "session not found")
+	}
+	if session.Status != sessiondomain.SessionStatusActive {
+		s.appendOutcomeRejected(ctx, sessionID, rollSeq, outcomeRejectSessionNotActive, "session is not active", rollerID)
+		return nil, status.Error(codes.FailedPrecondition, "session is not active")
+	}
+
+	participantID := strings.TrimSpace(grpcmeta.ParticipantIDFromContext(ctx))
+	if participantID != "" {
+		participant, err := s.stores.Participant.GetParticipant(ctx, campaignID, participantID)
+		if err != nil {
+			s.appendOutcomeRejected(ctx, sessionID, rollSeq, outcomeRejectPermissionDenied, "participant not found", rollerID)
+			return nil, status.Error(codes.PermissionDenied, "participant not found")
+		}
+		if participant.Role == campaigndomain.ParticipantRolePlayer {
+			if len(targets) != 1 || targets[0] != rollerID {
+				s.appendOutcomeRejected(ctx, sessionID, rollSeq, outcomeRejectPermissionDenied, "player may only apply to roller", rollerID)
+				return nil, status.Error(codes.PermissionDenied, "player may only apply to roller")
+			}
+		}
+	}
+
+	if err := s.appendOutcomeApplyRequested(ctx, sessionID, rollSeq, targets, rollerID); err != nil {
+		return nil, status.Errorf(codes.Internal, "append outcome apply requested: %v", err)
+	}
+
+	characterDeltas := make([]storage.RollOutcomeDelta, 0, len(targets))
+	gmFearDelta := 0
+	requiresComplication := false
+
+	switch {
+	case resolved.Crit:
+		for _, target := range targets {
+			characterDeltas = append(characterDeltas, storage.RollOutcomeDelta{
+				CharacterID: target,
+				HopeDelta:   1,
+				StressDelta: -1,
+			})
+		}
+	case strings.EqualFold(resolved.Flavor, "HOPE"):
+		for _, target := range targets {
+			characterDeltas = append(characterDeltas, storage.RollOutcomeDelta{
+				CharacterID: target,
+				HopeDelta:   1,
+			})
+		}
+	case strings.EqualFold(resolved.Flavor, "FEAR"):
+		gmFearDelta = 1
+		requiresComplication = true
+	default:
+		s.appendOutcomeRejected(ctx, sessionID, rollSeq, outcomeRejectInvalidState, "invalid roll flavor", rollerID)
+		return nil, status.Error(codes.Internal, "invalid roll flavor")
+	}
+
+	applyResult, err := s.stores.Outcome.ApplyRollOutcome(ctx, storage.RollOutcomeApplyInput{
+		CampaignID:           campaignID,
+		SessionID:            sessionID,
+		RollSeq:              rollSeq,
+		Targets:              targets,
+		RequiresComplication: requiresComplication,
+		RequestID:            grpcmeta.RequestIDFromContext(ctx),
+		InvocationID:         grpcmeta.InvocationIDFromContext(ctx),
+		ParticipantID:        participantID,
+		CharacterID:          rollerID,
+		EventTimestamp:       s.clock().UTC(),
+		CharacterDeltas:      characterDeltas,
+		GMFearDelta:          gmFearDelta,
+	})
+	if err != nil {
+		switch {
+		case errors.Is(err, sessiondomain.ErrOutcomeAlreadyApplied):
+			s.appendOutcomeRejected(ctx, sessionID, rollSeq, outcomeRejectAlreadyApplied, "outcome already applied", rollerID)
+			return nil, status.Error(codes.FailedPrecondition, "outcome already applied")
+		case errors.Is(err, sessiondomain.ErrOutcomeCharacterNotFound):
+			s.appendOutcomeRejected(ctx, sessionID, rollSeq, outcomeRejectCharacterNotFound, "character not found", rollerID)
+			return nil, status.Error(codes.NotFound, "character not found")
+		case errors.Is(err, sessiondomain.ErrOutcomeGMFearInvalid):
+			s.appendOutcomeRejected(ctx, sessionID, rollSeq, outcomeRejectInvalidState, "gm fear update invalid", rollerID)
+			return nil, status.Error(codes.FailedPrecondition, "gm fear update invalid")
+		default:
+			s.appendOutcomeRejected(ctx, sessionID, rollSeq, outcomeRejectInvalidState, err.Error(), rollerID)
+			return nil, status.Errorf(codes.Internal, "apply roll outcome: %v", err)
+		}
+	}
+
+	updated := &sessionv1.OutcomeUpdated{
+		CharacterStates: make([]*sessionv1.OutcomeCharacterState, 0, len(applyResult.UpdatedCharacterStates)),
+	}
+	for _, state := range applyResult.UpdatedCharacterStates {
+		updated.CharacterStates = append(updated.CharacterStates, &sessionv1.OutcomeCharacterState{
+			CharacterId: state.CharacterID,
+			Hope:        int32(state.Hope),
+			Stress:      int32(state.Stress),
+			Hp:          int32(state.Hp),
+		})
+	}
+	if applyResult.GMFearChanged {
+		gmFear := int32(applyResult.GMFearAfter)
+		updated.GmFear = &gmFear
+	}
+
+	return &sessionv1.ApplyRollOutcomeResponse{
+		RollSeq:              rollSeq,
+		RequiresComplication: requiresComplication,
+		Updated:              updated,
 	}, nil
 }
 
@@ -732,6 +925,12 @@ func eventTypeFromProto(eventType sessionv1.SessionEventType) (sessiondomain.Ses
 		return sessiondomain.SessionEventTypeActionRollRequested, nil
 	case sessionv1.SessionEventType_ACTION_ROLL_RESOLVED:
 		return sessiondomain.SessionEventTypeActionRollResolved, nil
+	case sessionv1.SessionEventType_OUTCOME_APPLY_REQUESTED:
+		return sessiondomain.SessionEventTypeOutcomeApplyRequested, nil
+	case sessionv1.SessionEventType_OUTCOME_APPLIED:
+		return sessiondomain.SessionEventTypeOutcomeApplied, nil
+	case sessionv1.SessionEventType_OUTCOME_REJECTED:
+		return sessiondomain.SessionEventTypeOutcomeRejected, nil
 	case sessionv1.SessionEventType_REQUEST_REJECTED:
 		return sessiondomain.SessionEventTypeRequestRejected, nil
 	default:
@@ -751,6 +950,12 @@ func eventTypeToProto(eventType sessiondomain.SessionEventType) sessionv1.Sessio
 		return sessionv1.SessionEventType_ACTION_ROLL_REQUESTED
 	case sessiondomain.SessionEventTypeActionRollResolved:
 		return sessionv1.SessionEventType_ACTION_ROLL_RESOLVED
+	case sessiondomain.SessionEventTypeOutcomeApplyRequested:
+		return sessionv1.SessionEventType_OUTCOME_APPLY_REQUESTED
+	case sessiondomain.SessionEventTypeOutcomeApplied:
+		return sessionv1.SessionEventType_OUTCOME_APPLIED
+	case sessiondomain.SessionEventTypeOutcomeRejected:
+		return sessionv1.SessionEventType_OUTCOME_REJECTED
 	case sessiondomain.SessionEventTypeRequestRejected:
 		return sessionv1.SessionEventType_REQUEST_REJECTED
 	default:
@@ -777,4 +982,118 @@ func actionRollFlavor(hope, fear int) string {
 		return "FEAR"
 	}
 	return "HOPE"
+}
+
+// normalizeOutcomeTargets resolves targets for an outcome apply request.
+func normalizeOutcomeTargets(targets []string, defaultTarget string) []string {
+	trimmed := make([]string, 0, len(targets))
+	seen := make(map[string]struct{}, len(targets))
+	for _, target := range targets {
+		value := strings.TrimSpace(target)
+		if value == "" {
+			continue
+		}
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
+		trimmed = append(trimmed, value)
+	}
+	if len(trimmed) == 0 && strings.TrimSpace(defaultTarget) != "" {
+		return []string{strings.TrimSpace(defaultTarget)}
+	}
+	return trimmed
+}
+
+// sessionEventBySeq loads a single session event by sequence.
+func (s *SessionService) sessionEventBySeq(ctx context.Context, sessionID string, seq uint64) (sessiondomain.SessionEvent, error) {
+	if s == nil || s.stores.Event == nil {
+		return sessiondomain.SessionEvent{}, fmt.Errorf("session event store is not configured")
+	}
+	items, err := s.stores.Event.ListSessionEvents(ctx, sessionID, seq-1, 1)
+	if err != nil {
+		return sessiondomain.SessionEvent{}, err
+	}
+	if len(items) == 0 || items[0].Seq != seq {
+		return sessiondomain.SessionEvent{}, storage.ErrNotFound
+	}
+	return items[0], nil
+}
+
+// sessionCampaignID resolves the campaign ID for a session via the session started event.
+func (s *SessionService) sessionCampaignID(ctx context.Context, sessionID string) (string, error) {
+	if s == nil || s.stores.Event == nil {
+		return "", fmt.Errorf("session event store is not configured")
+	}
+	events, err := s.stores.Event.ListSessionEvents(ctx, sessionID, 0, 1)
+	if err != nil {
+		return "", err
+	}
+	if len(events) == 0 {
+		return "", storage.ErrNotFound
+	}
+	if events[0].Type != sessiondomain.SessionEventTypeSessionStarted {
+		return "", fmt.Errorf("session started event not found")
+	}
+	var payload sessionStartedPayload
+	if err := json.Unmarshal(events[0].PayloadJSON, &payload); err != nil {
+		return "", fmt.Errorf("unmarshal session started payload: %w", err)
+	}
+	campaignID := strings.TrimSpace(payload.CampaignID)
+	if campaignID == "" {
+		return "", fmt.Errorf("session campaign id is required")
+	}
+	return campaignID, nil
+}
+
+// appendOutcomeApplyRequested appends an outcome apply requested event.
+func (s *SessionService) appendOutcomeApplyRequested(ctx context.Context, sessionID string, rollSeq uint64, targets []string, characterID string) error {
+	payload, err := json.Marshal(sessiondomain.OutcomeApplyRequestedPayload{
+		RollSeq: rollSeq,
+		Targets: targets,
+	})
+	if err != nil {
+		return fmt.Errorf("marshal outcome apply requested payload: %w", err)
+	}
+
+	return s.appendEvent(ctx, sessiondomain.SessionEvent{
+		SessionID:     sessionID,
+		Timestamp:     s.clock().UTC(),
+		Type:          sessiondomain.SessionEventTypeOutcomeApplyRequested,
+		RequestID:     grpcmeta.RequestIDFromContext(ctx),
+		InvocationID:  grpcmeta.InvocationIDFromContext(ctx),
+		ParticipantID: grpcmeta.ParticipantIDFromContext(ctx),
+		CharacterID:   characterID,
+		PayloadJSON:   payload,
+	})
+}
+
+// appendOutcomeRejected appends an outcome rejected event.
+func (s *SessionService) appendOutcomeRejected(ctx context.Context, sessionID string, rollSeq uint64, reasonCode, message, characterID string) {
+	if s == nil || s.stores.Event == nil {
+		return
+	}
+	if strings.TrimSpace(sessionID) == "" {
+		return
+	}
+
+	payload, err := json.Marshal(sessiondomain.OutcomeRejectedPayload{
+		RollSeq:    rollSeq,
+		ReasonCode: reasonCode,
+		Message:    message,
+	})
+	if err != nil {
+		return
+	}
+
+	_ = s.appendEvent(ctx, sessiondomain.SessionEvent{
+		SessionID:     sessionID,
+		Timestamp:     s.clock().UTC(),
+		Type:          sessiondomain.SessionEventTypeOutcomeRejected,
+		RequestID:     grpcmeta.RequestIDFromContext(ctx),
+		InvocationID:  grpcmeta.InvocationIDFromContext(ctx),
+		ParticipantID: grpcmeta.ParticipantIDFromContext(ctx),
+		CharacterID:   characterID,
+		PayloadJSON:   payload,
+	})
 }

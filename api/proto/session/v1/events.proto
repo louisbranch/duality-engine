@@ -15,6 +15,9 @@ enum SessionEventType {
   ACTION_ROLL_REQUESTED = 4;
   ACTION_ROLL_RESOLVED = 5;
   REQUEST_REJECTED = 6;
+  OUTCOME_APPLY_REQUESTED = 7;
+  OUTCOME_APPLIED = 8;
+  OUTCOME_REJECTED = 9;
 }
 
 // SessionEvent represents an immutable event in the session event stream.

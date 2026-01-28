@@ -139,6 +139,9 @@ func runMCPResourcesTests(t *testing.T, suite *integrationSuite) {
 		if campaignOutput.ID == "" {
 			t.Fatal("campaign_create returned empty id")
 		}
+		if campaignOutput.GmFear != 0 {
+			t.Fatalf("expected gm_fear 0, got %d", campaignOutput.GmFear)
+		}
 
 		// Create a participant
 		participantParams := &mcp.CallToolParams{

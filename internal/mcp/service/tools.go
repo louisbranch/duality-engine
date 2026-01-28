@@ -31,6 +31,7 @@ func registerSessionTools(mcpServer *mcp.Server, client sessionv1.SessionService
 	mcp.AddTool(mcpServer, domain.SessionStartTool(), domain.SessionStartHandler(client))
 	mcp.AddTool(mcpServer, domain.SessionEndTool(), domain.SessionEndHandler(client, getContext))
 	mcp.AddTool(mcpServer, domain.SessionActionRollTool(), domain.SessionActionRollHandler(client, getContext))
+	mcp.AddTool(mcpServer, domain.SessionRollOutcomeApplyTool(), domain.SessionRollOutcomeApplyHandler(client, getContext))
 }
 
 // registerContextTools registers context management tools.

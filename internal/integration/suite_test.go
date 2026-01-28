@@ -30,6 +30,10 @@ func TestMCPStdioEndToEnd(t *testing.T) {
 		runCampaignToolsTests(t, suite)
 	})
 
+	t.Run("session outcomes", func(t *testing.T) {
+		runSessionOutcomeTests(t, suite, grpcAddr)
+	})
+
 	t.Run("metadata", func(t *testing.T) {
 		runMetadataTests(t, suite, grpcAddr)
 	})

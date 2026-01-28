@@ -33,6 +33,9 @@ const (
 	SessionEventType_ACTION_ROLL_REQUESTED          SessionEventType = 4
 	SessionEventType_ACTION_ROLL_RESOLVED           SessionEventType = 5
 	SessionEventType_REQUEST_REJECTED               SessionEventType = 6
+	SessionEventType_OUTCOME_APPLY_REQUESTED        SessionEventType = 7
+	SessionEventType_OUTCOME_APPLIED                SessionEventType = 8
+	SessionEventType_OUTCOME_REJECTED               SessionEventType = 9
 )
 
 // Enum value maps for SessionEventType.
@@ -45,6 +48,9 @@ var (
 		4: "ACTION_ROLL_REQUESTED",
 		5: "ACTION_ROLL_RESOLVED",
 		6: "REQUEST_REJECTED",
+		7: "OUTCOME_APPLY_REQUESTED",
+		8: "OUTCOME_APPLIED",
+		9: "OUTCOME_REJECTED",
 	}
 	SessionEventType_value = map[string]int32{
 		"SESSION_EVENT_TYPE_UNSPECIFIED": 0,
@@ -54,6 +60,9 @@ var (
 		"ACTION_ROLL_REQUESTED":          4,
 		"ACTION_ROLL_RESOLVED":           5,
 		"REQUEST_REJECTED":               6,
+		"OUTCOME_APPLY_REQUESTED":        7,
+		"OUTCOME_APPLIED":                8,
+		"OUTCOME_REJECTED":               9,
 	}
 )
 
@@ -210,7 +219,7 @@ const file_session_v1_events_proto_rawDesc = "" +
 	"\rinvocation_id\x18\x06 \x01(\tR\finvocationId\x12%\n" +
 	"\x0eparticipant_id\x18\a \x01(\tR\rparticipantId\x12!\n" +
 	"\fcharacter_id\x18\b \x01(\tR\vcharacterId\x12!\n" +
-	"\fpayload_json\x18\t \x01(\fR\vpayloadJson*\xb9\x01\n" +
+	"\fpayload_json\x18\t \x01(\fR\vpayloadJson*\x81\x02\n" +
 	"\x10SessionEventType\x12\"\n" +
 	"\x1eSESSION_EVENT_TYPE_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fSESSION_STARTED\x10\x01\x12\x11\n" +
@@ -219,7 +228,10 @@ const file_session_v1_events_proto_rawDesc = "" +
 	"NOTE_ADDED\x10\x03\x12\x19\n" +
 	"\x15ACTION_ROLL_REQUESTED\x10\x04\x12\x18\n" +
 	"\x14ACTION_ROLL_RESOLVED\x10\x05\x12\x14\n" +
-	"\x10REQUEST_REJECTED\x10\x06BGZEgithub.com/louisbranch/duality-engine/api/gen/go/session/v1;sessionv1b\x06proto3"
+	"\x10REQUEST_REJECTED\x10\x06\x12\x1b\n" +
+	"\x17OUTCOME_APPLY_REQUESTED\x10\a\x12\x13\n" +
+	"\x0fOUTCOME_APPLIED\x10\b\x12\x14\n" +
+	"\x10OUTCOME_REJECTED\x10\tBGZEgithub.com/louisbranch/duality-engine/api/gen/go/session/v1;sessionv1b\x06proto3"
 
 var (
 	file_session_v1_events_proto_rawDescOnce sync.Once

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -27,21 +28,21 @@ const (
 
 // Stores groups all campaign-related storage interfaces.
 type Stores struct {
-	Campaign        storage.CampaignStore
-	Participant     storage.ParticipantStore
-	Character       storage.CharacterStore
+	Campaign         storage.CampaignStore
+	Participant      storage.ParticipantStore
+	Character        storage.CharacterStore
 	CharacterProfile storage.CharacterProfileStore
 	CharacterState   storage.CharacterStateStore
-	ControlDefault  storage.ControlDefaultStore
+	ControlDefault   storage.ControlDefaultStore
 }
 
 // CampaignService implements the CampaignService gRPC API.
 type CampaignService struct {
 	campaignv1.UnimplementedCampaignServiceServer
-	stores      Stores
-	clock       func() time.Time
-	idGenerator func() (string, error)
-	defaults    map[domain.CharacterKind]domain.CharacterProfileDefaults
+	stores       Stores
+	clock        func() time.Time
+	idGenerator  func() (string, error)
+	defaults     map[domain.CharacterKind]domain.CharacterProfileDefaults
 	defaultsOnce sync.Once
 	defaultsErr  error
 }
@@ -86,14 +87,15 @@ func (s *CampaignService) CreateCampaign(ctx context.Context, in *campaignv1.Cre
 
 	response := &campaignv1.CreateCampaignResponse{
 		Campaign: &campaignv1.Campaign{
-			Id:              campaign.ID,
-			Name:            campaign.Name,
-			GmMode:          gmModeToProto(campaign.GmMode),
+			Id:               campaign.ID,
+			Name:             campaign.Name,
+			GmMode:           gmModeToProto(campaign.GmMode),
 			ParticipantCount: int32(campaign.ParticipantCount),
 			CharacterCount:   int32(campaign.CharacterCount),
-			ThemePrompt:     campaign.ThemePrompt,
-			CreatedAt:       timestamppb.New(campaign.CreatedAt),
-			UpdatedAt:       timestamppb.New(campaign.UpdatedAt),
+			GmFear:           int32(campaign.GmFear),
+			ThemePrompt:      campaign.ThemePrompt,
+			CreatedAt:        timestamppb.New(campaign.CreatedAt),
+			UpdatedAt:        timestamppb.New(campaign.UpdatedAt),
 		},
 	}
 
@@ -133,14 +135,15 @@ func (s *CampaignService) ListCampaigns(ctx context.Context, in *campaignv1.List
 	response.Campaigns = make([]*campaignv1.Campaign, 0, len(page.Campaigns))
 	for _, campaign := range page.Campaigns {
 		response.Campaigns = append(response.Campaigns, &campaignv1.Campaign{
-			Id:              campaign.ID,
-			Name:            campaign.Name,
-			GmMode:          gmModeToProto(campaign.GmMode),
+			Id:               campaign.ID,
+			Name:             campaign.Name,
+			GmMode:           gmModeToProto(campaign.GmMode),
 			ParticipantCount: int32(campaign.ParticipantCount),
 			CharacterCount:   int32(campaign.CharacterCount),
-			ThemePrompt:     campaign.ThemePrompt,
-			CreatedAt:       timestamppb.New(campaign.CreatedAt),
-			UpdatedAt:       timestamppb.New(campaign.UpdatedAt),
+			GmFear:           int32(campaign.GmFear),
+			ThemePrompt:      campaign.ThemePrompt,
+			CreatedAt:        timestamppb.New(campaign.CreatedAt),
+			UpdatedAt:        timestamppb.New(campaign.UpdatedAt),
 		})
 	}
 
@@ -172,18 +175,90 @@ func (s *CampaignService) GetCampaign(ctx context.Context, in *campaignv1.GetCam
 
 	response := &campaignv1.GetCampaignResponse{
 		Campaign: &campaignv1.Campaign{
-			Id:              campaign.ID,
-			Name:            campaign.Name,
-			GmMode:          gmModeToProto(campaign.GmMode),
+			Id:               campaign.ID,
+			Name:             campaign.Name,
+			GmMode:           gmModeToProto(campaign.GmMode),
 			ParticipantCount: int32(campaign.ParticipantCount),
 			CharacterCount:   int32(campaign.CharacterCount),
-			ThemePrompt:     campaign.ThemePrompt,
-			CreatedAt:       timestamppb.New(campaign.CreatedAt),
-			UpdatedAt:       timestamppb.New(campaign.UpdatedAt),
+			GmFear:           int32(campaign.GmFear),
+			ThemePrompt:      campaign.ThemePrompt,
+			CreatedAt:        timestamppb.New(campaign.CreatedAt),
+			UpdatedAt:        timestamppb.New(campaign.UpdatedAt),
 		},
 	}
 
 	return response, nil
+}
+
+// GMFearGain increases GM fear for a campaign and persists the change.
+func (s *CampaignService) GMFearGain(ctx context.Context, campaignID string, amount int) (int, int, error) {
+	if s == nil {
+		return 0, 0, errors.New("campaign service is not configured")
+	}
+	if s.stores.Campaign == nil {
+		return 0, 0, errors.New("campaign store is not configured")
+	}
+
+	trimmedCampaignID := strings.TrimSpace(campaignID)
+	if trimmedCampaignID == "" {
+		return 0, 0, errors.New("campaign id is required")
+	}
+
+	campaign, err := s.stores.Campaign.Get(ctx, trimmedCampaignID)
+	if err != nil {
+		return 0, 0, fmt.Errorf("get campaign: %w", err)
+	}
+
+	updated, before, after, err := domain.ApplyGMFearGain(campaign, amount)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	updated.UpdatedAt = s.now().UTC()
+	if err := s.stores.Campaign.Put(ctx, updated); err != nil {
+		return 0, 0, fmt.Errorf("persist campaign: %w", err)
+	}
+
+	return before, after, nil
+}
+
+// GMFearSpend decreases GM fear for a campaign and persists the change.
+func (s *CampaignService) GMFearSpend(ctx context.Context, campaignID string, amount int) (int, int, error) {
+	if s == nil {
+		return 0, 0, errors.New("campaign service is not configured")
+	}
+	if s.stores.Campaign == nil {
+		return 0, 0, errors.New("campaign store is not configured")
+	}
+
+	trimmedCampaignID := strings.TrimSpace(campaignID)
+	if trimmedCampaignID == "" {
+		return 0, 0, errors.New("campaign id is required")
+	}
+
+	campaign, err := s.stores.Campaign.Get(ctx, trimmedCampaignID)
+	if err != nil {
+		return 0, 0, fmt.Errorf("get campaign: %w", err)
+	}
+
+	updated, before, after, err := domain.ApplyGMFearSpend(campaign, amount)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	updated.UpdatedAt = s.now().UTC()
+	if err := s.stores.Campaign.Put(ctx, updated); err != nil {
+		return 0, 0, fmt.Errorf("persist campaign: %w", err)
+	}
+
+	return before, after, nil
+}
+
+func (s *CampaignService) now() time.Time {
+	if s == nil || s.clock == nil {
+		return time.Now()
+	}
+	return s.clock()
 }
 
 // gmModeFromProto maps a protobuf GM mode to the domain representation.
@@ -290,9 +365,9 @@ func (s *CampaignService) CreateCharacter(ctx context.Context, in *campaignv1.Cr
 	state, err := domain.CreateCharacterState(domain.CreateCharacterStateInput{
 		CampaignID:  campaignID,
 		CharacterID: character.ID,
-		Hope:         0,
-		Stress:       0,
-		Hp:           profile.HpMax,
+		Hope:        0,
+		Stress:      0,
+		Hp:          profile.HpMax,
 	}, profile)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "create character state: %v", err)
@@ -474,9 +549,9 @@ func (s *CampaignService) SetDefaultControl(ctx context.Context, in *campaignv1.
 	}
 
 	response := &campaignv1.SetDefaultControlResponse{
-		CampaignId:   campaignID,
+		CampaignId:  campaignID,
 		CharacterId: characterID,
-		Controller:   characterControllerToProto(controller),
+		Controller:  characterControllerToProto(controller),
 	}
 
 	return response, nil
