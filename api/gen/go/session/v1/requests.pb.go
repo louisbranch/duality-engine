@@ -897,6 +897,250 @@ func (x *SessionActionRollResponse) GetCrit() bool {
 	return false
 }
 
+type ApplyRollOutcomeRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The session ID to apply the outcome within.
+	SessionId string `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	// The roll sequence number of the ACTION_ROLL_RESOLVED event.
+	RollSeq uint64 `protobuf:"varint,2,opt,name=roll_seq,json=rollSeq,proto3" json:"roll_seq,omitempty"`
+	// Optional list of character IDs to apply the outcome to.
+	// If omitted, defaults to the roller character in the roll event.
+	Targets       []string `protobuf:"bytes,3,rep,name=targets,proto3" json:"targets,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ApplyRollOutcomeRequest) Reset() {
+	*x = ApplyRollOutcomeRequest{}
+	mi := &file_session_v1_requests_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApplyRollOutcomeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApplyRollOutcomeRequest) ProtoMessage() {}
+
+func (x *ApplyRollOutcomeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_session_v1_requests_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApplyRollOutcomeRequest.ProtoReflect.Descriptor instead.
+func (*ApplyRollOutcomeRequest) Descriptor() ([]byte, []int) {
+	return file_session_v1_requests_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *ApplyRollOutcomeRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *ApplyRollOutcomeRequest) GetRollSeq() uint64 {
+	if x != nil {
+		return x.RollSeq
+	}
+	return 0
+}
+
+func (x *ApplyRollOutcomeRequest) GetTargets() []string {
+	if x != nil {
+		return x.Targets
+	}
+	return nil
+}
+
+type OutcomeCharacterState struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CharacterId   string                 `protobuf:"bytes,1,opt,name=character_id,json=characterId,proto3" json:"character_id,omitempty"`
+	Hope          int32                  `protobuf:"varint,2,opt,name=hope,proto3" json:"hope,omitempty"`
+	Stress        int32                  `protobuf:"varint,3,opt,name=stress,proto3" json:"stress,omitempty"`
+	Hp            int32                  `protobuf:"varint,4,opt,name=hp,proto3" json:"hp,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *OutcomeCharacterState) Reset() {
+	*x = OutcomeCharacterState{}
+	mi := &file_session_v1_requests_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OutcomeCharacterState) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OutcomeCharacterState) ProtoMessage() {}
+
+func (x *OutcomeCharacterState) ProtoReflect() protoreflect.Message {
+	mi := &file_session_v1_requests_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OutcomeCharacterState.ProtoReflect.Descriptor instead.
+func (*OutcomeCharacterState) Descriptor() ([]byte, []int) {
+	return file_session_v1_requests_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *OutcomeCharacterState) GetCharacterId() string {
+	if x != nil {
+		return x.CharacterId
+	}
+	return ""
+}
+
+func (x *OutcomeCharacterState) GetHope() int32 {
+	if x != nil {
+		return x.Hope
+	}
+	return 0
+}
+
+func (x *OutcomeCharacterState) GetStress() int32 {
+	if x != nil {
+		return x.Stress
+	}
+	return 0
+}
+
+func (x *OutcomeCharacterState) GetHp() int32 {
+	if x != nil {
+		return x.Hp
+	}
+	return 0
+}
+
+type OutcomeUpdated struct {
+	state           protoimpl.MessageState   `protogen:"open.v1"`
+	CharacterStates []*OutcomeCharacterState `protobuf:"bytes,1,rep,name=character_states,json=characterStates,proto3" json:"character_states,omitempty"`
+	GmFear          *int32                   `protobuf:"varint,2,opt,name=gm_fear,json=gmFear,proto3,oneof" json:"gm_fear,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *OutcomeUpdated) Reset() {
+	*x = OutcomeUpdated{}
+	mi := &file_session_v1_requests_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OutcomeUpdated) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OutcomeUpdated) ProtoMessage() {}
+
+func (x *OutcomeUpdated) ProtoReflect() protoreflect.Message {
+	mi := &file_session_v1_requests_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OutcomeUpdated.ProtoReflect.Descriptor instead.
+func (*OutcomeUpdated) Descriptor() ([]byte, []int) {
+	return file_session_v1_requests_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *OutcomeUpdated) GetCharacterStates() []*OutcomeCharacterState {
+	if x != nil {
+		return x.CharacterStates
+	}
+	return nil
+}
+
+func (x *OutcomeUpdated) GetGmFear() int32 {
+	if x != nil && x.GmFear != nil {
+		return *x.GmFear
+	}
+	return 0
+}
+
+type ApplyRollOutcomeResponse struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	RollSeq              uint64                 `protobuf:"varint,1,opt,name=roll_seq,json=rollSeq,proto3" json:"roll_seq,omitempty"`
+	RequiresComplication bool                   `protobuf:"varint,2,opt,name=requires_complication,json=requiresComplication,proto3" json:"requires_complication,omitempty"`
+	Updated              *OutcomeUpdated        `protobuf:"bytes,3,opt,name=updated,proto3" json:"updated,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *ApplyRollOutcomeResponse) Reset() {
+	*x = ApplyRollOutcomeResponse{}
+	mi := &file_session_v1_requests_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApplyRollOutcomeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApplyRollOutcomeResponse) ProtoMessage() {}
+
+func (x *ApplyRollOutcomeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_session_v1_requests_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApplyRollOutcomeResponse.ProtoReflect.Descriptor instead.
+func (*ApplyRollOutcomeResponse) Descriptor() ([]byte, []int) {
+	return file_session_v1_requests_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *ApplyRollOutcomeResponse) GetRollSeq() uint64 {
+	if x != nil {
+		return x.RollSeq
+	}
+	return 0
+}
+
+func (x *ApplyRollOutcomeResponse) GetRequiresComplication() bool {
+	if x != nil {
+		return x.RequiresComplication
+	}
+	return false
+}
+
+func (x *ApplyRollOutcomeResponse) GetUpdated() *OutcomeUpdated {
+	if x != nil {
+		return x.Updated
+	}
+	return nil
+}
+
 var File_session_v1_requests_proto protoreflect.FileDescriptor
 
 const file_session_v1_requests_proto_rawDesc = "" +
@@ -971,7 +1215,26 @@ const file_session_v1_requests_proto_rawDesc = "" +
 	"difficulty\x12\x18\n" +
 	"\asuccess\x18\x05 \x01(\bR\asuccess\x12\x16\n" +
 	"\x06flavor\x18\x06 \x01(\tR\x06flavor\x12\x12\n" +
-	"\x04crit\x18\a \x01(\bR\x04critBGZEgithub.com/louisbranch/duality-engine/api/gen/go/session/v1;sessionv1b\x06proto3"
+	"\x04crit\x18\a \x01(\bR\x04crit\"m\n" +
+	"\x17ApplyRollOutcomeRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x19\n" +
+	"\broll_seq\x18\x02 \x01(\x04R\arollSeq\x12\x18\n" +
+	"\atargets\x18\x03 \x03(\tR\atargets\"v\n" +
+	"\x15OutcomeCharacterState\x12!\n" +
+	"\fcharacter_id\x18\x01 \x01(\tR\vcharacterId\x12\x12\n" +
+	"\x04hope\x18\x02 \x01(\x05R\x04hope\x12\x16\n" +
+	"\x06stress\x18\x03 \x01(\x05R\x06stress\x12\x0e\n" +
+	"\x02hp\x18\x04 \x01(\x05R\x02hp\"\x88\x01\n" +
+	"\x0eOutcomeUpdated\x12L\n" +
+	"\x10character_states\x18\x01 \x03(\v2!.session.v1.OutcomeCharacterStateR\x0fcharacterStates\x12\x1c\n" +
+	"\agm_fear\x18\x02 \x01(\x05H\x00R\x06gmFear\x88\x01\x01B\n" +
+	"\n" +
+	"\b_gm_fear\"\xa0\x01\n" +
+	"\x18ApplyRollOutcomeResponse\x12\x19\n" +
+	"\broll_seq\x18\x01 \x01(\x04R\arollSeq\x123\n" +
+	"\x15requires_complication\x18\x02 \x01(\bR\x14requiresComplication\x124\n" +
+	"\aupdated\x18\x03 \x01(\v2\x1a.session.v1.OutcomeUpdatedR\aupdatedBGZEgithub.com/louisbranch/duality-engine/api/gen/go/session/v1;sessionv1b\x06proto3"
 
 var (
 	file_session_v1_requests_proto_rawDescOnce sync.Once
@@ -985,7 +1248,7 @@ func file_session_v1_requests_proto_rawDescGZIP() []byte {
 	return file_session_v1_requests_proto_rawDescData
 }
 
-var file_session_v1_requests_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_session_v1_requests_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_session_v1_requests_proto_goTypes = []any{
 	(*StartSessionRequest)(nil),        // 0: session.v1.StartSessionRequest
 	(*StartSessionResponse)(nil),       // 1: session.v1.StartSessionResponse
@@ -1002,24 +1265,30 @@ var file_session_v1_requests_proto_goTypes = []any{
 	(*ActionRollModifier)(nil),         // 12: session.v1.ActionRollModifier
 	(*SessionActionRollRequest)(nil),   // 13: session.v1.SessionActionRollRequest
 	(*SessionActionRollResponse)(nil),  // 14: session.v1.SessionActionRollResponse
-	(*Session)(nil),                    // 15: session.v1.Session
-	(SessionEventType)(0),              // 16: session.v1.SessionEventType
-	(*SessionEvent)(nil),               // 17: session.v1.SessionEvent
+	(*ApplyRollOutcomeRequest)(nil),    // 15: session.v1.ApplyRollOutcomeRequest
+	(*OutcomeCharacterState)(nil),      // 16: session.v1.OutcomeCharacterState
+	(*OutcomeUpdated)(nil),             // 17: session.v1.OutcomeUpdated
+	(*ApplyRollOutcomeResponse)(nil),   // 18: session.v1.ApplyRollOutcomeResponse
+	(*Session)(nil),                    // 19: session.v1.Session
+	(SessionEventType)(0),              // 20: session.v1.SessionEventType
+	(*SessionEvent)(nil),               // 21: session.v1.SessionEvent
 }
 var file_session_v1_requests_proto_depIdxs = []int32{
-	15, // 0: session.v1.StartSessionResponse.session:type_name -> session.v1.Session
-	15, // 1: session.v1.ListSessionsResponse.sessions:type_name -> session.v1.Session
-	15, // 2: session.v1.GetSessionResponse.session:type_name -> session.v1.Session
-	15, // 3: session.v1.EndSessionResponse.session:type_name -> session.v1.Session
-	16, // 4: session.v1.SessionEventAppendRequest.type:type_name -> session.v1.SessionEventType
-	17, // 5: session.v1.SessionEventAppendResponse.event:type_name -> session.v1.SessionEvent
-	17, // 6: session.v1.SessionEventsListResponse.events:type_name -> session.v1.SessionEvent
+	19, // 0: session.v1.StartSessionResponse.session:type_name -> session.v1.Session
+	19, // 1: session.v1.ListSessionsResponse.sessions:type_name -> session.v1.Session
+	19, // 2: session.v1.GetSessionResponse.session:type_name -> session.v1.Session
+	19, // 3: session.v1.EndSessionResponse.session:type_name -> session.v1.Session
+	20, // 4: session.v1.SessionEventAppendRequest.type:type_name -> session.v1.SessionEventType
+	21, // 5: session.v1.SessionEventAppendResponse.event:type_name -> session.v1.SessionEvent
+	21, // 6: session.v1.SessionEventsListResponse.events:type_name -> session.v1.SessionEvent
 	12, // 7: session.v1.SessionActionRollRequest.modifiers:type_name -> session.v1.ActionRollModifier
-	8,  // [8:8] is the sub-list for method output_type
-	8,  // [8:8] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	16, // 8: session.v1.OutcomeUpdated.character_states:type_name -> session.v1.OutcomeCharacterState
+	17, // 9: session.v1.ApplyRollOutcomeResponse.updated:type_name -> session.v1.OutcomeUpdated
+	10, // [10:10] is the sub-list for method output_type
+	10, // [10:10] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_session_v1_requests_proto_init() }
@@ -1029,13 +1298,14 @@ func file_session_v1_requests_proto_init() {
 	}
 	file_session_v1_session_proto_init()
 	file_session_v1_events_proto_init()
+	file_session_v1_requests_proto_msgTypes[17].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_session_v1_requests_proto_rawDesc), len(file_session_v1_requests_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   15,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -361,6 +361,36 @@ Rolls Duality dice for a session and appends session events.
 }
 ```
 
+#### session_roll_outcome_apply
+
+Applies the mandatory outcome effects from a resolved action roll.
+
+**Input:**
+
+```json
+{
+  "session_id": "sess_ghi789",
+  "roll_seq": 42,
+  "targets": ["char_123"]
+}
+```
+
+`session_id` defaults to the current context if omitted. `targets` defaults to the roller character.
+
+**Output:**
+
+```json
+{
+  "roll_seq": 42,
+  "requires_complication": false,
+  "updated": {
+    "character_states": [
+      {"character_id": "char_123", "hope": 3, "stress": 1, "hp": 10}
+    ]
+  }
+}
+```
+
 ### Duality Service Tools
 
 #### duality_rules_version
@@ -712,6 +742,7 @@ Note: The `ended_at` field is optional and only present for sessions that have e
 #### session://{session_id}/events
 
 JSON listing of session events for a session. Requires a concrete session ID.
+Events are ordered by descending sequence (latest first).
 
 **Response:**
 

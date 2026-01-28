@@ -119,6 +119,8 @@ message SessionActionRollRequest {
 
   // Optional modifiers applied to the roll.
   repeated ActionRollModifier modifiers = 6;
+
+  // TODO: Add optional seed field for deterministic rolls.
 }
 
 message SessionActionRollResponse {
@@ -129,4 +131,34 @@ message SessionActionRollResponse {
   bool success = 5;
   string flavor = 6;
   bool crit = 7;
+}
+
+message ApplyRollOutcomeRequest {
+  // The session ID to apply the outcome within.
+  string session_id = 1;
+
+  // The roll sequence number of the ACTION_ROLL_RESOLVED event.
+  uint64 roll_seq = 2;
+
+  // Optional list of character IDs to apply the outcome to.
+  // If omitted, defaults to the roller character in the roll event.
+  repeated string targets = 3;
+}
+
+message OutcomeCharacterState {
+  string character_id = 1;
+  int32 hope = 2;
+  int32 stress = 3;
+  int32 hp = 4;
+}
+
+message OutcomeUpdated {
+  repeated OutcomeCharacterState character_states = 1;
+  optional int32 gm_fear = 2;
+}
+
+message ApplyRollOutcomeResponse {
+  uint64 roll_seq = 1;
+  bool requires_complication = 2;
+  OutcomeUpdated updated = 3;
 }

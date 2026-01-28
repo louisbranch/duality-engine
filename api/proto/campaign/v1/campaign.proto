@@ -15,8 +15,10 @@ message Campaign {
   // Number of all characters (PC + NPC + future kinds) for this campaign.
   int32 character_count = 5;
   string theme_prompt = 6;
-  google.protobuf.Timestamp created_at = 7;
-  google.protobuf.Timestamp updated_at = 8;
+  // Campaign-scoped GM fear resource.
+  int32 gm_fear = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
 }
 
 enum GmMode {

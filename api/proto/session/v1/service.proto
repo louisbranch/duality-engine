@@ -28,4 +28,7 @@ service SessionService {
 
   // Roll Duality dice for a session.
   rpc SessionActionRoll(SessionActionRollRequest) returns (SessionActionRollResponse);
+
+  // Apply the mandatory outcome effects from a resolved action roll.
+  rpc ApplyRollOutcome(ApplyRollOutcomeRequest) returns (ApplyRollOutcomeResponse);
 }

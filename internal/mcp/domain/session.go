@@ -203,11 +203,47 @@ type SessionActionRollResult struct {
 	Crit       bool   `json:"crit" jsonschema:"whether the roll is a critical success"`
 }
 
+// SessionRollOutcomeApplyInput represents the MCP tool input for applying roll outcomes.
+type SessionRollOutcomeApplyInput struct {
+	SessionID string   `json:"session_id,omitempty" jsonschema:"session identifier (defaults to context)"`
+	RollSeq   uint64   `json:"roll_seq" jsonschema:"roll sequence number to apply"`
+	Targets   []string `json:"targets,omitempty" jsonschema:"optional target character ids"`
+}
+
+// SessionRollOutcomeApplyCharacterState represents updated character state output.
+type SessionRollOutcomeApplyCharacterState struct {
+	CharacterID string `json:"character_id" jsonschema:"character identifier"`
+	Hope        int    `json:"hope" jsonschema:"updated hope"`
+	Stress      int    `json:"stress" jsonschema:"updated stress"`
+	HP          int    `json:"hp" jsonschema:"updated hp"`
+}
+
+// SessionRollOutcomeApplyUpdated represents updated outcome state output.
+type SessionRollOutcomeApplyUpdated struct {
+	CharacterStates []SessionRollOutcomeApplyCharacterState `json:"character_states" jsonschema:"updated character states"`
+	GMFear          *int                                    `json:"gm_fear,omitempty" jsonschema:"updated gm fear"`
+}
+
+// SessionRollOutcomeApplyResult represents the MCP tool output for applying roll outcomes.
+type SessionRollOutcomeApplyResult struct {
+	RollSeq              uint64                         `json:"roll_seq" jsonschema:"roll sequence number applied"`
+	RequiresComplication bool                           `json:"requires_complication" jsonschema:"whether a complication is required"`
+	Updated              SessionRollOutcomeApplyUpdated `json:"updated" jsonschema:"updated state"`
+}
+
 // SessionActionRollTool defines the MCP tool schema for session action rolls.
 func SessionActionRollTool() *mcp.Tool {
 	return &mcp.Tool{
 		Name:        "session_action_roll",
 		Description: "Rolls Duality dice for a session and appends session events",
+	}
+}
+
+// SessionRollOutcomeApplyTool defines the MCP tool schema for applying roll outcomes.
+func SessionRollOutcomeApplyTool() *mcp.Tool {
+	return &mcp.Tool{
+		Name:        "session_roll_outcome_apply",
+		Description: "Applies mandatory roll outcome effects and appends session events",
 	}
 }
 
@@ -282,6 +318,78 @@ func SessionActionRollHandler(client sessionv1.SessionServiceClient, getContext 
 			Success:    response.GetSuccess(),
 			Flavor:     response.GetFlavor(),
 			Crit:       response.GetCrit(),
+		}
+
+		responseMeta := MergeResponseMetadata(callMeta, header)
+		return CallToolResultWithMetadata(responseMeta), result, nil
+	}
+}
+
+// SessionRollOutcomeApplyHandler executes a roll outcome apply request.
+func SessionRollOutcomeApplyHandler(client sessionv1.SessionServiceClient, getContext func() Context) mcp.ToolHandlerFor[SessionRollOutcomeApplyInput, SessionRollOutcomeApplyResult] {
+	return func(ctx context.Context, _ *mcp.CallToolRequest, input SessionRollOutcomeApplyInput) (*mcp.CallToolResult, SessionRollOutcomeApplyResult, error) {
+		invocationID, err := NewInvocationID()
+		if err != nil {
+			return nil, SessionRollOutcomeApplyResult{}, fmt.Errorf("generate invocation id: %w", err)
+		}
+
+		runCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+
+		mcpCtx := Context{}
+		if getContext != nil {
+			mcpCtx = getContext()
+		}
+
+		sessionID := input.SessionID
+		if sessionID == "" {
+			sessionID = mcpCtx.SessionID
+		}
+		if sessionID == "" {
+			return nil, SessionRollOutcomeApplyResult{}, fmt.Errorf("session_id is required")
+		}
+
+		callCtx, callMeta, err := NewOutgoingContext(runCtx, invocationID)
+		if err != nil {
+			return nil, SessionRollOutcomeApplyResult{}, fmt.Errorf("create request metadata: %w", err)
+		}
+		if mcpCtx.ParticipantID != "" {
+			callCtx = metadata.AppendToOutgoingContext(callCtx, grpcmeta.ParticipantIDHeader, mcpCtx.ParticipantID)
+		}
+
+		var header metadata.MD
+		response, err := client.ApplyRollOutcome(callCtx, &sessionv1.ApplyRollOutcomeRequest{
+			SessionId: sessionID,
+			RollSeq:   input.RollSeq,
+			Targets:   input.Targets,
+		}, grpc.Header(&header))
+		if err != nil {
+			return nil, SessionRollOutcomeApplyResult{}, fmt.Errorf("apply roll outcome failed: %w", err)
+		}
+		if response == nil || response.Updated == nil {
+			return nil, SessionRollOutcomeApplyResult{}, fmt.Errorf("apply roll outcome response is missing")
+		}
+
+		updatedStates := make([]SessionRollOutcomeApplyCharacterState, 0, len(response.Updated.GetCharacterStates()))
+		for _, state := range response.Updated.GetCharacterStates() {
+			updatedStates = append(updatedStates, SessionRollOutcomeApplyCharacterState{
+				CharacterID: state.GetCharacterId(),
+				Hope:        int(state.GetHope()),
+				Stress:      int(state.GetStress()),
+				HP:          int(state.GetHp()),
+			})
+		}
+
+		updated := SessionRollOutcomeApplyUpdated{CharacterStates: updatedStates}
+		if response.Updated.GmFear != nil {
+			gmFear := int(response.Updated.GetGmFear())
+			updated.GMFear = &gmFear
+		}
+
+		result := SessionRollOutcomeApplyResult{
+			RollSeq:              response.GetRollSeq(),
+			RequiresComplication: response.GetRequiresComplication(),
+			Updated:              updated,
 		}
 
 		responseMeta := MergeResponseMetadata(callMeta, header)
@@ -483,8 +591,10 @@ func SessionEventsResourceHandler(client sessionv1.SessionServiceClient) mcp.Res
 			return nil, fmt.Errorf("session events list response is missing")
 		}
 
-		payload := SessionEventsPayload{Events: make([]SessionEventEntry, 0, len(response.GetEvents()))}
-		for _, event := range response.GetEvents() {
+		events := response.GetEvents()
+		payload := SessionEventsPayload{Events: make([]SessionEventEntry, 0, len(events))}
+		for i := len(events); i > 0; i-- {
+			event := events[i-1]
 			payload.Events = append(payload.Events, SessionEventEntry{
 				SessionID:     event.GetSessionId(),
 				Seq:           event.GetSeq(),

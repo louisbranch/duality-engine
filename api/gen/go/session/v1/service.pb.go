@@ -25,7 +25,7 @@ var File_session_v1_service_proto protoreflect.FileDescriptor
 const file_session_v1_service_proto_rawDesc = "" +
 	"\n" +
 	"\x18session/v1/service.proto\x12\n" +
-	"session.v1\x1a\x19session/v1/requests.proto2\xf9\x04\n" +
+	"session.v1\x1a\x19session/v1/requests.proto2\xd8\x05\n" +
 	"\x0eSessionService\x12Q\n" +
 	"\fStartSession\x12\x1f.session.v1.StartSessionRequest\x1a .session.v1.StartSessionResponse\x12Q\n" +
 	"\fListSessions\x12\x1f.session.v1.ListSessionsRequest\x1a .session.v1.ListSessionsResponse\x12K\n" +
@@ -35,7 +35,8 @@ const file_session_v1_service_proto_rawDesc = "" +
 	"EndSession\x12\x1d.session.v1.EndSessionRequest\x1a\x1e.session.v1.EndSessionResponse\x12c\n" +
 	"\x12SessionEventAppend\x12%.session.v1.SessionEventAppendRequest\x1a&.session.v1.SessionEventAppendResponse\x12`\n" +
 	"\x11SessionEventsList\x12$.session.v1.SessionEventsListRequest\x1a%.session.v1.SessionEventsListResponse\x12`\n" +
-	"\x11SessionActionRoll\x12$.session.v1.SessionActionRollRequest\x1a%.session.v1.SessionActionRollResponseBGZEgithub.com/louisbranch/duality-engine/api/gen/go/session/v1;sessionv1b\x06proto3"
+	"\x11SessionActionRoll\x12$.session.v1.SessionActionRollRequest\x1a%.session.v1.SessionActionRollResponse\x12]\n" +
+	"\x10ApplyRollOutcome\x12#.session.v1.ApplyRollOutcomeRequest\x1a$.session.v1.ApplyRollOutcomeResponseBGZEgithub.com/louisbranch/duality-engine/api/gen/go/session/v1;sessionv1b\x06proto3"
 
 var file_session_v1_service_proto_goTypes = []any{
 	(*StartSessionRequest)(nil),        // 0: session.v1.StartSessionRequest
@@ -45,13 +46,15 @@ var file_session_v1_service_proto_goTypes = []any{
 	(*SessionEventAppendRequest)(nil),  // 4: session.v1.SessionEventAppendRequest
 	(*SessionEventsListRequest)(nil),   // 5: session.v1.SessionEventsListRequest
 	(*SessionActionRollRequest)(nil),   // 6: session.v1.SessionActionRollRequest
-	(*StartSessionResponse)(nil),       // 7: session.v1.StartSessionResponse
-	(*ListSessionsResponse)(nil),       // 8: session.v1.ListSessionsResponse
-	(*GetSessionResponse)(nil),         // 9: session.v1.GetSessionResponse
-	(*EndSessionResponse)(nil),         // 10: session.v1.EndSessionResponse
-	(*SessionEventAppendResponse)(nil), // 11: session.v1.SessionEventAppendResponse
-	(*SessionEventsListResponse)(nil),  // 12: session.v1.SessionEventsListResponse
-	(*SessionActionRollResponse)(nil),  // 13: session.v1.SessionActionRollResponse
+	(*ApplyRollOutcomeRequest)(nil),    // 7: session.v1.ApplyRollOutcomeRequest
+	(*StartSessionResponse)(nil),       // 8: session.v1.StartSessionResponse
+	(*ListSessionsResponse)(nil),       // 9: session.v1.ListSessionsResponse
+	(*GetSessionResponse)(nil),         // 10: session.v1.GetSessionResponse
+	(*EndSessionResponse)(nil),         // 11: session.v1.EndSessionResponse
+	(*SessionEventAppendResponse)(nil), // 12: session.v1.SessionEventAppendResponse
+	(*SessionEventsListResponse)(nil),  // 13: session.v1.SessionEventsListResponse
+	(*SessionActionRollResponse)(nil),  // 14: session.v1.SessionActionRollResponse
+	(*ApplyRollOutcomeResponse)(nil),   // 15: session.v1.ApplyRollOutcomeResponse
 }
 var file_session_v1_service_proto_depIdxs = []int32{
 	0,  // 0: session.v1.SessionService.StartSession:input_type -> session.v1.StartSessionRequest
@@ -61,15 +64,17 @@ var file_session_v1_service_proto_depIdxs = []int32{
 	4,  // 4: session.v1.SessionService.SessionEventAppend:input_type -> session.v1.SessionEventAppendRequest
 	5,  // 5: session.v1.SessionService.SessionEventsList:input_type -> session.v1.SessionEventsListRequest
 	6,  // 6: session.v1.SessionService.SessionActionRoll:input_type -> session.v1.SessionActionRollRequest
-	7,  // 7: session.v1.SessionService.StartSession:output_type -> session.v1.StartSessionResponse
-	8,  // 8: session.v1.SessionService.ListSessions:output_type -> session.v1.ListSessionsResponse
-	9,  // 9: session.v1.SessionService.GetSession:output_type -> session.v1.GetSessionResponse
-	10, // 10: session.v1.SessionService.EndSession:output_type -> session.v1.EndSessionResponse
-	11, // 11: session.v1.SessionService.SessionEventAppend:output_type -> session.v1.SessionEventAppendResponse
-	12, // 12: session.v1.SessionService.SessionEventsList:output_type -> session.v1.SessionEventsListResponse
-	13, // 13: session.v1.SessionService.SessionActionRoll:output_type -> session.v1.SessionActionRollResponse
-	7,  // [7:14] is the sub-list for method output_type
-	0,  // [0:7] is the sub-list for method input_type
+	7,  // 7: session.v1.SessionService.ApplyRollOutcome:input_type -> session.v1.ApplyRollOutcomeRequest
+	8,  // 8: session.v1.SessionService.StartSession:output_type -> session.v1.StartSessionResponse
+	9,  // 9: session.v1.SessionService.ListSessions:output_type -> session.v1.ListSessionsResponse
+	10, // 10: session.v1.SessionService.GetSession:output_type -> session.v1.GetSessionResponse
+	11, // 11: session.v1.SessionService.EndSession:output_type -> session.v1.EndSessionResponse
+	12, // 12: session.v1.SessionService.SessionEventAppend:output_type -> session.v1.SessionEventAppendResponse
+	13, // 13: session.v1.SessionService.SessionEventsList:output_type -> session.v1.SessionEventsListResponse
+	14, // 14: session.v1.SessionService.SessionActionRoll:output_type -> session.v1.SessionActionRollResponse
+	15, // 15: session.v1.SessionService.ApplyRollOutcome:output_type -> session.v1.ApplyRollOutcomeResponse
+	8,  // [8:16] is the sub-list for method output_type
+	0,  // [0:8] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name

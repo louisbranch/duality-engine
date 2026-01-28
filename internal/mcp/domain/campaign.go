@@ -30,6 +30,7 @@ type CampaignCreateResult struct {
 	GmMode           string `json:"gm_mode" jsonschema:"gm mode"`
 	ParticipantCount int    `json:"participant_count" jsonschema:"number of all participants (GM + PLAYER + future roles)"`
 	CharacterCount   int    `json:"character_count" jsonschema:"number of all characters (PC + NPC + future kinds)"`
+	GmFear           int    `json:"gm_fear" jsonschema:"campaign-scoped GM fear"`
 	ThemePrompt      string `json:"theme_prompt" jsonschema:"theme prompt"`
 }
 
@@ -40,6 +41,7 @@ type CampaignListEntry struct {
 	GmMode           string `json:"gm_mode"`
 	ParticipantCount int    `json:"participant_count"`
 	CharacterCount   int    `json:"character_count"`
+	GmFear           int    `json:"gm_fear"`
 	ThemePrompt      string `json:"theme_prompt"`
 	CreatedAt        string `json:"created_at"`
 	UpdatedAt        string `json:"updated_at"`
@@ -344,6 +346,7 @@ func CampaignCreateHandler(client campaignv1.CampaignServiceClient) mcp.ToolHand
 			GmMode:           gmModeToString(response.Campaign.GetGmMode()),
 			ParticipantCount: int(response.Campaign.GetParticipantCount()),
 			CharacterCount:   int(response.Campaign.GetCharacterCount()),
+			GmFear:           int(response.Campaign.GetGmFear()),
 			ThemePrompt:      response.Campaign.GetThemePrompt(),
 		}
 
@@ -391,6 +394,7 @@ func CampaignListResourceHandler(client campaignv1.CampaignServiceClient) mcp.Re
 				GmMode:           gmModeToString(campaign.GetGmMode()),
 				ParticipantCount: int(campaign.GetParticipantCount()),
 				CharacterCount:   int(campaign.GetCharacterCount()),
+				GmFear:           int(campaign.GetGmFear()),
 				ThemePrompt:      campaign.GetThemePrompt(),
 				CreatedAt:        formatTimestamp(campaign.GetCreatedAt()),
 				UpdatedAt:        formatTimestamp(campaign.GetUpdatedAt()),
@@ -1190,6 +1194,7 @@ func CampaignResourceHandler(client campaignv1.CampaignServiceClient) mcp.Resour
 				GmMode:           gmModeToString(campaign.GetGmMode()),
 				ParticipantCount: int(campaign.GetParticipantCount()),
 				CharacterCount:   int(campaign.GetCharacterCount()),
+				GmFear:           int(campaign.GetGmFear()),
 				ThemePrompt:      campaign.GetThemePrompt(),
 				CreatedAt:        formatTimestamp(campaign.GetCreatedAt()),
 				UpdatedAt:        formatTimestamp(campaign.GetUpdatedAt()),

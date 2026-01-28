@@ -28,6 +28,7 @@ const (
 	campaignActiveSessionBucket = "campaign_active_session"
 	sessionEventsBucket         = "session_events"
 	sessionEventSeqBucket       = "session_event_seq"
+	outcomeAppliedBucket        = "outcome_applied"
 )
 
 // Store provides a BoltDB-backed campaign store.
@@ -225,6 +226,10 @@ func (s *Store) ensureBuckets() error {
 		if err != nil {
 			return fmt.Errorf("create session event seq bucket: %w", err)
 		}
+		_, err = tx.CreateBucketIfNotExists([]byte(outcomeAppliedBucket))
+		if err != nil {
+			return fmt.Errorf("create outcome applied bucket: %w", err)
+		}
 		return nil
 	})
 }
@@ -266,6 +271,14 @@ func sessionEventKey(sessionID string, seq uint64) []byte {
 	key := make([]byte, len(prefix)+8)
 	copy(key, prefix)
 	binary.BigEndian.PutUint64(key[len(prefix):], seq)
+	return key
+}
+
+func outcomeAppliedKey(sessionID string, rollSeq uint64) []byte {
+	prefix := []byte(sessionID + "/")
+	key := make([]byte, len(prefix)+8)
+	copy(key, prefix)
+	binary.BigEndian.PutUint64(key[len(prefix):], rollSeq)
 	return key
 }
 
@@ -982,9 +995,6 @@ func (s *Store) AppendSessionEvent(ctx context.Context, event sessiondomain.Sess
 	if !event.Type.IsValid() {
 		return sessiondomain.SessionEvent{}, fmt.Errorf("session event type is required")
 	}
-	if event.Timestamp.IsZero() {
-		event.Timestamp = time.Now().UTC()
-	}
 
 	var stored sessiondomain.SessionEvent
 	updateErr := s.db.Update(func(tx *bbolt.Tx) error {
@@ -992,47 +1002,278 @@ func (s *Store) AppendSessionEvent(ctx context.Context, event sessiondomain.Sess
 			return err
 		}
 
-		seqBucket := tx.Bucket([]byte(sessionEventSeqBucket))
-		if seqBucket == nil {
-			return fmt.Errorf("session event seq bucket is missing")
-		}
-
-		currentSeq := uint64(0)
-		if payload := seqBucket.Get([]byte(event.SessionID)); payload != nil {
-			if len(payload) != 8 {
-				return fmt.Errorf("invalid session event seq value")
-			}
-			currentSeq = binary.BigEndian.Uint64(payload)
-		}
-
-		event.Seq = currentSeq + 1
-		seqBytes := make([]byte, 8)
-		binary.BigEndian.PutUint64(seqBytes, event.Seq)
-		if err := seqBucket.Put([]byte(event.SessionID), seqBytes); err != nil {
-			return fmt.Errorf("put session event seq: %w", err)
-		}
-
-		payload, err := json.Marshal(event)
-		if err != nil {
-			return fmt.Errorf("marshal session event: %w", err)
-		}
-
-		eventBucket := tx.Bucket([]byte(sessionEventsBucket))
-		if eventBucket == nil {
-			return fmt.Errorf("session events bucket is missing")
-		}
-		if err := eventBucket.Put(sessionEventKey(event.SessionID, event.Seq), payload); err != nil {
-			return fmt.Errorf("put session event: %w", err)
-		}
-
-		stored = event
-		return nil
+		var err error
+		stored, err = appendSessionEventTx(tx, event)
+		return err
 	})
 	if updateErr != nil {
 		return sessiondomain.SessionEvent{}, updateErr
 	}
 
 	return stored, nil
+}
+
+// ApplyRollOutcome atomically applies a roll outcome and appends the applied event.
+func (s *Store) ApplyRollOutcome(ctx context.Context, input storage.RollOutcomeApplyInput) (storage.RollOutcomeApplyResult, error) {
+	if err := ctx.Err(); err != nil {
+		return storage.RollOutcomeApplyResult{}, err
+	}
+	if s == nil || s.db == nil {
+		return storage.RollOutcomeApplyResult{}, fmt.Errorf("storage is not configured")
+	}
+	if strings.TrimSpace(input.CampaignID) == "" {
+		return storage.RollOutcomeApplyResult{}, fmt.Errorf("campaign id is required")
+	}
+	if strings.TrimSpace(input.SessionID) == "" {
+		return storage.RollOutcomeApplyResult{}, fmt.Errorf("session id is required")
+	}
+	if input.RollSeq == 0 {
+		return storage.RollOutcomeApplyResult{}, fmt.Errorf("roll seq is required")
+	}
+	if len(input.Targets) == 0 {
+		return storage.RollOutcomeApplyResult{}, fmt.Errorf("targets are required")
+	}
+
+	targetSet := make(map[string]struct{}, len(input.Targets))
+	for _, target := range input.Targets {
+		if strings.TrimSpace(target) == "" {
+			return storage.RollOutcomeApplyResult{}, fmt.Errorf("target id is required")
+		}
+		targetSet[target] = struct{}{}
+	}
+
+	perTargetDelta := make(map[string]storage.RollOutcomeDelta, len(input.CharacterDeltas))
+	for _, delta := range input.CharacterDeltas {
+		if _, ok := targetSet[delta.CharacterID]; !ok {
+			return storage.RollOutcomeApplyResult{}, fmt.Errorf("character delta target mismatch")
+		}
+		current := perTargetDelta[delta.CharacterID]
+		current.CharacterID = delta.CharacterID
+		current.HopeDelta += delta.HopeDelta
+		current.StressDelta += delta.StressDelta
+		perTargetDelta[delta.CharacterID] = current
+	}
+
+	result := storage.RollOutcomeApplyResult{
+		UpdatedCharacterStates: make([]domain.CharacterState, 0, len(input.Targets)),
+		AppliedChanges:         make([]sessiondomain.OutcomeAppliedChange, 0),
+	}
+
+	updateErr := s.db.Update(func(tx *bbolt.Tx) error {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
+		appliedBucket := tx.Bucket([]byte(outcomeAppliedBucket))
+		if appliedBucket == nil {
+			return fmt.Errorf("outcome applied bucket is missing")
+		}
+		appliedKey := outcomeAppliedKey(input.SessionID, input.RollSeq)
+		if appliedBucket.Get(appliedKey) != nil {
+			return sessiondomain.ErrOutcomeAlreadyApplied
+		}
+
+		if input.GMFearDelta != 0 {
+			if input.GMFearDelta < 0 {
+				return sessiondomain.ErrOutcomeGMFearInvalid
+			}
+			campBucket := tx.Bucket([]byte(campaignBucket))
+			if campBucket == nil {
+				return fmt.Errorf("campaign bucket is missing")
+			}
+			campaignPayload := campBucket.Get(campaignKey(input.CampaignID))
+			if campaignPayload == nil {
+				return storage.ErrNotFound
+			}
+			var campaign domain.Campaign
+			if err := json.Unmarshal(campaignPayload, &campaign); err != nil {
+				return fmt.Errorf("unmarshal campaign: %w", err)
+			}
+			updated, before, after, err := domain.ApplyGMFearGain(campaign, input.GMFearDelta)
+			if err != nil {
+				return sessiondomain.ErrOutcomeGMFearInvalid
+			}
+			updated.UpdatedAt = time.Now().UTC()
+			updatedPayload, err := json.Marshal(updated)
+			if err != nil {
+				return fmt.Errorf("marshal campaign: %w", err)
+			}
+			if err := campBucket.Put(campaignKey(input.CampaignID), updatedPayload); err != nil {
+				return fmt.Errorf("put campaign: %w", err)
+			}
+			result.GMFearChanged = true
+			result.GMFearBefore = before
+			result.GMFearAfter = after
+			result.AppliedChanges = append(result.AppliedChanges, sessiondomain.OutcomeAppliedChange{
+				Field:  sessiondomain.OutcomeFieldGMFear,
+				Before: before,
+				After:  after,
+			})
+		}
+
+		stateBucket := tx.Bucket([]byte(characterStateBucket))
+		if stateBucket == nil {
+			return fmt.Errorf("character state bucket is missing")
+		}
+		profileBucket := tx.Bucket([]byte(characterProfileBucket))
+		if profileBucket == nil {
+			return fmt.Errorf("character profile bucket is missing")
+		}
+
+		for _, target := range input.Targets {
+			payload := stateBucket.Get(characterStateKey(input.CampaignID, target))
+			if payload == nil {
+				return sessiondomain.ErrOutcomeCharacterNotFound
+			}
+			var state domain.CharacterState
+			if err := json.Unmarshal(payload, &state); err != nil {
+				return fmt.Errorf("unmarshal character state: %w", err)
+			}
+
+			profilePayload := profileBucket.Get(characterProfileKey(state.CampaignID, state.CharacterID))
+			if profilePayload == nil {
+				return sessiondomain.ErrOutcomeCharacterNotFound
+			}
+			var profile domain.CharacterProfile
+			if err := json.Unmarshal(profilePayload, &profile); err != nil {
+				return fmt.Errorf("unmarshal character profile: %w", err)
+			}
+
+			delta := perTargetDelta[target]
+			beforeHope := state.Hope
+			beforeStress := state.Stress
+			afterHope := beforeHope + delta.HopeDelta
+			if afterHope > 6 {
+				afterHope = 6
+			}
+			if afterHope < 0 {
+				afterHope = 0
+			}
+			afterStress := beforeStress + delta.StressDelta
+			if afterStress < 0 {
+				afterStress = 0
+			}
+			if afterStress > profile.StressMax {
+				afterStress = profile.StressMax
+			}
+
+			if afterHope != beforeHope {
+				result.AppliedChanges = append(result.AppliedChanges, sessiondomain.OutcomeAppliedChange{
+					CharacterID: state.CharacterID,
+					Field:       sessiondomain.OutcomeFieldHope,
+					Before:      beforeHope,
+					After:       afterHope,
+				})
+			}
+			if afterStress != beforeStress {
+				result.AppliedChanges = append(result.AppliedChanges, sessiondomain.OutcomeAppliedChange{
+					CharacterID: state.CharacterID,
+					Field:       sessiondomain.OutcomeFieldStress,
+					Before:      beforeStress,
+					After:       afterStress,
+				})
+			}
+
+			if afterHope != beforeHope || afterStress != beforeStress {
+				state.Hope = afterHope
+				state.Stress = afterStress
+				updatedPayload, err := json.Marshal(state)
+				if err != nil {
+					return fmt.Errorf("marshal character state: %w", err)
+				}
+				if err := stateBucket.Put(characterStateKey(state.CampaignID, state.CharacterID), updatedPayload); err != nil {
+					return fmt.Errorf("put character state: %w", err)
+				}
+			}
+
+			result.UpdatedCharacterStates = append(result.UpdatedCharacterStates, state)
+		}
+
+		payload, err := json.Marshal(sessiondomain.OutcomeAppliedPayload{
+			RollSeq:              input.RollSeq,
+			Targets:              input.Targets,
+			RequiresComplication: input.RequiresComplication,
+			AppliedChanges:       result.AppliedChanges,
+		})
+		if err != nil {
+			return fmt.Errorf("marshal outcome applied payload: %w", err)
+		}
+
+		_, err = appendSessionEventTx(tx, sessiondomain.SessionEvent{
+			SessionID:     input.SessionID,
+			Timestamp:     input.EventTimestamp,
+			Type:          sessiondomain.SessionEventTypeOutcomeApplied,
+			RequestID:     input.RequestID,
+			InvocationID:  input.InvocationID,
+			ParticipantID: input.ParticipantID,
+			CharacterID:   input.CharacterID,
+			PayloadJSON:   payload,
+		})
+		if err != nil {
+			return err
+		}
+		if err := appliedBucket.Put(appliedKey, []byte{1}); err != nil {
+			return fmt.Errorf("put outcome applied marker: %w", err)
+		}
+
+		return nil
+	})
+	if updateErr != nil {
+		return storage.RollOutcomeApplyResult{}, updateErr
+	}
+
+	return result, nil
+}
+
+// appendSessionEventTx appends a session event inside an existing transaction.
+func appendSessionEventTx(tx *bbolt.Tx, event sessiondomain.SessionEvent) (sessiondomain.SessionEvent, error) {
+	if tx == nil {
+		return sessiondomain.SessionEvent{}, fmt.Errorf("transaction is required")
+	}
+	if strings.TrimSpace(event.SessionID) == "" {
+		return sessiondomain.SessionEvent{}, fmt.Errorf("session id is required")
+	}
+	if !event.Type.IsValid() {
+		return sessiondomain.SessionEvent{}, fmt.Errorf("session event type is required")
+	}
+	if event.Timestamp.IsZero() {
+		event.Timestamp = time.Now().UTC()
+	}
+
+	seqBucket := tx.Bucket([]byte(sessionEventSeqBucket))
+	if seqBucket == nil {
+		return sessiondomain.SessionEvent{}, fmt.Errorf("session event seq bucket is missing")
+	}
+
+	currentSeq := uint64(0)
+	if payload := seqBucket.Get([]byte(event.SessionID)); payload != nil {
+		if len(payload) != 8 {
+			return sessiondomain.SessionEvent{}, fmt.Errorf("invalid session event seq value")
+		}
+		currentSeq = binary.BigEndian.Uint64(payload)
+	}
+
+	event.Seq = currentSeq + 1
+	seqBytes := make([]byte, 8)
+	binary.BigEndian.PutUint64(seqBytes, event.Seq)
+	if err := seqBucket.Put([]byte(event.SessionID), seqBytes); err != nil {
+		return sessiondomain.SessionEvent{}, fmt.Errorf("put session event seq: %w", err)
+	}
+
+	payload, err := json.Marshal(event)
+	if err != nil {
+		return sessiondomain.SessionEvent{}, fmt.Errorf("marshal session event: %w", err)
+	}
+
+	eventBucket := tx.Bucket([]byte(sessionEventsBucket))
+	if eventBucket == nil {
+		return sessiondomain.SessionEvent{}, fmt.Errorf("session events bucket is missing")
+	}
+	if err := eventBucket.Put(sessionEventKey(event.SessionID, event.Seq), payload); err != nil {
+		return sessiondomain.SessionEvent{}, fmt.Errorf("put session event: %w", err)
+	}
+
+	return event, nil
 }
 
 // ListSessionEvents returns a slice of session events ordered by sequence ascending.

@@ -16,6 +16,12 @@ const (
 	SessionEventTypeActionRollRequested SessionEventType = "ACTION_ROLL_REQUESTED"
 	// SessionEventTypeActionRollResolved records an action roll resolution.
 	SessionEventTypeActionRollResolved SessionEventType = "ACTION_ROLL_RESOLVED"
+	// SessionEventTypeOutcomeApplyRequested records an outcome apply request.
+	SessionEventTypeOutcomeApplyRequested SessionEventType = "OUTCOME_APPLY_REQUESTED"
+	// SessionEventTypeOutcomeApplied records a successful outcome apply.
+	SessionEventTypeOutcomeApplied SessionEventType = "OUTCOME_APPLIED"
+	// SessionEventTypeOutcomeRejected records a rejected outcome apply.
+	SessionEventTypeOutcomeRejected SessionEventType = "OUTCOME_REJECTED"
 	// SessionEventTypeRequestRejected records a rejected request.
 	SessionEventTypeRequestRejected SessionEventType = "REQUEST_REJECTED"
 )
@@ -41,6 +47,9 @@ func (t SessionEventType) IsValid() bool {
 		SessionEventTypeNoteAdded,
 		SessionEventTypeActionRollRequested,
 		SessionEventTypeActionRollResolved,
+		SessionEventTypeOutcomeApplyRequested,
+		SessionEventTypeOutcomeApplied,
+		SessionEventTypeOutcomeRejected,
 		SessionEventTypeRequestRejected:
 		return true
 	default:

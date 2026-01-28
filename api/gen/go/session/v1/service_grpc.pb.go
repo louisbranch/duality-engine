@@ -26,6 +26,7 @@ const (
 	SessionService_SessionEventAppend_FullMethodName = "/session.v1.SessionService/SessionEventAppend"
 	SessionService_SessionEventsList_FullMethodName  = "/session.v1.SessionService/SessionEventsList"
 	SessionService_SessionActionRoll_FullMethodName  = "/session.v1.SessionService/SessionActionRoll"
+	SessionService_ApplyRollOutcome_FullMethodName   = "/session.v1.SessionService/ApplyRollOutcome"
 )
 
 // SessionServiceClient is the client API for SessionService service.
@@ -47,6 +48,8 @@ type SessionServiceClient interface {
 	SessionEventsList(ctx context.Context, in *SessionEventsListRequest, opts ...grpc.CallOption) (*SessionEventsListResponse, error)
 	// Roll Duality dice for a session.
 	SessionActionRoll(ctx context.Context, in *SessionActionRollRequest, opts ...grpc.CallOption) (*SessionActionRollResponse, error)
+	// Apply the mandatory outcome effects from a resolved action roll.
+	ApplyRollOutcome(ctx context.Context, in *ApplyRollOutcomeRequest, opts ...grpc.CallOption) (*ApplyRollOutcomeResponse, error)
 }
 
 type sessionServiceClient struct {
@@ -127,6 +130,16 @@ func (c *sessionServiceClient) SessionActionRoll(ctx context.Context, in *Sessio
 	return out, nil
 }
 
+func (c *sessionServiceClient) ApplyRollOutcome(ctx context.Context, in *ApplyRollOutcomeRequest, opts ...grpc.CallOption) (*ApplyRollOutcomeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ApplyRollOutcomeResponse)
+	err := c.cc.Invoke(ctx, SessionService_ApplyRollOutcome_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SessionServiceServer is the server API for SessionService service.
 // All implementations must embed UnimplementedSessionServiceServer
 // for forward compatibility.
@@ -146,6 +159,8 @@ type SessionServiceServer interface {
 	SessionEventsList(context.Context, *SessionEventsListRequest) (*SessionEventsListResponse, error)
 	// Roll Duality dice for a session.
 	SessionActionRoll(context.Context, *SessionActionRollRequest) (*SessionActionRollResponse, error)
+	// Apply the mandatory outcome effects from a resolved action roll.
+	ApplyRollOutcome(context.Context, *ApplyRollOutcomeRequest) (*ApplyRollOutcomeResponse, error)
 	mustEmbedUnimplementedSessionServiceServer()
 }
 
@@ -176,6 +191,9 @@ func (UnimplementedSessionServiceServer) SessionEventsList(context.Context, *Ses
 }
 func (UnimplementedSessionServiceServer) SessionActionRoll(context.Context, *SessionActionRollRequest) (*SessionActionRollResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SessionActionRoll not implemented")
+}
+func (UnimplementedSessionServiceServer) ApplyRollOutcome(context.Context, *ApplyRollOutcomeRequest) (*ApplyRollOutcomeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ApplyRollOutcome not implemented")
 }
 func (UnimplementedSessionServiceServer) mustEmbedUnimplementedSessionServiceServer() {}
 func (UnimplementedSessionServiceServer) testEmbeddedByValue()                        {}
@@ -324,6 +342,24 @@ func _SessionService_SessionActionRoll_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SessionService_ApplyRollOutcome_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ApplyRollOutcomeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SessionServiceServer).ApplyRollOutcome(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SessionService_ApplyRollOutcome_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SessionServiceServer).ApplyRollOutcome(ctx, req.(*ApplyRollOutcomeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SessionService_ServiceDesc is the grpc.ServiceDesc for SessionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -358,6 +394,10 @@ var SessionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SessionActionRoll",
 			Handler:    _SessionService_SessionActionRoll_Handler,
+		},
+		{
+			MethodName: "ApplyRollOutcome",
+			Handler:    _SessionService_ApplyRollOutcome_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

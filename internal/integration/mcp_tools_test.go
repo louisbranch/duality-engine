@@ -42,6 +42,7 @@ func runMCPToolsTests(t *testing.T, suite *integrationSuite) {
 			"session_start",
 			"session_end",
 			"session_action_roll",
+			"session_roll_outcome_apply",
 			"set_context",
 		}
 

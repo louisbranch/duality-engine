@@ -118,6 +118,9 @@ func TestCreateCampaignSuccess(t *testing.T) {
 	if response.Campaign.CharacterCount != 0 {
 		t.Fatalf("expected 0 character count, got %d", response.Campaign.CharacterCount)
 	}
+	if response.Campaign.GmFear != 0 {
+		t.Fatalf("expected 0 gm fear, got %d", response.Campaign.GmFear)
+	}
 	if response.Campaign.ThemePrompt != "gentle hills" {
 		t.Fatalf("expected theme prompt preserved, got %q", response.Campaign.ThemePrompt)
 	}
@@ -289,6 +292,7 @@ func TestListCampaignsDefaults(t *testing.T) {
 					GmMode:           domain.GmModeAI,
 					ParticipantCount: 3,
 					CharacterCount:   2,
+					GmFear:           4,
 					ThemePrompt:      "windswept",
 					CreatedAt:        fixedTime,
 					UpdatedAt:        fixedTime,
@@ -324,6 +328,9 @@ func TestListCampaignsDefaults(t *testing.T) {
 	}
 	if response.Campaigns[0].GmMode != campaignv1.GmMode_AI {
 		t.Fatalf("expected gm mode AI, got %v", response.Campaigns[0].GmMode)
+	}
+	if response.Campaigns[0].GmFear != 4 {
+		t.Fatalf("expected gm fear 4, got %d", response.Campaigns[0].GmFear)
 	}
 	if response.Campaigns[0].CreatedAt.AsTime() != fixedTime {
 		t.Fatalf("expected created_at %v, got %v", fixedTime, response.Campaigns[0].CreatedAt.AsTime())
@@ -438,6 +445,7 @@ func TestGetCampaignSuccess(t *testing.T) {
 			GmMode:           domain.GmModeHybrid,
 			ParticipantCount: 5,
 			CharacterCount:   3,
+			GmFear:           6,
 			ThemePrompt:      "fantasy adventure",
 			CreatedAt:        fixedTime,
 			UpdatedAt:        fixedTime,
@@ -472,6 +480,9 @@ func TestGetCampaignSuccess(t *testing.T) {
 	}
 	if response.Campaign.CharacterCount != 3 {
 		t.Fatalf("expected 3 character count, got %d", response.Campaign.CharacterCount)
+	}
+	if response.Campaign.GmFear != 6 {
+		t.Fatalf("expected 6 gm fear, got %d", response.Campaign.GmFear)
 	}
 	if response.Campaign.ThemePrompt != "fantasy adventure" {
 		t.Fatalf("expected theme prompt fantasy adventure, got %q", response.Campaign.ThemePrompt)
@@ -594,6 +605,236 @@ func TestGetCampaignStoreError(t *testing.T) {
 	}
 	if st.Code() != codes.Internal {
 		t.Fatalf("expected internal error, got %v", st.Code())
+	}
+}
+
+func TestGMFearGainSuccess(t *testing.T) {
+	fixedTime := time.Date(2026, 1, 24, 9, 0, 0, 0, time.UTC)
+	store := &fakeCampaignStore{
+		getCampaign: domain.Campaign{ID: "camp-123", GmFear: 2},
+	}
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: store,
+		},
+		clock: func() time.Time {
+			return fixedTime
+		},
+	}
+
+	before, after, err := service.GMFearGain(context.Background(), "camp-123", 3)
+	if err != nil {
+		t.Fatalf("gm fear gain: %v", err)
+	}
+	if before != 2 {
+		t.Fatalf("expected before 2, got %d", before)
+	}
+	if after != 5 {
+		t.Fatalf("expected after 5, got %d", after)
+	}
+	if store.putCampaign.GmFear != 5 {
+		t.Fatalf("expected stored gm fear 5, got %d", store.putCampaign.GmFear)
+	}
+	if !store.putCampaign.UpdatedAt.Equal(fixedTime) {
+		t.Fatalf("expected updated_at %v, got %v", fixedTime, store.putCampaign.UpdatedAt)
+	}
+}
+
+func TestGMFearGainEmptyCampaignID(t *testing.T) {
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: &fakeCampaignStore{},
+		},
+	}
+
+	_, _, err := service.GMFearGain(context.Background(), "  ", 1)
+	if err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestGMFearGainInvalidAmount(t *testing.T) {
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: &fakeCampaignStore{getCampaign: domain.Campaign{ID: "camp-123", GmFear: 1}},
+		},
+	}
+
+	tests := []struct {
+		name   string
+		amount int
+	}{
+		{name: "zero", amount: 0},
+		{name: "negative", amount: -1},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, _, err := service.GMFearGain(context.Background(), "camp-123", tt.amount)
+			if !errors.Is(err, domain.ErrInvalidGMFearAmount) {
+				t.Fatalf("expected ErrInvalidGMFearAmount, got %v", err)
+			}
+		})
+	}
+}
+
+func TestGMFearGainExceedsCap(t *testing.T) {
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: &fakeCampaignStore{getCampaign: domain.Campaign{ID: "camp-123", GmFear: 12}},
+		},
+	}
+
+	_, _, err := service.GMFearGain(context.Background(), "camp-123", 1)
+	if !errors.Is(err, domain.ErrGMFearExceedsCap) {
+		t.Fatalf("expected ErrGMFearExceedsCap, got %v", err)
+	}
+}
+
+func TestGMFearGainNotFound(t *testing.T) {
+	store := &fakeCampaignStore{getErr: storage.ErrNotFound}
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: store,
+		},
+	}
+
+	_, _, err := service.GMFearGain(context.Background(), "camp-123", 1)
+	if !errors.Is(err, storage.ErrNotFound) {
+		t.Fatalf("expected not found error, got %v", err)
+	}
+}
+
+func TestGMFearGainPersistFailure(t *testing.T) {
+	persistErr := errors.New("boom")
+	store := &fakeCampaignStore{
+		getCampaign: domain.Campaign{ID: "camp-123", GmFear: 2},
+		putErr:      persistErr,
+	}
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: store,
+		},
+	}
+
+	_, _, err := service.GMFearGain(context.Background(), "camp-123", 1)
+	if !errors.Is(err, persistErr) {
+		t.Fatalf("expected persist error, got %v", err)
+	}
+}
+
+func TestGMFearSpendSuccess(t *testing.T) {
+	fixedTime := time.Date(2026, 1, 24, 10, 0, 0, 0, time.UTC)
+	store := &fakeCampaignStore{
+		getCampaign: domain.Campaign{ID: "camp-123", GmFear: 5},
+	}
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: store,
+		},
+		clock: func() time.Time {
+			return fixedTime
+		},
+	}
+
+	before, after, err := service.GMFearSpend(context.Background(), "camp-123", 3)
+	if err != nil {
+		t.Fatalf("gm fear spend: %v", err)
+	}
+	if before != 5 {
+		t.Fatalf("expected before 5, got %d", before)
+	}
+	if after != 2 {
+		t.Fatalf("expected after 2, got %d", after)
+	}
+	if store.putCampaign.GmFear != 2 {
+		t.Fatalf("expected stored gm fear 2, got %d", store.putCampaign.GmFear)
+	}
+	if !store.putCampaign.UpdatedAt.Equal(fixedTime) {
+		t.Fatalf("expected updated_at %v, got %v", fixedTime, store.putCampaign.UpdatedAt)
+	}
+}
+
+func TestGMFearSpendEmptyCampaignID(t *testing.T) {
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: &fakeCampaignStore{},
+		},
+	}
+
+	_, _, err := service.GMFearSpend(context.Background(), " ", 1)
+	if err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestGMFearSpendInvalidAmount(t *testing.T) {
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: &fakeCampaignStore{getCampaign: domain.Campaign{ID: "camp-123", GmFear: 5}},
+		},
+	}
+
+	tests := []struct {
+		name   string
+		amount int
+	}{
+		{name: "zero", amount: 0},
+		{name: "negative", amount: -3},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, _, err := service.GMFearSpend(context.Background(), "camp-123", tt.amount)
+			if !errors.Is(err, domain.ErrInvalidGMFearAmount) {
+				t.Fatalf("expected ErrInvalidGMFearAmount, got %v", err)
+			}
+		})
+	}
+}
+
+func TestGMFearSpendInsufficient(t *testing.T) {
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: &fakeCampaignStore{getCampaign: domain.Campaign{ID: "camp-123", GmFear: 1}},
+		},
+	}
+
+	_, _, err := service.GMFearSpend(context.Background(), "camp-123", 3)
+	if !errors.Is(err, domain.ErrInsufficientGMFear) {
+		t.Fatalf("expected ErrInsufficientGMFear, got %v", err)
+	}
+}
+
+func TestGMFearSpendNotFound(t *testing.T) {
+	store := &fakeCampaignStore{getErr: storage.ErrNotFound}
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: store,
+		},
+	}
+
+	_, _, err := service.GMFearSpend(context.Background(), "camp-123", 1)
+	if !errors.Is(err, storage.ErrNotFound) {
+		t.Fatalf("expected not found error, got %v", err)
+	}
+}
+
+func TestGMFearSpendPersistFailure(t *testing.T) {
+	persistErr := errors.New("boom")
+	store := &fakeCampaignStore{
+		getCampaign: domain.Campaign{ID: "camp-123", GmFear: 4},
+		putErr:      persistErr,
+	}
+	service := &CampaignService{
+		stores: Stores{
+			Campaign: store,
+		},
+	}
+
+	_, _, err := service.GMFearSpend(context.Background(), "camp-123", 2)
+	if !errors.Is(err, persistErr) {
+		t.Fatalf("expected persist error, got %v", err)
 	}
 }
 

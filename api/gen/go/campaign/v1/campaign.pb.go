@@ -82,12 +82,14 @@ type Campaign struct {
 	// Number of all participants (GM + PLAYER + future roles) for this campaign.
 	ParticipantCount int32 `protobuf:"varint,4,opt,name=participant_count,json=participantCount,proto3" json:"participant_count,omitempty"`
 	// Number of all characters (PC + NPC + future kinds) for this campaign.
-	CharacterCount int32                  `protobuf:"varint,5,opt,name=character_count,json=characterCount,proto3" json:"character_count,omitempty"`
-	ThemePrompt    string                 `protobuf:"bytes,6,opt,name=theme_prompt,json=themePrompt,proto3" json:"theme_prompt,omitempty"`
-	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt      *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	CharacterCount int32  `protobuf:"varint,5,opt,name=character_count,json=characterCount,proto3" json:"character_count,omitempty"`
+	ThemePrompt    string `protobuf:"bytes,6,opt,name=theme_prompt,json=themePrompt,proto3" json:"theme_prompt,omitempty"`
+	// Campaign-scoped GM fear resource.
+	GmFear        int32                  `protobuf:"varint,7,opt,name=gm_fear,json=gmFear,proto3" json:"gm_fear,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Campaign) Reset() {
@@ -162,6 +164,13 @@ func (x *Campaign) GetThemePrompt() string {
 	return ""
 }
 
+func (x *Campaign) GetGmFear() int32 {
+	if x != nil {
+		return x.GmFear
+	}
+	return 0
+}
+
 func (x *Campaign) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
@@ -180,18 +189,19 @@ var File_campaign_v1_campaign_proto protoreflect.FileDescriptor
 
 const file_campaign_v1_campaign_proto_rawDesc = "" +
 	"\n" +
-	"\x1acampaign/v1/campaign.proto\x12\vcampaign.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xcb\x02\n" +
+	"\x1acampaign/v1/campaign.proto\x12\vcampaign.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe4\x02\n" +
 	"\bCampaign\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12,\n" +
 	"\agm_mode\x18\x03 \x01(\x0e2\x13.campaign.v1.GmModeR\x06gmMode\x12+\n" +
 	"\x11participant_count\x18\x04 \x01(\x05R\x10participantCount\x12'\n" +
 	"\x0fcharacter_count\x18\x05 \x01(\x05R\x0echaracterCount\x12!\n" +
-	"\ftheme_prompt\x18\x06 \x01(\tR\vthemePrompt\x129\n" +
+	"\ftheme_prompt\x18\x06 \x01(\tR\vthemePrompt\x12\x17\n" +
+	"\agm_fear\x18\a \x01(\x05R\x06gmFear\x129\n" +
 	"\n" +
-	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt*@\n" +
+	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt*@\n" +
 	"\x06GmMode\x12\x17\n" +
 	"\x13GM_MODE_UNSPECIFIED\x10\x00\x12\t\n" +
 	"\x05HUMAN\x10\x01\x12\x06\n" +

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/louisbranch/duality-engine/internal/campaign/domain"
+	sessiondomain "github.com/louisbranch/duality-engine/internal/session/domain"
 	"github.com/louisbranch/duality-engine/internal/storage"
 	"go.etcd.io/bbolt"
 )
@@ -28,6 +29,7 @@ func TestCampaignStorePutGet(t *testing.T) {
 		GmMode:           domain.GmModeAI,
 		ParticipantCount: 4,
 		CharacterCount:   2,
+		GmFear:           7,
 		ThemePrompt:      "ice and steel",
 		CreatedAt:        now,
 		UpdatedAt:        now,
@@ -55,6 +57,9 @@ func TestCampaignStorePutGet(t *testing.T) {
 	}
 	if loaded.CharacterCount != campaign.CharacterCount {
 		t.Fatalf("expected character count %d, got %d", campaign.CharacterCount, loaded.CharacterCount)
+	}
+	if loaded.GmFear != campaign.GmFear {
+		t.Fatalf("expected gm fear %d, got %d", campaign.GmFear, loaded.GmFear)
 	}
 	if loaded.ThemePrompt != campaign.ThemePrompt {
 		t.Fatalf("expected theme prompt %q, got %q", campaign.ThemePrompt, loaded.ThemePrompt)
@@ -1701,6 +1706,130 @@ func TestCharacterStateStoreGetEmptyID(t *testing.T) {
 	_, err = store.GetCharacterState(context.Background(), "camp-123", "")
 	if err == nil {
 		t.Fatal("expected error")
+	}
+}
+
+// TestApplyRollOutcomeUpdatesState ensures outcome application updates state and event.
+func TestApplyRollOutcomeUpdatesState(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	ctx := context.Background()
+	campaign := domain.Campaign{ID: "camp-1", Name: "Test", GmMode: domain.GmModeHuman}
+	if err := store.Put(ctx, campaign); err != nil {
+		t.Fatalf("put campaign: %v", err)
+	}
+
+	state := domain.CharacterState{CampaignID: "camp-1", CharacterID: "char-1", Hope: 5, Stress: 1, Hp: 4}
+	if err := store.PutCharacterState(ctx, state); err != nil {
+		t.Fatalf("put character state: %v", err)
+	}
+	profile := domain.CharacterProfile{CampaignID: "camp-1", CharacterID: "char-1", StressMax: 6}
+	if err := store.PutCharacterProfile(ctx, profile); err != nil {
+		t.Fatalf("put character profile: %v", err)
+	}
+
+	result, err := store.ApplyRollOutcome(ctx, storage.RollOutcomeApplyInput{
+		CampaignID:           "camp-1",
+		SessionID:            "sess-1",
+		RollSeq:              5,
+		Targets:              []string{"char-1"},
+		RequiresComplication: false,
+		RequestID:            "req-1",
+		InvocationID:         "inv-1",
+		ParticipantID:        "part-1",
+		CharacterID:          "char-1",
+		EventTimestamp:       time.Date(2026, 1, 26, 13, 0, 0, 0, time.UTC),
+		CharacterDeltas: []storage.RollOutcomeDelta{
+			{CharacterID: "char-1", HopeDelta: 1, StressDelta: -1},
+		},
+	})
+	if err != nil {
+		t.Fatalf("apply roll outcome: %v", err)
+	}
+	if len(result.UpdatedCharacterStates) != 1 {
+		t.Fatalf("expected 1 updated state, got %d", len(result.UpdatedCharacterStates))
+	}
+	updated := result.UpdatedCharacterStates[0]
+	if updated.Hope != 6 || updated.Stress != 0 {
+		t.Fatalf("expected hope 6 stress 0, got hope %d stress %d", updated.Hope, updated.Stress)
+	}
+	if len(result.AppliedChanges) != 2 {
+		t.Fatalf("expected 2 applied changes, got %d", len(result.AppliedChanges))
+	}
+
+	stored, err := store.GetCharacterState(ctx, "camp-1", "char-1")
+	if err != nil {
+		t.Fatalf("get character state: %v", err)
+	}
+	if stored.Hope != 6 || stored.Stress != 0 {
+		t.Fatalf("expected stored hope 6 stress 0, got hope %d stress %d", stored.Hope, stored.Stress)
+	}
+
+	events, err := store.ListSessionEvents(ctx, "sess-1", 0, 10)
+	if err != nil {
+		t.Fatalf("list session events: %v", err)
+	}
+	if len(events) != 1 {
+		t.Fatalf("expected 1 event, got %d", len(events))
+	}
+	if events[0].Type != sessiondomain.SessionEventTypeOutcomeApplied {
+		t.Fatalf("expected OUTCOME_APPLIED event, got %s", events[0].Type)
+	}
+}
+
+// TestApplyRollOutcomeRejectsAlreadyApplied ensures duplicate apply is rejected.
+func TestApplyRollOutcomeRejectsAlreadyApplied(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duality.db")
+	store, err := Open(path)
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer store.Close()
+
+	ctx := context.Background()
+	campaign := domain.Campaign{ID: "camp-2", Name: "Test", GmMode: domain.GmModeHuman}
+	if err := store.Put(ctx, campaign); err != nil {
+		t.Fatalf("put campaign: %v", err)
+	}
+
+	state := domain.CharacterState{CampaignID: "camp-2", CharacterID: "char-2", Hope: 2, Stress: 1, Hp: 4}
+	if err := store.PutCharacterState(ctx, state); err != nil {
+		t.Fatalf("put character state: %v", err)
+	}
+	profile := domain.CharacterProfile{CampaignID: "camp-2", CharacterID: "char-2", StressMax: 6}
+	if err := store.PutCharacterProfile(ctx, profile); err != nil {
+		t.Fatalf("put character profile: %v", err)
+	}
+
+	_, err = store.ApplyRollOutcome(ctx, storage.RollOutcomeApplyInput{
+		CampaignID: "camp-2",
+		SessionID:  "sess-2",
+		RollSeq:    9,
+		Targets:    []string{"char-2"},
+		CharacterDeltas: []storage.RollOutcomeDelta{
+			{CharacterID: "char-2", HopeDelta: 1},
+		},
+	})
+	if err != nil {
+		t.Fatalf("apply roll outcome: %v", err)
+	}
+
+	_, err = store.ApplyRollOutcome(ctx, storage.RollOutcomeApplyInput{
+		CampaignID: "camp-2",
+		SessionID:  "sess-2",
+		RollSeq:    9,
+		Targets:    []string{"char-2"},
+		CharacterDeltas: []storage.RollOutcomeDelta{
+			{CharacterID: "char-2", HopeDelta: 1},
+		},
+	})
+	if !errors.Is(err, sessiondomain.ErrOutcomeAlreadyApplied) {
+		t.Fatalf("expected outcome already applied error, got %v", err)
 	}
 }
 
