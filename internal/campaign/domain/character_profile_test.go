@@ -207,6 +207,29 @@ func TestLoadCharacterDefaultsFromPath(t *testing.T) {
 	}
 }
 
+func TestLoadCharacterDefaultsEmbedded(t *testing.T) {
+	defaults, err := LoadCharacterDefaults("")
+	if err != nil {
+		t.Fatalf("load defaults: %v", err)
+	}
+
+	pc, ok := defaults[CharacterKindPC]
+	if !ok {
+		t.Fatal("expected pc defaults")
+	}
+	if pc.HpMax != 6 {
+		t.Fatalf("expected pc hp max 6, got %d", pc.HpMax)
+	}
+
+	npc, ok := defaults[CharacterKindNPC]
+	if !ok {
+		t.Fatal("expected npc defaults")
+	}
+	if npc.HpMax != 3 {
+		t.Fatalf("expected npc hp max 3, got %d", npc.HpMax)
+	}
+}
+
 func TestLoadCharacterDefaultsInvalidJSON(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "defaults.json")
 	if err := os.WriteFile(path, []byte("{"), 0o600); err != nil {
