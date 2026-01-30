@@ -733,6 +733,40 @@ Rolls arbitrary dice pools and returns the individual results.
 
 MCP resource registrations use placeholder URIs because the SDK requires concrete URIs for registration. Clients should read using the concrete URI format shown in each resource section. When listing resources, you may see placeholder URIs like `campaign://_/participants` or `session://_/events`.
 
+### Resource Subscriptions and Updates
+
+Clients can subscribe to resource URIs to receive update notifications when tool calls modify those resources.
+
+- Subscribe: `resources/subscribe`
+- Unsubscribe: `resources/unsubscribe`
+- Notification: `notifications/resources/updated` (sent only for subscribed URIs)
+- HTTP transport: notifications arrive on the `GET /mcp` SSE stream
+
+Example subscribe request:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "resources/subscribe",
+  "params": {
+    "uri": "campaign://camp_abc123/participants"
+  }
+}
+```
+
+Example SSE notification payload:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "notifications/resources/updated",
+  "params": {
+    "uri": "campaign://camp_abc123/participants"
+  }
+}
+```
+
 ### Campaign Resources
 
 #### campaigns://list

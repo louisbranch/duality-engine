@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"strings"
 
 	"github.com/louisbranch/duality-engine/internal/grpcmeta"
 	"github.com/louisbranch/duality-engine/internal/id"
@@ -14,6 +15,9 @@ type ToolCallMetadata struct {
 	RequestID    string
 	InvocationID string
 }
+
+// ResourceUpdateNotifier notifies MCP clients about resource updates.
+type ResourceUpdateNotifier func(ctx context.Context, uri string)
 
 // NewInvocationID generates an invocation identifier for a tool call.
 func NewInvocationID() (string, error) {
@@ -66,4 +70,20 @@ func CallToolResultWithMetadata(meta ToolCallMetadata) *mcp.CallToolResult {
 		result.Meta[grpcmeta.InvocationIDHeader] = meta.InvocationID
 	}
 	return result
+}
+
+// NotifyResourceUpdates sends resource update notifications for each URI provided.
+func NotifyResourceUpdates(ctx context.Context, notify ResourceUpdateNotifier, uris ...string) {
+	if notify == nil {
+		return
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	for _, uri := range uris {
+		if strings.TrimSpace(uri) == "" {
+			continue
+		}
+		notify(ctx, uri)
+	}
 }

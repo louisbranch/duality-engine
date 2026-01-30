@@ -302,7 +302,7 @@ func CampaignResourceTemplate() *mcp.ResourceTemplate {
 }
 
 // CampaignCreateHandler executes a campaign creation request.
-func CampaignCreateHandler(client campaignv1.CampaignServiceClient) mcp.ToolHandlerFor[CampaignCreateInput, CampaignCreateResult] {
+func CampaignCreateHandler(client campaignv1.CampaignServiceClient, notify ResourceUpdateNotifier) mcp.ToolHandlerFor[CampaignCreateInput, CampaignCreateResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input CampaignCreateInput) (*mcp.CallToolResult, CampaignCreateResult, error) {
 		invocationID, err := NewInvocationID()
 		if err != nil {
@@ -342,7 +342,12 @@ func CampaignCreateHandler(client campaignv1.CampaignServiceClient) mcp.ToolHand
 		}
 
 		responseMeta := MergeResponseMetadata(callMeta, header)
-		// TODO: Emit MCP notifications when campaigns are created or updated so SSE clients can refresh resources.
+		NotifyResourceUpdates(
+			ctx,
+			notify,
+			CampaignListResource().URI,
+			fmt.Sprintf("campaign://%s", result.ID),
+		)
 		return CallToolResultWithMetadata(responseMeta), result, nil
 	}
 }
@@ -445,7 +450,7 @@ func gmModeToString(mode campaignv1.GmMode) string {
 }
 
 // ParticipantCreateHandler executes a participant creation request.
-func ParticipantCreateHandler(client campaignv1.CampaignServiceClient) mcp.ToolHandlerFor[ParticipantCreateInput, ParticipantCreateResult] {
+func ParticipantCreateHandler(client campaignv1.CampaignServiceClient, notify ResourceUpdateNotifier) mcp.ToolHandlerFor[ParticipantCreateInput, ParticipantCreateResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input ParticipantCreateInput) (*mcp.CallToolResult, ParticipantCreateResult, error) {
 		invocationID, err := NewInvocationID()
 		if err != nil {
@@ -492,6 +497,13 @@ func ParticipantCreateHandler(client campaignv1.CampaignServiceClient) mcp.ToolH
 		}
 
 		responseMeta := MergeResponseMetadata(callMeta, header)
+		NotifyResourceUpdates(
+			ctx,
+			notify,
+			CampaignListResource().URI,
+			fmt.Sprintf("campaign://%s", result.CampaignID),
+			fmt.Sprintf("campaign://%s/participants", result.CampaignID),
+		)
 		return CallToolResultWithMetadata(responseMeta), result, nil
 	}
 }
@@ -541,7 +553,7 @@ func controllerToString(controller campaignv1.Controller) string {
 }
 
 // CharacterCreateHandler executes a character creation request.
-func CharacterCreateHandler(client campaignv1.CampaignServiceClient) mcp.ToolHandlerFor[CharacterCreateInput, CharacterCreateResult] {
+func CharacterCreateHandler(client campaignv1.CampaignServiceClient, notify ResourceUpdateNotifier) mcp.ToolHandlerFor[CharacterCreateInput, CharacterCreateResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input CharacterCreateInput) (*mcp.CallToolResult, CharacterCreateResult, error) {
 		invocationID, err := NewInvocationID()
 		if err != nil {
@@ -584,6 +596,13 @@ func CharacterCreateHandler(client campaignv1.CampaignServiceClient) mcp.ToolHan
 		}
 
 		responseMeta := MergeResponseMetadata(callMeta, header)
+		NotifyResourceUpdates(
+			ctx,
+			notify,
+			CampaignListResource().URI,
+			fmt.Sprintf("campaign://%s", result.CampaignID),
+			fmt.Sprintf("campaign://%s/characters", result.CampaignID),
+		)
 		return CallToolResultWithMetadata(responseMeta), result, nil
 	}
 }
@@ -611,7 +630,7 @@ func characterKindToString(kind campaignv1.CharacterKind) string {
 }
 
 // CharacterControlSetHandler executes a character control set request.
-func CharacterControlSetHandler(client campaignv1.CampaignServiceClient) mcp.ToolHandlerFor[CharacterControlSetInput, CharacterControlSetResult] {
+func CharacterControlSetHandler(client campaignv1.CampaignServiceClient, notify ResourceUpdateNotifier) mcp.ToolHandlerFor[CharacterControlSetInput, CharacterControlSetResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input CharacterControlSetInput) (*mcp.CallToolResult, CharacterControlSetResult, error) {
 		invocationID, err := NewInvocationID()
 		if err != nil {
@@ -654,6 +673,11 @@ func CharacterControlSetHandler(client campaignv1.CampaignServiceClient) mcp.Too
 		}
 
 		responseMeta := MergeResponseMetadata(callMeta, header)
+		NotifyResourceUpdates(
+			ctx,
+			notify,
+			fmt.Sprintf("campaign://%s/characters", result.CampaignID),
+		)
 		return CallToolResultWithMetadata(responseMeta), result, nil
 	}
 }
@@ -780,7 +804,7 @@ func CharacterSheetGetHandler(client campaignv1.CampaignServiceClient, getContex
 }
 
 // CharacterProfilePatchHandler executes a character profile patch request.
-func CharacterProfilePatchHandler(client campaignv1.CampaignServiceClient, getContext func() Context) mcp.ToolHandlerFor[CharacterProfilePatchInput, CharacterProfilePatchResult] {
+func CharacterProfilePatchHandler(client campaignv1.CampaignServiceClient, getContext func() Context, notify ResourceUpdateNotifier) mcp.ToolHandlerFor[CharacterProfilePatchInput, CharacterProfilePatchResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input CharacterProfilePatchInput) (*mcp.CallToolResult, CharacterProfilePatchResult, error) {
 		invocationID, err := NewInvocationID()
 		if err != nil {
@@ -862,12 +886,17 @@ func CharacterProfilePatchHandler(client campaignv1.CampaignServiceClient, getCo
 		}
 
 		responseMeta := MergeResponseMetadata(callMeta, header)
+		NotifyResourceUpdates(
+			ctx,
+			notify,
+			fmt.Sprintf("campaign://%s/characters", campaignID),
+		)
 		return CallToolResultWithMetadata(responseMeta), result, nil
 	}
 }
 
 // CharacterStatePatchHandler executes a character state patch request.
-func CharacterStatePatchHandler(client campaignv1.CampaignServiceClient, getContext func() Context) mcp.ToolHandlerFor[CharacterStatePatchInput, CharacterStatePatchResult] {
+func CharacterStatePatchHandler(client campaignv1.CampaignServiceClient, getContext func() Context, notify ResourceUpdateNotifier) mcp.ToolHandlerFor[CharacterStatePatchInput, CharacterStatePatchResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input CharacterStatePatchInput) (*mcp.CallToolResult, CharacterStatePatchResult, error) {
 		invocationID, err := NewInvocationID()
 		if err != nil {
@@ -926,6 +955,11 @@ func CharacterStatePatchHandler(client campaignv1.CampaignServiceClient, getCont
 		}
 
 		responseMeta := MergeResponseMetadata(callMeta, header)
+		NotifyResourceUpdates(
+			ctx,
+			notify,
+			fmt.Sprintf("campaign://%s/characters", campaignID),
+		)
 		return CallToolResultWithMetadata(responseMeta), result, nil
 	}
 }

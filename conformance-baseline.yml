@@ -11,8 +11,6 @@ server:
   - elicitation-sep1330-enums
   - resources-read-binary
   - resources-templates-read
-  - resources-subscribe
-  - resources-unsubscribe
   - prompts-get-with-args
   - prompts-get-with-image
   - prompts-get-embedded-resource

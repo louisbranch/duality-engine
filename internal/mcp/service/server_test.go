@@ -992,7 +992,7 @@ func TestRulesVersionHandlerMapsResponse(t *testing.T) {
 // TestCampaignCreateHandlerReturnsClientError ensures gRPC errors are returned as tool errors.
 func TestCampaignCreateHandlerReturnsClientError(t *testing.T) {
 	client := &fakeCampaignClient{err: errors.New("boom")}
-	handler := domain.CampaignCreateHandler(client)
+	handler := domain.CampaignCreateHandler(client, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.CampaignCreateInput{
 		Name:   "New Campaign",
@@ -1021,7 +1021,7 @@ func TestCampaignCreateHandlerMapsRequestAndResponse(t *testing.T) {
 			UpdatedAt:        timestamppb.New(now),
 		},
 	}}
-	result, output, err := domain.CampaignCreateHandler(client)(
+	result, output, err := domain.CampaignCreateHandler(client, nil)(
 		context.Background(),
 		&mcp.CallToolRequest{},
 		domain.CampaignCreateInput{
@@ -1350,7 +1350,7 @@ func TestCampaignResourceHandlerRejectsSuffixedURI(t *testing.T) {
 // TestParticipantCreateHandlerReturnsClientError ensures gRPC errors are returned as tool errors.
 func TestParticipantCreateHandlerReturnsClientError(t *testing.T) {
 	client := &fakeCampaignClient{createParticipantErr: errors.New("boom")}
-	handler := domain.ParticipantCreateHandler(client)
+	handler := domain.ParticipantCreateHandler(client, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.ParticipantCreateInput{
 		CampaignID:  "camp-123",
@@ -1380,7 +1380,7 @@ func TestParticipantCreateHandlerMapsRequestAndResponse(t *testing.T) {
 			UpdatedAt:   timestamppb.New(now.Add(time.Hour)),
 		},
 	}}
-	result, output, err := domain.ParticipantCreateHandler(client)(
+	result, output, err := domain.ParticipantCreateHandler(client, nil)(
 		context.Background(),
 		&mcp.CallToolRequest{},
 		domain.ParticipantCreateInput{
@@ -1446,7 +1446,7 @@ func TestParticipantCreateHandlerOptionalController(t *testing.T) {
 			UpdatedAt:   timestamppb.New(now),
 		},
 	}}
-	result, output, err := domain.ParticipantCreateHandler(client)(
+	result, output, err := domain.ParticipantCreateHandler(client, nil)(
 		context.Background(),
 		&mcp.CallToolRequest{},
 		domain.ParticipantCreateInput{
@@ -1475,7 +1475,7 @@ func TestParticipantCreateHandlerOptionalController(t *testing.T) {
 // TestParticipantCreateHandlerRejectsEmptyResponse ensures nil responses are rejected.
 func TestParticipantCreateHandlerRejectsEmptyResponse(t *testing.T) {
 	client := &fakeCampaignClient{}
-	handler := domain.ParticipantCreateHandler(client)
+	handler := domain.ParticipantCreateHandler(client, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.ParticipantCreateInput{
 		CampaignID:  "camp-123",
@@ -1493,7 +1493,7 @@ func TestParticipantCreateHandlerRejectsEmptyResponse(t *testing.T) {
 // TestCharacterCreateHandlerReturnsClientError ensures gRPC errors are returned as tool errors.
 func TestCharacterCreateHandlerReturnsClientError(t *testing.T) {
 	client := &fakeCampaignClient{createCharacterErr: errors.New("boom")}
-	handler := domain.CharacterCreateHandler(client)
+	handler := domain.CharacterCreateHandler(client, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.CharacterCreateInput{
 		CampaignID: "camp-123",
@@ -1523,7 +1523,7 @@ func TestCharacterCreateHandlerMapsRequestAndResponse(t *testing.T) {
 			UpdatedAt:  timestamppb.New(now.Add(time.Hour)),
 		},
 	}}
-	result, output, err := domain.CharacterCreateHandler(client)(
+	result, output, err := domain.CharacterCreateHandler(client, nil)(
 		context.Background(),
 		&mcp.CallToolRequest{},
 		domain.CharacterCreateInput{
@@ -1589,7 +1589,7 @@ func TestCharacterCreateHandlerOptionalNotes(t *testing.T) {
 			UpdatedAt:  timestamppb.New(now),
 		},
 	}}
-	result, output, err := domain.CharacterCreateHandler(client)(
+	result, output, err := domain.CharacterCreateHandler(client, nil)(
 		context.Background(),
 		&mcp.CallToolRequest{},
 		domain.CharacterCreateInput{
@@ -1617,7 +1617,7 @@ func TestCharacterCreateHandlerOptionalNotes(t *testing.T) {
 // TestCharacterCreateHandlerRejectsEmptyResponse ensures nil responses are rejected.
 func TestCharacterCreateHandlerRejectsEmptyResponse(t *testing.T) {
 	client := &fakeCampaignClient{}
-	handler := domain.CharacterCreateHandler(client)
+	handler := domain.CharacterCreateHandler(client, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.CharacterCreateInput{
 		CampaignID: "camp-123",
@@ -1635,7 +1635,7 @@ func TestCharacterCreateHandlerRejectsEmptyResponse(t *testing.T) {
 // TestCharacterControlSetHandlerReturnsClientError ensures gRPC errors are returned as tool errors.
 func TestCharacterControlSetHandlerReturnsClientError(t *testing.T) {
 	client := &fakeCampaignClient{setDefaultControlErr: errors.New("boom")}
-	handler := domain.CharacterControlSetHandler(client)
+	handler := domain.CharacterControlSetHandler(client, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.CharacterControlSetInput{
 		CampaignID:  "camp-123",
@@ -1661,7 +1661,7 @@ func TestCharacterControlSetHandlerMapsRequestAndResponseGM(t *testing.T) {
 			},
 		},
 	}}
-	result, output, err := domain.CharacterControlSetHandler(client)(
+	result, output, err := domain.CharacterControlSetHandler(client, nil)(
 		context.Background(),
 		&mcp.CallToolRequest{},
 		domain.CharacterControlSetInput{
@@ -1715,7 +1715,7 @@ func TestCharacterControlSetHandlerMapsRequestAndResponseParticipant(t *testing.
 			},
 		},
 	}}
-	result, output, err := domain.CharacterControlSetHandler(client)(
+	result, output, err := domain.CharacterControlSetHandler(client, nil)(
 		context.Background(),
 		&mcp.CallToolRequest{},
 		domain.CharacterControlSetInput{
@@ -1772,7 +1772,7 @@ func TestCharacterControlSetHandlerCaseInsensitiveGM(t *testing.T) {
 	}}
 	for _, input := range []string{"GM", "gm", "Gm", "gM"} {
 		t.Run(input, func(t *testing.T) {
-			_, output, err := domain.CharacterControlSetHandler(client)(
+			_, output, err := domain.CharacterControlSetHandler(client, nil)(
 				context.Background(),
 				&mcp.CallToolRequest{},
 				domain.CharacterControlSetInput{
@@ -1794,7 +1794,7 @@ func TestCharacterControlSetHandlerCaseInsensitiveGM(t *testing.T) {
 // TestCharacterControlSetHandlerRejectsEmptyResponse ensures nil responses are rejected.
 func TestCharacterControlSetHandlerRejectsEmptyResponse(t *testing.T) {
 	client := &fakeCampaignClient{}
-	handler := domain.CharacterControlSetHandler(client)
+	handler := domain.CharacterControlSetHandler(client, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.CharacterControlSetInput{
 		CampaignID:  "camp-123",
@@ -1812,7 +1812,7 @@ func TestCharacterControlSetHandlerRejectsEmptyResponse(t *testing.T) {
 // TestCharacterControlSetHandlerRejectsEmptyController ensures empty controller is rejected.
 func TestCharacterControlSetHandlerRejectsEmptyController(t *testing.T) {
 	client := &fakeCampaignClient{}
-	handler := domain.CharacterControlSetHandler(client)
+	handler := domain.CharacterControlSetHandler(client, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.CharacterControlSetInput{
 		CampaignID:  "camp-123",
@@ -1830,7 +1830,7 @@ func TestCharacterControlSetHandlerRejectsEmptyController(t *testing.T) {
 // TestSessionStartHandlerReturnsClientError ensures gRPC errors are returned as tool errors.
 func TestSessionStartHandlerReturnsClientError(t *testing.T) {
 	client := &fakeSessionClient{err: errors.New("boom")}
-	handler := domain.SessionStartHandler(client)
+	handler := domain.SessionStartHandler(client, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SessionStartInput{
 		CampaignID: "camp-123",
@@ -1857,7 +1857,7 @@ func TestSessionStartHandlerMapsRequestAndResponse(t *testing.T) {
 			UpdatedAt:  timestamppb.New(now.Add(time.Hour)),
 		},
 	}}
-	result, output, err := domain.SessionStartHandler(client)(
+	result, output, err := domain.SessionStartHandler(client, nil)(
 		context.Background(),
 		&mcp.CallToolRequest{},
 		domain.SessionStartInput{
@@ -1911,7 +1911,7 @@ func TestSessionStartHandlerOptionalName(t *testing.T) {
 			UpdatedAt:  timestamppb.New(now),
 		},
 	}}
-	result, output, err := domain.SessionStartHandler(client)(
+	result, output, err := domain.SessionStartHandler(client, nil)(
 		context.Background(),
 		&mcp.CallToolRequest{},
 		domain.SessionStartInput{
@@ -1940,7 +1940,7 @@ func TestSessionStartHandlerOptionalName(t *testing.T) {
 // TestSessionStartHandlerRejectsEmptyResponse ensures nil responses are rejected.
 func TestSessionStartHandlerRejectsEmptyResponse(t *testing.T) {
 	client := &fakeSessionClient{}
-	handler := domain.SessionStartHandler(client)
+	handler := domain.SessionStartHandler(client, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SessionStartInput{
 		CampaignID: "camp-123",
@@ -1969,7 +1969,7 @@ func TestSessionStartHandlerMapsEndedAt(t *testing.T) {
 			EndedAt:    timestamppb.New(endedAt),
 		},
 	}}
-	result, output, err := domain.SessionStartHandler(client)(
+	result, output, err := domain.SessionStartHandler(client, nil)(
 		context.Background(),
 		&mcp.CallToolRequest{},
 		domain.SessionStartInput{
@@ -1992,7 +1992,7 @@ func TestSessionStartHandlerMapsEndedAt(t *testing.T) {
 // TestSessionEndHandlerReturnsClientError ensures gRPC errors are returned as tool errors.
 func TestSessionEndHandlerReturnsClientError(t *testing.T) {
 	client := &fakeSessionClient{endSessionErr: errors.New("boom")}
-	handler := domain.SessionEndHandler(client, nil)
+	handler := domain.SessionEndHandler(client, nil, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SessionEndInput{
 		CampaignID: "camp-123",
@@ -2020,7 +2020,7 @@ func TestSessionEndHandlerMapsRequestAndResponse(t *testing.T) {
 			EndedAt:    timestamppb.New(now),
 		},
 	}}
-	result, output, err := domain.SessionEndHandler(client, nil)(
+	result, output, err := domain.SessionEndHandler(client, nil, nil)(
 		context.Background(),
 		&mcp.CallToolRequest{},
 		domain.SessionEndInput{
@@ -2081,7 +2081,7 @@ func TestSessionEndHandlerUsesContextDefaults(t *testing.T) {
 	getContext := func() domain.Context {
 		return domain.Context{CampaignID: "camp-123", SessionID: "sess-456"}
 	}
-	result, _, err := domain.SessionEndHandler(client, getContext)(
+	result, _, err := domain.SessionEndHandler(client, getContext, nil)(
 		context.Background(),
 		&mcp.CallToolRequest{},
 		domain.SessionEndInput{},
@@ -2104,7 +2104,7 @@ func TestSessionEndHandlerUsesContextDefaults(t *testing.T) {
 // TestSessionEndHandlerRejectsEmptyResponse ensures nil responses are rejected.
 func TestSessionEndHandlerRejectsEmptyResponse(t *testing.T) {
 	client := &fakeSessionClient{}
-	handler := domain.SessionEndHandler(client, nil)
+	handler := domain.SessionEndHandler(client, nil, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SessionEndInput{
 		CampaignID: "camp-123",
@@ -2121,7 +2121,7 @@ func TestSessionEndHandlerRejectsEmptyResponse(t *testing.T) {
 // TestSessionEndHandlerRejectsMissingCampaign ensures campaign_id is required.
 func TestSessionEndHandlerRejectsMissingCampaign(t *testing.T) {
 	client := &fakeSessionClient{}
-	handler := domain.SessionEndHandler(client, func() domain.Context { return domain.Context{} })
+	handler := domain.SessionEndHandler(client, func() domain.Context { return domain.Context{} }, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SessionEndInput{
 		SessionID: "sess-456",
@@ -2552,7 +2552,7 @@ func TestSetContextHandlerReturnsClientError(t *testing.T) {
 	campaignClient := &fakeCampaignClient{getCampaignErr: errors.New("boom")}
 	sessionClient := &fakeSessionClient{}
 	server := &Server{}
-	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext)
+	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SetContextInput{
 		CampaignID: "camp-123",
@@ -2570,7 +2570,7 @@ func TestSetContextHandlerRejectsEmptyCampaignID(t *testing.T) {
 	campaignClient := &fakeCampaignClient{}
 	sessionClient := &fakeSessionClient{}
 	server := &Server{}
-	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext)
+	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SetContextInput{
 		CampaignID: "",
@@ -2593,7 +2593,7 @@ func TestSetContextHandlerRejectsNonExistentCampaign(t *testing.T) {
 	}
 	sessionClient := &fakeSessionClient{}
 	server := &Server{}
-	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext)
+	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SetContextInput{
 		CampaignID: "camp-123",
@@ -2621,7 +2621,7 @@ func TestSetContextHandlerTreatsWhitespaceOnlySessionIDAsOmitted(t *testing.T) {
 	}
 	sessionClient := &fakeSessionClient{}
 	server := &Server{}
-	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext)
+	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext, nil)
 
 	result, output, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SetContextInput{
 		CampaignID: "camp-123",
@@ -2650,7 +2650,7 @@ func TestSetContextHandlerRejectsNonExistentSession(t *testing.T) {
 		getSessionErr: status.Error(codes.NotFound, "session not found"),
 	}
 	server := &Server{}
-	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext)
+	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SetContextInput{
 		CampaignID: "camp-123",
@@ -2684,7 +2684,7 @@ func TestSetContextHandlerRejectsSessionFromDifferentCampaign(t *testing.T) {
 		getSessionErr: status.Error(codes.InvalidArgument, "session not found or does not belong to campaign"),
 	}
 	server := &Server{}
-	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext)
+	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SetContextInput{
 		CampaignID: "camp-123",
@@ -2707,7 +2707,7 @@ func TestSetContextHandlerTreatsWhitespaceOnlyParticipantIDAsOmitted(t *testing.
 	}
 	sessionClient := &fakeSessionClient{}
 	server := &Server{}
-	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext)
+	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext, nil)
 
 	result, output, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SetContextInput{
 		CampaignID:    "camp-123",
@@ -2735,7 +2735,7 @@ func TestSetContextHandlerRejectsNonExistentParticipant(t *testing.T) {
 	}
 	sessionClient := &fakeSessionClient{}
 	server := &Server{}
-	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext)
+	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SetContextInput{
 		CampaignID:    "camp-123",
@@ -2768,7 +2768,7 @@ func TestSetContextHandlerRejectsParticipantFromDifferentCampaign(t *testing.T) 
 	}
 	sessionClient := &fakeSessionClient{}
 	server := &Server{}
-	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext)
+	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext, nil)
 
 	result, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SetContextInput{
 		CampaignID:    "camp-123",
@@ -2804,7 +2804,7 @@ func TestSetContextHandlerMapsRequestAndResponse(t *testing.T) {
 		},
 	}
 	server := &Server{}
-	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext)
+	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext, nil)
 
 	result, output, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SetContextInput{
 		CampaignID:    "camp-123",
@@ -2846,7 +2846,7 @@ func TestSetContextHandlerOptionalFields(t *testing.T) {
 	}
 	sessionClient := &fakeSessionClient{}
 	server := &Server{}
-	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext)
+	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext, nil)
 
 	result, output, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SetContextInput{
 		CampaignID: "camp-123",
@@ -2900,7 +2900,7 @@ func TestSetContextHandlerClearsOptionalFields(t *testing.T) {
 		},
 	}
 	server := &Server{}
-	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext)
+	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext, nil)
 
 	// First set context with all fields
 	_, _, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SetContextInput{
@@ -2964,7 +2964,7 @@ func TestSetContextHandlerGetSetContextIntegration(t *testing.T) {
 		},
 	}
 	server := &Server{}
-	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext)
+	handler := domain.SetContextHandler(campaignClient, sessionClient, server.setContext, server.getContext, nil)
 
 	// Set context
 	_, output1, err := handler(context.Background(), &mcp.CallToolRequest{}, domain.SetContextInput{

@@ -39,7 +39,7 @@ func SessionStartTool() *mcp.Tool {
 }
 
 // SessionStartHandler executes a session start request.
-func SessionStartHandler(client sessionv1.SessionServiceClient) mcp.ToolHandlerFor[SessionStartInput, SessionStartResult] {
+func SessionStartHandler(client sessionv1.SessionServiceClient, notify ResourceUpdateNotifier) mcp.ToolHandlerFor[SessionStartInput, SessionStartResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input SessionStartInput) (*mcp.CallToolResult, SessionStartResult, error) {
 		invocationID, err := NewInvocationID()
 		if err != nil {
@@ -81,6 +81,12 @@ func SessionStartHandler(client sessionv1.SessionServiceClient) mcp.ToolHandlerF
 		}
 
 		responseMeta := MergeResponseMetadata(callMeta, header)
+		NotifyResourceUpdates(
+			ctx,
+			notify,
+			fmt.Sprintf("campaign://%s", result.CampaignID),
+			fmt.Sprintf("campaign://%s/sessions", result.CampaignID),
+		)
 		return CallToolResultWithMetadata(responseMeta), result, nil
 	}
 }
@@ -111,7 +117,7 @@ func SessionEndTool() *mcp.Tool {
 }
 
 // SessionEndHandler executes a session end request.
-func SessionEndHandler(client sessionv1.SessionServiceClient, getContext func() Context) mcp.ToolHandlerFor[SessionEndInput, SessionEndResult] {
+func SessionEndHandler(client sessionv1.SessionServiceClient, getContext func() Context, notify ResourceUpdateNotifier) mcp.ToolHandlerFor[SessionEndInput, SessionEndResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input SessionEndInput) (*mcp.CallToolResult, SessionEndResult, error) {
 		invocationID, err := NewInvocationID()
 		if err != nil {
@@ -172,6 +178,12 @@ func SessionEndHandler(client sessionv1.SessionServiceClient, getContext func() 
 		}
 
 		responseMeta := MergeResponseMetadata(callMeta, header)
+		NotifyResourceUpdates(
+			ctx,
+			notify,
+			fmt.Sprintf("campaign://%s", result.CampaignID),
+			fmt.Sprintf("campaign://%s/sessions", result.CampaignID),
+		)
 		return CallToolResultWithMetadata(responseMeta), result, nil
 	}
 }
@@ -248,7 +260,7 @@ func SessionRollOutcomeApplyTool() *mcp.Tool {
 }
 
 // SessionActionRollHandler executes a session action roll request.
-func SessionActionRollHandler(client sessionv1.SessionServiceClient, getContext func() Context) mcp.ToolHandlerFor[SessionActionRollInput, SessionActionRollResult] {
+func SessionActionRollHandler(client sessionv1.SessionServiceClient, getContext func() Context, notify ResourceUpdateNotifier) mcp.ToolHandlerFor[SessionActionRollInput, SessionActionRollResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input SessionActionRollInput) (*mcp.CallToolResult, SessionActionRollResult, error) {
 		invocationID, err := NewInvocationID()
 		if err != nil {
@@ -321,12 +333,17 @@ func SessionActionRollHandler(client sessionv1.SessionServiceClient, getContext 
 		}
 
 		responseMeta := MergeResponseMetadata(callMeta, header)
+		NotifyResourceUpdates(
+			ctx,
+			notify,
+			fmt.Sprintf("session://%s/events", sessionID),
+		)
 		return CallToolResultWithMetadata(responseMeta), result, nil
 	}
 }
 
 // SessionRollOutcomeApplyHandler executes a roll outcome apply request.
-func SessionRollOutcomeApplyHandler(client sessionv1.SessionServiceClient, getContext func() Context) mcp.ToolHandlerFor[SessionRollOutcomeApplyInput, SessionRollOutcomeApplyResult] {
+func SessionRollOutcomeApplyHandler(client sessionv1.SessionServiceClient, getContext func() Context, notify ResourceUpdateNotifier) mcp.ToolHandlerFor[SessionRollOutcomeApplyInput, SessionRollOutcomeApplyResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input SessionRollOutcomeApplyInput) (*mcp.CallToolResult, SessionRollOutcomeApplyResult, error) {
 		invocationID, err := NewInvocationID()
 		if err != nil {
@@ -393,6 +410,11 @@ func SessionRollOutcomeApplyHandler(client sessionv1.SessionServiceClient, getCo
 		}
 
 		responseMeta := MergeResponseMetadata(callMeta, header)
+		NotifyResourceUpdates(
+			ctx,
+			notify,
+			fmt.Sprintf("session://%s/events", sessionID),
+		)
 		return CallToolResultWithMetadata(responseMeta), result, nil
 	}
 }
