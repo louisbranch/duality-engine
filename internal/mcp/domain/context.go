@@ -48,6 +48,7 @@ func SetContextHandler(
 	sessionClient sessionv1.SessionServiceClient,
 	setContextFunc func(ctx Context),
 	getContextFunc func() Context,
+	notify ResourceUpdateNotifier,
 ) mcp.ToolHandlerFor[SetContextInput, SetContextResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input SetContextInput) (*mcp.CallToolResult, SetContextResult, error) {
 		invocationID, err := NewInvocationID()
@@ -104,6 +105,8 @@ func SetContextHandler(
 
 		// Update server context
 		setContextFunc(newCtx)
+
+		NotifyResourceUpdates(ctx, notify, ContextResource().URI)
 
 		// Return current context
 		currentCtx := getContextFunc()

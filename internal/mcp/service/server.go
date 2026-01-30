@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -57,7 +58,9 @@ type Server struct {
 // New creates a configured MCP server that connects to Duality, Campaign, and Session gRPC services.
 func New(grpcAddr string) (*Server, error) {
 	mcpServer := mcp.NewServer(&mcp.Implementation{Name: serverName, Version: serverVersion}, &mcp.ServerOptions{
-		CompletionHandler: completionHandler,
+		CompletionHandler:  completionHandler,
+		SubscribeHandler:   resourceSubscribeHandler,
+		UnsubscribeHandler: resourceUnsubscribeHandler,
 	})
 
 	addr := grpcAddress(grpcAddr)
@@ -71,11 +74,22 @@ func New(grpcAddr string) (*Server, error) {
 	sessionClient := sessionv1.NewSessionServiceClient(conn)
 
 	server := &Server{mcpServer: mcpServer, conn: conn}
+	resourceNotifier := func(ctx context.Context, uri string) {
+		if strings.TrimSpace(uri) == "" {
+			return
+		}
+		if ctx == nil {
+			ctx = context.Background()
+		}
+		if err := mcpServer.ResourceUpdated(ctx, &mcp.ResourceUpdatedNotificationParams{URI: uri}); err != nil {
+			log.Printf("mcp resource updated notify failed: uri=%s err=%v", uri, err)
+		}
+	}
 
 	registerDualityTools(mcpServer, dualityClient)
-	registerCampaignTools(mcpServer, campaignClient, server.getContext)
-	registerSessionTools(mcpServer, sessionClient, server.getContext)
-	registerContextTools(mcpServer, campaignClient, sessionClient, server)
+	registerCampaignTools(mcpServer, campaignClient, server.getContext, resourceNotifier)
+	registerSessionTools(mcpServer, sessionClient, server.getContext, resourceNotifier)
+	registerContextTools(mcpServer, campaignClient, sessionClient, server, resourceNotifier)
 	registerCampaignResources(mcpServer, campaignClient)
 	registerSessionResources(mcpServer, sessionClient)
 	registerContextResources(mcpServer, server)
@@ -92,6 +106,22 @@ func completionHandler(ctx context.Context, req *mcp.CompleteRequest) (*mcp.Comp
 			Values: []string{},
 		},
 	}, nil
+}
+
+// resourceSubscribeHandler accepts resource subscriptions with a valid URI.
+func resourceSubscribeHandler(_ context.Context, req *mcp.SubscribeRequest) error {
+	if req == nil || req.Params == nil || strings.TrimSpace(req.Params.URI) == "" {
+		return fmt.Errorf("resource uri is required")
+	}
+	return nil
+}
+
+// resourceUnsubscribeHandler accepts resource unsubscriptions with a valid URI.
+func resourceUnsubscribeHandler(_ context.Context, req *mcp.UnsubscribeRequest) error {
+	if req == nil || req.Params == nil || strings.TrimSpace(req.Params.URI) == "" {
+		return fmt.Errorf("resource uri is required")
+	}
+	return nil
 }
 
 // Run creates and serves the MCP server until the context ends.

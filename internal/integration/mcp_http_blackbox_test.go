@@ -6,6 +6,7 @@
 package integration
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -18,6 +19,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"syscall"
@@ -76,7 +78,7 @@ func TestMCPHTTPBlackbox(t *testing.T) {
 		t.Fatal("SSE recorder not initialized")
 	}
 	finishSSERecorder(t, sseResp, sseRecorder)
-	assertSSEIdle(t, sseRecorder)
+	assertSSEResourceUpdates(t, sseRecorder, expectedResourceURIs(captures))
 }
 
 // loadBlackboxFixture reads the JSON fixture from disk with number preservation.
@@ -545,13 +547,114 @@ func finishSSERecorder(t *testing.T, resp *http.Response, capture *sseCapture) {
 	}
 }
 
-// assertSSEIdle ensures no SSE events were emitted during the test.
-func assertSSEIdle(t *testing.T, capture *sseCapture) {
+// expectedResourceURIs builds the set of resource URIs that should emit updates.
+func expectedResourceURIs(captures map[string]string) []string {
+	campaignID := captures["campaign_id"]
+	sessionID := captures["session_id"]
+	return []string{
+		"campaigns://list",
+		fmt.Sprintf("campaign://%s", campaignID),
+		fmt.Sprintf("campaign://%s/participants", campaignID),
+		fmt.Sprintf("campaign://%s/characters", campaignID),
+		fmt.Sprintf("campaign://%s/sessions", campaignID),
+		"context://current",
+		fmt.Sprintf("session://%s/events", sessionID),
+	}
+}
+
+// assertSSEResourceUpdates ensures resource update notifications were emitted.
+func assertSSEResourceUpdates(t *testing.T, capture *sseCapture, expectedURIs []string) {
 	t.Helper()
 	if capture == nil {
-		return
+		t.Fatal("SSE capture missing")
 	}
-	if capture.Buffer.Len() != 0 {
-		t.Fatalf("unexpected SSE output: %q", capture.Buffer.String())
+	notifications := parseSSENotifications(t, capture)
+	if len(notifications) == 0 {
+		t.Fatal("expected SSE notifications but none were captured")
 	}
+
+	seen := make(map[string]struct{})
+	for _, message := range notifications {
+		if message.Method != "notifications/resources/updated" {
+			continue
+		}
+		if message.URI != "" {
+			seen[message.URI] = struct{}{}
+		}
+	}
+	if len(seen) == 0 {
+		t.Fatalf("no resources/updated notifications found; raw=%q", capture.Buffer.String())
+	}
+	for _, uri := range expectedURIs {
+		if _, ok := seen[uri]; !ok {
+			t.Fatalf("missing resources/updated notification for %q (seen=%v)", uri, sortedKeys(seen))
+		}
+	}
+}
+
+type sseNotification struct {
+	Method string
+	URI    string
+}
+
+func parseSSENotifications(t *testing.T, capture *sseCapture) []sseNotification {
+	t.Helper()
+	data := capture.Buffer.String()
+	if data == "" {
+		return nil
+	}
+
+	scanner := bufio.NewScanner(strings.NewReader(data))
+	var payloadLines []string
+	var notifications []sseNotification
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line == "" {
+			if len(payloadLines) == 0 {
+				continue
+			}
+			payload := strings.Join(payloadLines, "\n")
+			payloadLines = nil
+			notifications = append(notifications, decodeSSENotification(t, payload))
+			continue
+		}
+		if strings.HasPrefix(line, "data: ") {
+			payloadLines = append(payloadLines, strings.TrimPrefix(line, "data: "))
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		t.Fatalf("scan SSE stream: %v", err)
+	}
+	if len(payloadLines) != 0 {
+		payload := strings.Join(payloadLines, "\n")
+		notifications = append(notifications, decodeSSENotification(t, payload))
+	}
+	return notifications
+}
+
+func decodeSSENotification(t *testing.T, payload string) sseNotification {
+	t.Helper()
+	var envelope struct {
+		Method string         `json:"method"`
+		Params map[string]any `json:"params"`
+	}
+	if err := json.Unmarshal([]byte(payload), &envelope); err != nil {
+		t.Fatalf("decode SSE payload: %v", err)
+	}
+	notification := sseNotification{Method: envelope.Method}
+	if uriValue, ok := envelope.Params["uri"]; ok {
+		if uri, ok := uriValue.(string); ok {
+			notification.URI = uri
+		}
+	}
+	return notification
+}
+
+func sortedKeys(values map[string]struct{}) []string {
+	keys := make([]string, 0, len(values))
+	for key := range values {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	return keys
 }

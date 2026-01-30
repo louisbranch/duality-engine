@@ -31,11 +31,27 @@
       }
     },
     {
-      "name": "campaign_create",
+      "name": "campaign_list_subscribe",
       "expect_status": 200,
       "request": {
         "jsonrpc": "2.0",
         "id": 2,
+        "method": "resources/subscribe",
+        "params": {
+          "uri": "campaigns://list"
+        }
+      },
+      "expect_paths": {
+        "jsonrpc": "2.0",
+        "id": 2
+      }
+    },
+    {
+      "name": "campaign_create",
+      "expect_status": 200,
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 3,
         "method": "tools/call",
         "params": {
           "name": "campaign_create",
@@ -48,7 +64,7 @@
       },
       "expect_paths": {
         "jsonrpc": "2.0",
-        "id": 2
+        "id": 3
       },
       "captures": {
         "campaign_id": [
@@ -62,7 +78,7 @@
       "expect_status": 200,
       "request": {
         "jsonrpc": "2.0",
-        "id": 3,
+        "id": 4,
         "method": "resources/read",
         "params": {
           "uri": "campaign://{{campaign_id}}"
@@ -70,9 +86,41 @@
       },
       "expect_paths": {
         "jsonrpc": "2.0",
-        "id": 3,
+        "id": 4,
         "result.contents[0].text|json.campaign.id": "{{campaign_id}}",
         "result.contents[0].text|json.campaign.name": "Blackbox Campaign"
+      }
+    },
+    {
+      "name": "campaign_subscribe",
+      "expect_status": 200,
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 5,
+        "method": "resources/subscribe",
+        "params": {
+          "uri": "campaign://{{campaign_id}}"
+        }
+      },
+      "expect_paths": {
+        "jsonrpc": "2.0",
+        "id": 5
+      }
+    },
+    {
+      "name": "participant_list_subscribe",
+      "expect_status": 200,
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 6,
+        "method": "resources/subscribe",
+        "params": {
+          "uri": "campaign://{{campaign_id}}/participants"
+        }
+      },
+      "expect_paths": {
+        "jsonrpc": "2.0",
+        "id": 6
       }
     },
     {
@@ -80,7 +128,7 @@
       "expect_status": 200,
       "request": {
         "jsonrpc": "2.0",
-        "id": 4,
+        "id": 7,
         "method": "tools/call",
         "params": {
           "name": "participant_create",
@@ -94,7 +142,7 @@
       },
       "expect_paths": {
         "jsonrpc": "2.0",
-        "id": 4
+        "id": 7
       },
       "captures": {
         "participant_id": [
@@ -108,7 +156,7 @@
       "expect_status": 200,
       "request": {
         "jsonrpc": "2.0",
-        "id": 5,
+        "id": 8,
         "method": "resources/read",
         "params": {
           "uri": "campaign://{{campaign_id}}/participants"
@@ -116,8 +164,24 @@
       },
       "expect_paths": {
         "jsonrpc": "2.0",
-        "id": 5,
+        "id": 8,
         "result.contents[0].text|json.participants[0].id": "{{participant_id}}"
+      }
+    },
+    {
+      "name": "character_list_subscribe",
+      "expect_status": 200,
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 9,
+        "method": "resources/subscribe",
+        "params": {
+          "uri": "campaign://{{campaign_id}}/characters"
+        }
+      },
+      "expect_paths": {
+        "jsonrpc": "2.0",
+        "id": 9
       }
     },
     {
@@ -125,7 +189,7 @@
       "expect_status": 200,
       "request": {
         "jsonrpc": "2.0",
-        "id": 6,
+        "id": 10,
         "method": "tools/call",
         "params": {
           "name": "character_create",
@@ -139,7 +203,7 @@
       },
       "expect_paths": {
         "jsonrpc": "2.0",
-        "id": 6
+        "id": 10
       },
       "captures": {
         "character_id": [
@@ -153,7 +217,7 @@
       "expect_status": 200,
       "request": {
         "jsonrpc": "2.0",
-        "id": 7,
+        "id": 11,
         "method": "resources/read",
         "params": {
           "uri": "campaign://{{campaign_id}}/characters"
@@ -161,7 +225,7 @@
       },
       "expect_paths": {
         "jsonrpc": "2.0",
-        "id": 7,
+        "id": 11,
         "result.contents[0].text|json.characters[0].id": "{{character_id}}"
       }
     },
@@ -170,7 +234,7 @@
       "expect_status": 200,
       "request": {
         "jsonrpc": "2.0",
-        "id": 8,
+        "id": 12,
         "method": "tools/call",
         "params": {
           "name": "character_control_set",
@@ -183,7 +247,23 @@
       },
       "expect_paths": {
         "jsonrpc": "2.0",
-        "id": 8
+        "id": 12
+      }
+    },
+    {
+      "name": "session_list_subscribe",
+      "expect_status": 200,
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 13,
+        "method": "resources/subscribe",
+        "params": {
+          "uri": "campaign://{{campaign_id}}/sessions"
+        }
+      },
+      "expect_paths": {
+        "jsonrpc": "2.0",
+        "id": 13
       }
     },
     {
@@ -191,7 +271,7 @@
       "expect_status": 200,
       "request": {
         "jsonrpc": "2.0",
-        "id": 9,
+        "id": 14,
         "method": "tools/call",
         "params": {
           "name": "session_start",
@@ -203,7 +283,7 @@
       },
       "expect_paths": {
         "jsonrpc": "2.0",
-        "id": 9
+        "id": 14
       },
       "captures": {
         "session_id": [
@@ -213,11 +293,43 @@
       }
     },
     {
+      "name": "session_events_subscribe",
+      "expect_status": 200,
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 15,
+        "method": "resources/subscribe",
+        "params": {
+          "uri": "session://{{session_id}}/events"
+        }
+      },
+      "expect_paths": {
+        "jsonrpc": "2.0",
+        "id": 15
+      }
+    },
+    {
+      "name": "context_subscribe",
+      "expect_status": 200,
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 16,
+        "method": "resources/subscribe",
+        "params": {
+          "uri": "context://current"
+        }
+      },
+      "expect_paths": {
+        "jsonrpc": "2.0",
+        "id": 16
+      }
+    },
+    {
       "name": "set_context",
       "expect_status": 200,
       "request": {
         "jsonrpc": "2.0",
-        "id": 10,
+        "id": 17,
         "method": "tools/call",
         "params": {
           "name": "set_context",
@@ -230,7 +342,7 @@
       },
       "expect_paths": {
         "jsonrpc": "2.0",
-        "id": 10
+        "id": 17
       }
     },
     {
@@ -238,7 +350,7 @@
       "expect_status": 200,
       "request": {
         "jsonrpc": "2.0",
-        "id": 11,
+        "id": 18,
         "method": "tools/call",
         "params": {
           "name": "session_action_roll",
@@ -254,7 +366,7 @@
       },
       "expect_paths": {
         "jsonrpc": "2.0",
-        "id": 11
+        "id": 18
       }
     },
     {
@@ -262,7 +374,7 @@
       "expect_status": 200,
       "request": {
         "jsonrpc": "2.0",
-        "id": 12,
+        "id": 19,
         "method": "resources/read",
         "params": {
           "uri": "session://{{session_id}}/events"
@@ -270,7 +382,7 @@
       },
       "expect_paths": {
         "jsonrpc": "2.0",
-        "id": 12,
+        "id": 19,
         "result.contents[0].text|json.events[0].session_id": "{{session_id}}"
       }
     }
