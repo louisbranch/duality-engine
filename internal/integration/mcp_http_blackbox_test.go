@@ -39,16 +39,18 @@ type scenarioFixture struct {
 
 // scenarioStep defines a single human-oriented action step.
 type scenarioStep struct {
-	Name            string         `json:"name"`
-	Use             string         `json:"use"`
-	With            map[string]any `json:"with"`
-	Action          string         `json:"action"`
-	Tool            string         `json:"tool"`
-	Args            map[string]any `json:"args"`
-	URI             any            `json:"uri"`
-	Expect          string         `json:"expect"`
-	ExpectStatus    int            `json:"expect_status"`
-	ExpectPaths     map[string]any `json:"expect_paths"`
+	Name         string         `json:"name"`
+	Use          string         `json:"use"`
+	With         map[string]any `json:"with"`
+	Action       string         `json:"action"`
+	Tool         string         `json:"tool"`
+	Args         map[string]any `json:"args"`
+	URI          any            `json:"uri"`
+	Expect       string         `json:"expect"`
+	ExpectStatus int            `json:"expect_status"`
+	ExpectPaths  map[string]any `json:"expect_paths"`
+	// ExpectContains asserts that a JSON path array includes matching entries.
+	ExpectContains  map[string]any `json:"expect_contains"`
 	Capture         map[string]any `json:"capture"`
 	Request         map[string]any `json:"request"`
 	Method          string         `json:"method"`
@@ -59,11 +61,13 @@ type scenarioStep struct {
 
 // blackboxStep defines a single JSON-RPC request/expectation pair.
 type blackboxStep struct {
-	Name         string              `json:"name"`
-	ExpectStatus int                 `json:"expect_status"`
-	Request      map[string]any      `json:"request"`
-	ExpectPaths  map[string]any      `json:"expect_paths"`
-	Captures     map[string][]string `json:"captures"`
+	Name         string         `json:"name"`
+	ExpectStatus int            `json:"expect_status"`
+	Request      map[string]any `json:"request"`
+	ExpectPaths  map[string]any `json:"expect_paths"`
+	// ExpectContains asserts that a JSON path array includes matching entries.
+	ExpectContains map[string]any      `json:"expect_contains"`
+	Captures       map[string][]string `json:"captures"`
 }
 
 type blackboxFixture struct {
@@ -287,14 +291,26 @@ func buildBlackboxStep(t *testing.T, step scenarioStep, vars map[string]string, 
 		}
 	}
 
+	var expectContains map[string]any
+	if rendered := renderVars(step.ExpectContains, vars); rendered != nil {
+		containsOverrides, ok := rendered.(map[string]any)
+		if !ok {
+			t.Fatalf("expect_contains must be an object")
+		}
+		if len(containsOverrides) > 0 {
+			expectContains = containsOverrides
+		}
+	}
+
 	captures := parseCaptureSpec(t, renderVars(step.Capture, vars))
 
 	return blackboxStep{
-		Name:         name,
-		ExpectStatus: expectStatus,
-		Request:      request,
-		ExpectPaths:  expectPaths,
-		Captures:     captures,
+		Name:           name,
+		ExpectStatus:   expectStatus,
+		Request:        request,
+		ExpectPaths:    expectPaths,
+		ExpectContains: expectContains,
+		Captures:       captures,
 	}
 }
 
@@ -466,7 +482,7 @@ func executeBlackboxStep(t *testing.T, client *http.Client, url string, step bla
 	if err != nil {
 		t.Fatalf("read response for %s: %v", step.Name, err)
 	}
-	if len(step.ExpectPaths) == 0 && len(step.Captures) == 0 {
+	if len(step.ExpectPaths) == 0 && len(step.ExpectContains) == 0 && len(step.Captures) == 0 {
 		return
 	}
 	if len(body) == 0 {
@@ -486,6 +502,21 @@ func executeBlackboxStep(t *testing.T, client *http.Client, url string, step bla
 		resolvedExpected := renderPlaceholders(t, expected, captures)
 		if !valuesEqual(actual, resolvedExpected) {
 			t.Fatalf("%s expected %s = %v, got %v (response=%s)", step.Name, path, resolvedExpected, actual, string(body))
+		}
+	}
+
+	for path, expected := range step.ExpectContains {
+		actual, err := lookupJSONPath(response, path)
+		if err != nil {
+			errorDetails := formatJSONRPCError(response)
+			if errorDetails != "" {
+				t.Fatalf("%s lookup %s: %v (error=%s)", step.Name, path, err, errorDetails)
+			}
+			t.Fatalf("%s lookup %s: %v (response=%s)", step.Name, path, err, string(body))
+		}
+		resolvedExpected := renderPlaceholders(t, expected, captures)
+		if err := assertArrayContains(actual, resolvedExpected); err != nil {
+			t.Fatalf("%s expected %s to contain %v: %v (response=%s)", step.Name, path, resolvedExpected, err, string(body))
 		}
 	}
 
@@ -769,6 +800,72 @@ func valuesEqual(actual, expected any) bool {
 		return fmt.Sprint(actual) == exp
 	default:
 		return fmt.Sprintf("%v", actual) == fmt.Sprintf("%v", expected)
+	}
+}
+
+// assertArrayContains verifies that actual contains the expected subset.
+func assertArrayContains(actual, expected any) error {
+	array, ok := actual.([]any)
+	if !ok {
+		return fmt.Errorf("expected array, got %T", actual)
+	}
+
+	expectedSlice, isSlice := expected.([]any)
+	if !isSlice {
+		if arrayMatches(array, expected) {
+			return nil
+		}
+		return fmt.Errorf("no matching entries")
+	}
+
+	for _, expItem := range expectedSlice {
+		if !arrayMatches(array, expItem) {
+			return fmt.Errorf("missing entry %v", expItem)
+		}
+	}
+	return nil
+}
+
+func arrayMatches(array []any, expected any) bool {
+	for _, item := range array {
+		if matchJSONSubset(item, expected) {
+			return true
+		}
+	}
+	return false
+}
+
+// matchJSONSubset checks whether actual satisfies all fields in expected.
+func matchJSONSubset(actual, expected any) bool {
+	switch exp := expected.(type) {
+	case map[string]any:
+		actMap, ok := actual.(map[string]any)
+		if !ok {
+			return false
+		}
+		for key, expValue := range exp {
+			actValue, ok := actMap[key]
+			if !ok {
+				return false
+			}
+			if !matchJSONSubset(actValue, expValue) {
+				return false
+			}
+		}
+		return true
+	case []any:
+		actSlice, ok := actual.([]any)
+		if !ok {
+			return false
+		}
+		for _, expItem := range exp {
+			if !arrayMatches(actSlice, expItem) {
+				return false
+			}
+		}
+		return true
+	default:
+		return valuesEqual(actual, expected)
 	}
 }
 
