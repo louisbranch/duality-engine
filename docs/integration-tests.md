@@ -97,6 +97,8 @@ Example:
 - Prefer deterministic endpoints for assertions (example: duality_outcome).
 - For responses with IDs, timestamps, or seeds, validate structure and reuse
   values across steps instead of matching exact strings.
+- For list resources without stable ordering, use `expect_contains` to assert a
+  matching entry exists rather than hard-coding array indices.
 - Parse timestamps as RFC3339 and assert non-empty IDs.
 
 ## Candidate Test Cases
