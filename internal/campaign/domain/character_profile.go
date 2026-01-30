@@ -1,12 +1,11 @@
 package domain
 
 import (
+	_ "embed"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
-	"runtime"
 )
 
 var (
@@ -21,6 +20,12 @@ var (
 	// ErrInvalidTraitValue indicates a trait value is outside the valid range.
 	ErrInvalidTraitValue = errors.New("trait values must be in range -2..+4")
 )
+
+// embeddedCharacterDefaults contains the bundled defaults JSON payload.
+// TODO(louis): Support overrides once defaults can load from repo/runtime config.
+//
+//go:embed embedded/character_defaults.json
+var embeddedCharacterDefaults []byte
 
 // CharacterProfile represents the static profile values for a character.
 type CharacterProfile struct {
@@ -37,11 +42,11 @@ type CharacterProfile struct {
 // CharacterProfileDefaults represents the default profile values loaded from JSON.
 type CharacterProfileDefaults struct {
 	Traits          map[string]int `json:"traits"`
-	HpMax           int             `json:"hp_max"`
-	StressMax       int             `json:"stress_max"`
-	Evasion         int             `json:"evasion"`
-	MajorThreshold  int             `json:"major_threshold"`
-	SevereThreshold int             `json:"severe_threshold"`
+	HpMax           int            `json:"hp_max"`
+	StressMax       int            `json:"stress_max"`
+	Evasion         int            `json:"evasion"`
+	MajorThreshold  int            `json:"major_threshold"`
+	SevereThreshold int            `json:"severe_threshold"`
 }
 
 // CharacterDefaultsFile represents the structure of the defaults JSON file.
@@ -142,42 +147,22 @@ func PatchCharacterProfile(existing CharacterProfile, patch PatchCharacterProfil
 	return result, nil
 }
 
-// findRepoRoot finds the repository root by walking up to go.mod.
-func findRepoRoot() (string, error) {
-	_, filename, _, ok := runtime.Caller(1)
-	if !ok {
-		return "", fmt.Errorf("failed to resolve runtime caller")
-	}
-
-	dir := filepath.Dir(filename)
-	for {
-		candidate := filepath.Join(dir, "go.mod")
-		if _, err := os.Stat(candidate); err == nil {
-			return dir, nil
-		}
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			break
-		}
-		dir = parent
-	}
-
-	return "", fmt.Errorf("go.mod not found from %s", filename)
-}
-
-// LoadCharacterDefaults loads default profile values from the JSON file.
+// LoadCharacterDefaults loads default profile values from JSON.
+// When path is empty, the embedded defaults payload is used.
 func LoadCharacterDefaults(path string) (map[CharacterKind]CharacterProfileDefaults, error) {
+	var data []byte
 	if path == "" {
-		repoRoot, err := findRepoRoot()
+		data = embeddedCharacterDefaults
+	} else {
+		var err error
+		data, err = os.ReadFile(path)
 		if err != nil {
-			return nil, fmt.Errorf("find repo root: %w", err)
+			return nil, fmt.Errorf("read defaults file: %w", err)
 		}
-		path = filepath.Join(repoRoot, "data", "character_defaults.json")
 	}
 
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("read defaults file: %w", err)
+	if len(data) == 0 {
+		return nil, errors.New("defaults payload is empty")
 	}
 
 	var defaultsFile CharacterDefaultsFile
