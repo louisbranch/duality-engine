@@ -7,8 +7,8 @@ import (
 	"testing"
 )
 
-// TestCampaignPageRendering verifies layout rendering based on HTMX requests.
-func TestCampaignPageRendering(t *testing.T) {
+// TestWebPageRendering verifies layout rendering based on HTMX requests.
+func TestWebPageRendering(t *testing.T) {
 	handler := NewHandler(nil)
 
 	tests := []struct {
@@ -18,6 +18,17 @@ func TestCampaignPageRendering(t *testing.T) {
 		contains    []string
 		notContains []string
 	}{
+		{
+			name: "home full page",
+			path: "/",
+			contains: []string{
+				"<!doctype html>",
+				"<h1>Duality Engine</h1>",
+			},
+			notContains: []string{
+				"<h2>Campaigns</h2>",
+			},
+		},
 		{
 			name: "campaigns full page",
 			path: "/campaigns",
