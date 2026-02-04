@@ -76,7 +76,7 @@ func (h *Handler) handleCampaignsPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	templ.Handler(templates.Home()).ServeHTTP(w, r)
+	templ.Handler(templates.CampaignsFullPage()).ServeHTTP(w, r)
 }
 
 // handleCampaignDetail renders the single-campaign detail content.

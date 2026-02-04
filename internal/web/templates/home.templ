@@ -3,6 +3,12 @@ package templates
 // Home renders the base landing page.
 templ Home() {
 	@Layout("Duality Engine") {
+	}
+}
+
+// CampaignsFullPage renders campaigns content in the base layout.
+templ CampaignsFullPage() {
+	@Layout("Duality Engine") {
 		@CampaignsPage()
 	}
 }
