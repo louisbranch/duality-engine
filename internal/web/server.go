@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	campaignv1 "github.com/louisbranch/duality-engine/api/gen/go/campaign/v1"
 	dualityv1 "github.com/louisbranch/duality-engine/api/gen/go/duality/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -30,6 +31,7 @@ type Server struct {
 	grpcAddr   string
 	grpcConn   *grpc.ClientConn
 	grpcClient dualityv1.DualityServiceClient
+	campClient campaignv1.CampaignServiceClient
 	httpServer *http.Server
 }
 
@@ -43,16 +45,16 @@ func NewServer(ctx context.Context, config Config) (*Server, error) {
 		config.GRPCDialTimeout = defaultGRPCDialTimeout
 	}
 
-	handler := NewHandler()
+	grpcConn, grpcClient, campaignClient, err := dialGRPC(ctx, config)
+	if err != nil {
+		log.Printf("web gRPC dial failed: %v", err)
+	}
+
+	handler := NewHandler(campaignClient)
 	httpServer := &http.Server{
 		Addr:              httpAddr,
 		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
-	}
-
-	grpcConn, grpcClient, err := dialGRPC(ctx, config)
-	if err != nil {
-		log.Printf("web gRPC dial failed: %v", err)
 	}
 
 	return &Server{
@@ -60,6 +62,7 @@ func NewServer(ctx context.Context, config Config) (*Server, error) {
 		grpcAddr:   config.GRPCAddr,
 		grpcConn:   grpcConn,
 		grpcClient: grpcClient,
+		campClient: campaignClient,
 		httpServer: httpServer,
 	}, nil
 }
@@ -107,10 +110,10 @@ func (s *Server) Close() {
 }
 
 // dialGRPC connects to the gRPC server and returns a client.
-func dialGRPC(ctx context.Context, config Config) (*grpc.ClientConn, dualityv1.DualityServiceClient, error) {
+func dialGRPC(ctx context.Context, config Config) (*grpc.ClientConn, dualityv1.DualityServiceClient, campaignv1.CampaignServiceClient, error) {
 	grpcAddr := strings.TrimSpace(config.GRPCAddr)
 	if grpcAddr == "" {
-		return nil, nil, nil
+		return nil, nil, nil, nil
 	}
 	if ctx == nil {
 		ctx = context.Background()
@@ -126,9 +129,10 @@ func dialGRPC(ctx context.Context, config Config) (*grpc.ClientConn, dualityv1.D
 		grpc.WithBlock(),
 	)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	client := dualityv1.NewDualityServiceClient(conn)
-	return conn, client, nil
+	dualityClient := dualityv1.NewDualityServiceClient(conn)
+	campaignClient := campaignv1.NewCampaignServiceClient(conn)
+	return conn, dualityClient, campaignClient, nil
 }
