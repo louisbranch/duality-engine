@@ -43,6 +43,36 @@ use the Make targets documented in `docs/integration-tests.md`:
 
 ------------------------------------------------------------------------
 
+## Where to Put New Features
+
+| Feature Type | Location |
+|--------------|----------|
+| Campaign settings | `internal/state/campaign/` |
+| Player/GM management | `internal/state/participant/` |
+| Character definitions | `internal/state/character/` |
+| Persistent gameplay state | `internal/state/snapshot/` |
+| Session mechanics | `internal/state/session/` |
+| Game-system-specific rules | `internal/systems/{system}/` |
+| Generic dice mechanics | `internal/core/dice/` |
+| gRPC API endpoints | `internal/api/grpc/` |
+| MCP tools | `internal/mcp/tool/` |
+
+------------------------------------------------------------------------
+
+## Adding a New Game System
+
+1. Add enum value to `api/proto/common/v1/game_system.proto`
+2. Create `internal/systems/{name}/` with domain logic
+3. Implement `systems.GameSystem` interface
+4. Create protos in `api/proto/systems/{name}/v1/`
+5. Create gRPC service in `internal/api/grpc/systems/{name}/`
+6. Register MCP tools in `internal/mcp/tool/systems/{name}/`
+7. Add integration tests
+
+See [AGENTS.md](AGENTS.md) for detailed architecture documentation.
+
+------------------------------------------------------------------------
+
 ## Documentation Expectations
 
 - Document exported types and functions.
@@ -55,7 +85,7 @@ use the Make targets documented in `docs/integration-tests.md`:
 ## MCP Tool Changes
 
 When adding a new MCP tool, update the expected tools list in
-`internal/integration/mcp_tools_test.go`.
+`internal/test/integration/fixtures/blackbox_tools_list.json`.
 
 ------------------------------------------------------------------------
 
@@ -64,3 +94,9 @@ When adding a new MCP tool, update the expected tools list in
 - Commit messages use prefixes: `feat:`, `fix:`, `chore:`, `docs:`.
 - Keep PRs small and focused; split unrelated changes.
 - Do not open PRs from branches used by closed or merged PRs.
+
+## PR Checklist
+
+- No direct state writes without emitting events.
+- Added or updated tests for any new mutations.
+- `make integration` passes.

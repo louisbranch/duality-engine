@@ -16,7 +16,7 @@ services:
       init-data:
         condition: service_completed_successfully
     environment:
-      - DUALITY_DB_PATH=/data/duality.db
+      - DUALITY_DB_PATH=/data/fracturing.space.db
     volumes:
       - duality-data:/data
     ports:

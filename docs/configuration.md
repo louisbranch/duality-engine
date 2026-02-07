@@ -2,7 +2,7 @@
 
 ## Environment variables
 
-- `DUALITY_DB_PATH`: file path for the campaign BoltDB store. Default: `data/duality.db`.
+- `DUALITY_DB_PATH`: file path for the campaign SQLite database. Default: `data/fracturing.space.db`.
 - `DUALITY_GRPC_ADDR`: default gRPC address used by the MCP server (when `-addr` is not set) and the web client (when `-grpc-addr` is not set). Defaults to `localhost:8080`.
 - `DUALITY_WEB_ADDR`: HTTP bind address for the web client when `-http-addr` is not set. Defaults to `:8082`.
 - `DUALITY_MCP_ALLOWED_HOSTS`: comma-separated list of allowed Host/Origin values for MCP HTTP transport. Defaults to loopback-only when unset.

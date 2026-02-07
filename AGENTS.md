@@ -1,153 +1,125 @@
 # AGENTS.md
 
-Use the guidance below as the default operating rules for agents working here.
-If the project structure evolves, update this file to match the real tooling.
+Single source of agent directives and project context.
 
-## Scope
-- Applies to the entire repository.
-- If future nested `AGENTS.md` files exist, follow the most specific one.
-- Keep instructions concise and action oriented.
+## Safety
 
-## Quick Start
-- Initialize a Go module with `go mod init <module>`.
-- Keep `go.mod` and `go.sum` in repo root.
-- Prefer Go 1.21+ unless specified otherwise.
+- Never work directly on main; create a feature branch first.
+- Run tests (`make integration`) before committing.
+- Do not commit files containing secrets (.env, credentials).
+- Do not push to closed/merged PR branches; open new ones.
+- Prefer squash merge when enabling auto-merge.
 
-## Build Commands
-- Build all packages: `go build ./...`
-- Build a single package: `go build ./path/to/pkg`
-- Build a single binary (example): `go build -o bin/app ./cmd/app`
-- Verify module tidy: `go mod tidy`
+## Learning Workflow
 
-## Test Commands
-- Run all tests: `go test ./...`
-- Run a single package: `go test ./path/to/pkg`
-- Run a single test by name: `go test ./path/to/pkg -run '^TestName$'`
-- Run subtests by name: `go test ./path/to/pkg -run 'TestName/Subtest'`
-- Run with race detector: `go test -race ./...`
-- Run with coverage: `go test -cover ./...`
-- Run without cache: `go test -count=1 ./...`
+Capture and crystallize learnings to improve future sessions.
 
-## Lint / Format Commands
-- Format all files: `gofmt -w .`
-- Format with goimports (recommended): `goimports -w .`
-- Vet all packages: `go vet ./...`
-- Lint all packages: `golangci-lint run ./...`
-- Lint a single package: `golangci-lint run ./path/to/pkg`
+### Diary Entries (`/diary`)
 
-## Code Organization
-- Put entrypoints in `cmd/web`, `cmd/server`, `cmd/mcp`.
-- Keep shared logic in `internal/` (preferred) or `pkg/`.
-- Keep package names short and descriptive.
-- Keep files focused; split large files by responsibility.
-- Treat the MCP layer as a thin transport wrapper; keep rule validation and game logic in the gRPC server/dice packages.
+At the end of meaningful sessions, use `/diary` to capture:
+- Design decisions and rationale
+- Challenges and solutions
+- Patterns discovered
+- Future considerations
 
-## Imports
-- Group imports: standard library, third-party, local.
-- Use `goimports` to manage import order and pruning.
-- Avoid dot imports.
-- Use alias only when necessary for clarity or conflicts.
+Entries stored in `.ai/memory/diary/`. Skip for trivial sessions.
 
-## Formatting
-- Always run `gofmt` (or `goimports`) on edited files.
-- Keep line length reasonable; break long expressions.
-- Prefer early returns to reduce nesting.
-- Avoid inline `if err := ...` blocks for multi-line bodies; assign the error and check it after unless the block is very small.
+### Reflection (`/reflect`)
 
-## Naming Conventions
-- Use `camelCase` for locals and parameters.
-- Use `PascalCase` for exported identifiers.
-- Use short, meaningful names; avoid cryptic single-letter names except for idiomatic uses (loop indices, receivers, short-lived locals).
-- Name interfaces by behavior (`Reader`, `Store`, `Validator`).
-- Name concrete types by domain (`UserStore`, `OAuthClient`).
+Periodically use `/reflect` to:
+- Analyze accumulated diary entries
+- Identify recurring patterns
+- Propose AGENTS.md updates
 
-## Types and Interfaces
-- Prefer concrete types in APIs; accept interfaces at boundaries.
-- Keep interfaces small and focused.
-- Avoid empty interface (`interface{}`); use `any` only when necessary.
-- Use type aliases sparingly; prefer defined types for clarity.
+## Project Overview
 
-## Error Handling
-- Return errors explicitly; avoid panics for control flow.
-- Wrap errors with `%w` to preserve causes.
-- Use sentinel errors for stable comparisons.
-- Include context in error messages, no trailing punctuation.
-- Prefer `errors.Is` and `errors.As` for checks.
+Fracturing.Space: server-authoritative mechanics and campaign-state service for tabletop RPG campaigns.
+Primary use case is enabling an AI Game Master.
 
-## Logging
-- Use structured logging if a logger exists.
-- Avoid `fmt.Println` in library code.
-- Include useful context fields; avoid dumping large structs.
+Supports multiple game systems (Daggerheart first, with architecture for D&D 5e, VtM, etc.).
 
-## Concurrency
-- Avoid sharing mutable state without synchronization.
-- Prefer context cancellation for goroutines.
-- Use `sync.WaitGroup` to coordinate goroutines.
-- Avoid goroutine leaks; ensure exit paths are clear.
+## Architecture
 
-## Testing Style
-- Use table-driven tests for multiple cases.
-- Name tests `TestXxx` and subtests with `t.Run`.
-- Prefer `t.Helper` for helper functions.
-- Keep tests deterministic; avoid real network calls.
-- Use fake implementations over heavy mocks.
-- When adding a new MCP tool, update the expected tools list in `internal/integration/mcp_tools_test.go` to include the new tool name.
+### Three-Layer Design
 
-## Dependency Management
-- Avoid adding heavy dependencies without justification.
-- Prefer standard library equivalents when possible.
-- Keep `go.mod` tidy and committed.
+- **Transport**: gRPC server (`cmd/server`) + MCP bridge (`cmd/mcp`) + Web UI (`cmd/web`)
+- **Domain**: Game systems (`internal/systems/`) + State management (`internal/state/`)
+- **Storage**: SQLite persistence (`data/fracturing.space.db`)
 
-## Documentation
-- Document exported types and functions.
-- Add module, file, and package comments that explain intent and scope.
-- Document core data structures and methods with the "why" (purpose, lifecycle, consumers), not just what they do.
-- For security-sensitive flows (auth, crypto, token validation), add short rationale comments explaining the threat being mitigated.
-- Keep README short and task focused.
-- Document env vars in `README` or `docs/`.
-- Update `docs/` when user-facing features, MCP tools, or configuration change.
-- Keep `docs/index.md` and README links current as documentation grows.
+MCP is a thin transport wrapper; all rules and state logic live in gRPC/domain packages.
 
-### Documentation Checklist (all code changes)
-- Add/update doc comments for any new or modified identifiers (exported or not).
-- Ensure package or file comments exist when adding new files or packages.
-- Capture behavior or lifecycle changes in existing docs (comments or README) when code changes alter intent.
+### State Management Model
 
-### Documentation Self-Check (before commit)
-- Review touched files for missing doc comments and add why/intent where needed.
+Game state is organized into three tiers by change frequency:
 
-## Security
-- Validate input at boundaries.
-- Avoid `exec.Command` with user input.
-- Use `context` with timeouts for external calls.
-- When editing auth/crypto flows, add a brief function-level intent comment plus an inline rationale comment at non-obvious checks.
+| Layer | Subpackages | Changes | Contents |
+|-------|-------------|---------|----------|
+| **Campaign** (Config) | `state/campaign/`, `state/participant/`, `state/character/` | Setup time | Name, system, GM mode, participants, character profiles |
+| **Snapshot** (Continuity) | `state/snapshot/` | Between sessions | Character state (HP, Hope, Stress), GM Fear, progress |
+| **Session** (Gameplay) | `state/session/` | Every action | Active session, events, rolls, outcomes |
 
-## Cursor / Copilot Rules
-- No `.cursor/rules`, `.cursorrules`, or `.github/copilot-instructions.md` found.
-- If added later, incorporate their rules here.
+### Game System Architecture
 
-## Agent Workflow
-- Always create or switch to a new branch before making changes; never work directly on main.
-- If you are not on a prefixed work branch (for example: `feat/`, `fix/`, `chore/`, `docs/`), stop and switch before editing files.
-- Use branch prefixes: `feat/<name>`, `fix/<name>`, `chore/<name>`, `docs/<name>`.
-- Use commit prefixes: `feat:`, `fix:`, `chore:`, `docs:` with a short why-focused subject.
-- Match PR titles to the same prefix style (example: `feat: add duality outcome tool`).
-- Prefer small, focused changes per request.
-- Keep one intent per PR; split unrelated changes.
-- Avoid reformatting unrelated code.
-- Do not introduce new files unless required.
-- Do not push new commits to branches from closed or merged PRs; open a new branch and PR instead.
-- Mention any missing tests or tooling in summaries.
-- Run `go test ./...` when a task is complete.
-- If tests pass, create a commit unless the user says otherwise.
-- PR bodies do not need a testing section mentioning `go test ./...`.
-- Always use squash when enabling PR auto-merge.
+- Each game system is a plugin under `internal/systems/`.
+- Game system gRPC services live in `internal/api/grpc/systems/{name}/`.
+- Systems are registered at startup and campaigns are bound to one system at creation.
 
-## Versioning
-- Follow semantic versioning if releases are introduced.
-- Tag releases in git if requested.
+### Key Packages
 
-## Future Updates
-- Update commands once a build system is chosen.
-- Add CI references when available.
-- Extend sections for database, API, or frontend code.
+| Package | Responsibility |
+|---------|----------------|
+| `internal/core/dice/` | Generic dice rolling primitives |
+| `internal/core/check/` | Difficulty check primitives |
+| `internal/core/random/` | Cryptographic seed generation |
+| `internal/systems/daggerheart/` | Daggerheart/Duality dice mechanics |
+| `internal/state/campaign/` | Campaign configuration and lifecycle |
+| `internal/state/participant/` | Player and GM management |
+| `internal/state/character/` | Character profiles and controllers |
+| `internal/state/snapshot/` | Cross-session continuity (char state, GM fear) |
+| `internal/state/session/` | Session lifecycle and events |
+| `internal/api/grpc/` | gRPC service implementations |
+| `internal/mcp/` | MCP tool/resource handlers |
+| `internal/storage/` | Persistence interfaces |
+| `internal/telemetry/` | Events and metrics (placeholder) |
+
+### Proto Structure
+
+```
+api/proto/
+├── common/v1/               # Shared types (RNG, GameSystem enum)
+├── state/v1/                # System-agnostic state management
+│   ├── campaign.proto       # Campaign + CampaignService
+│   ├── session.proto        # Session + SessionService
+│   ├── snapshot.proto       # Snapshot + SnapshotService
+│   ├── participant.proto
+│   └── character.proto
+└── systems/daggerheart/v1/  # Daggerheart mechanics
+    ├── mechanics.proto      # Duality dice, outcomes
+    └── service.proto        # DaggerheartService
+```
+
+## Verification
+
+Run `make integration` after changes (covers full gRPC + MCP + storage path).
+
+```bash
+make test        # Unit tests
+make integration # Integration tests
+make proto       # Regenerate proto code
+```
+
+## Skills
+
+Load the relevant skill when working in these areas:
+
+Skills live in `.ai/skills/` (with a symlink at `.claude/skills/` for tool compatibility).
+
+- `workflow`: Git branching, commits, and PR conventions.
+- `go-style`: Go conventions, build commands, naming, error handling patterns.
+- `error-handling`: Structured errors and i18n-friendly messaging workflow.
+- `schema`: Database migrations and proto field ordering rules.
+- `game-system`: Steps and checklists for adding a new game system.
+- `mcp`: MCP tool/resource guidance and parity rules with gRPC.
+- `web-server`: Web UI and transport layer conventions.
+- `diary`: Capture session learnings.
+- `reflect`: Analyze diaries and update agent guidance.
