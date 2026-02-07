@@ -1,0 +1,155 @@
+package templates
+
+import "fmt"
+import "strconv"
+
+// EventLogFullPage renders the event log in the base layout.
+templ EventLogFullPage(view EventLogView) {
+	@Layout("Events - Fracturing.Space", "Campaigns") {
+		@EventLogPage(view)
+	}
+}
+
+// EventLogPage renders the event log content.
+templ EventLogPage(view EventLogView) {
+	<h2>{view.CampaignName}</h2>
+	@CampaignSubNav(view.CampaignID, "events")
+	<h3>Event Log</h3>
+	<p>{ strconv.Itoa(int(view.TotalCount)) } events</p>
+	@EventFilterForm(view.CampaignID, view.SessionID, view.Filters)
+	<div id="event-timeline-container">
+		@EventTimelineContent(view)
+	</div>
+}
+
+// EventFilterForm renders the filter controls for events.
+templ EventFilterForm(campaignID string, sessionID string, filters EventFilterOptions) {
+	<form
+		class="border"
+		hx-get={ "/campaigns/" + campaignID + "/events/table" }
+		hx-target="#event-timeline-container"
+		hx-swap="innerHTML"
+		hx-trigger="change from:select, change from:input[type=date]"
+	>
+		<div class="row">
+			<div class="sm-6 md-3 col">
+				<label for="event_type">Event Type</label>
+				<select id="event_type" name="event_type">
+					for _, opt := range GetEventTypeOptions(filters.EventType) {
+						<option value={ opt.Value } selected?={ opt.Current }>{ opt.Label }</option>
+					}
+				</select>
+			</div>
+			<div class="sm-6 md-3 col">
+				<label for="actor_type">Actor Type</label>
+				<select id="actor_type" name="actor_type">
+					for _, opt := range GetActorTypeOptions(filters.ActorType) {
+						<option value={ opt.Value } selected?={ opt.Current }>{ opt.Label }</option>
+					}
+				</select>
+			</div>
+			<div class="sm-6 md-3 col">
+				<label for="entity_type">Entity Type</label>
+				<select id="entity_type" name="entity_type">
+					for _, opt := range GetEntityTypeOptions(filters.EntityType) {
+						<option value={ opt.Value } selected?={ opt.Current }>{ opt.Label }</option>
+					}
+				</select>
+			</div>
+			<div class="sm-6 md-3 col">
+				<label for="start_date">From Date</label>
+				<input type="date" id="start_date" name="start_date" value={ filters.StartDate }/>
+			</div>
+			<div class="sm-6 md-3 col">
+				<label for="end_date">To Date</label>
+				<input type="date" id="end_date" name="end_date" value={ filters.EndDate }/>
+			</div>
+		</div>
+	</form>
+}
+
+// EventTimelineContent renders the event timeline with pagination.
+templ EventTimelineContent(view EventLogView) {
+	if len(view.Events) == 0 {
+		@EmptyState("No events found")
+	} else {
+		<table>
+			<thead>
+				<tr>
+					<th>Event</th>
+					<th>Actor</th>
+					<th>Entity</th>
+					<th>Time</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, event := range view.Events {
+					@EventTableRow(event)
+				}
+			</tbody>
+		</table>
+		@Pagination(view.NextToken, view.PrevToken, "/campaigns/"+view.CampaignID+"/events")
+	}
+}
+
+// EventTableRow renders a single event row in a table.
+templ EventTableRow(event EventRow) {
+	<tr id={ "event-" + fmt.Sprintf("%d", event.Seq) }>
+		<td><strong>{ event.TypeDisplay }</strong></td>
+		<td>
+			if event.ActorName != "" {
+				<small>{ event.ActorType }:</small> { event.ActorName }
+			}
+		</td>
+		<td>
+			if event.EntityName != "" {
+				<small>{ event.EntityType }:</small> { event.EntityName }
+			}
+		</td>
+		<td><small>{ event.Timestamp }</small></td>
+	</tr>
+	if event.PayloadJSON != "" && event.PayloadJSON != "{}" && event.PayloadJSON != "null" {
+		<tr class="payload-row">
+			<td colspan="4">
+				<details>
+					<summary><small>payload</small></summary>
+					<pre><code>{ event.PayloadJSON }</code></pre>
+				</details>
+			</td>
+		</tr>
+	}
+}
+
+// EventTimeline renders a simple event timeline (for embedding in other pages).
+templ EventTimeline(events []EventRow, campaignID string) {
+	if len(events) == 0 {
+		@EmptyState("No events yet")
+	} else {
+		<table>
+			<thead>
+				<tr>
+					<th>Event</th>
+					<th>Time</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, event := range events {
+					<tr>
+						<td>{ event.TypeDisplay }</td>
+						<td><small>{ event.Timestamp }</small></td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	}
+}
+
+// EventTimelineItem renders a single event in the timeline (legacy, used by sessions).
+templ EventTimelineItem(event EventRow, campaignID string) {
+	@EventTableRow(event)
+}
+
+// EventLogTableContent renders just the event table content (for HTMX updates).
+templ EventLogTableContent(view EventLogView) {
+	@EventTimelineContent(view)
+}

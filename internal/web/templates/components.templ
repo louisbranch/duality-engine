@@ -1,0 +1,170 @@
+package templates
+
+// TopNav renders the top navigation bar using PaperCSS split-nav.
+templ TopNav(activePage string) {
+	<nav class="split-nav border fixed">
+		<div class="nav-brand">
+			<h3><a href="/">Fracturing.Space</a></h3>
+		</div>
+		<div class="collapsible">
+			<input id="nav-collapsible" type="checkbox" name="nav-collapsible">
+			<label for="nav-collapsible">
+				<div class="bar1"></div>
+				<div class="bar2"></div>
+				<div class="bar3"></div>
+			</label>
+			<div class="collapsible-body">
+				<ul class="inline">
+					<li>
+						<a
+							href="/"
+							hx-get="/"
+							hx-target="#main"
+							hx-swap="innerHTML"
+							hx-push-url="true"
+							if activePage == "Dashboard" {
+								class="active"
+							}
+						>Dashboard</a>
+					</li>
+					<li>
+						<a
+							href="/campaigns"
+							hx-get="/campaigns"
+							hx-target="#main"
+							hx-swap="innerHTML"
+							hx-push-url="true"
+							if activePage == "Campaigns" {
+								class="active"
+							}
+						>Campaigns</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+}
+
+// CampaignSubNav renders the sub-navigation for campaign detail pages using PaperCSS tabs.
+templ CampaignSubNav(campaignID string, activePage string) {
+	<div class="row flex-spaces tabs">
+		<input
+			id="tab-overview"
+			type="radio"
+			name="campaign-tabs"
+			if activePage == "overview" {
+				checked
+			}
+			hx-get={ "/campaigns/" + campaignID }
+			hx-target="#main"
+			hx-swap="innerHTML"
+			hx-push-url={ "/campaigns/" + campaignID }
+		/>
+		<label for="tab-overview">Overview</label>
+		<input
+			id="tab-sessions"
+			type="radio"
+			name="campaign-tabs"
+			if activePage == "sessions" {
+				checked
+			}
+			hx-get={ "/campaigns/" + campaignID + "/sessions" }
+			hx-target="#main"
+			hx-swap="innerHTML"
+			hx-push-url={ "/campaigns/" + campaignID + "/sessions" }
+		/>
+		<label for="tab-sessions">Sessions</label>
+		<input
+			id="tab-characters"
+			type="radio"
+			name="campaign-tabs"
+			if activePage == "characters" {
+				checked
+			}
+			hx-get={ "/campaigns/" + campaignID + "/characters" }
+			hx-target="#main"
+			hx-swap="innerHTML"
+			hx-push-url={ "/campaigns/" + campaignID + "/characters" }
+		/>
+		<label for="tab-characters">Characters</label>
+		<input
+			id="tab-participants"
+			type="radio"
+			name="campaign-tabs"
+			if activePage == "participants" {
+				checked
+			}
+			hx-get={ "/campaigns/" + campaignID + "/participants" }
+			hx-target="#main"
+			hx-swap="innerHTML"
+			hx-push-url={ "/campaigns/" + campaignID + "/participants" }
+		/>
+		<label for="tab-participants">Participants</label>
+		<input
+			id="tab-events"
+			type="radio"
+			name="campaign-tabs"
+			if activePage == "events" {
+				checked
+			}
+			hx-get={ "/campaigns/" + campaignID + "/events" }
+			hx-target="#main"
+			hx-swap="innerHTML"
+			hx-push-url={ "/campaigns/" + campaignID + "/events" }
+		/>
+		<label for="tab-events">Events</label>
+	</div>
+}
+
+// StatCard renders a dashboard stat card using PaperCSS card.
+templ StatCard(label string, value string, icon string) {
+	<div class="card">
+		<div class="card-body">
+			<h4 class="card-title">{value}</h4>
+			<p class="card-text">{label}</p>
+		</div>
+	</div>
+}
+
+// StatusBadge renders a colored status badge using PaperCSS badge.
+templ StatusBadge(status string, variant string) {
+	<span class={ "badge", variant }>{status}</span>
+}
+
+// EmptyState renders a centered empty state message.
+templ EmptyState(message string) {
+	<p class="text-center muted">{message}</p>
+}
+
+// LoadingSpinner renders a loading message.
+templ LoadingSpinner() {
+	<p>Loading...</p>
+}
+
+// Pagination renders prev/next navigation controls using PaperCSS buttons.
+templ Pagination(nextToken string, prevToken string, baseURL string) {
+	<div class="row flex-center margin-top">
+		if prevToken != "" {
+			<a
+				href={ templ.SafeURL(baseURL + "?page_token=" + prevToken) }
+				hx-get={ baseURL + "?page_token=" + prevToken }
+				hx-target="#main"
+				hx-swap="innerHTML"
+				class="paper-btn btn-small margin-right"
+			>Previous</a>
+		} else {
+			<button class="btn-small margin-right" disabled>Previous</button>
+		}
+		if nextToken != "" {
+			<a
+				href={ templ.SafeURL(baseURL + "?page_token=" + nextToken) }
+				hx-get={ baseURL + "?page_token=" + nextToken }
+				hx-target="#main"
+				hx-swap="innerHTML"
+				class="paper-btn btn-small"
+			>Next</a>
+		} else {
+			<button class="btn-small" disabled>Next</button>
+		}
+	</div>
+}

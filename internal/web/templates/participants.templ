@@ -1,0 +1,55 @@
+package templates
+
+// ParticipantsListFullPage renders the participants list in the base layout.
+templ ParticipantsListFullPage(campaignID string, campaignName string) {
+	@Layout("Participants - Fracturing.Space", "Campaigns") {
+		@ParticipantsListPage(campaignID, campaignName)
+	}
+}
+
+// ParticipantsListPage renders the participants list content.
+templ ParticipantsListPage(campaignID string, campaignName string) {
+	<h2>{campaignName}</h2>
+	@CampaignSubNav(campaignID, "participants")
+	<h3>Participants</h3>
+	@ParticipantsLoading(campaignID)
+}
+
+// ParticipantsLoading renders the HTMX loading placeholder.
+templ ParticipantsLoading(campaignID string) {
+	<div
+		hx-get={ "/campaigns/" + campaignID + "/participants/table" }
+		hx-trigger="load"
+		hx-swap="outerHTML"
+	>
+		<p>Loading participants...</p>
+	</div>
+}
+
+// ParticipantsTable renders the participants table.
+templ ParticipantsTable(rows []ParticipantRow, message string) {
+	if len(rows) == 0 {
+		@EmptyState(message)
+	} else {
+		<table>
+			<thead>
+				<tr>
+					<th>Display Name</th>
+					<th>Role</th>
+					<th>Controller</th>
+					<th>Created</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, row := range rows {
+					<tr>
+						<td>{row.DisplayName}</td>
+						<td>@StatusBadge(row.Role, row.RoleVariant)</td>
+						<td>@StatusBadge(row.Controller, row.ControllerVariant)</td>
+						<td>{row.CreatedDate}</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	}
+}

@@ -1,0 +1,159 @@
+package templates
+
+// CampaignsFullPage renders campaigns content in the base layout.
+templ CampaignsFullPage() {
+	@Layout("Campaigns - Fracturing.Space", "Campaigns") {
+		@CampaignsPage()
+	}
+}
+
+// CampaignsPage renders the campaigns page content.
+templ CampaignsPage() {
+	<h2>Campaigns</h2>
+	@CampaignsLoading()
+}
+
+// CampaignsLoading renders the HTMX loading placeholder.
+templ CampaignsLoading() {
+	<div hx-get="/campaigns/table" hx-trigger="load" hx-swap="outerHTML">
+		<p>Loading campaigns...</p>
+	</div>
+}
+
+// CampaignsTable renders a campaigns table or a message when empty.
+templ CampaignsTable(rows []CampaignRow, message string) {
+	<table class="table-hover">
+		<thead>
+			<tr>
+				<th>Campaign</th>
+				<th>System</th>
+				<th>GM Mode</th>
+				<th>Participants</th>
+				<th>Characters</th>
+				<th>Created</th>
+			</tr>
+		</thead>
+		<tbody>
+			if len(rows) == 0 {
+				<tr>
+					<td colspan="6">{message}</td>
+				</tr>
+			}
+			for _, row := range rows {
+				<tr>
+					<td>
+						<a
+							href={"/campaigns/" + row.ID}
+							hx-get={"/campaigns/" + row.ID}
+							hx-target="#main"
+							hx-swap="innerHTML"
+							hx-push-url="true"
+						>{row.Name}</a>
+					</td>
+					<td>{row.System}</td>
+					<td>{row.GMMode}</td>
+					<td>{row.ParticipantCount}</td>
+					<td>{row.CharacterCount}</td>
+					<td>{row.CreatedDate}</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+// CampaignDetailPage renders a single campaign with sub navigation.
+templ CampaignDetailPage(detail CampaignDetail, message string) {
+	if message != "" {
+		<h2>Campaign</h2>
+		<p>{message}</p>
+	} else {
+		<h2>{detail.Name}</h2>
+		@CampaignSubNav(detail.ID, "overview")
+		@CampaignOverviewTab(detail)
+	}
+}
+
+// CampaignOverviewTab renders the campaign overview content.
+templ CampaignOverviewTab(detail CampaignDetail) {
+	<div class="row">
+		<div class="sm-12 md-6 col">
+			<h3>Campaign Info</h3>
+			<table>
+				<tbody>
+					<tr><td><strong>ID</strong></td><td><code>{detail.ID}</code></td></tr>
+					<tr><td><strong>Name</strong></td><td>{detail.Name}</td></tr>
+					<tr><td><strong>System</strong></td><td>{detail.System}</td></tr>
+					<tr><td><strong>GM Mode</strong></td><td>{detail.GMMode}</td></tr>
+					<tr><td><strong>Theme Prompt</strong></td><td>{detail.ThemePrompt}</td></tr>
+					<tr><td><strong>Created</strong></td><td>{detail.CreatedAt}</td></tr>
+					<tr><td><strong>Updated</strong></td><td>{detail.UpdatedAt}</td></tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="sm-12 md-6 col">
+			<h3>Quick Stats</h3>
+			<div class="row">
+				<div class="col-6 col">
+					@StatCard("Participants", detail.ParticipantCount, "")
+				</div>
+				<div class="col-6 col">
+					@StatCard("Characters", detail.CharacterCount, "")
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+// CampaignSessionsLoading renders the HTMX loading placeholder for sessions.
+templ CampaignSessionsLoading(campaignID string) {
+	<div
+		hx-get={"/campaigns/" + campaignID + "/sessions"}
+		hx-trigger="load"
+		hx-swap="outerHTML"
+	>
+		<p>Loading sessions...</p>
+	</div>
+}
+
+// CampaignSessionsList renders the list of sessions for a campaign.
+templ CampaignSessionsList(rows []CampaignSessionRow, message string) {
+	if len(rows) == 0 {
+		@EmptyState(message)
+	} else {
+		<table class="table-hover">
+			<thead>
+				<tr>
+					<th>Session</th>
+					<th>Status</th>
+					<th>Started</th>
+					<th>Ended</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, row := range rows {
+					<tr>
+						<td>
+							<a
+								href={ templ.SafeURL("/campaigns/" + row.CampaignID + "/sessions/" + row.ID) }
+								hx-get={ "/campaigns/" + row.CampaignID + "/sessions/" + row.ID }
+								hx-target="#main"
+								hx-swap="innerHTML"
+								hx-push-url="true"
+							>{row.Name}</a>
+						</td>
+						<td>@StatusBadge(row.Status, row.StatusBadge)</td>
+						<td>{row.StartedAt}</td>
+						<td>{row.EndedAt}</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	}
+}
+
+// CampaignDetailFullPage renders campaign detail content in the base layout.
+templ CampaignDetailFullPage(detail CampaignDetail, message string) {
+	@Layout("Campaign - Fracturing.Space", "Campaigns") {
+		@CampaignDetailPage(detail, message)
+	}
+}

@@ -1,0 +1,136 @@
+package templates
+
+// CharactersListFullPage renders the characters list in the base layout.
+templ CharactersListFullPage(campaignID string, campaignName string) {
+	@Layout("Characters - Fracturing.Space", "Campaigns") {
+		@CharactersListPage(campaignID, campaignName)
+	}
+}
+
+// CharactersListPage renders the characters list content.
+templ CharactersListPage(campaignID string, campaignName string) {
+	<h2>{campaignName}</h2>
+	@CampaignSubNav(campaignID, "characters")
+	<h3>Characters</h3>
+	@CharactersLoading(campaignID)
+}
+
+// CharactersLoading renders the HTMX loading placeholder.
+templ CharactersLoading(campaignID string) {
+	<div
+		hx-get={ "/campaigns/" + campaignID + "/characters/table" }
+		hx-trigger="load"
+		hx-swap="outerHTML"
+	>
+		<p>Loading characters...</p>
+	</div>
+}
+
+// CharactersTable renders the characters table.
+templ CharactersTable(rows []CharacterRow, message string) {
+	if len(rows) == 0 {
+		@EmptyState(message)
+	} else {
+		<table class="table-hover">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Kind</th>
+					<th>Controller</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, row := range rows {
+					<tr>
+						<td>
+							<a
+								href={ templ.SafeURL("/campaigns/" + row.CampaignID + "/characters/" + row.ID) }
+								hx-get={ "/campaigns/" + row.CampaignID + "/characters/" + row.ID }
+								hx-target="#main"
+								hx-swap="innerHTML"
+								hx-push-url="true"
+							>{row.Name}</a>
+						</td>
+						<td>@StatusBadge(row.Kind, "secondary")</td>
+						<td>{row.Controller}</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	}
+}
+
+// CharacterSheetFullPage renders the character sheet in the base layout.
+templ CharacterSheetFullPage(sheet CharacterSheetView) {
+	@Layout(sheet.Character.GetName() + " - Fracturing.Space", "Campaigns") {
+		@CharacterSheetPage(sheet)
+	}
+}
+
+// CharacterSheetPage renders the character sheet content.
+templ CharacterSheetPage(sheet CharacterSheetView) {
+	<ul class="breadcrumb">
+		<li>
+			<a
+				href="/campaigns"
+				hx-get="/campaigns"
+				hx-target="#main"
+				hx-swap="innerHTML"
+				hx-push-url="true"
+			>Campaigns</a>
+		</li>
+		<li>
+			<a
+				href={ templ.SafeURL("/campaigns/" + sheet.CampaignID) }
+				hx-get={ "/campaigns/" + sheet.CampaignID }
+				hx-target="#main"
+				hx-swap="innerHTML"
+				hx-push-url="true"
+			>{sheet.CampaignName}</a>
+		</li>
+		<li>
+			<a
+				href={ templ.SafeURL("/campaigns/" + sheet.CampaignID + "/characters") }
+				hx-get={ "/campaigns/" + sheet.CampaignID + "/characters" }
+				hx-target="#main"
+				hx-swap="innerHTML"
+				hx-push-url="true"
+			>Characters</a>
+		</li>
+		<li>{sheet.Character.GetName()}</li>
+	</ul>
+	<h2>{sheet.Character.GetName()}</h2>
+	<h3>Character Info</h3>
+	<table>
+		<tbody>
+			<tr><td><strong>ID</strong></td><td><code>{sheet.Character.GetId()}</code></td></tr>
+			<tr><td><strong>Name</strong></td><td>{sheet.Character.GetName()}</td></tr>
+			<tr><td><strong>Kind</strong></td><td>@StatusBadge(formatCharacterKind(sheet.Character.GetKind()), "secondary")</td></tr>
+			<tr><td><strong>Controller</strong></td><td>{sheet.Controller}</td></tr>
+			if sheet.Character.GetNotes() != "" {
+				<tr><td><strong>Notes</strong></td><td>{sheet.Character.GetNotes()}</td></tr>
+			}
+			<tr><td><strong>Created</strong></td><td>{sheet.CreatedAt}</td></tr>
+			<tr><td><strong>Updated</strong></td><td>{sheet.UpdatedAt}</td></tr>
+		</tbody>
+	</table>
+	if len(sheet.RecentEvents) > 0 {
+		<h3>Recent Activity</h3>
+		<table>
+			<thead>
+				<tr>
+					<th>Event</th>
+					<th>Time</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, event := range sheet.RecentEvents {
+					<tr>
+						<td>{event.Type}</td>
+						<td><small>{event.Timestamp}</small></td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	}
+}

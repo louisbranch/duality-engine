@@ -1,0 +1,122 @@
+package templates
+
+import "strconv"
+
+// SessionsListFullPage renders the sessions list in the base layout.
+templ SessionsListFullPage(campaignID string, campaignName string) {
+	@Layout("Sessions - Fracturing.Space", "Campaigns") {
+		@SessionsListPage(campaignID, campaignName)
+	}
+}
+
+// SessionsListPage renders the sessions list content.
+templ SessionsListPage(campaignID string, campaignName string) {
+	<h2>{campaignName}</h2>
+	@CampaignSubNav(campaignID, "sessions")
+	<h3>Sessions</h3>
+	@SessionsLoading(campaignID)
+}
+
+// SessionsLoading renders the HTMX loading placeholder for sessions.
+templ SessionsLoading(campaignID string) {
+	<div
+		hx-get={"/campaigns/" + campaignID + "/sessions/table"}
+		hx-trigger="load"
+		hx-swap="outerHTML"
+	>
+		<p>Loading sessions...</p>
+	</div>
+}
+
+// SessionDetailFullPage renders the session detail in the base layout.
+templ SessionDetailFullPage(session SessionDetail) {
+	@Layout(session.Name + " - Fracturing.Space", "Campaigns") {
+		@SessionDetailPage(session)
+	}
+}
+
+// SessionDetailPage renders the session detail content.
+templ SessionDetailPage(session SessionDetail) {
+	<ul class="breadcrumb">
+		<li>
+			<a
+				href="/campaigns"
+				hx-get="/campaigns"
+				hx-target="#main"
+				hx-swap="innerHTML"
+				hx-push-url="true"
+			>Campaigns</a>
+		</li>
+		<li>
+			<a
+				href={ templ.SafeURL("/campaigns/" + session.CampaignID) }
+				hx-get={ "/campaigns/" + session.CampaignID }
+				hx-target="#main"
+				hx-swap="innerHTML"
+				hx-push-url="true"
+			>{session.CampaignName}</a>
+		</li>
+		<li>{session.Name}</li>
+	</ul>
+	<h2>{session.Name}</h2>
+	<div class="row">
+		<div class="sm-12 md-6 col">
+			<h3>Session Info</h3>
+			<table>
+				<tbody>
+					<tr><td><strong>ID</strong></td><td><code>{session.ID}</code></td></tr>
+					<tr><td><strong>Name</strong></td><td>{session.Name}</td></tr>
+					<tr><td><strong>Status</strong></td><td>@StatusBadge(session.Status, session.StatusBadge)</td></tr>
+					<tr><td><strong>Started</strong></td><td>{session.StartedAt}</td></tr>
+					if session.EndedAt != "" {
+						<tr><td><strong>Ended</strong></td><td>{session.EndedAt}</td></tr>
+					}
+					<tr><td><strong>Events</strong></td><td>{ strconv.Itoa(int(session.EventCount)) }</td></tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="sm-12 md-6 col">
+			<h3>Event Timeline</h3>
+			<div id="session-events">
+				@SessionEventsLoading(session.CampaignID, session.ID)
+			</div>
+		</div>
+	</div>
+}
+
+// SessionEventsLoading renders the HTMX loading placeholder for session events.
+templ SessionEventsLoading(campaignID string, sessionID string) {
+	<div
+		hx-get={ "/campaigns/" + campaignID + "/sessions/" + sessionID + "/events" }
+		hx-trigger="load"
+		hx-swap="outerHTML"
+	>
+		<p>Loading events...</p>
+	</div>
+}
+
+// SessionEventsContent renders the events timeline for a session.
+templ SessionEventsContent(session SessionDetail) {
+	if len(session.Events) == 0 {
+		@EmptyState("No events in this session")
+	} else {
+		<table>
+			<thead>
+				<tr>
+					<th>Event</th>
+					<th>Actor</th>
+					<th>Entity</th>
+					<th>Time</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, event := range session.Events {
+					@EventTableRow(event)
+				}
+			</tbody>
+		</table>
+		if session.NextToken != "" || session.PrevToken != "" {
+			@Pagination(session.NextToken, session.PrevToken, "/campaigns/"+session.CampaignID+"/sessions/"+session.ID+"/events")
+		}
+	}
+}
