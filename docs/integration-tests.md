@@ -3,7 +3,7 @@
 ## Overview
 
 Integration tests exercise the full request path through the gRPC server, MCP
-bridge, and BoltDB storage using real processes and transports. These tests are
+bridge, and SQLite storage using real processes and transports. These tests are
 meant to increase trust in end-to-end behavior and backward compatibility.
 
 ## Goals
@@ -29,7 +29,7 @@ meant to increase trust in end-to-end behavior and backward compatibility.
 ## Scenario Fixture Format
 
 Blackbox tests load action-focused scenario fixtures from
-`internal/integration/fixtures/blackbox_*.json`. Each fixture describes human
+`internal/test/integration/fixtures/blackbox_*.json`. Each fixture describes human
 actions (initialize, subscribe, tool calls, resource reads) and the loader
 expands them into JSON-RPC requests with IDs, jsonrpc version, and optional
 expectations. This keeps scenarios readable while still validating protocol
