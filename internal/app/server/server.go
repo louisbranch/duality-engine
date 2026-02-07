@@ -152,7 +152,7 @@ func (s *Server) Serve(ctx context.Context) error {
 }
 
 func openCampaignStore() (storage.Store, error) {
-	path := os.Getenv("DUALITY_DB_PATH")
+	path := os.Getenv("FRACTURING_SPACE_DB_PATH")
 	if path == "" {
 		path = filepath.Join("data", "fracturing.space.db")
 	}

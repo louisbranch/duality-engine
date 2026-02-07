@@ -12,28 +12,28 @@ import (
 )
 
 // RequestIDHeader is the gRPC metadata key for request correlation IDs.
-const RequestIDHeader = "x-duality-request-id"
+const RequestIDHeader = "x-fracturing-space-request-id"
 
 // InvocationIDHeader is the gRPC metadata key for MCP tool invocation IDs.
-const InvocationIDHeader = "x-duality-invocation-id"
+const InvocationIDHeader = "x-fracturing-space-invocation-id"
 
 // ParticipantIDHeader is the gRPC metadata key for caller identity hints.
-const ParticipantIDHeader = "x-duality-participant-id"
+const ParticipantIDHeader = "x-fracturing-space-participant-id"
 
 // CampaignIDHeader is the gRPC metadata key for campaign routing hints.
-const CampaignIDHeader = "x-duality-campaign-id"
+const CampaignIDHeader = "x-fracturing-space-campaign-id"
 
 // SessionIDHeader is the gRPC metadata key for session routing hints.
-const SessionIDHeader = "x-duality-session-id"
+const SessionIDHeader = "x-fracturing-space-session-id"
 
 // contextKey stores metadata values in context.
 type contextKey string
 
 const (
 	// requestIDContextKey stores the request ID in context.
-	requestIDContextKey contextKey = "duality-request-id"
+	requestIDContextKey contextKey = "fracturing-space-request-id"
 	// invocationIDContextKey stores the invocation ID in context.
-	invocationIDContextKey contextKey = "duality-invocation-id"
+	invocationIDContextKey contextKey = "fracturing-space-invocation-id"
 )
 
 // RequestIDFromContext returns the request ID stored in context.

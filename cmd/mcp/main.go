@@ -13,8 +13,8 @@ import (
 
 // main starts the MCP server on stdio or HTTP.
 func main() {
-	addrDefault := getenvDefault("DUALITY_GRPC_ADDR", "localhost:8080")
-	httpAddrDefault := getenvDefault("DUALITY_MCP_HTTP_ADDR", "localhost:8081")
+	addrDefault := getenvDefault("FRACTURING_SPACE_GRPC_ADDR", "localhost:8080")
+	httpAddrDefault := getenvDefault("FRACTURING_SPACE_MCP_HTTP_ADDR", "localhost:8081")
 	addrFlag := flag.String("addr", addrDefault, "gRPC server address")
 	httpAddrFlag := flag.String("http-addr", httpAddrDefault, "HTTP server address (for HTTP transport)")
 	transportFlag := flag.String("transport", "stdio", "Transport type: stdio or http")

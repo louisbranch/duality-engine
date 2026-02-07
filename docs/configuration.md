@@ -2,11 +2,11 @@
 
 ## Environment variables
 
-- `DUALITY_DB_PATH`: file path for the campaign SQLite database. Default: `data/fracturing.space.db`.
-- `DUALITY_GRPC_ADDR`: default gRPC address used by the MCP server (when `-addr` is not set) and the web client (when `-grpc-addr` is not set). Defaults to `localhost:8080`.
-- `DUALITY_WEB_ADDR`: HTTP bind address for the web client when `-http-addr` is not set. Defaults to `:8082`.
-- `DUALITY_MCP_ALLOWED_HOSTS`: comma-separated list of allowed Host/Origin values for MCP HTTP transport. Defaults to loopback-only when unset.
-- `DUALITY_MCP_HTTP_ADDR`: HTTP bind address for MCP transport when using HTTP and `-http-addr` is not set. Defaults to `0.0.0.0:8081`.
+- `FRACTURING_SPACE_DB_PATH`: file path for the campaign SQLite database. Default: `data/fracturing.space.db`.
+- `FRACTURING_SPACE_GRPC_ADDR`: default gRPC address used by the MCP server (when `-addr` is not set) and the web client (when `-grpc-addr` is not set). Defaults to `localhost:8080`.
+- `FRACTURING_SPACE_WEB_ADDR`: HTTP bind address for the web client when `-http-addr` is not set. Defaults to `:8082`.
+- `FRACTURING_SPACE_MCP_ALLOWED_HOSTS`: comma-separated list of allowed Host/Origin values for MCP HTTP transport. Defaults to loopback-only when unset.
+- `FRACTURING_SPACE_MCP_HTTP_ADDR`: HTTP bind address for MCP transport when using HTTP and `-http-addr` is not set. Defaults to `0.0.0.0:8081`.
 
 ## MCP Server Configuration
 
@@ -22,8 +22,8 @@ The MCP server (`cmd/mcp`) accepts the following flags:
 
 ### Address Overrides
 
-The MCP server accepts flags for gRPC and HTTP addresses. If `DUALITY_GRPC_ADDR`
-or `DUALITY_MCP_HTTP_ADDR` are set, they provide defaults when the matching flag
+The MCP server accepts flags for gRPC and HTTP addresses. If `FRACTURING_SPACE_GRPC_ADDR`
+or `FRACTURING_SPACE_MCP_HTTP_ADDR` are set, they provide defaults when the matching flag
 is omitted. Command-line flags take precedence over env values.
 
 ### Transport Selection
@@ -43,6 +43,6 @@ The web client (`cmd/web`) accepts the following flags:
 
 ### Address Overrides
 
-The web client accepts flags for gRPC and HTTP addresses. If `DUALITY_WEB_ADDR`
-or `DUALITY_GRPC_ADDR` are set, they provide defaults when the matching flag is
+The web client accepts flags for gRPC and HTTP addresses. If `FRACTURING_SPACE_WEB_ADDR`
+or `FRACTURING_SPACE_GRPC_ADDR` are set, they provide defaults when the matching flag is
 omitted. Command-line flags take precedence over env values.

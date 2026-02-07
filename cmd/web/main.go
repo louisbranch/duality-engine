@@ -1,4 +1,4 @@
-// Package main hosts the Duality web client.
+// Package main hosts the Fracturing.Space web client.
 package main
 
 import (
@@ -32,8 +32,8 @@ func envOrDefault(key, fallback string) string {
 
 // main runs the web server with optional gRPC connectivity.
 func main() {
-	httpAddr := flag.String("http-addr", envOrDefault("DUALITY_WEB_ADDR", defaultHTTPAddr), "HTTP listen address")
-	grpcAddr := flag.String("grpc-addr", envOrDefault("DUALITY_GRPC_ADDR", defaultGRPCAddr), "gRPC server address")
+	httpAddr := flag.String("http-addr", envOrDefault("FRACTURING_SPACE_WEB_ADDR", defaultHTTPAddr), "HTTP listen address")
+	grpcAddr := flag.String("grpc-addr", envOrDefault("FRACTURING_SPACE_GRPC_ADDR", defaultGRPCAddr), "gRPC server address")
 	flag.Parse()
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)

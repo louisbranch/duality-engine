@@ -303,7 +303,7 @@ func grpcAddress(fallback string) string {
 	if strings.TrimSpace(fallback) != "" {
 		return fallback
 	}
-	if value := os.Getenv("DUALITY_GRPC_ADDR"); value != "" {
+	if value := os.Getenv("FRACTURING_SPACE_GRPC_ADDR"); value != "" {
 		return value
 	}
 	return fallback
