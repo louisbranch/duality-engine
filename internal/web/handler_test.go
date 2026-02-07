@@ -23,7 +23,7 @@ func TestWebPageRendering(t *testing.T) {
 			path: "/",
 			contains: []string{
 				"<!doctype html>",
-				"<h1>Fracturing.Space</h1>",
+				"Fracturing.Space",
 			},
 			notContains: []string{
 				"<h2>Campaigns</h2>",
@@ -34,7 +34,7 @@ func TestWebPageRendering(t *testing.T) {
 			path: "/campaigns",
 			contains: []string{
 				"<!doctype html>",
-				"<h1>Fracturing.Space</h1>",
+				"Fracturing.Space",
 				"<h2>Campaigns</h2>",
 			},
 		},
@@ -47,7 +47,7 @@ func TestWebPageRendering(t *testing.T) {
 			},
 			notContains: []string{
 				"<!doctype html>",
-				"<h1>Fracturing.Space</h1>",
+				"Fracturing.Space",
 				"<html",
 			},
 		},
@@ -56,7 +56,7 @@ func TestWebPageRendering(t *testing.T) {
 			path: "/campaigns/camp-123",
 			contains: []string{
 				"<!doctype html>",
-				"<h1>Fracturing.Space</h1>",
+				"Fracturing.Space",
 				"Campaign service unavailable.",
 				"<h2>Campaign</h2>",
 			},
@@ -71,7 +71,7 @@ func TestWebPageRendering(t *testing.T) {
 			},
 			notContains: []string{
 				"<!doctype html>",
-				"<h1>Fracturing.Space</h1>",
+				"Fracturing.Space",
 				"<html",
 			},
 		},
@@ -101,6 +101,54 @@ func TestWebPageRendering(t *testing.T) {
 	}
 }
 
+// TestCampaignSessionsRoute verifies session routes render pages correctly.
+func TestCampaignSessionsRoute(t *testing.T) {
+	handler := NewHandler(nil)
+
+	t.Run("sessions htmx", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "http://example.com/campaigns/camp-123/sessions", nil)
+		req.Header.Set("HX-Request", "true")
+		recorder := httptest.NewRecorder()
+		handler.ServeHTTP(recorder, req)
+
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("expected status %d, got %d", http.StatusOK, recorder.Code)
+		}
+
+		body := recorder.Body.String()
+		assertContains(t, body, "<h3>Sessions</h3>")
+		assertNotContains(t, body, "<!doctype html>")
+	})
+
+	t.Run("sessions full page", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "http://example.com/campaigns/camp-123/sessions", nil)
+		recorder := httptest.NewRecorder()
+		handler.ServeHTTP(recorder, req)
+
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("expected status %d, got %d", http.StatusOK, recorder.Code)
+		}
+
+		body := recorder.Body.String()
+		assertContains(t, body, "<!doctype html>")
+		assertContains(t, body, "<h3>Sessions</h3>")
+	})
+
+	t.Run("sessions table htmx", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "http://example.com/campaigns/camp-123/sessions/table", nil)
+		req.Header.Set("HX-Request", "true")
+		recorder := httptest.NewRecorder()
+		handler.ServeHTTP(recorder, req)
+
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("expected status %d, got %d", http.StatusOK, recorder.Code)
+		}
+
+		body := recorder.Body.String()
+		assertContains(t, body, "Session service unavailable.")
+	})
+}
+
 // assertContains fails the test when the body lacks the expected fragment.
 func assertContains(t *testing.T, body string, expected string) {
 	t.Helper()
@@ -114,5 +162,29 @@ func assertNotContains(t *testing.T, body string, unexpected string) {
 	t.Helper()
 	if strings.Contains(body, unexpected) {
 		t.Fatalf("expected response to not contain %q", unexpected)
+	}
+}
+
+// TestEscapeAIP160StringLiteral verifies special character escaping.
+func TestEscapeAIP160StringLiteral(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"simple", "simple"},
+		{`with"quote`, `with\"quote`},
+		{`with\backslash`, `with\\backslash`},
+		{`both\"chars`, `both\\\"chars`},
+		{`a"b\c"d`, `a\"b\\c\"d`},
+		{"", ""},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.input, func(t *testing.T) {
+			result := escapeAIP160StringLiteral(tc.input)
+			if result != tc.expected {
+				t.Errorf("escapeAIP160StringLiteral(%q) = %q, want %q", tc.input, result, tc.expected)
+			}
+		})
 	}
 }

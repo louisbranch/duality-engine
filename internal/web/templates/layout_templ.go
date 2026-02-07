@@ -8,8 +8,8 @@ package templates
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-// Layout wraps content in the base HTML shell.
-func Layout(title string) templ.Component {
+// Layout wraps content in the base HTML shell with top navigation.
+func Layout(title string, activePage string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -30,20 +30,28 @@ func Layout(title string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"color-scheme\" content=\"light dark\"><title>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\" class=\"dark\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/layout.templ`, Line: 11, Col: 16}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/layout.templ`, Line: 10, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><link rel=\"stylesheet\" href=\"https://unpkg.com/@picocss/pico@2.1.1/css/pico.fluid.classless.min.css\" integrity=\"sha384-qOiei7yImoBMWAIgkZbT/ht+8ipwM2cPC7rHVCGMN+eGnVBihD1BC/3o3XU44yy0\" crossorigin=\"anonymous\"><script src=\"https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js\" integrity=\"sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2\" crossorigin=\"anonymous\"></script></head><body><header><div class=\"container\"><nav><ul><li><h1>Fracturing.Space</h1></li><li><a href=\"/campaigns\" hx-get=\"/campaigns\" hx-target=\"#main\" hx-swap=\"innerHTML\" hx-replace-url=\"/campaigns\">Campaigns</a></li></ul></nav></div></header><main id=\"main\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><link rel=\"stylesheet\" href=\"https://unpkg.com/papercss@1.9.2/dist/paper.min.css\" integrity=\"sha384-wMyZfjGAQ1ZgZgPm5qchzSB5HnjMhkNztmQTcnqZSdk5nrTqgiitoN+nL0XgczcG\" crossorigin=\"anonymous\"><link rel=\"stylesheet\" href=\"/static/theme.css\"><script src=\"https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js\"></script></head><body>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = TopNav(activePage).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"paper container margin-top\" id=\"main\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -51,7 +59,7 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</main></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><script>\n\t\t\t\t// Make table rows with links in first cell clickable\n\t\t\t\tfunction initClickableRows() {\n\t\t\t\t\tdocument.querySelectorAll('tbody tr').forEach(function(row) {\n\t\t\t\t\t\tvar link = row.querySelector('td:first-child a');\n\t\t\t\t\t\tif (link && !row.hasAttribute('data-href')) {\n\t\t\t\t\t\t\trow.setAttribute('data-href', link.getAttribute('href'));\n\t\t\t\t\t\t\trow.addEventListener('click', function(e) {\n\t\t\t\t\t\t\t\tif (e.target.tagName !== 'A') {\n\t\t\t\t\t\t\t\t\tlink.click();\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\tdocument.addEventListener('DOMContentLoaded', initClickableRows);\n\t\t\t\tdocument.addEventListener('htmx:afterSwap', initClickableRows);\n\t\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
