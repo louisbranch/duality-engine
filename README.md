@@ -1,6 +1,6 @@
 # Fracturing.Space ![Coverage](../../raw/badges/coverage.svg)
 
-Fracturing.Space is a server-authoritative mechanics and campaign-state service for running a Daggerheart Compatible campaign using the Duality Dice system.
+Fracturing.Space is a server-authoritative mechanics and campaign-state service for tabletop RPG campaigns. Currently supports Daggerheart (Duality Dice system), with architecture designed for additional game systems.
 
 Its primary goal is enabling an AI Game Master: an LLM (or agent runtime) drives the campaign by calling MCP tools/resources to resolve mechanics and persist state, while human participants interact through whatever client you build around it.
 
@@ -22,6 +22,15 @@ It is not a VTT. You will need to run the service locally or remotely and integr
 - **Campaign state**: persisted campaign entities (see State Model below).
 - **Determinism**: supports auditable resolution (useful for testing, replay, and debugging).
 - **Two interfaces, same behavior**: gRPC APIs and MCP tools/resources are kept in parity.
+
+## Game System Support
+
+Fracturing.Space is built with a pluggable architecture that can support multiple tabletop RPG systems:
+
+- **Daggerheart** (current): Duality Dice mechanics, Hope/Fear outcomes
+- **Future systems**: The plugin architecture (`internal/systems/`) is designed to support D&D 5e, Vampire: The Masquerade, and other systems
+
+Each game system provides its own mechanics while sharing common state management (campaigns, participants, characters, sessions).
 
 ## Interfaces
 
@@ -63,16 +72,9 @@ Notes:
 - The gRPC server listens on port 8080, the MCP HTTP transport listens on port 8081 when enabled, and the web app listens on port 8082.
 - Full port/config details live in [docs](#Documentation).
 
-## Migration notes
-
-- Module path is now `github.com/louisbranch/fracturing.space`; update `go.mod` and import paths.
-- Docker images now use the `fracturing.space-*` names on Docker Hub.
-- Docs site moved to https://louisbranch.github.io/fracturing.space/.
-- Environment variables remain `DUALITY_*` and the default DB path is still `data/duality.db` for now.
-
 ## State Model
 
-Persisted (BoltDB):
+Persisted (SQLite):
 
 - Campaigns
 - Participants
