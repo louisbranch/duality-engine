@@ -10,8 +10,11 @@ management for LLM and traditional clients.
 
 - [Getting started](getting-started.md)
 - [Configuration](configuration.md)
+- [Seeding the database](seeding.md)
 - [MCP tools and resources](mcp.md)
 - [Architecture](architecture.md)
+- [Domain language](domain-language.md)
+- [Event replay and snapshots](event-replay.md)
 - [Integration tests](integration-tests.md)
 
 ## Key concepts
@@ -19,8 +22,8 @@ management for LLM and traditional clients.
 - Deterministic and probabilistic Duality resolution
 - Campaign, session, participant, and character management
 - MCP integration for AI/LLM clients
-- Persistent storage via BoltDB
-- Reproducible and auditable outcomes
+- Persistent storage via SQLite
+- Reproducible and auditable outcomes via the event journal
 
 ## Reference
 

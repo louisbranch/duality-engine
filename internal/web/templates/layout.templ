@@ -1,39 +1,40 @@
 package templates
 
-// Layout wraps content in the base HTML shell.
-templ Layout(title string) {
+// Layout wraps content in the base HTML shell with top navigation.
+templ Layout(title string, activePage string) {
 	<!DOCTYPE html>
-	<html lang="en">
+	<html lang="en" class="dark">
 		<head>
 			<meta charset="utf-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1">
-			<meta name="color-scheme" content="light dark">
 			<title>{title}</title>
-			<link rel="stylesheet" href="https://unpkg.com/@picocss/pico@2.1.1/css/pico.fluid.classless.min.css" integrity="sha384-qOiei7yImoBMWAIgkZbT/ht+8ipwM2cPC7rHVCGMN+eGnVBihD1BC/3o3XU44yy0" crossorigin="anonymous">
-			<script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
+			<link rel="stylesheet" href="https://unpkg.com/papercss@1.9.2/dist/paper.min.css" integrity="sha384-wMyZfjGAQ1ZgZgPm5qchzSB5HnjMhkNztmQTcnqZSdk5nrTqgiitoN+nL0XgczcG" crossorigin="anonymous">
+			<link rel="stylesheet" href="/static/theme.css">
+			<script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js"></script>
 		</head>
 		<body>
-			<header>
-				<div class="container">
-				<nav>
-					<ul>
-						<li><h1>Fracturing.Space</h1></li>
-						<li>
-							<a
-								href="/campaigns"
-								hx-get="/campaigns"
-								hx-target="#main"
-								hx-swap="innerHTML"
-								hx-replace-url="/campaigns"
-							>Campaigns</a>
-						</li>
-					</ul>
-				</nav>
-			</div>
-		</header>
-			<main id="main">
+			@TopNav(activePage)
+			<div class="paper container margin-top" id="main">
 				{ children... }
-			</main>
+			</div>
+			<script>
+				// Make table rows with links in first cell clickable
+				function initClickableRows() {
+					document.querySelectorAll('tbody tr').forEach(function(row) {
+						var link = row.querySelector('td:first-child a');
+						if (link && !row.hasAttribute('data-href')) {
+							row.setAttribute('data-href', link.getAttribute('href'));
+							row.addEventListener('click', function(e) {
+								if (e.target.tagName !== 'A') {
+									link.click();
+								}
+							});
+						}
+					});
+				}
+				document.addEventListener('DOMContentLoaded', initClickableRows);
+				document.addEventListener('htmx:afterSwap', initClickableRows);
+			</script>
 		</body>
 	</html>
 }

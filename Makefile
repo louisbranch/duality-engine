@@ -1,12 +1,11 @@
 PROTO_DIR := api/proto
 GEN_GO_DIR := api/gen/go
-COVER_EXCLUDE_REGEX := api/gen/
+COVER_EXCLUDE_REGEX := (api/gen/|_templ\.go|internal/storage/sqlite/db/|internal/seed/)
 
 PROTO_FILES := \
 	$(wildcard $(PROTO_DIR)/common/v1/*.proto) \
-	$(wildcard $(PROTO_DIR)/campaign/v1/*.proto) \
-	$(wildcard $(PROTO_DIR)/duality/v1/*.proto) \
-	$(wildcard $(PROTO_DIR)/session/v1/*.proto)
+	$(wildcard $(PROTO_DIR)/state/v1/*.proto) \
+	$(wildcard $(PROTO_DIR)/systems/daggerheart/v1/*.proto)
 
 .PHONY: all proto clean run cover test integration templ-generate
 
@@ -66,3 +65,18 @@ test:
 
 integration:
 	go test -tags=integration ./...
+
+seed: ## Seed the local database with demo data (static fixtures)
+	go run ./cmd/seed -v
+
+seed-fresh: ## Reset DB and seed with static fixtures
+	rm -f data/fracturing.space.db && $(MAKE) seed
+
+seed-generate: ## Generate dynamic demo data
+	go run ./cmd/seed -generate -preset=demo -v
+
+seed-variety: ## Generate variety of campaigns across all statuses
+	go run ./cmd/seed -generate -preset=variety -v
+
+seed-generate-fresh: ## Reset DB and generate demo data
+	rm -f data/fracturing.space.db && $(MAKE) seed-generate

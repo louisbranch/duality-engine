@@ -4,7 +4,7 @@
 
 - Go 1.25.6
 - protoc (required until binaries are published)
-- BoltDB (embedded; the server creates `data/duality.db` by default)
+- SQLite (embedded; the server creates `data/fracturing.space.db` by default)
 - Make (for `make run`)
 
 ## Run locally (fastest)
@@ -95,7 +95,7 @@ docker run -d --name duality-grpc \
   --network duality \
   -p 127.0.0.1:8080:8080 \
   -v /srv/duality/data:/data \
-  -e DUALITY_DB_PATH=/data/duality.db \
+  -e DUALITY_DB_PATH=/data/fracturing.space.db \
   docker.io/louisbranch/fracturing.space-grpc:latest
 
 docker run -d --name duality-mcp \

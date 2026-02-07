@@ -1,0 +1,82 @@
+package templates
+
+// DashboardFullPage renders the dashboard in the base layout.
+templ DashboardFullPage() {
+	@Layout("Dashboard - Fracturing.Space", "Dashboard") {
+		@DashboardPage()
+	}
+}
+
+// DashboardPage renders the dashboard content.
+templ DashboardPage() {
+	<h2>Dashboard</h2>
+	@DashboardLoading()
+}
+
+// DashboardLoading renders the HTMX loading placeholder.
+templ DashboardLoading() {
+	<div hx-get="/dashboard/content" hx-trigger="load" hx-swap="outerHTML">
+		<p>Loading dashboard...</p>
+	</div>
+}
+
+// DashboardContent renders the main dashboard content.
+templ DashboardContent(stats DashboardStats, activities []ActivityEvent) {
+	<div>
+		@DashboardStatsCards(stats)
+		<h3>Recent Activity</h3>
+		@RecentActivityFeed(activities)
+	</div>
+}
+
+// DashboardStatsCards renders the stat cards grid using PaperCSS flexbox.
+templ DashboardStatsCards(stats DashboardStats) {
+	<div class="row">
+		<div class="sm-6 md-3 col">
+			@StatCard("Campaigns", stats.TotalCampaigns, "")
+		</div>
+		<div class="sm-6 md-3 col">
+			@StatCard("Active Sessions", stats.ActiveSessions, "")
+		</div>
+		<div class="sm-6 md-3 col">
+			@StatCard("Characters", stats.TotalCharacters, "")
+		</div>
+		<div class="sm-6 md-3 col">
+			@StatCard("Participants", stats.TotalParticipants, "")
+		</div>
+	</div>
+}
+
+// RecentActivityFeed renders a list of recent events.
+templ RecentActivityFeed(activities []ActivityEvent) {
+	if len(activities) == 0 {
+		@EmptyState("No recent activity")
+	} else {
+		<table class="table-hover">
+			<thead>
+				<tr>
+					<th>Campaign</th>
+					<th>Event</th>
+					<th>Time</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, activity := range activities {
+					<tr>
+						<td>
+							<a
+								href={ templ.SafeURL("/campaigns/" + activity.CampaignID) }
+								hx-get={ "/campaigns/" + activity.CampaignID }
+								hx-target="#main"
+								hx-swap="innerHTML"
+								hx-push-url="true"
+							>{activity.CampaignName}</a>
+						</td>
+						<td>{activity.EventType}</td>
+						<td><small>{activity.Timestamp}</small></td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	}
+}

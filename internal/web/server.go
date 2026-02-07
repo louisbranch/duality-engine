@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	campaignv1 "github.com/louisbranch/fracturing.space/api/gen/go/campaign/v1"
-	dualityv1 "github.com/louisbranch/fracturing.space/api/gen/go/duality/v1"
+	statev1 "github.com/louisbranch/fracturing.space/api/gen/go/state/v1"
+	daggerheartv1 "github.com/louisbranch/fracturing.space/api/gen/go/systems/daggerheart/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -42,20 +42,75 @@ type Server struct {
 
 // grpcClients stores gRPC connections and clients for the web server.
 type grpcClients struct {
-	mu             sync.RWMutex
-	conn           *grpc.ClientConn
-	dualityClient  dualityv1.DualityServiceClient
-	campaignClient campaignv1.CampaignServiceClient
+	mu                sync.RWMutex
+	conn              *grpc.ClientConn
+	daggerheartClient daggerheartv1.DaggerheartServiceClient
+	campaignClient    statev1.CampaignServiceClient
+	sessionClient     statev1.SessionServiceClient
+	characterClient   statev1.CharacterServiceClient
+	participantClient statev1.ParticipantServiceClient
+	snapshotClient    statev1.SnapshotServiceClient
+	eventClient       statev1.EventServiceClient
 }
 
 // CampaignClient returns the current campaign client.
-func (g *grpcClients) CampaignClient() campaignv1.CampaignServiceClient {
+func (g *grpcClients) CampaignClient() statev1.CampaignServiceClient {
 	if g == nil {
 		return nil
 	}
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 	return g.campaignClient
+}
+
+// SessionClient returns the current session client.
+func (g *grpcClients) SessionClient() statev1.SessionServiceClient {
+	if g == nil {
+		return nil
+	}
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+	return g.sessionClient
+}
+
+// CharacterClient returns the current character client.
+func (g *grpcClients) CharacterClient() statev1.CharacterServiceClient {
+	if g == nil {
+		return nil
+	}
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+	return g.characterClient
+}
+
+// ParticipantClient returns the current participant client.
+func (g *grpcClients) ParticipantClient() statev1.ParticipantServiceClient {
+	if g == nil {
+		return nil
+	}
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+	return g.participantClient
+}
+
+// SnapshotClient returns the current snapshot client.
+func (g *grpcClients) SnapshotClient() statev1.SnapshotServiceClient {
+	if g == nil {
+		return nil
+	}
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+	return g.snapshotClient
+}
+
+// EventClient returns the current event client.
+func (g *grpcClients) EventClient() statev1.EventServiceClient {
+	if g == nil {
+		return nil
+	}
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+	return g.eventClient
 }
 
 // HasConnection reports whether a gRPC connection is already set.
@@ -69,7 +124,7 @@ func (g *grpcClients) HasConnection() bool {
 }
 
 // Set stores the gRPC connection and clients.
-func (g *grpcClients) Set(conn *grpc.ClientConn, dualityClient dualityv1.DualityServiceClient, campaignClient campaignv1.CampaignServiceClient) {
+func (g *grpcClients) Set(conn *grpc.ClientConn, daggerheartClient daggerheartv1.DaggerheartServiceClient, campaignClient statev1.CampaignServiceClient, sessionClient statev1.SessionServiceClient, characterClient statev1.CharacterServiceClient, participantClient statev1.ParticipantServiceClient, snapshotClient statev1.SnapshotServiceClient, eventClient statev1.EventServiceClient) {
 	if g == nil {
 		return
 	}
@@ -79,8 +134,13 @@ func (g *grpcClients) Set(conn *grpc.ClientConn, dualityClient dualityv1.Duality
 		return
 	}
 	g.conn = conn
-	g.dualityClient = dualityClient
+	g.daggerheartClient = daggerheartClient
 	g.campaignClient = campaignClient
+	g.sessionClient = sessionClient
+	g.characterClient = characterClient
+	g.participantClient = participantClient
+	g.snapshotClient = snapshotClient
+	g.eventClient = eventClient
 }
 
 // Close releases any gRPC resources held by the clients.
@@ -111,12 +171,12 @@ func NewServer(ctx context.Context, config Config) (*Server, error) {
 
 	clients := &grpcClients{}
 	if strings.TrimSpace(config.GRPCAddr) != "" {
-		conn, dualityClient, campaignClient, err := dialGRPC(ctx, config)
+		conn, daggerheartClient, campaignClient, sessionClient, characterClient, participantClient, snapshotClient, eventClient, err := dialGRPC(ctx, config)
 		if err != nil {
 			log.Printf("web gRPC dial failed: %v", err)
 			go connectGRPCWithRetry(ctx, config, clients)
 		} else {
-			clients.Set(conn, dualityClient, campaignClient)
+			clients.Set(conn, daggerheartClient, campaignClient, sessionClient, characterClient, participantClient, snapshotClient, eventClient)
 		}
 	}
 
@@ -176,10 +236,10 @@ func (s *Server) Close() {
 }
 
 // dialGRPC connects to the gRPC server and returns a client.
-func dialGRPC(ctx context.Context, config Config) (*grpc.ClientConn, dualityv1.DualityServiceClient, campaignv1.CampaignServiceClient, error) {
+func dialGRPC(ctx context.Context, config Config) (*grpc.ClientConn, daggerheartv1.DaggerheartServiceClient, statev1.CampaignServiceClient, statev1.SessionServiceClient, statev1.CharacterServiceClient, statev1.ParticipantServiceClient, statev1.SnapshotServiceClient, statev1.EventServiceClient, error) {
 	grpcAddr := strings.TrimSpace(config.GRPCAddr)
 	if grpcAddr == "" {
-		return nil, nil, nil, nil
+		return nil, nil, nil, nil, nil, nil, nil, nil, nil
 	}
 	if ctx == nil {
 		ctx = context.Background()
@@ -195,12 +255,17 @@ func dialGRPC(ctx context.Context, config Config) (*grpc.ClientConn, dualityv1.D
 		grpc.WithBlock(),
 	)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, nil, nil, nil, nil, err
 	}
 
-	dualityClient := dualityv1.NewDualityServiceClient(conn)
-	campaignClient := campaignv1.NewCampaignServiceClient(conn)
-	return conn, dualityClient, campaignClient, nil
+	daggerheartClient := daggerheartv1.NewDaggerheartServiceClient(conn)
+	campaignClient := statev1.NewCampaignServiceClient(conn)
+	sessionClient := statev1.NewSessionServiceClient(conn)
+	characterClient := statev1.NewCharacterServiceClient(conn)
+	participantClient := statev1.NewParticipantServiceClient(conn)
+	snapshotClient := statev1.NewSnapshotServiceClient(conn)
+	eventClient := statev1.NewEventServiceClient(conn)
+	return conn, daggerheartClient, campaignClient, sessionClient, characterClient, participantClient, snapshotClient, eventClient, nil
 }
 
 // connectGRPCWithRetry keeps dialing until a connection is established or context ends.
@@ -222,9 +287,9 @@ func connectGRPCWithRetry(ctx context.Context, config Config, clients *grpcClien
 		if clients.HasConnection() {
 			return
 		}
-		conn, dualityClient, campaignClient, err := dialGRPC(ctx, config)
+		conn, daggerheartClient, campaignClient, sessionClient, characterClient, participantClient, snapshotClient, eventClient, err := dialGRPC(ctx, config)
 		if err == nil {
-			clients.Set(conn, dualityClient, campaignClient)
+			clients.Set(conn, daggerheartClient, campaignClient, sessionClient, characterClient, participantClient, snapshotClient, eventClient)
 			log.Printf("web gRPC connected to %s", config.GRPCAddr)
 			return
 		}
