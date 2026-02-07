@@ -53,7 +53,7 @@ func main() {
 
 	flag.StringVar(&campaignID, "campaign-id", "", "campaign ID to replay snapshot events")
 	flag.StringVar(&campaignIDs, "campaign-ids", "", "comma-separated campaign IDs to replay snapshot events")
-	flag.StringVar(&dbPath, "db-path", defaultDBPath(), "path to sqlite database (default: DUALITY_DB_PATH or data/fracturing.space.db)")
+	flag.StringVar(&dbPath, "db-path", defaultDBPath(), "path to sqlite database (default: FRACTURING_SPACE_DB_PATH or data/fracturing.space.db)")
 	flag.Uint64Var(&untilSeq, "until-seq", 0, "replay up to this event sequence (0 = latest)")
 	flag.Uint64Var(&afterSeq, "after-seq", 0, "start replay after this event sequence")
 	flag.BoolVar(&dryRun, "dry-run", false, "scan snapshot events without applying projections")
@@ -347,7 +347,7 @@ func openStore(path string) (storage.Store, error) {
 }
 
 func defaultDBPath() string {
-	path := os.Getenv("DUALITY_DB_PATH")
+	path := os.Getenv("FRACTURING_SPACE_DB_PATH")
 	if path == "" {
 		path = filepath.Join("data", "fracturing.space.db")
 	}
@@ -490,7 +490,7 @@ func checkSnapshotIntegrity(ctx context.Context, store storage.Store, campaignID
 		return report, warnings, fmt.Errorf("campaign id is required")
 	}
 
-	tmpFile, err := os.CreateTemp("", "duality-integrity-*.db")
+	tmpFile, err := os.CreateTemp("", "fracturing-space-integrity-*.db")
 	if err != nil {
 		return report, warnings, fmt.Errorf("create temp db: %w", err)
 	}

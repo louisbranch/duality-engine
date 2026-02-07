@@ -652,7 +652,7 @@ func isLoopbackHost(host string) bool {
 
 // parseAllowedHosts parses allowed hosts from env (comma-separated, hostnames only).
 func parseAllowedHosts() map[string]struct{} {
-	entries := strings.Split(os.Getenv("DUALITY_MCP_ALLOWED_HOSTS"), ",")
+	entries := strings.Split(os.Getenv("FRACTURING_SPACE_MCP_ALLOWED_HOSTS"), ",")
 	result := make(map[string]struct{}, len(entries))
 	for _, entry := range entries {
 		trimmed := strings.TrimSpace(entry)

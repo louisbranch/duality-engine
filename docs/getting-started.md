@@ -81,35 +81,35 @@ curl http://localhost:8081/mcp/health
 
 For remote deployments, keep MCP bound to loopback and front it with a reverse
 proxy (Caddy/Nginx) that terminates TLS. Allow only your domain in
-`DUALITY_MCP_ALLOWED_HOSTS`.
+`FRACTURING_SPACE_MCP_ALLOWED_HOSTS`.
 
-You can set `DUALITY_GRPC_ADDR` and `DUALITY_MCP_HTTP_ADDR` in the MCP container
+You can set `FRACTURING_SPACE_GRPC_ADDR` and `FRACTURING_SPACE_MCP_HTTP_ADDR` in the MCP container
 instead of flags. Command-line flags still take precedence when provided.
 
 Example (replace `your-domain.example`):
 
 ```sh
-docker network create duality
+docker network create fracturing-space
 
-docker run -d --name duality-grpc \
-  --network duality \
+docker run -d --name fracturing-space-grpc \
+  --network fracturing-space \
   -p 127.0.0.1:8080:8080 \
-  -v /srv/duality/data:/data \
-  -e DUALITY_DB_PATH=/data/fracturing.space.db \
+  -v /srv/fracturing-space/data:/data \
+  -e FRACTURING_SPACE_DB_PATH=/data/fracturing.space.db \
   docker.io/louisbranch/fracturing.space-grpc:latest
 
-docker run -d --name duality-mcp \
-  --network duality \
+docker run -d --name fracturing-space-mcp \
+  --network fracturing-space \
   -p 127.0.0.1:8081:8081 \
-  -e DUALITY_MCP_ALLOWED_HOSTS=your-domain.example \
+  -e FRACTURING_SPACE_MCP_ALLOWED_HOSTS=your-domain.example \
   docker.io/louisbranch/fracturing.space-mcp:latest \
-  -transport=http -http-addr=0.0.0.0:8081 -addr=duality-grpc:8080
+  -transport=http -http-addr=0.0.0.0:8081 -addr=fracturing-space-grpc:8080
 
-docker run -d --name duality-web \
-  --network duality \
+docker run -d --name fracturing-space-web \
+  --network fracturing-space \
   -p 127.0.0.1:8082:8082 \
-  -e DUALITY_WEB_ADDR=0.0.0.0:8082 \
-  -e DUALITY_GRPC_ADDR=duality-grpc:8080 \
+  -e FRACTURING_SPACE_WEB_ADDR=0.0.0.0:8082 \
+  -e FRACTURING_SPACE_GRPC_ADDR=fracturing-space-grpc:8080 \
   docker.io/louisbranch/fracturing.space-web:latest
 ```
 

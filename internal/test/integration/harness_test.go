@@ -73,7 +73,7 @@ func startMCPClient(t *testing.T, grpcAddr string) (*mcp.ClientSession, func()) 
 
 	cmd := exec.Command("go", "run", "./cmd/mcp")
 	cmd.Dir = repoRoot(t)
-	cmd.Env = append(os.Environ(), fmt.Sprintf("DUALITY_GRPC_ADDR=%s", grpcAddr))
+	cmd.Env = append(os.Environ(), fmt.Sprintf("FRACTURING_SPACE_GRPC_ADDR=%s", grpcAddr))
 	cmd.Stderr = os.Stderr
 
 	transport := &mcp.CommandTransport{Command: cmd}
@@ -151,7 +151,7 @@ func setTempDBPath(t *testing.T) {
 	t.Helper()
 
 	path := filepath.Join(t.TempDir(), "fracturing.space.db")
-	t.Setenv("DUALITY_DB_PATH", path)
+	t.Setenv("FRACTURING_SPACE_DB_PATH", path)
 }
 
 // repoRoot returns the repository root by walking up to go.mod.

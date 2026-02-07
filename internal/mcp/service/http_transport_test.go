@@ -98,7 +98,7 @@ func TestHTTPTransport_handleHealth_AllowsLoopbackHosts(t *testing.T) {
 }
 
 func TestHTTPTransport_handleHealth_AllowsConfiguredHosts(t *testing.T) {
-	t.Setenv("DUALITY_MCP_ALLOWED_HOSTS", "example.com, api.example.com")
+	t.Setenv("FRACTURING_SPACE_MCP_ALLOWED_HOSTS", "example.com, api.example.com")
 	transport := NewHTTPTransport("localhost:8081")
 
 	req := httptest.NewRequest(http.MethodGet, "/mcp/health", nil)
@@ -113,7 +113,7 @@ func TestHTTPTransport_handleHealth_AllowsConfiguredHosts(t *testing.T) {
 }
 
 func TestHTTPTransport_handleHealth_RejectsUnlistedHost(t *testing.T) {
-	t.Setenv("DUALITY_MCP_ALLOWED_HOSTS", "example.com")
+	t.Setenv("FRACTURING_SPACE_MCP_ALLOWED_HOSTS", "example.com")
 	transport := NewHTTPTransport("localhost:8081")
 
 	req := httptest.NewRequest(http.MethodGet, "/mcp/health", nil)
@@ -200,7 +200,7 @@ func TestHTTPTransport_handleMessages_NewSession(t *testing.T) {
 }
 
 func TestHTTPTransport_handleMessages_AllowsConfiguredHosts(t *testing.T) {
-	t.Setenv("DUALITY_MCP_ALLOWED_HOSTS", "example.com")
+	t.Setenv("FRACTURING_SPACE_MCP_ALLOWED_HOSTS", "example.com")
 	transport := NewHTTPTransport("localhost:8081")
 
 	request := map[string]interface{}{
@@ -228,7 +228,7 @@ func TestHTTPTransport_handleMessages_AllowsConfiguredHosts(t *testing.T) {
 }
 
 func TestHTTPTransport_handleMessages_RejectsUnlistedHost(t *testing.T) {
-	t.Setenv("DUALITY_MCP_ALLOWED_HOSTS", "example.com")
+	t.Setenv("FRACTURING_SPACE_MCP_ALLOWED_HOSTS", "example.com")
 	transport := NewHTTPTransport("localhost:8081")
 
 	request := map[string]interface{}{

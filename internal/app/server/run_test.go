@@ -278,5 +278,5 @@ func normalizeAddress(t *testing.T, addr string) string {
 func setTempDBPath(t *testing.T) {
 	t.Helper()
 	path := filepath.Join(t.TempDir(), "fracturing.space.db")
-	t.Setenv("DUALITY_DB_PATH", path)
+	t.Setenv("FRACTURING_SPACE_DB_PATH", path)
 }

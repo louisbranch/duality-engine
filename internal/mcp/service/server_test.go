@@ -371,7 +371,7 @@ func (f *fakeSessionClient) GetSession(ctx context.Context, req *statev1.GetSess
 
 // TestGRPCAddressUsesFallbackOverEnv ensures the fallback wins over env.
 func TestGRPCAddressUsesFallbackOverEnv(t *testing.T) {
-	t.Setenv("DUALITY_GRPC_ADDR", "env:123")
+	t.Setenv("FRACTURING_SPACE_GRPC_ADDR", "env:123")
 	if got := grpcAddress("fallback"); got != "fallback" {
 		t.Fatalf("expected fallback address, got %q", got)
 	}
@@ -379,7 +379,7 @@ func TestGRPCAddressUsesFallbackOverEnv(t *testing.T) {
 
 // TestGRPCAddressUsesEnvWhenFallbackEmpty ensures env is used when fallback is empty.
 func TestGRPCAddressUsesEnvWhenFallbackEmpty(t *testing.T) {
-	t.Setenv("DUALITY_GRPC_ADDR", "env:123")
+	t.Setenv("FRACTURING_SPACE_GRPC_ADDR", "env:123")
 	if got := grpcAddress(""); got != "env:123" {
 		t.Fatalf("expected env address, got %q", got)
 	}
@@ -387,7 +387,7 @@ func TestGRPCAddressUsesEnvWhenFallbackEmpty(t *testing.T) {
 
 // TestGRPCAddressUsesEnvWhenFallbackWhitespace ensures env is used when fallback is whitespace.
 func TestGRPCAddressUsesEnvWhenFallbackWhitespace(t *testing.T) {
-	t.Setenv("DUALITY_GRPC_ADDR", "env:123")
+	t.Setenv("FRACTURING_SPACE_GRPC_ADDR", "env:123")
 	if got := grpcAddress(" "); got != "env:123" {
 		t.Fatalf("expected env address, got %q", got)
 	}
@@ -395,7 +395,7 @@ func TestGRPCAddressUsesEnvWhenFallbackWhitespace(t *testing.T) {
 
 // TestGRPCAddressFallback ensures the fallback address is used when env is empty.
 func TestGRPCAddressFallback(t *testing.T) {
-	t.Setenv("DUALITY_GRPC_ADDR", "")
+	t.Setenv("FRACTURING_SPACE_GRPC_ADDR", "")
 	if got := grpcAddress("fallback"); got != "fallback" {
 		t.Fatalf("expected fallback address, got %q", got)
 	}

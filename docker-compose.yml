@@ -3,7 +3,7 @@ services:
     image: busybox:1.36
     command: ["sh", "-c", "chown -R 65532:65532 /data"]
     volumes:
-      - duality-data:/data
+      - fracturing-space-data:/data
 
   grpc:
     build:
@@ -16,9 +16,9 @@ services:
       init-data:
         condition: service_completed_successfully
     environment:
-      - DUALITY_DB_PATH=/data/fracturing.space.db
+      - FRACTURING_SPACE_DB_PATH=/data/fracturing.space.db
     volumes:
-      - duality-data:/data
+      - fracturing-space-data:/data
     ports:
       - "127.0.0.1:8080:8080"
 
@@ -45,10 +45,10 @@ services:
     depends_on:
       - grpc
     environment:
-      - DUALITY_WEB_ADDR=0.0.0.0:8082
-      - DUALITY_GRPC_ADDR=grpc:8080
+      - FRACTURING_SPACE_WEB_ADDR=0.0.0.0:8082
+      - FRACTURING_SPACE_GRPC_ADDR=grpc:8080
     ports:
       - "127.0.0.1:8082:8082"
 
 volumes:
-  duality-data:
+  fracturing-space-data:
