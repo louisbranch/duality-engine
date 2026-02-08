@@ -10,6 +10,8 @@ Go language conventions for this project.
 
 ## Build / Test / Lint
 
+Project-wide verification lives in `AGENTS.md`. Use those commands after code changes.
+
 ```bash
 go build ./...                      # Build all packages
 go test ./...                       # Run all tests
@@ -27,7 +29,7 @@ Group imports: standard library, third-party, local. Use `goimports` to manage o
 
 ## Formatting
 
-- Run `gofmt` or `goimports` on edited files
+- Run `goimports` on edited files
 - Prefer early returns to reduce nesting
 - Keep line length reasonable; break long expressions
 - Avoid inline `if err := ...` for multi-line bodies
@@ -48,11 +50,7 @@ Group imports: standard library, third-party, local. Use `goimports` to manage o
 
 ## Error Handling
 
-- Return errors explicitly; avoid panics for control flow
-- Wrap errors with `%w` to preserve causes
-- Use sentinel errors for stable comparisons
-- Include context in messages, no trailing punctuation
-- Prefer `errors.Is` and `errors.As` for checks
+Use the `error-handling` skill for structured error workflows and messaging rules.
 
 ## Logging
 
