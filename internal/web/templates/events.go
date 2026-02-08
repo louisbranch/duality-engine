@@ -2,21 +2,22 @@ package templates
 
 // EventRow represents an event in the timeline (enhanced version).
 type EventRow struct {
-	CampaignID  string
-	Seq         uint64
-	Hash        string
-	Type        string
-	TypeDisplay string
-	Timestamp   string
-	SessionID   string
-	ActorType   string
-	ActorName   string
-	EntityType  string
-	EntityID    string
-	EntityName  string
-	Description string
-	PayloadJSON string
-	Expanded    bool
+	CampaignID       string
+	Seq              uint64
+	Hash             string
+	Type             string
+	TypeDisplay      string
+	Timestamp        string
+	SessionID        string
+	ActorType        string
+	ActorTypeDisplay string
+	ActorName        string
+	EntityType       string
+	EntityID         string
+	EntityName       string
+	Description      string
+	PayloadJSON      string
+	Expanded         bool
 }
 
 // EventFilterOptions holds the current filter state for event lists.

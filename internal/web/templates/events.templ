@@ -96,8 +96,8 @@ templ EventTableRow(event EventRow, loc Localizer) {
 	<tr id={ "event-" + fmt.Sprintf("%d", event.Seq) }>
 		<td><strong>{ event.TypeDisplay }</strong></td>
 		<td>
-			if event.ActorName != "" {
-				<small>{ event.ActorType }:</small> { event.ActorName }
+			if event.ActorTypeDisplay != "" {
+				<small>{ event.ActorTypeDisplay }</small>
 			}
 		</td>
 		<td>
