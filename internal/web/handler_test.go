@@ -5,6 +5,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/louisbranch/fracturing.space/internal/web/i18n"
 )
 
 // TestWebPageRendering verifies layout rendering based on HTMX requests.
@@ -184,6 +186,51 @@ func TestEscapeAIP160StringLiteral(t *testing.T) {
 			result := escapeAIP160StringLiteral(tc.input)
 			if result != tc.expected {
 				t.Errorf("escapeAIP160StringLiteral(%q) = %q, want %q", tc.input, result, tc.expected)
+			}
+		})
+	}
+}
+
+func TestFormatActorType(t *testing.T) {
+	loc := i18n.Printer(i18n.Default())
+
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "empty",
+			input:    "",
+			expected: "",
+		},
+		{
+			name:     "system",
+			input:    "system",
+			expected: loc.Sprintf("filter.actor.system"),
+		},
+		{
+			name:     "participant",
+			input:    "participant",
+			expected: loc.Sprintf("filter.actor.participant"),
+		},
+		{
+			name:     "gm",
+			input:    "gm",
+			expected: loc.Sprintf("filter.actor.gm"),
+		},
+		{
+			name:     "fallback",
+			input:    "custom",
+			expected: "custom",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := formatActorType(tc.input, loc)
+			if result != tc.expected {
+				t.Errorf("formatActorType(%q) = %q, want %q", tc.input, result, tc.expected)
 			}
 		})
 	}

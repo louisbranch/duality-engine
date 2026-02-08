@@ -680,6 +680,23 @@ func formatEventType(eventType string, loc *message.Printer) string {
 	}
 }
 
+// formatActorType returns a display label for an actor type string.
+func formatActorType(actorType string, loc *message.Printer) string {
+	if actorType == "" {
+		return ""
+	}
+	switch actorType {
+	case "system":
+		return loc.Sprintf("filter.actor.system")
+	case "participant":
+		return loc.Sprintf("filter.actor.participant")
+	case "gm":
+		return loc.Sprintf("filter.actor.gm")
+	default:
+		return actorType
+	}
+}
+
 // formatEventDescription generates a human-readable event description.
 func formatEventDescription(event *statev1.Event, loc *message.Printer) string {
 	if event == nil {
@@ -1195,20 +1212,21 @@ func buildEventRows(events []*statev1.Event, loc *message.Printer) []templates.E
 			continue
 		}
 		rows = append(rows, templates.EventRow{
-			CampaignID:  event.GetCampaignId(),
-			Seq:         event.GetSeq(),
-			Hash:        event.GetHash(),
-			Type:        event.GetType(),
-			TypeDisplay: formatEventType(event.GetType(), loc),
-			Timestamp:   formatTimestamp(event.GetTs()),
-			SessionID:   event.GetSessionId(),
-			ActorType:   event.GetActorType(),
-			ActorName:   event.GetActorId(),
-			EntityType:  event.GetEntityType(),
-			EntityID:    event.GetEntityId(),
-			EntityName:  event.GetEntityId(),
-			Description: formatEventDescription(event, loc),
-			PayloadJSON: string(event.GetPayloadJson()),
+			CampaignID:       event.GetCampaignId(),
+			Seq:              event.GetSeq(),
+			Hash:             event.GetHash(),
+			Type:             event.GetType(),
+			TypeDisplay:      formatEventType(event.GetType(), loc),
+			Timestamp:        formatTimestamp(event.GetTs()),
+			SessionID:        event.GetSessionId(),
+			ActorType:        event.GetActorType(),
+			ActorTypeDisplay: formatActorType(event.GetActorType(), loc),
+			ActorName:        "",
+			EntityType:       event.GetEntityType(),
+			EntityID:         event.GetEntityId(),
+			EntityName:       event.GetEntityId(),
+			Description:      formatEventDescription(event, loc),
+			PayloadJSON:      string(event.GetPayloadJson()),
 		})
 	}
 	return rows
