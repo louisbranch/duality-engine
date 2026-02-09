@@ -16,8 +16,6 @@ This is a fast-moving prototype. Favor logical, clear structure over backwards c
 When the schema changes, create a new migration that drops and recreates the table.
 This keeps migrations simple and avoids migration ordering issues during rapid development.
 
-Migration files live in `internal/services/game/storage/sqlite/migrations/`.
-
 ## Proto Fields
 
 - Do: Reorder fields for logical grouping and clarity.

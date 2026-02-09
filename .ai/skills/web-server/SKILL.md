@@ -10,6 +10,4 @@ Transport-layer guidance for the Web UI and related services.
 
 ## Architecture Notes
 
-- Admin dashboard lives under `cmd/admin`.
-- Transport services include `cmd/game` (gRPC) and `cmd/mcp` (MCP bridge).
-- Keep transport thin: rules and state logic belong in gRPC/domain packages.
+Refer to `docs/project/architecture.md` for system layout and service boundaries.

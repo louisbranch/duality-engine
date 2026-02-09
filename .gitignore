@@ -3,3 +3,5 @@ coverage.html
 coverage.raw
 coverage.log
 data/
+
+.ai/plans/*.md
