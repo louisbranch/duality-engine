@@ -33,6 +33,7 @@ const maxGRPCRetryDelay = 10 * time.Second
 type Config struct {
 	HTTPAddr        string
 	GRPCAddr        string
+	AuthAddr        string
 	GRPCDialTimeout time.Duration
 }
 
@@ -40,6 +41,7 @@ type Config struct {
 type Server struct {
 	httpAddr    string
 	grpcAddr    string
+	authAddr    string
 	grpcClients *grpcClients
 	httpServer  *http.Server
 	adminStore  *adminsqlite.Store
@@ -48,7 +50,8 @@ type Server struct {
 // grpcClients stores gRPC connections and clients for the admin server.
 type grpcClients struct {
 	mu                sync.RWMutex
-	conn              *grpc.ClientConn
+	gameConn          *grpc.ClientConn
+	authConn          *grpc.ClientConn
 	authClient        authv1.AuthServiceClient
 	daggerheartClient daggerheartv1.DaggerheartServiceClient
 	campaignClient    statev1.CampaignServiceClient
@@ -140,28 +143,37 @@ func (g *grpcClients) StatisticsClient() statev1.StatisticsServiceClient {
 	return g.statisticsClient
 }
 
-// HasConnection reports whether a gRPC connection is already set.
-func (g *grpcClients) HasConnection() bool {
+// HasGameConnection reports whether a game gRPC connection is already set.
+func (g *grpcClients) HasGameConnection() bool {
 	if g == nil {
 		return false
 	}
 	g.mu.RLock()
 	defer g.mu.RUnlock()
-	return g.conn != nil
+	return g.gameConn != nil
 }
 
-// Set stores the gRPC connection and clients.
-func (g *grpcClients) Set(conn *grpc.ClientConn, authClient authv1.AuthServiceClient, daggerheartClient daggerheartv1.DaggerheartServiceClient, campaignClient statev1.CampaignServiceClient, sessionClient statev1.SessionServiceClient, characterClient statev1.CharacterServiceClient, participantClient statev1.ParticipantServiceClient, snapshotClient statev1.SnapshotServiceClient, eventClient statev1.EventServiceClient, statisticsClient statev1.StatisticsServiceClient) {
+// HasAuthConnection reports whether an auth gRPC connection is already set.
+func (g *grpcClients) HasAuthConnection() bool {
+	if g == nil {
+		return false
+	}
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+	return g.authConn != nil
+}
+
+// SetGameConn stores the game gRPC connection and clients.
+func (g *grpcClients) SetGameConn(conn *grpc.ClientConn, daggerheartClient daggerheartv1.DaggerheartServiceClient, campaignClient statev1.CampaignServiceClient, sessionClient statev1.SessionServiceClient, characterClient statev1.CharacterServiceClient, participantClient statev1.ParticipantServiceClient, snapshotClient statev1.SnapshotServiceClient, eventClient statev1.EventServiceClient, statisticsClient statev1.StatisticsServiceClient) {
 	if g == nil {
 		return
 	}
 	g.mu.Lock()
 	defer g.mu.Unlock()
-	if g.conn != nil {
+	if g.gameConn != nil {
 		return
 	}
-	g.conn = conn
-	g.authClient = authClient
+	g.gameConn = conn
 	g.daggerheartClient = daggerheartClient
 	g.campaignClient = campaignClient
 	g.sessionClient = sessionClient
@@ -172,6 +184,20 @@ func (g *grpcClients) Set(conn *grpc.ClientConn, authClient authv1.AuthServiceCl
 	g.statisticsClient = statisticsClient
 }
 
+// SetAuthConn stores the auth gRPC connection and client.
+func (g *grpcClients) SetAuthConn(conn *grpc.ClientConn, authClient authv1.AuthServiceClient) {
+	if g == nil {
+		return
+	}
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	if g.authConn != nil {
+		return
+	}
+	g.authConn = conn
+	g.authClient = authClient
+}
+
 // Close releases any gRPC resources held by the clients.
 func (g *grpcClients) Close() {
 	if g == nil {
@@ -179,13 +205,18 @@ func (g *grpcClients) Close() {
 	}
 	g.mu.Lock()
 	defer g.mu.Unlock()
-	if g.conn == nil {
-		return
+	if g.gameConn != nil {
+		if err := g.gameConn.Close(); err != nil {
+			log.Printf("close admin game gRPC connection: %v", err)
+		}
+		g.gameConn = nil
 	}
-	if err := g.conn.Close(); err != nil {
-		log.Printf("close admin gRPC connection: %v", err)
+	if g.authConn != nil {
+		if err := g.authConn.Close(); err != nil {
+			log.Printf("close admin auth gRPC connection: %v", err)
+		}
+		g.authConn = nil
 	}
-	g.conn = nil
 }
 
 // NewServer builds a configured admin server.
@@ -205,12 +236,21 @@ func NewServer(ctx context.Context, config Config) (*Server, error) {
 
 	clients := &grpcClients{}
 	if strings.TrimSpace(config.GRPCAddr) != "" {
-		conn, authClient, daggerheartClient, campaignClient, sessionClient, characterClient, participantClient, snapshotClient, eventClient, statisticsClient, err := dialGRPC(ctx, config)
+		conn, daggerheartClient, campaignClient, sessionClient, characterClient, participantClient, snapshotClient, eventClient, statisticsClient, err := dialGameGRPC(ctx, config)
 		if err != nil {
-			log.Printf("admin gRPC dial failed: %v", err)
-			go connectGRPCWithRetry(ctx, config, clients)
+			log.Printf("admin game gRPC dial failed: %v", err)
+			go connectGameGRPCWithRetry(ctx, config, clients)
 		} else {
-			clients.Set(conn, authClient, daggerheartClient, campaignClient, sessionClient, characterClient, participantClient, snapshotClient, eventClient, statisticsClient)
+			clients.SetGameConn(conn, daggerheartClient, campaignClient, sessionClient, characterClient, participantClient, snapshotClient, eventClient, statisticsClient)
+		}
+	}
+	if strings.TrimSpace(config.AuthAddr) != "" {
+		conn, authClient, err := dialAuthGRPC(ctx, config)
+		if err != nil {
+			log.Printf("admin auth gRPC dial failed: %v", err)
+			go connectAuthGRPCWithRetry(ctx, config, clients)
+		} else {
+			clients.SetAuthConn(conn, authClient)
 		}
 	}
 
@@ -224,6 +264,7 @@ func NewServer(ctx context.Context, config Config) (*Server, error) {
 	return &Server{
 		httpAddr:    httpAddr,
 		grpcAddr:    config.GRPCAddr,
+		authAddr:    config.AuthAddr,
 		grpcClients: clients,
 		httpServer:  httpServer,
 		adminStore:  adminStore,
@@ -296,10 +337,10 @@ func openAdminStore() (*adminsqlite.Store, error) {
 }
 
 // dialGRPC connects to the game server and returns a client.
-func dialGRPC(ctx context.Context, config Config) (*grpc.ClientConn, authv1.AuthServiceClient, daggerheartv1.DaggerheartServiceClient, statev1.CampaignServiceClient, statev1.SessionServiceClient, statev1.CharacterServiceClient, statev1.ParticipantServiceClient, statev1.SnapshotServiceClient, statev1.EventServiceClient, statev1.StatisticsServiceClient, error) {
+func dialGameGRPC(ctx context.Context, config Config) (*grpc.ClientConn, daggerheartv1.DaggerheartServiceClient, statev1.CampaignServiceClient, statev1.SessionServiceClient, statev1.CharacterServiceClient, statev1.ParticipantServiceClient, statev1.SnapshotServiceClient, statev1.EventServiceClient, statev1.StatisticsServiceClient, error) {
 	grpcAddr := strings.TrimSpace(config.GRPCAddr)
 	if grpcAddr == "" {
-		return nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil
+		return nil, nil, nil, nil, nil, nil, nil, nil, nil, nil
 	}
 	if ctx == nil {
 		ctx = context.Background()
@@ -315,10 +356,9 @@ func dialGRPC(ctx context.Context, config Config) (*grpc.ClientConn, authv1.Auth
 		grpc.WithBlock(),
 	)
 	if err != nil {
-		return nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, nil, nil, nil, nil, err
 	}
 
-	authClient := authv1.NewAuthServiceClient(conn)
 	daggerheartClient := daggerheartv1.NewDaggerheartServiceClient(conn)
 	campaignClient := statev1.NewCampaignServiceClient(conn)
 	sessionClient := statev1.NewSessionServiceClient(conn)
@@ -327,11 +367,38 @@ func dialGRPC(ctx context.Context, config Config) (*grpc.ClientConn, authv1.Auth
 	snapshotClient := statev1.NewSnapshotServiceClient(conn)
 	eventClient := statev1.NewEventServiceClient(conn)
 	statisticsClient := statev1.NewStatisticsServiceClient(conn)
-	return conn, authClient, daggerheartClient, campaignClient, sessionClient, characterClient, participantClient, snapshotClient, eventClient, statisticsClient, nil
+	return conn, daggerheartClient, campaignClient, sessionClient, characterClient, participantClient, snapshotClient, eventClient, statisticsClient, nil
 }
 
-// connectGRPCWithRetry keeps dialing until a connection is established or context ends.
-func connectGRPCWithRetry(ctx context.Context, config Config, clients *grpcClients) {
+// dialAuthGRPC connects to the auth server and returns a client.
+func dialAuthGRPC(ctx context.Context, config Config) (*grpc.ClientConn, authv1.AuthServiceClient, error) {
+	authAddr := strings.TrimSpace(config.AuthAddr)
+	if authAddr == "" {
+		return nil, nil, nil
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	dialCtx, cancel := context.WithTimeout(ctx, config.GRPCDialTimeout)
+	defer cancel()
+
+	conn, err := grpc.DialContext(
+		dialCtx,
+		authAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	authClient := authv1.NewAuthServiceClient(conn)
+	return conn, authClient, nil
+}
+
+// connectGameGRPCWithRetry keeps dialing until a connection is established or context ends.
+func connectGameGRPCWithRetry(ctx context.Context, config Config, clients *grpcClients) {
 	if clients == nil {
 		return
 	}
@@ -346,16 +413,58 @@ func connectGRPCWithRetry(ctx context.Context, config Config, clients *grpcClien
 		if ctx.Err() != nil {
 			return
 		}
-		if clients.HasConnection() {
+		if clients.HasGameConnection() {
 			return
 		}
-		conn, authClient, daggerheartClient, campaignClient, sessionClient, characterClient, participantClient, snapshotClient, eventClient, statisticsClient, err := dialGRPC(ctx, config)
+		conn, daggerheartClient, campaignClient, sessionClient, characterClient, participantClient, snapshotClient, eventClient, statisticsClient, err := dialGameGRPC(ctx, config)
 		if err == nil {
-			clients.Set(conn, authClient, daggerheartClient, campaignClient, sessionClient, characterClient, participantClient, snapshotClient, eventClient, statisticsClient)
+			clients.SetGameConn(conn, daggerheartClient, campaignClient, sessionClient, characterClient, participantClient, snapshotClient, eventClient, statisticsClient)
 			log.Printf("admin gRPC connected to %s", config.GRPCAddr)
 			return
 		}
-		log.Printf("admin gRPC dial failed: %v", err)
+		log.Printf("admin game gRPC dial failed: %v", err)
+		timer := time.NewTimer(retryDelay)
+		select {
+		case <-timer.C:
+		case <-ctx.Done():
+			timer.Stop()
+			return
+		}
+		if retryDelay < maxGRPCRetryDelay {
+			retryDelay *= 2
+			if retryDelay > maxGRPCRetryDelay {
+				retryDelay = maxGRPCRetryDelay
+			}
+		}
+	}
+}
+
+// connectAuthGRPCWithRetry keeps dialing until a connection is established or context ends.
+func connectAuthGRPCWithRetry(ctx context.Context, config Config, clients *grpcClients) {
+	if clients == nil {
+		return
+	}
+	if strings.TrimSpace(config.AuthAddr) == "" {
+		return
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	retryDelay := defaultGRPCRetryDelay
+	for {
+		if ctx.Err() != nil {
+			return
+		}
+		if clients.HasAuthConnection() {
+			return
+		}
+		conn, authClient, err := dialAuthGRPC(ctx, config)
+		if err == nil {
+			clients.SetAuthConn(conn, authClient)
+			log.Printf("admin auth gRPC connected to %s", config.AuthAddr)
+			return
+		}
+		log.Printf("admin auth gRPC dial failed: %v", err)
 		timer := time.NewTimer(retryDelay)
 		select {
 		case <-timer.C:

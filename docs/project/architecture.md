@@ -4,7 +4,7 @@
 
 Fracturing.Space is split into four layers:
 
-- **Transport layer**: Game server (`cmd/game`) + MCP bridge (`cmd/mcp`) + Admin dashboard (`cmd/admin`)
+- **Transport layer**: Game server (`cmd/game`) + Auth server (`cmd/auth`) + MCP bridge (`cmd/mcp`) + Admin dashboard (`cmd/admin`)
 - **Platform layer**: Shared infrastructure (`internal/platform/`)
 - **Domain layer**: Game systems (`internal/services/game/domain/systems/`) + Campaign model (`internal/services/game/domain/campaign/`)
 - **Storage layer**: SQLite persistence (`data/game.db`, `data/auth.db`, `data/admin.db`)
@@ -89,6 +89,13 @@ It validates inputs, applies the ruleset, and persists state.
 
 Entry point: `cmd/game`
 
+### Auth server
+
+The auth server hosts the auth gRPC API for identity data (users) and future
+authentication flows.
+
+Entry point: `cmd/auth`
+
 ### MCP bridge
 
 The MCP server exposes the same capabilities over the MCP JSON-RPC protocol.
@@ -123,7 +130,7 @@ The primary service boundaries are:
 - **Game service** (`internal/services/game/`): Canonical rules and campaign state; gRPC APIs under `internal/services/game/api/grpc/`; owns the game database.
 - **MCP service** (`internal/services/mcp/`): JSON-RPC adapter for the MCP protocol; forwards to the game service and does not own rules or state.
 - **Admin service** (`internal/services/admin/`): HTTP admin dashboard; renders UI and calls the game service for data.
-- **Auth service** (`internal/services/auth/`): Authentication domain logic; transport/API surface is planned and not yet exposed.
+- **Auth service** (`internal/services/auth/`): Authentication domain logic and gRPC API surface; owns the auth database.
 
 Non-service utilities live in shared layers:
 

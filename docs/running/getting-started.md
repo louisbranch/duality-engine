@@ -9,13 +9,13 @@
 
 ## Run locally (fastest)
 
-Start the game server, MCP bridge, and admin dashboard together:
+Start the game server, auth service, MCP bridge, and admin dashboard together:
 
 ```sh
 make run
 ```
 
-This runs the game server on `localhost:8080`, the MCP server on stdio, and the admin dashboard on `http://localhost:8082`.
+This runs the game server on `localhost:8080`, the auth server on `localhost:8083`, the MCP server on stdio, and the admin dashboard on `http://localhost:8082`.
 The MCP server will wait for the game server to be healthy before accepting requests.
 
 ## Run services individually
@@ -24,6 +24,12 @@ Start the game server:
 
 ```sh
 go run ./cmd/game
+```
+
+Start the auth server:
+
+```sh
+go run ./cmd/auth
 ```
 
 Start the MCP server after the game server starts.
@@ -35,6 +41,7 @@ go run ./cmd/mcp
 Default endpoints:
 
 - Game gRPC: `localhost:8080`
+- Auth gRPC: `localhost:8083`
 - MCP (stdio): process stdin/stdout
 - Admin: `http://localhost:8082`
 
@@ -56,20 +63,20 @@ Build the images with bake:
 docker buildx bake
 ```
 
-Run with Compose (MCP HTTP on loopback, game gRPC internal-only):
+Run with Compose (MCP HTTP on loopback, game/auth gRPC internal-only):
 
 ```sh
 docker compose up
 ```
 
-Compose uses a named volume for the game data store. To remove it:
+Compose uses a named volume for the game/auth data stores. To remove it:
 
 ```sh
 docker compose down -v
 ```
 
-On first run, Compose initializes the volume permissions so the nonroot game
-container can write the database.
+On first run, Compose initializes the volume permissions so the nonroot
+containers can write the databases.
 
 Check MCP health:
 
@@ -98,6 +105,13 @@ docker run -d --name fracturing-space-game \
   -e FRACTURING_SPACE_GAME_DB_PATH=/data/game.db \
   docker.io/louisbranch/fracturing.space-game:latest
 
+docker run -d --name fracturing-space-auth \
+  --network fracturing-space \
+  -p 127.0.0.1:8083:8083 \
+  -v /srv/fracturing-space/data:/data \
+  -e FRACTURING_SPACE_AUTH_DB_PATH=/data/auth.db \
+  docker.io/louisbranch/fracturing.space-auth:latest
+
 docker run -d --name fracturing-space-mcp \
   --network fracturing-space \
   -p 127.0.0.1:8081:8081 \
@@ -110,6 +124,7 @@ docker run -d --name fracturing-space-admin \
   -p 127.0.0.1:8082:8082 \
   -e FRACTURING_SPACE_ADMIN_ADDR=0.0.0.0:8082 \
   -e FRACTURING_SPACE_GAME_ADDR=fracturing-space-game:8080 \
+  -e FRACTURING_SPACE_AUTH_ADDR=fracturing-space-auth:8083 \
   docker.io/louisbranch/fracturing.space-admin:latest
 ```
 
@@ -121,5 +136,6 @@ Use bake to build and push all images:
 GAME_IMAGE="docker.io/louisbranch/fracturing.space-game:latest" \
 MCP_IMAGE="docker.io/louisbranch/fracturing.space-mcp:latest" \
 ADMIN_IMAGE="docker.io/louisbranch/fracturing.space-admin:latest" \
+AUTH_IMAGE="docker.io/louisbranch/fracturing.space-auth:latest" \
 docker buildx bake --push
 ```

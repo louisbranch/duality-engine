@@ -10,11 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	authv1 "github.com/louisbranch/fracturing.space/api/gen/go/auth/v1"
 	statev1 "github.com/louisbranch/fracturing.space/api/gen/go/game/v1"
 	daggerheartv1 "github.com/louisbranch/fracturing.space/api/gen/go/systems/daggerheart/v1"
-	authsqlite "github.com/louisbranch/fracturing.space/internal/services/auth/storage/sqlite"
-	authservice "github.com/louisbranch/fracturing.space/internal/services/game/api/grpc/auth"
 	gamegrpc "github.com/louisbranch/fracturing.space/internal/services/game/api/grpc/game"
 	"github.com/louisbranch/fracturing.space/internal/services/game/api/grpc/interceptors"
 	grpcmeta "github.com/louisbranch/fracturing.space/internal/services/game/api/grpc/metadata"
@@ -33,7 +30,6 @@ type Server struct {
 	grpcServer *grpc.Server
 	health     *health.Server
 	store      storage.Store
-	authStore  *authsqlite.Store
 }
 
 // New creates a configured game server listening on the provided port.
@@ -47,13 +43,6 @@ func New(port int) (*Server, error) {
 		_ = listener.Close()
 		return nil, err
 	}
-	authStore, err := openAuthStore()
-	if err != nil {
-		_ = listener.Close()
-		_ = store.Close()
-		return nil, err
-	}
-
 	stores := gamegrpc.Stores{
 		Campaign:     store,
 		Participant:  store,
@@ -78,7 +67,6 @@ func New(port int) (*Server, error) {
 		grpc.StreamInterceptor(grpcmeta.StreamServerInterceptor(nil)),
 	)
 	daggerheartService := daggerheartservice.NewDaggerheartService(random.NewSeed)
-	authService := authservice.NewAuthService(authStore)
 	campaignService := gamegrpc.NewCampaignService(stores)
 	participantService := gamegrpc.NewParticipantService(stores)
 	inviteService := gamegrpc.NewInviteService(stores)
@@ -90,7 +78,6 @@ func New(port int) (*Server, error) {
 	statisticsService := gamegrpc.NewStatisticsService(stores)
 	healthServer := health.NewServer()
 	daggerheartv1.RegisterDaggerheartServiceServer(grpcServer, daggerheartService)
-	authv1.RegisterAuthServiceServer(grpcServer, authService)
 	statev1.RegisterCampaignServiceServer(grpcServer, campaignService)
 	statev1.RegisterParticipantServiceServer(grpcServer, participantService)
 	statev1.RegisterInviteServiceServer(grpcServer, inviteService)
@@ -103,7 +90,6 @@ func New(port int) (*Server, error) {
 	grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
 	healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
 	healthServer.SetServingStatus("systems.daggerheart.v1.DaggerheartService", grpc_health_v1.HealthCheckResponse_SERVING)
-	healthServer.SetServingStatus("auth.v1.AuthService", grpc_health_v1.HealthCheckResponse_SERVING)
 	healthServer.SetServingStatus("game.v1.CampaignService", grpc_health_v1.HealthCheckResponse_SERVING)
 	healthServer.SetServingStatus("game.v1.ParticipantService", grpc_health_v1.HealthCheckResponse_SERVING)
 	healthServer.SetServingStatus("game.v1.InviteService", grpc_health_v1.HealthCheckResponse_SERVING)
@@ -119,7 +105,6 @@ func New(port int) (*Server, error) {
 		grpcServer: grpcServer,
 		health:     healthServer,
 		store:      store,
-		authStore:  authStore,
 	}, nil
 }
 
@@ -191,24 +176,6 @@ func openCampaignStore() (storage.Store, error) {
 	return store, nil
 }
 
-func openAuthStore() (*authsqlite.Store, error) {
-	path := strings.TrimSpace(os.Getenv("FRACTURING_SPACE_AUTH_DB_PATH"))
-	if path == "" {
-		path = filepath.Join("data", "auth.db")
-	}
-	if dir := filepath.Dir(path); dir != "." {
-		if err := os.MkdirAll(dir, 0o755); err != nil {
-			return nil, fmt.Errorf("create storage dir: %w", err)
-		}
-	}
-
-	store, err := authsqlite.Open(path)
-	if err != nil {
-		return nil, fmt.Errorf("open auth sqlite store: %w", err)
-	}
-	return store, nil
-}
-
 func (s *Server) closeStores() {
 	if s == nil {
 		return
@@ -216,11 +183,6 @@ func (s *Server) closeStores() {
 	if s.store != nil {
 		if err := s.store.Close(); err != nil {
 			log.Printf("close campaign store: %v", err)
-		}
-	}
-	if s.authStore != nil {
-		if err := s.authStore.Close(); err != nil {
-			log.Printf("close auth store: %v", err)
 		}
 	}
 }

@@ -20,6 +20,10 @@ FROM base AS build-admin
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /out/admin ./cmd/admin
 
+FROM base AS build-auth
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o /out/auth ./cmd/auth
+
 FROM gcr.io/distroless/static-debian12:nonroot AS game
 
 WORKDIR /app
@@ -49,3 +53,13 @@ COPY --from=build-admin /out/admin /app/admin
 EXPOSE 8082
 
 ENTRYPOINT ["/app/admin"]
+
+FROM gcr.io/distroless/static-debian12:nonroot AS auth
+
+WORKDIR /app
+
+COPY --from=build-auth /out/auth /app/auth
+
+EXPOSE 8083
+
+ENTRYPOINT ["/app/auth"]

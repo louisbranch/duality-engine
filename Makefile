@@ -42,6 +42,7 @@ run:
 	    wait || true; \
 	  }; \
 	  go run ./cmd/game 2>&1 & pids+=($$!); \
+	  go run ./cmd/auth 2>&1 & pids+=($$!); \
 	  go run ./cmd/mcp 2>&1 & pids+=($$!); \
 	  go run ./cmd/admin 2>&1 & pids+=($$!); \
 	  trap "cleanup $${pids[*]}" EXIT; \
