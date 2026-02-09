@@ -14,8 +14,12 @@ variable "ADMIN_IMAGE" {
   default = "docker.io/louisbranch/fracturing.space-admin:dev"
 }
 
+variable "AUTH_IMAGE" {
+  default = "docker.io/louisbranch/fracturing.space-auth:dev"
+}
+
 group "default" {
-  targets = ["game", "mcp", "admin"]
+  targets = ["game", "mcp", "admin", "auth"]
 }
 
 target "base" {
@@ -42,4 +46,10 @@ target "admin" {
   inherits = ["base"]
   target   = "admin"
   tags     = ["${ADMIN_IMAGE}"]
+}
+
+target "auth" {
+  inherits = ["base"]
+  target   = "auth"
+  tags     = ["${AUTH_IMAGE}"]
 }

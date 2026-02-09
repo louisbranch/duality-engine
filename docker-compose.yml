@@ -22,6 +22,23 @@ services:
     ports:
       - "127.0.0.1:8080:8080"
 
+  auth:
+    build:
+      context: .
+      target: auth
+      args:
+        GO_VERSION: ${GO_VERSION:-1.25.6}
+    image: docker.io/louisbranch/fracturing.space-auth:dev
+    depends_on:
+      init-data:
+        condition: service_completed_successfully
+    environment:
+      - FRACTURING_SPACE_AUTH_DB_PATH=/data/auth.db
+    volumes:
+      - fracturing-space-data:/data
+    ports:
+      - "127.0.0.1:8083:8083"
+
   mcp:
     build:
       context: .
@@ -44,9 +61,11 @@ services:
     image: docker.io/louisbranch/fracturing.space-admin:dev
     depends_on:
       - game
+      - auth
     environment:
       - FRACTURING_SPACE_ADMIN_ADDR=0.0.0.0:8082
       - FRACTURING_SPACE_GAME_ADDR=game:8080
+      - FRACTURING_SPACE_AUTH_ADDR=auth:8083
     ports:
       - "127.0.0.1:8082:8082"
 

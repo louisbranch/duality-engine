@@ -19,6 +19,8 @@ var (
 	defaultHTTPAddr = ":8082"
 	// defaultGRPCAddr sets the fallback game server address.
 	defaultGRPCAddr = "localhost:8080"
+	// defaultAuthAddr sets the fallback auth server address.
+	defaultAuthAddr = "localhost:8083"
 )
 
 // envOrDefault returns the trimmed environment value or a fallback.
@@ -36,6 +38,7 @@ func envOrDefault(keys []string, fallback string) string {
 func main() {
 	httpAddr := flag.String("http-addr", envOrDefault([]string{"FRACTURING_SPACE_ADMIN_ADDR"}, defaultHTTPAddr), "HTTP listen address")
 	grpcAddr := flag.String("grpc-addr", envOrDefault([]string{"FRACTURING_SPACE_GAME_ADDR"}, defaultGRPCAddr), "game server address")
+	authAddr := flag.String("auth-addr", envOrDefault([]string{"FRACTURING_SPACE_AUTH_ADDR"}, defaultAuthAddr), "auth server address")
 	flag.Parse()
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -44,6 +47,7 @@ func main() {
 	server, err := admin.NewServer(ctx, admin.Config{
 		HTTPAddr:        *httpAddr,
 		GRPCAddr:        *grpcAddr,
+		AuthAddr:        *authAddr,
 		GRPCDialTimeout: 2 * time.Second,
 	})
 	if err != nil {
