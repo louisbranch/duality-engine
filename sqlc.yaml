@@ -2,7 +2,9 @@ version: "2"
 sql:
   - engine: "sqlite"
     queries: "internal/services/game/storage/sqlite/queries"
-    schema: "internal/services/game/storage/sqlite/migrations"
+    schema:
+      - "internal/services/game/storage/sqlite/migrations/events"
+      - "internal/services/game/storage/sqlite/migrations/projections"
     gen:
       go:
         package: "db"

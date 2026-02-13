@@ -18,7 +18,19 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-const timeFormat = time.RFC3339Nano
+const authStatisticsQuery = `
+SELECT COUNT(*)
+FROM users
+WHERE (?1 IS NULL OR created_at >= ?1);
+`
+
+func toMillis(value time.Time) int64 {
+	return value.UTC().UnixMilli()
+}
+
+func fromMillis(value int64) time.Time {
+	return time.UnixMilli(value).UTC()
+}
 
 // Store provides a SQLite-backed store implementing auth storage interfaces.
 type Store struct {
@@ -142,8 +154,8 @@ func (s *Store) PutUser(ctx context.Context, u user.User) error {
 	return s.q.PutUser(ctx, db.PutUserParams{
 		ID:          u.ID,
 		DisplayName: u.DisplayName,
-		CreatedAt:   u.CreatedAt.Format(timeFormat),
-		UpdatedAt:   u.UpdatedAt.Format(timeFormat),
+		CreatedAt:   toMillis(u.CreatedAt),
+		UpdatedAt:   toMillis(u.UpdatedAt),
 	})
 }
 
@@ -214,22 +226,37 @@ func (s *Store) ListUsers(ctx context.Context, pageSize int, pageToken string) (
 	return page, nil
 }
 
-func dbUserToDomain(row db.User) (user.User, error) {
-	createdAt, err := time.Parse(timeFormat, row.CreatedAt)
-	if err != nil {
-		return user.User{}, fmt.Errorf("parse created_at: %w", err)
+// GetAuthStatistics returns aggregate counts across auth data.
+func (s *Store) GetAuthStatistics(ctx context.Context, since *time.Time) (storage.AuthStatistics, error) {
+	if err := ctx.Err(); err != nil {
+		return storage.AuthStatistics{}, err
 	}
-	updatedAt, err := time.Parse(timeFormat, row.UpdatedAt)
-	if err != nil {
-		return user.User{}, fmt.Errorf("parse updated_at: %w", err)
+	if s == nil || s.sqlDB == nil {
+		return storage.AuthStatistics{}, fmt.Errorf("storage is not configured")
 	}
 
+	var sinceValue any
+	if since != nil {
+		sinceValue = toMillis(*since)
+	}
+
+	var count int64
+	row := s.sqlDB.QueryRowContext(ctx, authStatisticsQuery, sinceValue)
+	if err := row.Scan(&count); err != nil {
+		return storage.AuthStatistics{}, fmt.Errorf("get auth statistics: %w", err)
+	}
+
+	return storage.AuthStatistics{UserCount: count}, nil
+}
+
+func dbUserToDomain(row db.User) (user.User, error) {
 	return user.User{
 		ID:          row.ID,
 		DisplayName: row.DisplayName,
-		CreatedAt:   createdAt,
-		UpdatedAt:   updatedAt,
+		CreatedAt:   fromMillis(row.CreatedAt),
+		UpdatedAt:   fromMillis(row.UpdatedAt),
 	}, nil
 }
 
 var _ storage.UserStore = (*Store)(nil)
+var _ storage.StatisticsStore = (*Store)(nil)

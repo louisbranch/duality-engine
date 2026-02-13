@@ -265,7 +265,8 @@ func (q *Queries) InitEventSeq(ctx context.Context, campaignID string) error {
 const listEvents = `-- name: ListEvents :many
 SELECT campaign_id, seq, event_hash, prev_event_hash, chain_hash, signature_key_id, event_signature,
     timestamp, event_type, session_id, request_id, invocation_id, actor_type, actor_id,
-    entity_type, entity_id, payload_json FROM events
+    entity_type, entity_id, payload_json
+FROM events
 WHERE campaign_id = ? AND seq > ?
 ORDER BY seq
 LIMIT ?
@@ -321,7 +322,8 @@ func (q *Queries) ListEvents(ctx context.Context, arg ListEventsParams) ([]Event
 const listEventsBySession = `-- name: ListEventsBySession :many
 SELECT campaign_id, seq, event_hash, prev_event_hash, chain_hash, signature_key_id, event_signature,
     timestamp, event_type, session_id, request_id, invocation_id, actor_type, actor_id,
-    entity_type, entity_id, payload_json FROM events
+    entity_type, entity_id, payload_json
+FROM events
 WHERE campaign_id = ? AND session_id = ? AND seq > ?
 ORDER BY seq
 LIMIT ?

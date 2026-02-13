@@ -4,9 +4,72 @@
 
 package db
 
+type OauthAccessToken struct {
+	Token     string `json:"token"`
+	ClientID  string `json:"client_id"`
+	UserID    string `json:"user_id"`
+	Scope     string `json:"scope"`
+	ExpiresAt string `json:"expires_at"`
+}
+
+type OauthAuthorizationCode struct {
+	Code                string `json:"code"`
+	ClientID            string `json:"client_id"`
+	UserID              string `json:"user_id"`
+	RedirectUri         string `json:"redirect_uri"`
+	CodeChallenge       string `json:"code_challenge"`
+	CodeChallengeMethod string `json:"code_challenge_method"`
+	Scope               string `json:"scope"`
+	State               string `json:"state"`
+	ExpiresAt           string `json:"expires_at"`
+	Used                int64  `json:"used"`
+}
+
+type OauthExternalIdentity struct {
+	ID             string `json:"id"`
+	Provider       string `json:"provider"`
+	ProviderUserID string `json:"provider_user_id"`
+	UserID         string `json:"user_id"`
+	AccessToken    string `json:"access_token"`
+	RefreshToken   string `json:"refresh_token"`
+	Scope          string `json:"scope"`
+	ExpiresAt      string `json:"expires_at"`
+	IDToken        string `json:"id_token"`
+	UpdatedAt      string `json:"updated_at"`
+}
+
+type OauthPendingAuthorization struct {
+	ID                  string `json:"id"`
+	ResponseType        string `json:"response_type"`
+	ClientID            string `json:"client_id"`
+	RedirectUri         string `json:"redirect_uri"`
+	Scope               string `json:"scope"`
+	State               string `json:"state"`
+	CodeChallenge       string `json:"code_challenge"`
+	CodeChallengeMethod string `json:"code_challenge_method"`
+	UserID              string `json:"user_id"`
+	ExpiresAt           string `json:"expires_at"`
+}
+
+type OauthProviderState struct {
+	State        string `json:"state"`
+	Provider     string `json:"provider"`
+	RedirectUri  string `json:"redirect_uri"`
+	CodeVerifier string `json:"code_verifier"`
+	ExpiresAt    string `json:"expires_at"`
+}
+
+type OauthUserCredential struct {
+	UserID       string `json:"user_id"`
+	Username     string `json:"username"`
+	PasswordHash string `json:"password_hash"`
+	CreatedAt    string `json:"created_at"`
+	UpdatedAt    string `json:"updated_at"`
+}
+
 type User struct {
 	ID          string `json:"id"`
 	DisplayName string `json:"display_name"`
-	CreatedAt   string `json:"created_at"`
-	UpdatedAt   string `json:"updated_at"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
 }

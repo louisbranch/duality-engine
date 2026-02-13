@@ -76,11 +76,14 @@ func New(port int, httpAddr string) (*Server, error) {
 
 	grpcServer := grpc.NewServer()
 	authService := authservice.NewAuthService(store)
+	statisticsService := authservice.NewStatisticsService(store)
 	healthServer := health.NewServer()
 	authv1.RegisterAuthServiceServer(grpcServer, authService)
+	authv1.RegisterStatisticsServiceServer(grpcServer, statisticsService)
 	grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
 	healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
 	healthServer.SetServingStatus("auth.v1.AuthService", grpc_health_v1.HealthCheckResponse_SERVING)
+	healthServer.SetServingStatus("auth.v1.StatisticsService", grpc_health_v1.HealthCheckResponse_SERVING)
 
 	return &Server{
 		listener:     listener,
