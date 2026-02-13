@@ -1,6 +1,6 @@
 // Package metadata provides utilities for handling gRPC request metadata.
 //
-// It defines standard header keys used across Fracturing.Space services and
+// It defines standard header keys used across project services and
 // provides interceptors to enforce request IDs and invocation IDs.
 //
 // Header constants include:

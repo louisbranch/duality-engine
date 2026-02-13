@@ -124,7 +124,7 @@ func FirstMetadataValue(md metadata.MD, key string) string {
 	return ""
 }
 
-// UnaryServerInterceptor enforces Fracturing.Space request metadata on unary calls.
+// UnaryServerInterceptor enforces project request metadata on unary calls.
 func UnaryServerInterceptor(idGenerator func() (string, error)) grpc.UnaryServerInterceptor {
 	if idGenerator == nil {
 		idGenerator = id.NewID
@@ -145,7 +145,7 @@ func UnaryServerInterceptor(idGenerator func() (string, error)) grpc.UnaryServer
 	}
 }
 
-// StreamServerInterceptor enforces Fracturing.Space request metadata on streaming calls.
+// StreamServerInterceptor enforces project request metadata on streaming calls.
 func StreamServerInterceptor(idGenerator func() (string, error)) grpc.StreamServerInterceptor {
 	if idGenerator == nil {
 		idGenerator = id.NewID

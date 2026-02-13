@@ -5,7 +5,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// Domain is the error domain for Fracturing.Space errors.
+// Domain is the error domain for project errors.
 const Domain = "github.com/louisbranch/fracturing.space"
 
 // Error is the domain error type with structured metadata.

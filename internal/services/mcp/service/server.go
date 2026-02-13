@@ -12,6 +12,7 @@ import (
 
 	statev1 "github.com/louisbranch/fracturing.space/api/gen/go/game/v1"
 	daggerheartv1 "github.com/louisbranch/fracturing.space/api/gen/go/systems/daggerheart/v1"
+	"github.com/louisbranch/fracturing.space/internal/platform/branding"
 	"github.com/louisbranch/fracturing.space/internal/services/mcp/conformance"
 	"github.com/louisbranch/fracturing.space/internal/services/mcp/domain"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -21,11 +22,12 @@ import (
 )
 
 const (
-	// serverName identifies this MCP server to clients.
-	serverName = "Fracturing.Space MCP"
 	// serverVersion identifies the MCP server version.
 	serverVersion = "0.1.0"
 )
+
+// serverName identifies this MCP server to clients.
+var serverName = branding.AppName + " MCP"
 
 // TransportKind identifies the MCP transport implementation.
 type TransportKind string

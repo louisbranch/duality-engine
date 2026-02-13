@@ -11,6 +11,7 @@ import (
 	authv1 "github.com/louisbranch/fracturing.space/api/gen/go/auth/v1"
 	commonv1 "github.com/louisbranch/fracturing.space/api/gen/go/common/v1"
 	statev1 "github.com/louisbranch/fracturing.space/api/gen/go/game/v1"
+	"github.com/louisbranch/fracturing.space/internal/platform/branding"
 	"github.com/louisbranch/fracturing.space/internal/services/admin/i18n"
 	grpcmeta "github.com/louisbranch/fracturing.space/internal/services/game/api/grpc/metadata"
 	"google.golang.org/grpc"
@@ -33,7 +34,7 @@ func TestWebPageRendering(t *testing.T) {
 			path: "/",
 			contains: []string{
 				"<!doctype html>",
-				"Fracturing.Space",
+				branding.AppName,
 			},
 			notContains: []string{
 				"<h2>Campaigns</h2>",
@@ -44,7 +45,7 @@ func TestWebPageRendering(t *testing.T) {
 			path: "/campaigns",
 			contains: []string{
 				"<!doctype html>",
-				"Fracturing.Space",
+				branding.AppName,
 				"<h2>Campaigns</h2>",
 			},
 		},
@@ -57,7 +58,7 @@ func TestWebPageRendering(t *testing.T) {
 			},
 			notContains: []string{
 				"<!doctype html>",
-				"Fracturing.Space",
+				branding.AppName,
 				"<html",
 			},
 		},
@@ -66,7 +67,7 @@ func TestWebPageRendering(t *testing.T) {
 			path: "/campaigns/camp-123",
 			contains: []string{
 				"<!doctype html>",
-				"Fracturing.Space",
+				branding.AppName,
 				"Campaign service unavailable.",
 				"<h2>Campaign</h2>",
 			},
@@ -81,7 +82,7 @@ func TestWebPageRendering(t *testing.T) {
 			},
 			notContains: []string{
 				"<!doctype html>",
-				"Fracturing.Space",
+				branding.AppName,
 				"<html",
 			},
 		},

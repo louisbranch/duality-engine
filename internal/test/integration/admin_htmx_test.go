@@ -12,6 +12,7 @@ import (
 
 	commonv1 "github.com/louisbranch/fracturing.space/api/gen/go/common/v1"
 	statev1 "github.com/louisbranch/fracturing.space/api/gen/go/game/v1"
+	"github.com/louisbranch/fracturing.space/internal/platform/branding"
 	"github.com/louisbranch/fracturing.space/internal/services/admin"
 	grpcmeta "github.com/louisbranch/fracturing.space/internal/services/game/api/grpc/metadata"
 	"google.golang.org/grpc"
@@ -120,7 +121,7 @@ func TestAdminHTMXIntegration(t *testing.T) {
 
 		assertHTMLContains(t, body,
 			"<!doctype html>",
-			"Fracturing.Space",
+			branding.AppName,
 			"Detail Test Campaign",
 			campaignID,
 		)
@@ -210,7 +211,7 @@ func TestAdminHTMXIntegration(t *testing.T) {
 
 		assertHTMLContains(t, body,
 			"<!doctype html>",
-			"Fracturing.Space",
+			branding.AppName,
 			"<h2>Dashboard</h2>",
 		)
 	})
@@ -293,7 +294,7 @@ func TestAdminHTMXIntegration(t *testing.T) {
 
 		assertHTMLContains(t, body,
 			"<!doctype html>",
-			"Fracturing.Space",
+			branding.AppName,
 			"<h3>Sessions</h3>",
 		)
 	})
@@ -393,7 +394,7 @@ func TestAdminHTMXIntegration(t *testing.T) {
 
 		assertHTMLContains(t, body,
 			"<!doctype html>",
-			"Fracturing.Space",
+			branding.AppName,
 			"<h3>Session Info</h3>",
 			"<h3>Event Timeline</h3>",
 		)
@@ -497,7 +498,7 @@ func TestAdminHTMXIntegration(t *testing.T) {
 
 		assertHTMLContains(t, body,
 			"<!doctype html>",
-			"Fracturing.Space",
+			branding.AppName,
 			"<h3>Characters</h3>",
 		)
 	})
@@ -622,7 +623,7 @@ func TestAdminHTMXIntegration(t *testing.T) {
 
 		assertHTMLContains(t, body,
 			"<!doctype html>",
-			"Fracturing.Space",
+			branding.AppName,
 			"<h3>Character Info</h3>",
 		)
 	})
@@ -696,7 +697,7 @@ func TestAdminHTMXIntegration(t *testing.T) {
 
 		assertHTMLContains(t, body,
 			"<!doctype html>",
-			"Fracturing.Space",
+			branding.AppName,
 			"<h3>Participants</h3>",
 		)
 	})
@@ -827,7 +828,7 @@ func TestAdminHTMXIntegration(t *testing.T) {
 
 		assertHTMLContains(t, body,
 			"<!doctype html>",
-			"Fracturing.Space",
+			branding.AppName,
 			"<h3>Event Log</h3>",
 		)
 	})

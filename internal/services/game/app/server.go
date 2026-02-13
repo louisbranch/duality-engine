@@ -27,7 +27,7 @@ import (
 	grpc_health_v1 "google.golang.org/grpc/health/grpc_health_v1"
 )
 
-// Server hosts the Fracturing.Space game server.
+// Server hosts the game service.
 type Server struct {
 	listener   net.Listener
 	grpcServer *grpc.Server
