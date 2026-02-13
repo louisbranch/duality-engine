@@ -111,8 +111,8 @@ ON CONFLICT(id) DO UPDATE SET
 type PutUserParams struct {
 	ID          string `json:"id"`
 	DisplayName string `json:"display_name"`
-	CreatedAt   string `json:"created_at"`
-	UpdatedAt   string `json:"updated_at"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
 }
 
 func (q *Queries) PutUser(ctx context.Context, arg PutUserParams) error {
