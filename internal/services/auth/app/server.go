@@ -23,7 +23,7 @@ import (
 	grpc_health_v1 "google.golang.org/grpc/health/grpc_health_v1"
 )
 
-// Server hosts the Fracturing.Space auth server.
+// Server hosts the auth service.
 type Server struct {
 	listener     net.Listener
 	grpcServer   *grpc.Server

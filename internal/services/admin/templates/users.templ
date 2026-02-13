@@ -2,7 +2,7 @@ package templates
 
 // UsersFullPage renders the users page in the base layout.
 templ UsersFullPage(view UsersPageView, page PageContext) {
-	@Layout(T(page.Loc, "title.users"), "Users", page) {
+	@Layout(T(page.Loc, "title.users", AppName()), "Users", page) {
 		@UsersPage(view, page.Loc)
 	}
 }

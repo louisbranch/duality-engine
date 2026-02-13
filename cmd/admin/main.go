@@ -1,4 +1,4 @@
-// Package main hosts the Fracturing.Space admin dashboard.
+// Package main hosts the admin dashboard service.
 package main
 
 import (

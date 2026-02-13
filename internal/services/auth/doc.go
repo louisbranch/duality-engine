@@ -1,4 +1,4 @@
-// Package auth defines the authentication boundary for Fracturing.Space.
+// Package auth defines the authentication boundary for the project.
 //
 // It is an umbrella package for the auth server, OAuth flows, user model,
 // and storage implementations used by the gRPC auth service.
