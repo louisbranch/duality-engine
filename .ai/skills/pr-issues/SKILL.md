@@ -20,7 +20,7 @@ Use this skill when the user asks to:
 ## Core Workflow
 
 1. **Fetch PR context**
-   - Use `gh pr view` for title, branch, checks, and overall status.
+   - Get the PR number with `gh pr view --json number`
    - Always fetch inline review comments (file/line) using the PR comments endpoint.
 
 2. **Wait for automated reviewer (if expected)**
