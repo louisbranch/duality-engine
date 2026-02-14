@@ -43,7 +43,7 @@ func Layout(title string, activePage string, page PageContext) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"dark\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" data-theme=\"night\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -56,7 +56,7 @@ func Layout(title string, activePage string, page PageContext) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</title><link rel=\"stylesheet\" href=\"https://unpkg.com/papercss@1.9.2/dist/paper.min.css\" integrity=\"sha384-wMyZfjGAQ1ZgZgPm5qchzSB5HnjMhkNztmQTcnqZSdk5nrTqgiitoN+nL0XgczcG\" crossorigin=\"anonymous\"><link rel=\"stylesheet\" href=\"/static/theme.css\"><script src=\"https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js\"></script></head><body>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</title><link href=\"https://cdn.jsdelivr.net/npm/daisyui@5.5.18\" rel=\"stylesheet\" type=\"text/css\" integrity=\"sha384-ww1btmC3Ah3rEb6jt/coOxyQ9JYMoxQpFSB/bxdE20ZYMK4kWSb+TwcgbHR/GFCq\" crossorigin=\"anonymous\"><link href=\"https://cdn.jsdelivr.net/npm/daisyui@5.5.18/theme/night.css\" rel=\"stylesheet\" type=\"text/css\" integrity=\"sha384-ct77NF8TqvORUyD+5Lztd6YSkLycHMPcXYpANNBLLENMAYgVm+EZ41dZXMZdXrT3\" crossorigin=\"anonymous\"><script src=\"https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.18\" integrity=\"sha384-WrpyCFNrMmN/IC7KmMNiXxIouXEFpoDIuJ2P+ys++uYEzegAW2MSl+X6Unsahaij\" crossorigin=\"anonymous\"></script><link rel=\"stylesheet\" href=\"/static/theme.css\"><script src=\"https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js\" integrity=\"sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2\" crossorigin=\"anonymous\"></script></head><body>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -64,7 +64,7 @@ func Layout(title string, activePage string, page PageContext) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"paper container margin-top\" id=\"main\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"max-w-screen-xl mx-auto px-4 pt-24\" id=\"main\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -72,7 +72,7 @@ func Layout(title string, activePage string, page PageContext) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><script>\n\t\t\t\t// Make table rows with links in first cell clickable\n\t\t\t\tfunction initClickableRows() {\n\t\t\t\t\tdocument.querySelectorAll('tbody tr').forEach(function(row) {\n\t\t\t\t\t\tvar link = row.querySelector('td:first-child a');\n\t\t\t\t\t\tif (link && !row.hasAttribute('data-href')) {\n\t\t\t\t\t\t\trow.setAttribute('data-href', link.getAttribute('href'));\n\t\t\t\t\t\t\trow.addEventListener('click', function(e) {\n\t\t\t\t\t\t\t\tif (e.target.tagName !== 'A') {\n\t\t\t\t\t\t\t\t\tlink.click();\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\tdocument.addEventListener('DOMContentLoaded', initClickableRows);\n\t\t\t\tdocument.addEventListener('htmx:afterSwap', initClickableRows);\n\t\t\t</script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><script>\n\t\t\t\t// Make table rows with links in first cell clickable\n\t\t\t\tfunction initClickableRows() {\n\t\t\t\t\tdocument.querySelectorAll('tbody tr').forEach(function(row) {\n\t\t\t\t\t\tvar link = row.querySelector('td:first-child a');\n\t\t\t\t\t\tif (link && !row.hasAttribute('data-href')) {\n\t\t\t\t\t\t\trow.setAttribute('data-href', link.getAttribute('href'));\n\t\t\t\t\t\t\trow.addEventListener('click', function(e) {\n\t\t\t\t\t\t\t\tif (e.target.tagName !== 'A') {\n\t\t\t\t\t\t\t\t\tlink.click();\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\tfunction updateLanguageLinks() {\n\t\t\t\t\tvar links = document.querySelectorAll('[data-lang]');\n\t\t\t\t\tif (!links.length) {\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tvar current = new URL(window.location.href);\n\t\t\t\t\tlinks.forEach(function(link) {\n\t\t\t\t\t\tvar lang = link.getAttribute('data-lang');\n\t\t\t\t\t\tif (!lang) {\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tvar next = new URL(current);\n\t\t\t\t\t\tnext.searchParams.set('lang', lang);\n\t\t\t\t\t\tlink.setAttribute('href', next.pathname + next.search + next.hash);\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t\tdocument.addEventListener('DOMContentLoaded', initClickableRows);\n\t\t\t\tdocument.addEventListener('DOMContentLoaded', updateLanguageLinks);\n\t\t\t\tdocument.addEventListener('htmx:afterSwap', initClickableRows);\n\t\t\t\tdocument.addEventListener('htmx:afterSwap', updateLanguageLinks);\n\t\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

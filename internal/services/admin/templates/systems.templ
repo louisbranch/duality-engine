@@ -9,22 +9,18 @@ templ SystemsFullPage(page PageContext) {
 
 // SystemsPage renders the systems page content.
 templ SystemsPage(loc Localizer) {
-	<div class="row flex-spaces">
-		<h2>{T(loc, "systems.heading")}</h2>
-	</div>
+	@PageHeader(PageHeading{Title: T(loc, "systems.heading")})
 	@SystemsLoading(loc)
 }
 
 // SystemsLoading renders the HTMX loading placeholder.
 templ SystemsLoading(loc Localizer) {
-	<div hx-get="/systems/table" hx-trigger="load" hx-swap="outerHTML">
-		<p>{T(loc, "systems.loading")}</p>
-	</div>
+	@LazyLoad("/systems/table", T(loc, "systems.loading"))
 }
 
 // SystemsTable renders a systems table or a message when empty.
 templ SystemsTable(rows []SystemRow, message string, loc Localizer) {
-	<table class="table-hover">
+	<table class="table table-zebra">
 		<thead>
 			<tr>
 				<th>{T(loc, "systems.table.system")}</th>
@@ -43,18 +39,14 @@ templ SystemsTable(rows []SystemRow, message string, loc Localizer) {
 			for _, row := range rows {
 				<tr>
 					<td>
-						<a
-							href={ templ.SafeURL(row.DetailURL) }
-							hx-get={ row.DetailURL }
-							hx-target="#main"
-							hx-swap="innerHTML"
-							hx-push-url="true"
-						>{row.Name}</a>
+						@NavLink(row.DetailURL) {
+							{row.Name}
+						}
 					</td>
 					<td>
 						{row.Version}
 						if row.IsDefault {
-							<span class="badge secondary margin-left">{T(loc, "systems.default")}</span>
+							<span class="badge badge-secondary ml-2">{T(loc, "systems.default")}</span>
 						}
 					</td>
 					<td>{row.ImplementationStage}</td>
@@ -76,18 +68,18 @@ templ SystemDetailFullPage(detail SystemDetail, message string, page PageContext
 // SystemDetailPage renders a single system detail page.
 templ SystemDetailPage(detail SystemDetail, message string, loc Localizer) {
 	if message != "" {
-		<h2>{T(loc, "systems.detail.heading")}</h2>
+		@PageHeader(PageHeading{Breadcrumbs: []Breadcrumb{{T(loc, "nav.systems"), "/systems"}, {T(loc, "systems.detail.heading"), ""}}, Title: T(loc, "systems.detail.heading")})
 		<p>{message}</p>
 	} else {
-		<h2>{detail.Name}</h2>
-		<table>
+		@PageHeader(PageHeading{Breadcrumbs: []Breadcrumb{{T(loc, "nav.systems"), "/systems"}, {detail.Name, ""}}, Title: detail.Name})
+		<table class="table table-zebra">
 			<tbody>
 				<tr><td><strong>{T(loc, "systems.detail.id")}</strong></td><td><code>{detail.ID}</code></td></tr>
-				<tr><td><strong>{T(loc, "systems.detail.name")}</strong></td><td>{detail.Name}</td></tr>
-				<tr><td><strong>{T(loc, "systems.detail.version")}</strong></td><td>{detail.Version}</td></tr>
-				<tr><td><strong>{T(loc, "systems.detail.implementation")}</strong></td><td>{detail.ImplementationStage}</td></tr>
-				<tr><td><strong>{T(loc, "systems.detail.status")}</strong></td><td>{detail.OperationalStatus}</td></tr>
-				<tr><td><strong>{T(loc, "systems.detail.access")}</strong></td><td>{detail.AccessLevel}</td></tr>
+				@DetailRow(T(loc, "systems.detail.name"), detail.Name)
+				@DetailRow(T(loc, "systems.detail.version"), detail.Version)
+				@DetailRow(T(loc, "systems.detail.implementation"), detail.ImplementationStage)
+				@DetailRow(T(loc, "systems.detail.status"), detail.OperationalStatus)
+				@DetailRow(T(loc, "systems.detail.access"), detail.AccessLevel)
 				<tr><td><strong>{T(loc, "systems.detail.default")}</strong></td><td>
 					if detail.IsDefault {
 						{T(loc, "label.yes")}

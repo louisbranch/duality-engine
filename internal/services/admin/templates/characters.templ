@@ -9,21 +9,16 @@ templ CharactersListFullPage(campaignID string, campaignName string, page PageCo
 
 // CharactersListPage renders the characters list content.
 templ CharactersListPage(campaignID string, campaignName string, loc Localizer) {
-	<h2>{campaignName}</h2>
-	@CampaignSubNav(campaignID, "characters", loc)
-	<h3>{T(loc, "characters.heading")}</h3>
-	@CharactersLoading(campaignID, loc)
+	@PageHeader(PageHeading{Breadcrumbs: []Breadcrumb{{T(loc, "nav.campaigns"), "/campaigns"}, {campaignName, ""}}, Title: campaignName})
+	@CampaignSubNav(campaignID, "characters", loc) {
+		<h3>{T(loc, "characters.heading")}</h3>
+		@CharactersLoading(campaignID, loc)
+	}
 }
 
 // CharactersLoading renders the HTMX loading placeholder.
 templ CharactersLoading(campaignID string, loc Localizer) {
-	<div
-		hx-get={ "/campaigns/" + campaignID + "/characters/table" }
-		hx-trigger="load"
-		hx-swap="outerHTML"
-	>
-		<p>{T(loc, "characters.loading")}</p>
-	</div>
+	@LazyLoad("/campaigns/"+campaignID+"/characters/table", T(loc, "characters.loading"))
 }
 
 // CharactersTable renders the characters table.
@@ -31,7 +26,7 @@ templ CharactersTable(rows []CharacterRow, message string, loc Localizer) {
 	if len(rows) == 0 {
 		@EmptyState(message)
 	} else {
-		<table class="table-hover">
+		<table class="table table-zebra">
 			<thead>
 				<tr>
 					<th>{T(loc, "characters.table.name")}</th>
@@ -43,13 +38,9 @@ templ CharactersTable(rows []CharacterRow, message string, loc Localizer) {
 				for _, row := range rows {
 					<tr>
 						<td>
-							<a
-								href={ templ.SafeURL("/campaigns/" + row.CampaignID + "/characters/" + row.ID) }
-								hx-get={ "/campaigns/" + row.CampaignID + "/characters/" + row.ID }
-								hx-target="#main"
-								hx-swap="innerHTML"
-								hx-push-url="true"
-							>{row.Name}</a>
+							@NavLink("/campaigns/" + row.CampaignID + "/characters/" + row.ID) {
+								{row.Name}
+							}
 						</td>
 						<td>@StatusBadge(row.Kind, "secondary")</td>
 						<td>{row.Controller}</td>
@@ -61,62 +52,49 @@ templ CharactersTable(rows []CharacterRow, message string, loc Localizer) {
 }
 
 // CharacterSheetFullPage renders the character sheet in the base layout.
-templ CharacterSheetFullPage(sheet CharacterSheetView, page PageContext) {
+templ CharacterSheetFullPage(sheet CharacterSheetView, activePage string, page PageContext) {
 	@Layout(T(page.Loc, "title.character_sheet", sheet.Character.GetName(), AppName()), "Campaigns", page) {
-		@CharacterSheetPage(sheet, page.Loc)
+		@CharacterSheetPage(sheet, activePage, page.Loc)
 	}
 }
 
 // CharacterSheetPage renders the character sheet content.
-templ CharacterSheetPage(sheet CharacterSheetView, loc Localizer) {
-	<ul class="breadcrumb">
-		<li>
-			<a
-				href="/campaigns"
-				hx-get="/campaigns"
-				hx-target="#main"
-				hx-swap="innerHTML"
-				hx-push-url="true"
-			>{T(loc, "nav.campaigns")}</a>
-		</li>
-		<li>
-			<a
-				href={ templ.SafeURL("/campaigns/" + sheet.CampaignID) }
-				hx-get={ "/campaigns/" + sheet.CampaignID }
-				hx-target="#main"
-				hx-swap="innerHTML"
-				hx-push-url="true"
-			>{sheet.CampaignName}</a>
-		</li>
-		<li>
-			<a
-				href={ templ.SafeURL("/campaigns/" + sheet.CampaignID + "/characters") }
-				hx-get={ "/campaigns/" + sheet.CampaignID + "/characters" }
-				hx-target="#main"
-				hx-swap="innerHTML"
-				hx-push-url="true"
-			>{T(loc, "characters.heading")}</a>
-		</li>
-		<li>{sheet.Character.GetName()}</li>
-	</ul>
-	<h2>{sheet.Character.GetName()}</h2>
+templ CharacterSheetPage(sheet CharacterSheetView, activePage string, loc Localizer) {
+	@PageHeader(PageHeading{Breadcrumbs: []Breadcrumb{{T(loc, "nav.campaigns"), "/campaigns"}, {sheet.CampaignName, "/campaigns/" + sheet.CampaignID}, {T(loc, "characters.heading"), "/campaigns/" + sheet.CampaignID + "/characters"}, {sheet.Character.GetName(), ""}}, Title: sheet.Character.GetName()})
+	if activePage == "activity" {
+		@CharacterSubNav(sheet.CampaignID, sheet.Character.GetId(), "activity", loc) {
+			@CharacterActivityTab(sheet, loc)
+		}
+	} else {
+		@CharacterSubNav(sheet.CampaignID, sheet.Character.GetId(), "info", loc) {
+			@CharacterInfoTab(sheet, loc)
+		}
+	}
+}
+
+// CharacterInfoTab renders the character info tab content.
+templ CharacterInfoTab(sheet CharacterSheetView, loc Localizer) {
 	<h3>{T(loc, "characters.sheet.info")}</h3>
-	<table>
+	<table class="table table-zebra">
 		<tbody>
 			<tr><td><strong>{T(loc, "campaigns.detail.id")}</strong></td><td><code>{sheet.Character.GetId()}</code></td></tr>
-			<tr><td><strong>{T(loc, "campaigns.detail.name")}</strong></td><td>{sheet.Character.GetName()}</td></tr>
+			@DetailRow(T(loc, "campaigns.detail.name"), sheet.Character.GetName())
 			<tr><td><strong>{T(loc, "characters.table.kind")}</strong></td><td>@StatusBadge(formatCharacterKind(sheet.Character.GetKind(), loc), "secondary")</td></tr>
-			<tr><td><strong>{T(loc, "characters.table.controller")}</strong></td><td>{sheet.Controller}</td></tr>
+			@DetailRow(T(loc, "characters.table.controller"), sheet.Controller)
 			if sheet.Character.GetNotes() != "" {
-				<tr><td><strong>{T(loc, "characters.sheet.notes")}</strong></td><td>{sheet.Character.GetNotes()}</td></tr>
+				@DetailRow(T(loc, "characters.sheet.notes"), sheet.Character.GetNotes())
 			}
-			<tr><td><strong>{T(loc, "characters.sheet.created")}</strong></td><td>{sheet.CreatedAt}</td></tr>
-			<tr><td><strong>{T(loc, "characters.sheet.updated")}</strong></td><td>{sheet.UpdatedAt}</td></tr>
+			@DetailRow(T(loc, "characters.sheet.created"), sheet.CreatedAt)
+			@DetailRow(T(loc, "characters.sheet.updated"), sheet.UpdatedAt)
 		</tbody>
 	</table>
+}
+
+// CharacterActivityTab renders the character activity tab content.
+templ CharacterActivityTab(sheet CharacterSheetView, loc Localizer) {
 	if len(sheet.RecentEvents) > 0 {
 		<h3>{T(loc, "characters.sheet.recent_activity")}</h3>
-		<table>
+		<table class="table table-zebra">
 			<thead>
 				<tr>
 					<th>{T(loc, "characters.sheet.event")}</th>
@@ -127,10 +105,12 @@ templ CharacterSheetPage(sheet CharacterSheetView, loc Localizer) {
 				for _, event := range sheet.RecentEvents {
 					<tr>
 						<td>{event.Type}</td>
-						<td><small>{event.Timestamp}</small></td>
+						<td>{event.Timestamp}</td>
 					</tr>
 				}
 			</tbody>
 		</table>
+	} else {
+		@EmptyState(T(loc, "characters.sheet.no_activity"))
 	}
 }

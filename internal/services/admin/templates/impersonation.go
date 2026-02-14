@@ -4,6 +4,8 @@ package templates
 type PageContext struct {
 	Lang          string
 	Loc           Localizer
+	CurrentPath   string
+	CurrentQuery  string
 	Impersonation *ImpersonationView
 }
 

@@ -11,21 +11,16 @@ templ SessionsListFullPage(campaignID string, campaignName string, page PageCont
 
 // SessionsListPage renders the sessions list content.
 templ SessionsListPage(campaignID string, campaignName string, loc Localizer) {
-	<h2>{campaignName}</h2>
-	@CampaignSubNav(campaignID, "sessions", loc)
-	<h3>{T(loc, "sessions.heading")}</h3>
-	@SessionsLoading(campaignID, loc)
+	@PageHeader(PageHeading{Breadcrumbs: []Breadcrumb{{T(loc, "nav.campaigns"), "/campaigns"}, {campaignName, ""}}, Title: campaignName})
+	@CampaignSubNav(campaignID, "sessions", loc) {
+		<h3>{T(loc, "sessions.heading")}</h3>
+		@SessionsLoading(campaignID, loc)
+	}
 }
 
 // SessionsLoading renders the HTMX loading placeholder for sessions.
 templ SessionsLoading(campaignID string, loc Localizer) {
-	<div
-		hx-get={"/campaigns/" + campaignID + "/sessions/table"}
-		hx-trigger="load"
-		hx-swap="outerHTML"
-	>
-		<p>{T(loc, "sessions.loading")}</p>
-	</div>
+	@LazyLoad("/campaigns/"+campaignID+"/sessions/table", T(loc, "sessions.loading"))
 }
 
 // SessionDetailFullPage renders the session detail in the base layout.
@@ -37,45 +32,24 @@ templ SessionDetailFullPage(session SessionDetail, page PageContext) {
 
 // SessionDetailPage renders the session detail content.
 templ SessionDetailPage(session SessionDetail, loc Localizer) {
-	<ul class="breadcrumb">
-		<li>
-			<a
-				href="/campaigns"
-				hx-get="/campaigns"
-				hx-target="#main"
-				hx-swap="innerHTML"
-				hx-push-url="true"
-			>{T(loc, "nav.campaigns")}</a>
-		</li>
-		<li>
-			<a
-				href={ templ.SafeURL("/campaigns/" + session.CampaignID) }
-				hx-get={ "/campaigns/" + session.CampaignID }
-				hx-target="#main"
-				hx-swap="innerHTML"
-				hx-push-url="true"
-			>{session.CampaignName}</a>
-		</li>
-		<li>{session.Name}</li>
-	</ul>
-	<h2>{session.Name}</h2>
-	<div class="row">
-		<div class="sm-12 md-6 col">
+	@PageHeader(PageHeading{Breadcrumbs: []Breadcrumb{{T(loc, "nav.campaigns"), "/campaigns"}, {session.CampaignName, "/campaigns/" + session.CampaignID}, {session.Name, ""}}, Title: session.Name})
+	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+		<div>
 			<h3>{T(loc, "sessions.detail.info")}</h3>
-			<table>
+			<table class="table table-zebra">
 				<tbody>
 					<tr><td><strong>{T(loc, "campaigns.detail.id")}</strong></td><td><code>{session.ID}</code></td></tr>
-					<tr><td><strong>{T(loc, "campaigns.detail.name")}</strong></td><td>{session.Name}</td></tr>
+					@DetailRow(T(loc, "campaigns.detail.name"), session.Name)
 					<tr><td><strong>{T(loc, "sessions.detail.status")}</strong></td><td>@StatusBadge(session.Status, session.StatusBadge)</td></tr>
-					<tr><td><strong>{T(loc, "sessions.detail.started")}</strong></td><td>{session.StartedAt}</td></tr>
+					@DetailRow(T(loc, "sessions.detail.started"), session.StartedAt)
 					if session.EndedAt != "" {
-						<tr><td><strong>{T(loc, "sessions.detail.ended")}</strong></td><td>{session.EndedAt}</td></tr>
+						@DetailRow(T(loc, "sessions.detail.ended"), session.EndedAt)
 					}
-					<tr><td><strong>{T(loc, "sessions.detail.events")}</strong></td><td>{ strconv.Itoa(int(session.EventCount)) }</td></tr>
+					@DetailRow(T(loc, "sessions.detail.events"), strconv.Itoa(int(session.EventCount)))
 				</tbody>
 			</table>
 		</div>
-		<div class="sm-12 md-6 col">
+		<div>
 			<h3>{T(loc, "sessions.detail.timeline")}</h3>
 			<div id="session-events">
 				@SessionEventsLoading(session.CampaignID, session.ID, loc)
@@ -86,13 +60,7 @@ templ SessionDetailPage(session SessionDetail, loc Localizer) {
 
 // SessionEventsLoading renders the HTMX loading placeholder for session events.
 templ SessionEventsLoading(campaignID string, sessionID string, loc Localizer) {
-	<div
-		hx-get={ "/campaigns/" + campaignID + "/sessions/" + sessionID + "/events" }
-		hx-trigger="load"
-		hx-swap="outerHTML"
-	>
-		<p>{T(loc, "sessions.events.loading")}</p>
-	</div>
+	@LazyLoad("/campaigns/"+campaignID+"/sessions/"+sessionID+"/events", T(loc, "sessions.events.loading"))
 }
 
 // SessionEventsContent renders the events timeline for a session.
@@ -100,7 +68,7 @@ templ SessionEventsContent(session SessionDetail, loc Localizer) {
 	if len(session.Events) == 0 {
 		@EmptyState(T(loc, "sessions.events.empty"))
 	} else {
-		<table>
+		<table class="table table-zebra">
 			<thead>
 				<tr>
 					<th>{T(loc, "sessions.events.table.event")}</th>

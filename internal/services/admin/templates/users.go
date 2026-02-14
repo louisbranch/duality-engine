@@ -6,6 +6,20 @@ type UsersPageView struct {
 	Impersonation *ImpersonationView
 }
 
+// UserFormCardView provides data for a reusable user form card.
+type UserFormCardView struct {
+	Title       string
+	Action      string
+	Method      string
+	FieldLabel  string
+	FieldName   string
+	FieldValue  string
+	FieldType   string
+	Placeholder string
+	Required    bool
+	ButtonLabel string
+}
+
 // UserDetailPageView provides data for the single user detail page.
 type UserDetailPageView struct {
 	Message       string
