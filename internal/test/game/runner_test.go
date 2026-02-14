@@ -2054,7 +2054,7 @@ func parseCharacterKind(t *testing.T, value string) gamev1.CharacterKind {
 
 func prefabOptions(name string) map[string]any {
 	switch strings.ToLower(strings.TrimSpace(name)) {
-	case "quinn":
+	case "frodo":
 		return map[string]any{
 			"kind":             "PC",
 			"armor":            1,
