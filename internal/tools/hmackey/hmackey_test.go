@@ -3,6 +3,7 @@ package hmackey
 import (
 	"bytes"
 	"flag"
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -43,5 +44,41 @@ func TestRunWritesHex(t *testing.T) {
 	}
 	if got := strings.TrimSpace(buf.String()); got != "01020304" {
 		t.Fatalf("expected hex output, got %q", got)
+	}
+}
+
+func TestRunNilOutput(t *testing.T) {
+	if err := Run(Config{Bytes: 4}, nil, nil); err == nil {
+		t.Fatal("expected error for nil output")
+	}
+}
+
+func TestRunDefaultReader(t *testing.T) {
+	buf := &bytes.Buffer{}
+	if err := Run(Config{Bytes: 4}, buf, nil); err != nil {
+		t.Fatalf("run: %v", err)
+	}
+	// Default reader is crypto/rand, so output should be 8 hex chars + newline.
+	if got := strings.TrimSpace(buf.String()); len(got) != 8 {
+		t.Fatalf("expected 8 hex chars, got %d: %q", len(got), got)
+	}
+}
+
+type errReader struct{}
+
+func (errReader) Read([]byte) (int, error) { return 0, fmt.Errorf("read error") }
+
+func TestRunReaderError(t *testing.T) {
+	buf := &bytes.Buffer{}
+	if err := Run(Config{Bytes: 4}, buf, errReader{}); err == nil {
+		t.Fatal("expected error from failing reader")
+	}
+}
+
+func TestParseConfigBadArgs(t *testing.T) {
+	fs := flag.NewFlagSet("hmackey", flag.ContinueOnError)
+	fs.SetOutput(&bytes.Buffer{})
+	if _, err := ParseConfig(fs, []string{"-invalid"}); err == nil {
+		t.Fatal("expected error for unknown flag")
 	}
 }

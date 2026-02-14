@@ -3,7 +3,9 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -65,6 +67,65 @@ func TestPutUserSessionRequiresStore(t *testing.T) {
 	var store *Store
 	if err := store.PutUserSession(context.Background(), "session-3", time.Now()); err == nil {
 		t.Fatal("expected error for nil store")
+	}
+}
+
+func TestCloseNilSafe(t *testing.T) {
+	var s *Store
+	if err := s.Close(); err != nil {
+		t.Fatalf("unexpected error from nil store: %v", err)
+	}
+
+	s = &Store{}
+	if err := s.Close(); err != nil {
+		t.Fatalf("unexpected error from store with nil db: %v", err)
+	}
+}
+
+func TestPutUserSessionContextCancelled(t *testing.T) {
+	store := openTempStore(t)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if err := store.PutUserSession(ctx, "session-1", time.Now()); err == nil {
+		t.Fatal("expected error for cancelled context")
+	}
+}
+
+func TestExtractUpMigration(t *testing.T) {
+	t.Run("no markers", func(t *testing.T) {
+		content := "CREATE TABLE foo (id TEXT);"
+		up := extractUpMigration(content)
+		if up != content {
+			t.Errorf("expected full content, got %q", up)
+		}
+	})
+
+	t.Run("up only", func(t *testing.T) {
+		content := "-- +migrate Up\nCREATE TABLE foo (id TEXT);"
+		up := extractUpMigration(content)
+		if !strings.Contains(up, "CREATE TABLE") {
+			t.Errorf("expected CREATE TABLE, got %q", up)
+		}
+	})
+
+	t.Run("up and down", func(t *testing.T) {
+		content := "-- +migrate Up\nCREATE TABLE foo (id TEXT);\n-- +migrate Down\nDROP TABLE foo;"
+		up := extractUpMigration(content)
+		if !strings.Contains(up, "CREATE TABLE") {
+			t.Errorf("expected CREATE TABLE, got %q", up)
+		}
+		if strings.Contains(up, "DROP TABLE") {
+			t.Error("did not expect DROP TABLE in up migration")
+		}
+	})
+}
+
+func TestIsAlreadyExistsError(t *testing.T) {
+	if !isAlreadyExistsError(fmt.Errorf("table already exists")) {
+		t.Error("expected true for already exists error")
+	}
+	if isAlreadyExistsError(fmt.Errorf("not found")) {
+		t.Error("expected false for unrelated error")
 	}
 }
 

@@ -71,6 +71,11 @@ func TestResolveTagInvalidValues(t *testing.T) {
 	})
 }
 
+func TestSetLanguageCookieNilSafe(t *testing.T) {
+	// Should not panic when called with nil ResponseWriter.
+	SetLanguageCookie(nil, Default())
+}
+
 func TestSetLanguageCookie(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	SetLanguageCookie(recorder, Default())

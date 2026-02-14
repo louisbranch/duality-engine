@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"context"
+	"errors"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -197,6 +198,15 @@ func TestExtractUpMigration(t *testing.T) {
 	up := extractUpMigration(content)
 	if !strings.Contains(up, "CREATE TABLE users") {
 		t.Fatalf("unexpected up migration: %q", up)
+	}
+}
+
+func TestIsAlreadyExistsError(t *testing.T) {
+	if isAlreadyExistsError(errors.New("record already exists")) != true {
+		t.Error("expected true for 'already exists' error")
+	}
+	if isAlreadyExistsError(errors.New("not found")) != false {
+		t.Error("expected false for unrelated error")
 	}
 }
 
