@@ -1162,6 +1162,7 @@ func (h *Handler) handleDashboardContent(w http.ResponseWriter, r *http.Request)
 		TotalSessions:     "0",
 		TotalCharacters:   "0",
 		TotalParticipants: "0",
+		TotalUsers:        "0",
 	}
 
 	var activities []templates.ActivityEvent
@@ -1173,6 +1174,31 @@ func (h *Handler) handleDashboardContent(w http.ResponseWriter, r *http.Request)
 			stats.TotalSessions = strconv.FormatInt(resp.GetStats().GetSessionCount(), 10)
 			stats.TotalCharacters = strconv.FormatInt(resp.GetStats().GetCharacterCount(), 10)
 			stats.TotalParticipants = strconv.FormatInt(resp.GetStats().GetParticipantCount(), 10)
+		}
+	}
+
+	if authClient := h.authClient(); authClient != nil {
+		var totalUsers int64
+		pageToken := ""
+		ok := true
+		for {
+			resp, err := authClient.ListUsers(ctx, &authv1.ListUsersRequest{
+				PageSize:  50,
+				PageToken: pageToken,
+			})
+			if err != nil || resp == nil {
+				log.Printf("list users for dashboard: %v", err)
+				ok = false
+				break
+			}
+			totalUsers += int64(len(resp.GetUsers()))
+			pageToken = strings.TrimSpace(resp.GetNextPageToken())
+			if pageToken == "" {
+				break
+			}
+		}
+		if ok {
+			stats.TotalUsers = strconv.FormatInt(totalUsers, 10)
 		}
 	}
 

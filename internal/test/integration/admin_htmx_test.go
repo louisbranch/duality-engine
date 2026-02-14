@@ -255,6 +255,7 @@ func TestAdminHTMXIntegration(t *testing.T) {
 		assertHTMLContains(t, body,
 			"Campaigns",
 			"Sessions",
+			"Users",
 		)
 		assertHTMLNotContains(t, body, "<!doctype html>", "<!DOCTYPE html>")
 	})
