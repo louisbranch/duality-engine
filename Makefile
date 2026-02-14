@@ -8,7 +8,7 @@ PROTO_FILES := \
 	$(wildcard $(PROTO_DIR)/game/v1/*.proto) \
 	$(wildcard $(PROTO_DIR)/systems/daggerheart/v1/*.proto)
 
-.PHONY: all proto clean run cover test integration scenario templ-generate event-catalog-check
+.PHONY: all proto clean run cover cover-treemap test integration scenario templ-generate event-catalog-check
 
 all: proto
 
@@ -67,6 +67,9 @@ cover:
 	awk -v exclude='$(COVER_EXCLUDE_REGEX)' 'NR==1 || $$1 !~ exclude' coverage.raw > coverage.out
 	go tool cover -func coverage.out
 	go tool cover -html=coverage.out -o coverage.html
+
+cover-treemap: cover
+	go run github.com/nikolaydubina/go-cover-treemap -coverprofile=coverage.out -percent > docs/project/testing-coverage.svg
 
 test:
 	go test ./...

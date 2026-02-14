@@ -6,6 +6,7 @@ require (
 	github.com/Shopify/go-lua v0.0.0-20250718183320-1e37f32ad7d0
 	github.com/a-h/templ v0.3.977
 	github.com/modelcontextprotocol/go-sdk v1.2.0
+	github.com/nikolaydubina/go-cover-treemap v1.5.0
 	go.einride.tech/aip v0.80.0
 	golang.org/x/crypto v0.44.0
 	golang.org/x/text v0.31.0
@@ -21,8 +22,10 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/google/jsonschema-go v0.3.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/ncruces/go-strftime v1.0.0 // indirect
+	github.com/nikolaydubina/treemap v1.2.5 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546 // indirect
