@@ -8,7 +8,7 @@ PROTO_FILES := \
 	$(wildcard $(PROTO_DIR)/game/v1/*.proto) \
 	$(wildcard $(PROTO_DIR)/systems/daggerheart/v1/*.proto)
 
-.PHONY: all proto clean run cover test integration templ-generate event-catalog-check
+.PHONY: all proto clean run cover test integration scenario templ-generate event-catalog-check
 
 all: proto
 
@@ -74,6 +74,9 @@ test:
 integration:
 	$(MAKE) event-catalog-check
 	go test -tags=integration ./...
+
+scenario:
+	go test -tags=scenario ./internal/test/game
 
 event-catalog-check:
 	@bash -euo pipefail -c 'go generate ./internal/services/game/domain/campaign/event >/dev/null 2>&1; git diff --exit-code -- docs/events/event-catalog.md'

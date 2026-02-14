@@ -1,3 +1,5 @@
+github.com/Shopify/go-lua v0.0.0-20250718183320-1e37f32ad7d0 h1:oGlw/+ndlFMn8KWLjEX5nULcDwOC4tJy3Kk1Pm84Cys=
+github.com/Shopify/go-lua v0.0.0-20250718183320-1e37f32ad7d0/go.mod h1:M4CxjVc/1Nwka5atBv7G/sb7Ac2BDe3+FxbiT9iVNIQ=
 github.com/a-h/templ v0.3.977 h1:kiKAPXTZE2Iaf8JbtM21r54A8bCNsncrfnokZZSrSDg=
 github.com/a-h/templ v0.3.977/go.mod h1:oCZcnKRf5jjsGpf2yELzQfodLphd2mwecwG4Crk5HBo=
 github.com/dustin/go-humanize v1.0.1 h1:GzkhY7T5VNhEkwH0PVJgjz+fX1rhBrR7pRT3mDkpeCY=

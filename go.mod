@@ -3,6 +3,7 @@ module github.com/louisbranch/fracturing.space
 go 1.25.6
 
 require (
+	github.com/Shopify/go-lua v0.0.0-20250718183320-1e37f32ad7d0
 	github.com/a-h/templ v0.3.977
 	github.com/modelcontextprotocol/go-sdk v1.2.0
 	go.einride.tech/aip v0.80.0
