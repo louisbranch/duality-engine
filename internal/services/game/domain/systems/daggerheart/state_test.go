@@ -83,6 +83,25 @@ func TestCharacterState_ResourceHolder(t *testing.T) {
 		}
 	})
 
+	// Test stress overflow to HP
+	t.Run("StressOverflow", func(t *testing.T) {
+		state.SetStress(5)
+		beforeHP := state.CurrentHP()
+		before, after, err := state.GainResource(ResourceStress, 2)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if before != 5 {
+			t.Errorf("before = %d, want 5", before)
+		}
+		if after != 6 {
+			t.Errorf("after = %d, want 6", after)
+		}
+		if state.CurrentHP() != beforeHP-1 {
+			t.Errorf("hp = %d, want %d", state.CurrentHP(), beforeHP-1)
+		}
+	})
+
 	// Test unknown resource
 	t.Run("UnknownResource", func(t *testing.T) {
 		_, _, err := state.GainResource("unknown", 1)
@@ -93,6 +112,7 @@ func TestCharacterState_ResourceHolder(t *testing.T) {
 
 	// Test ResourceValue
 	t.Run("ResourceValue", func(t *testing.T) {
+		state.SetStress(2)
 		if v := state.ResourceValue(ResourceHope); v != 1 {
 			t.Errorf("hope = %d, want 1", v)
 		}

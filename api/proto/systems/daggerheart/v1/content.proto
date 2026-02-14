@@ -1,0 +1,530 @@
+syntax = "proto3";
+
+package systems.daggerheart.v1;
+
+import "systems/daggerheart/v1/mechanics.proto";
+import "systems/daggerheart/v1/state.proto";
+
+option go_package = "github.com/louisbranch/fracturing.space/api/gen/go/systems/daggerheart/v1;daggerheartv1";
+
+service DaggerheartContentService {
+  rpc GetContentCatalog(GetDaggerheartContentCatalogRequest) returns (GetDaggerheartContentCatalogResponse);
+
+  rpc GetClass(GetDaggerheartClassRequest) returns (GetDaggerheartClassResponse);
+  rpc ListClasses(ListDaggerheartClassesRequest) returns (ListDaggerheartClassesResponse);
+
+  rpc GetSubclass(GetDaggerheartSubclassRequest) returns (GetDaggerheartSubclassResponse);
+  rpc ListSubclasses(ListDaggerheartSubclassesRequest) returns (ListDaggerheartSubclassesResponse);
+
+  rpc GetHeritage(GetDaggerheartHeritageRequest) returns (GetDaggerheartHeritageResponse);
+  rpc ListHeritages(ListDaggerheartHeritagesRequest) returns (ListDaggerheartHeritagesResponse);
+
+  rpc GetExperience(GetDaggerheartExperienceRequest) returns (GetDaggerheartExperienceResponse);
+  rpc ListExperiences(ListDaggerheartExperiencesRequest) returns (ListDaggerheartExperiencesResponse);
+
+  rpc GetAdversary(GetDaggerheartAdversaryRequest) returns (GetDaggerheartAdversaryResponse);
+  rpc ListAdversaries(ListDaggerheartAdversariesRequest) returns (ListDaggerheartAdversariesResponse);
+
+  rpc GetBeastform(GetDaggerheartBeastformRequest) returns (GetDaggerheartBeastformResponse);
+  rpc ListBeastforms(ListDaggerheartBeastformsRequest) returns (ListDaggerheartBeastformsResponse);
+
+  rpc GetCompanionExperience(GetDaggerheartCompanionExperienceRequest) returns (GetDaggerheartCompanionExperienceResponse);
+  rpc ListCompanionExperiences(ListDaggerheartCompanionExperiencesRequest) returns (ListDaggerheartCompanionExperiencesResponse);
+
+  rpc GetLootEntry(GetDaggerheartLootEntryRequest) returns (GetDaggerheartLootEntryResponse);
+  rpc ListLootEntries(ListDaggerheartLootEntriesRequest) returns (ListDaggerheartLootEntriesResponse);
+
+  rpc GetDamageType(GetDaggerheartDamageTypeRequest) returns (GetDaggerheartDamageTypeResponse);
+  rpc ListDamageTypes(ListDaggerheartDamageTypesRequest) returns (ListDaggerheartDamageTypesResponse);
+
+  rpc GetDomain(GetDaggerheartDomainRequest) returns (GetDaggerheartDomainResponse);
+  rpc ListDomains(ListDaggerheartDomainsRequest) returns (ListDaggerheartDomainsResponse);
+
+  rpc GetDomainCard(GetDaggerheartDomainCardRequest) returns (GetDaggerheartDomainCardResponse);
+  rpc ListDomainCards(ListDaggerheartDomainCardsRequest) returns (ListDaggerheartDomainCardsResponse);
+
+  rpc GetWeapon(GetDaggerheartWeaponRequest) returns (GetDaggerheartWeaponResponse);
+  rpc ListWeapons(ListDaggerheartWeaponsRequest) returns (ListDaggerheartWeaponsResponse);
+
+  rpc GetArmor(GetDaggerheartArmorRequest) returns (GetDaggerheartArmorResponse);
+  rpc ListArmor(ListDaggerheartArmorRequest) returns (ListDaggerheartArmorResponse);
+
+  rpc GetItem(GetDaggerheartItemRequest) returns (GetDaggerheartItemResponse);
+  rpc ListItems(ListDaggerheartItemsRequest) returns (ListDaggerheartItemsResponse);
+
+  rpc GetEnvironment(GetDaggerheartEnvironmentRequest) returns (GetDaggerheartEnvironmentResponse);
+  rpc ListEnvironments(ListDaggerheartEnvironmentsRequest) returns (ListDaggerheartEnvironmentsResponse);
+}
+
+message GetDaggerheartContentCatalogRequest {}
+
+message GetDaggerheartContentCatalogResponse {
+  DaggerheartContentCatalog catalog = 1;
+}
+
+message GetDaggerheartClassRequest {
+  string id = 1;
+}
+
+message GetDaggerheartClassResponse {
+  DaggerheartClass class = 1;
+}
+
+message ListDaggerheartClassesRequest {}
+
+message ListDaggerheartClassesResponse {
+  repeated DaggerheartClass classes = 1;
+}
+
+message GetDaggerheartSubclassRequest {
+  string id = 1;
+}
+
+message GetDaggerheartSubclassResponse {
+  DaggerheartSubclass subclass = 1;
+}
+
+message ListDaggerheartSubclassesRequest {}
+
+message ListDaggerheartSubclassesResponse {
+  repeated DaggerheartSubclass subclasses = 1;
+}
+
+message GetDaggerheartHeritageRequest {
+  string id = 1;
+}
+
+message GetDaggerheartHeritageResponse {
+  DaggerheartHeritage heritage = 1;
+}
+
+message ListDaggerheartHeritagesRequest {}
+
+message ListDaggerheartHeritagesResponse {
+  repeated DaggerheartHeritage heritages = 1;
+}
+
+message GetDaggerheartExperienceRequest {
+  string id = 1;
+}
+
+message GetDaggerheartExperienceResponse {
+  DaggerheartExperienceEntry experience = 1;
+}
+
+message ListDaggerheartExperiencesRequest {}
+
+message ListDaggerheartExperiencesResponse {
+  repeated DaggerheartExperienceEntry experiences = 1;
+}
+
+message GetDaggerheartAdversaryRequest {
+  string id = 1;
+}
+
+message GetDaggerheartAdversaryResponse {
+  DaggerheartAdversaryEntry adversary = 1;
+}
+
+message ListDaggerheartAdversariesRequest {}
+
+message ListDaggerheartAdversariesResponse {
+  repeated DaggerheartAdversaryEntry adversaries = 1;
+}
+
+message GetDaggerheartBeastformRequest {
+  string id = 1;
+}
+
+message GetDaggerheartBeastformResponse {
+  DaggerheartBeastformEntry beastform = 1;
+}
+
+message ListDaggerheartBeastformsRequest {}
+
+message ListDaggerheartBeastformsResponse {
+  repeated DaggerheartBeastformEntry beastforms = 1;
+}
+
+message GetDaggerheartCompanionExperienceRequest {
+  string id = 1;
+}
+
+message GetDaggerheartCompanionExperienceResponse {
+  DaggerheartCompanionExperienceEntry experience = 1;
+}
+
+message ListDaggerheartCompanionExperiencesRequest {}
+
+message ListDaggerheartCompanionExperiencesResponse {
+  repeated DaggerheartCompanionExperienceEntry experiences = 1;
+}
+
+message GetDaggerheartLootEntryRequest {
+  string id = 1;
+}
+
+message GetDaggerheartLootEntryResponse {
+  DaggerheartLootEntry entry = 1;
+}
+
+message ListDaggerheartLootEntriesRequest {}
+
+message ListDaggerheartLootEntriesResponse {
+  repeated DaggerheartLootEntry entries = 1;
+}
+
+message GetDaggerheartDamageTypeRequest {
+  string id = 1;
+}
+
+message GetDaggerheartDamageTypeResponse {
+  DaggerheartDamageTypeEntry damage_type = 1;
+}
+
+message ListDaggerheartDamageTypesRequest {}
+
+message ListDaggerheartDamageTypesResponse {
+  repeated DaggerheartDamageTypeEntry damage_types = 1;
+}
+
+message GetDaggerheartDomainRequest {
+  string id = 1;
+}
+
+message GetDaggerheartDomainResponse {
+  DaggerheartDomain domain = 1;
+}
+
+message ListDaggerheartDomainsRequest {}
+
+message ListDaggerheartDomainsResponse {
+  repeated DaggerheartDomain domains = 1;
+}
+
+message GetDaggerheartDomainCardRequest {
+  string id = 1;
+}
+
+message GetDaggerheartDomainCardResponse {
+  DaggerheartDomainCard domain_card = 1;
+}
+
+message ListDaggerheartDomainCardsRequest {
+  string domain_id = 1;
+}
+
+message ListDaggerheartDomainCardsResponse {
+  repeated DaggerheartDomainCard domain_cards = 1;
+}
+
+message GetDaggerheartWeaponRequest {
+  string id = 1;
+}
+
+message GetDaggerheartWeaponResponse {
+  DaggerheartWeapon weapon = 1;
+}
+
+message ListDaggerheartWeaponsRequest {}
+
+message ListDaggerheartWeaponsResponse {
+  repeated DaggerheartWeapon weapons = 1;
+}
+
+message GetDaggerheartArmorRequest {
+  string id = 1;
+}
+
+message GetDaggerheartArmorResponse {
+  DaggerheartArmor armor = 1;
+}
+
+message ListDaggerheartArmorRequest {}
+
+message ListDaggerheartArmorResponse {
+  repeated DaggerheartArmor armor = 1;
+}
+
+message GetDaggerheartItemRequest {
+  string id = 1;
+}
+
+message GetDaggerheartItemResponse {
+  DaggerheartItem item = 1;
+}
+
+message ListDaggerheartItemsRequest {}
+
+message ListDaggerheartItemsResponse {
+  repeated DaggerheartItem items = 1;
+}
+
+message GetDaggerheartEnvironmentRequest {
+  string id = 1;
+}
+
+message GetDaggerheartEnvironmentResponse {
+  DaggerheartEnvironment environment = 1;
+}
+
+message ListDaggerheartEnvironmentsRequest {}
+
+message ListDaggerheartEnvironmentsResponse {
+  repeated DaggerheartEnvironment environments = 1;
+}
+
+message DaggerheartFeature {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  int32 level = 4;
+}
+
+message DaggerheartHopeFeature {
+  string name = 1;
+  string description = 2;
+  int32 hope_cost = 3;
+}
+
+message DaggerheartClass {
+  string id = 1;
+  string name = 2;
+  int32 starting_evasion = 3;
+  int32 starting_hp = 4;
+  repeated string starting_items = 5;
+  repeated DaggerheartFeature features = 6;
+  DaggerheartHopeFeature hope_feature = 7;
+  repeated string domain_ids = 8;
+}
+
+message DaggerheartSubclass {
+  string id = 1;
+  string name = 2;
+  string spellcast_trait = 3;
+  repeated DaggerheartFeature foundation_features = 4;
+  repeated DaggerheartFeature specialization_features = 5;
+  repeated DaggerheartFeature mastery_features = 6;
+}
+
+enum DaggerheartHeritageKind {
+  DAGGERHEART_HERITAGE_KIND_UNSPECIFIED = 0;
+  DAGGERHEART_HERITAGE_KIND_ANCESTRY = 1;
+  DAGGERHEART_HERITAGE_KIND_COMMUNITY = 2;
+}
+
+message DaggerheartHeritage {
+  string id = 1;
+  string name = 2;
+  DaggerheartHeritageKind kind = 3;
+  repeated DaggerheartFeature features = 4;
+}
+
+message DaggerheartExperienceEntry {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message DaggerheartAdversaryAttack {
+  string name = 1;
+  string range = 2;
+  repeated DiceSpec damage_dice = 3;
+  int32 damage_bonus = 4;
+  DaggerheartDamageType damage_type = 5;
+}
+
+message DaggerheartAdversaryExperience {
+  string name = 1;
+  int32 modifier = 2;
+}
+
+message DaggerheartAdversaryFeature {
+  string id = 1;
+  string name = 2;
+  string kind = 3;
+  string description = 4;
+  string cost_type = 5;
+  int32 cost = 6;
+}
+
+message DaggerheartAdversaryEntry {
+  string id = 1;
+  string name = 2;
+  int32 tier = 3;
+  string role = 4;
+  string description = 5;
+  string motives = 6;
+  int32 difficulty = 7;
+  int32 major_threshold = 8;
+  int32 severe_threshold = 9;
+  int32 hp = 10;
+  int32 stress = 11;
+  int32 armor = 12;
+  int32 attack_modifier = 13;
+  DaggerheartAdversaryAttack standard_attack = 14;
+  repeated DaggerheartAdversaryExperience experiences = 15;
+  repeated DaggerheartAdversaryFeature features = 16;
+}
+
+message DaggerheartBeastformAttack {
+  string range = 1;
+  string trait = 2;
+  repeated DiceSpec damage_dice = 3;
+  int32 damage_bonus = 4;
+  DaggerheartDamageType damage_type = 5;
+}
+
+message DaggerheartBeastformFeature {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message DaggerheartBeastformEntry {
+  string id = 1;
+  string name = 2;
+  int32 tier = 3;
+  string examples = 4;
+  string trait = 5;
+  int32 trait_bonus = 6;
+  int32 evasion_bonus = 7;
+  DaggerheartBeastformAttack attack = 8;
+  repeated string advantages = 9;
+  repeated DaggerheartBeastformFeature features = 10;
+}
+
+message DaggerheartCompanionExperienceEntry {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message DaggerheartLootEntry {
+  string id = 1;
+  string name = 2;
+  int32 roll = 3;
+  string description = 4;
+}
+
+message DaggerheartDamageTypeEntry {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+enum DaggerheartDomainCardType {
+  DAGGERHEART_DOMAIN_CARD_TYPE_UNSPECIFIED = 0;
+  DAGGERHEART_DOMAIN_CARD_TYPE_ABILITY = 1;
+  DAGGERHEART_DOMAIN_CARD_TYPE_SPELL = 2;
+  DAGGERHEART_DOMAIN_CARD_TYPE_GRIMOIRE = 3;
+}
+
+message DaggerheartDomain {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message DaggerheartDomainCard {
+  string id = 1;
+  string name = 2;
+  string domain_id = 3;
+  int32 level = 4;
+  DaggerheartDomainCardType type = 5;
+  int32 recall_cost = 6;
+  string usage_limit = 7;
+  string feature_text = 8;
+}
+
+enum DaggerheartWeaponCategory {
+  DAGGERHEART_WEAPON_CATEGORY_UNSPECIFIED = 0;
+  DAGGERHEART_WEAPON_CATEGORY_PRIMARY = 1;
+  DAGGERHEART_WEAPON_CATEGORY_SECONDARY = 2;
+}
+
+message DaggerheartWeapon {
+  string id = 1;
+  string name = 2;
+  DaggerheartWeaponCategory category = 3;
+  int32 tier = 4;
+  string trait = 5;
+  string range = 6;
+  repeated DiceSpec damage_dice = 7;
+  DaggerheartDamageType damage_type = 8;
+  int32 burden = 9;
+  string feature = 10;
+}
+
+message DaggerheartArmor {
+  string id = 1;
+  string name = 2;
+  int32 tier = 3;
+  int32 base_major_threshold = 4;
+  int32 base_severe_threshold = 5;
+  int32 armor_score = 6;
+  string feature = 7;
+}
+
+enum DaggerheartItemRarity {
+  DAGGERHEART_ITEM_RARITY_UNSPECIFIED = 0;
+  DAGGERHEART_ITEM_RARITY_COMMON = 1;
+  DAGGERHEART_ITEM_RARITY_UNCOMMON = 2;
+  DAGGERHEART_ITEM_RARITY_RARE = 3;
+  DAGGERHEART_ITEM_RARITY_UNIQUE = 4;
+}
+
+enum DaggerheartItemKind {
+  DAGGERHEART_ITEM_KIND_UNSPECIFIED = 0;
+  DAGGERHEART_ITEM_KIND_CONSUMABLE = 1;
+  DAGGERHEART_ITEM_KIND_EQUIPMENT = 2;
+  DAGGERHEART_ITEM_KIND_TREASURE = 3;
+}
+
+message DaggerheartItem {
+  string id = 1;
+  string name = 2;
+  DaggerheartItemRarity rarity = 3;
+  DaggerheartItemKind kind = 4;
+  int32 stack_max = 5;
+  string description = 6;
+  string effect_text = 7;
+}
+
+enum DaggerheartEnvironmentType {
+  DAGGERHEART_ENVIRONMENT_TYPE_UNSPECIFIED = 0;
+  DAGGERHEART_ENVIRONMENT_TYPE_EXPLORATION = 1;
+  DAGGERHEART_ENVIRONMENT_TYPE_SOCIAL = 2;
+  DAGGERHEART_ENVIRONMENT_TYPE_TRAVERSAL = 3;
+  DAGGERHEART_ENVIRONMENT_TYPE_EVENT = 4;
+}
+
+message DaggerheartEnvironment {
+  string id = 1;
+  string name = 2;
+  int32 tier = 3;
+  DaggerheartEnvironmentType type = 4;
+  int32 difficulty = 5;
+  repeated string impulses = 6;
+  repeated string potential_adversary_ids = 7;
+  repeated DaggerheartFeature features = 8;
+  repeated string prompts = 9;
+}
+
+message DaggerheartContentCatalog {
+  repeated DaggerheartClass classes = 1;
+  repeated DaggerheartSubclass subclasses = 2;
+  repeated DaggerheartHeritage heritages = 3;
+  repeated DaggerheartExperienceEntry experiences = 4;
+  repeated DaggerheartAdversaryEntry adversaries = 5;
+  repeated DaggerheartBeastformEntry beastforms = 6;
+  repeated DaggerheartCompanionExperienceEntry companion_experiences = 7;
+  repeated DaggerheartLootEntry loot_entries = 8;
+  repeated DaggerheartDamageTypeEntry damage_types = 9;
+  repeated DaggerheartDomain domains = 10;
+  repeated DaggerheartDomainCard domain_cards = 11;
+  repeated DaggerheartWeapon weapons = 12;
+  repeated DaggerheartArmor armor = 13;
+  repeated DaggerheartItem items = 14;
+  repeated DaggerheartEnvironment environments = 15;
+}

@@ -230,6 +230,55 @@ type SessionPage struct {
 	NextPageToken string
 }
 
+// SessionGate describes an open or resolved session gate.
+type SessionGate struct {
+	CampaignID          string
+	SessionID           string
+	GateID              string
+	GateType            string
+	Status              string
+	Reason              string
+	CreatedAt           time.Time
+	CreatedByActorType  string
+	CreatedByActorID    string
+	ResolvedAt          *time.Time
+	ResolvedByActorType string
+	ResolvedByActorID   string
+	MetadataJSON        []byte
+	ResolutionJSON      []byte
+}
+
+// SessionGateStore persists session gate projections.
+type SessionGateStore interface {
+	// PutSessionGate stores a gate record.
+	PutSessionGate(ctx context.Context, gate SessionGate) error
+	// GetSessionGate retrieves a gate by id.
+	GetSessionGate(ctx context.Context, campaignID, sessionID, gateID string) (SessionGate, error)
+	// GetOpenSessionGate retrieves the currently open gate for a session.
+	GetOpenSessionGate(ctx context.Context, campaignID, sessionID string) (SessionGate, error)
+}
+
+// SessionSpotlight describes the current session spotlight.
+type SessionSpotlight struct {
+	CampaignID         string
+	SessionID          string
+	SpotlightType      string
+	CharacterID        string
+	UpdatedAt          time.Time
+	UpdatedByActorType string
+	UpdatedByActorID   string
+}
+
+// SessionSpotlightStore persists session spotlight projections.
+type SessionSpotlightStore interface {
+	// PutSessionSpotlight stores the current spotlight for a session.
+	PutSessionSpotlight(ctx context.Context, spotlight SessionSpotlight) error
+	// GetSessionSpotlight retrieves the current spotlight for a session.
+	GetSessionSpotlight(ctx context.Context, campaignID, sessionID string) (SessionSpotlight, error)
+	// ClearSessionSpotlight removes the spotlight for a session.
+	ClearSessionSpotlight(ctx context.Context, campaignID, sessionID string) error
+}
+
 // Snapshot represents a materialized projection for a campaign as of an event sequence.
 // Snapshots are derived from the event journal and are not authoritative.
 type Snapshot struct {
@@ -401,6 +450,270 @@ type DaggerheartAdversary struct {
 	UpdatedAt   time.Time
 }
 
+// DaggerheartFeature captures a class, subclass, heritage, or environment feature.
+type DaggerheartFeature struct {
+	ID          string
+	Name        string
+	Description string
+	Level       int
+}
+
+// DaggerheartHopeFeature captures a class hope feature.
+type DaggerheartHopeFeature struct {
+	Name        string
+	Description string
+	HopeCost    int
+}
+
+// DaggerheartClass represents a content catalog class.
+type DaggerheartClass struct {
+	ID              string
+	Name            string
+	StartingEvasion int
+	StartingHP      int
+	StartingItems   []string
+	Features        []DaggerheartFeature
+	HopeFeature     DaggerheartHopeFeature
+	DomainIDs       []string
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+}
+
+// DaggerheartSubclass represents a content catalog subclass.
+type DaggerheartSubclass struct {
+	ID                     string
+	Name                   string
+	SpellcastTrait         string
+	FoundationFeatures     []DaggerheartFeature
+	SpecializationFeatures []DaggerheartFeature
+	MasteryFeatures        []DaggerheartFeature
+	CreatedAt              time.Time
+	UpdatedAt              time.Time
+}
+
+// DaggerheartHeritage represents ancestry or community content.
+type DaggerheartHeritage struct {
+	ID        string
+	Name      string
+	Kind      string
+	Features  []DaggerheartFeature
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+// DaggerheartExperienceEntry represents an experience catalog entry.
+type DaggerheartExperienceEntry struct {
+	ID          string
+	Name        string
+	Description string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+// DaggerheartAdversaryAttack represents a standard adversary attack.
+type DaggerheartAdversaryAttack struct {
+	Name        string
+	Range       string
+	DamageDice  []DaggerheartDamageDie
+	DamageBonus int
+	DamageType  string
+}
+
+// DaggerheartAdversaryExperience represents an adversary experience bonus.
+type DaggerheartAdversaryExperience struct {
+	Name     string
+	Modifier int
+}
+
+// DaggerheartAdversaryFeature represents an adversary feature.
+type DaggerheartAdversaryFeature struct {
+	ID          string
+	Name        string
+	Kind        string
+	Description string
+	CostType    string
+	Cost        int
+}
+
+// DaggerheartAdversaryEntry represents an adversary catalog entry.
+type DaggerheartAdversaryEntry struct {
+	ID              string
+	Name            string
+	Tier            int
+	Role            string
+	Description     string
+	Motives         string
+	Difficulty      int
+	MajorThreshold  int
+	SevereThreshold int
+	HP              int
+	Stress          int
+	Armor           int
+	AttackModifier  int
+	StandardAttack  DaggerheartAdversaryAttack
+	Experiences     []DaggerheartAdversaryExperience
+	Features        []DaggerheartAdversaryFeature
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+}
+
+// DaggerheartBeastformAttack represents a beastform attack profile.
+type DaggerheartBeastformAttack struct {
+	Range       string
+	Trait       string
+	DamageDice  []DaggerheartDamageDie
+	DamageBonus int
+	DamageType  string
+}
+
+// DaggerheartBeastformFeature represents a beastform feature.
+type DaggerheartBeastformFeature struct {
+	ID          string
+	Name        string
+	Description string
+}
+
+// DaggerheartBeastformEntry represents a beastform catalog entry.
+type DaggerheartBeastformEntry struct {
+	ID           string
+	Name         string
+	Tier         int
+	Examples     string
+	Trait        string
+	TraitBonus   int
+	EvasionBonus int
+	Attack       DaggerheartBeastformAttack
+	Advantages   []string
+	Features     []DaggerheartBeastformFeature
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
+// DaggerheartCompanionExperienceEntry represents a companion experience catalog entry.
+type DaggerheartCompanionExperienceEntry struct {
+	ID          string
+	Name        string
+	Description string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+// DaggerheartLootEntry represents a loot catalog entry.
+type DaggerheartLootEntry struct {
+	ID          string
+	Name        string
+	Roll        int
+	Description string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+// DaggerheartDamageTypeEntry represents a damage type catalog entry.
+type DaggerheartDamageTypeEntry struct {
+	ID          string
+	Name        string
+	Description string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+// DaggerheartDomain represents a domain catalog entry.
+type DaggerheartDomain struct {
+	ID          string
+	Name        string
+	Description string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+// DaggerheartDomainCard represents a domain card catalog entry.
+type DaggerheartDomainCard struct {
+	ID          string
+	Name        string
+	DomainID    string
+	Level       int
+	Type        string
+	RecallCost  int
+	UsageLimit  string
+	FeatureText string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+// DaggerheartDamageDie represents a damage dice spec for content weapons.
+type DaggerheartDamageDie struct {
+	Sides int
+	Count int
+}
+
+// DaggerheartWeapon represents a weapon catalog entry.
+type DaggerheartWeapon struct {
+	ID         string
+	Name       string
+	Category   string
+	Tier       int
+	Trait      string
+	Range      string
+	DamageDice []DaggerheartDamageDie
+	DamageType string
+	Burden     int
+	Feature    string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+}
+
+// DaggerheartArmor represents an armor catalog entry.
+type DaggerheartArmor struct {
+	ID                  string
+	Name                string
+	Tier                int
+	BaseMajorThreshold  int
+	BaseSevereThreshold int
+	ArmorScore          int
+	Feature             string
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
+}
+
+// DaggerheartItem represents an item catalog entry.
+type DaggerheartItem struct {
+	ID          string
+	Name        string
+	Rarity      string
+	Kind        string
+	StackMax    int
+	Description string
+	EffectText  string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+// DaggerheartEnvironment represents an environment catalog entry.
+type DaggerheartEnvironment struct {
+	ID                    string
+	Name                  string
+	Tier                  int
+	Type                  string
+	Difficulty            int
+	Impulses              []string
+	PotentialAdversaryIDs []string
+	Features              []DaggerheartFeature
+	Prompts               []string
+	CreatedAt             time.Time
+	UpdatedAt             time.Time
+}
+
+// DaggerheartContentString stores localized content strings.
+type DaggerheartContentString struct {
+	ContentID   string
+	ContentType string
+	Field       string
+	Locale      string
+	Text        string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
 // DaggerheartStore provides Daggerheart-specific storage operations.
 // This interface is used for the Daggerheart game system extension tables.
 type DaggerheartStore interface {
@@ -427,4 +740,85 @@ type DaggerheartStore interface {
 	GetDaggerheartAdversary(ctx context.Context, campaignID, adversaryID string) (DaggerheartAdversary, error)
 	ListDaggerheartAdversaries(ctx context.Context, campaignID, sessionID string) ([]DaggerheartAdversary, error)
 	DeleteDaggerheartAdversary(ctx context.Context, campaignID, adversaryID string) error
+}
+
+// DaggerheartContentStore provides access to the Daggerheart content catalog.
+type DaggerheartContentStore interface {
+	PutDaggerheartClass(ctx context.Context, class DaggerheartClass) error
+	GetDaggerheartClass(ctx context.Context, id string) (DaggerheartClass, error)
+	ListDaggerheartClasses(ctx context.Context) ([]DaggerheartClass, error)
+	DeleteDaggerheartClass(ctx context.Context, id string) error
+
+	PutDaggerheartSubclass(ctx context.Context, subclass DaggerheartSubclass) error
+	GetDaggerheartSubclass(ctx context.Context, id string) (DaggerheartSubclass, error)
+	ListDaggerheartSubclasses(ctx context.Context) ([]DaggerheartSubclass, error)
+	DeleteDaggerheartSubclass(ctx context.Context, id string) error
+
+	PutDaggerheartHeritage(ctx context.Context, heritage DaggerheartHeritage) error
+	GetDaggerheartHeritage(ctx context.Context, id string) (DaggerheartHeritage, error)
+	ListDaggerheartHeritages(ctx context.Context) ([]DaggerheartHeritage, error)
+	DeleteDaggerheartHeritage(ctx context.Context, id string) error
+
+	PutDaggerheartExperience(ctx context.Context, experience DaggerheartExperienceEntry) error
+	GetDaggerheartExperience(ctx context.Context, id string) (DaggerheartExperienceEntry, error)
+	ListDaggerheartExperiences(ctx context.Context) ([]DaggerheartExperienceEntry, error)
+	DeleteDaggerheartExperience(ctx context.Context, id string) error
+
+	PutDaggerheartAdversaryEntry(ctx context.Context, adversary DaggerheartAdversaryEntry) error
+	GetDaggerheartAdversaryEntry(ctx context.Context, id string) (DaggerheartAdversaryEntry, error)
+	ListDaggerheartAdversaryEntries(ctx context.Context) ([]DaggerheartAdversaryEntry, error)
+	DeleteDaggerheartAdversaryEntry(ctx context.Context, id string) error
+
+	PutDaggerheartBeastform(ctx context.Context, beastform DaggerheartBeastformEntry) error
+	GetDaggerheartBeastform(ctx context.Context, id string) (DaggerheartBeastformEntry, error)
+	ListDaggerheartBeastforms(ctx context.Context) ([]DaggerheartBeastformEntry, error)
+	DeleteDaggerheartBeastform(ctx context.Context, id string) error
+
+	PutDaggerheartCompanionExperience(ctx context.Context, experience DaggerheartCompanionExperienceEntry) error
+	GetDaggerheartCompanionExperience(ctx context.Context, id string) (DaggerheartCompanionExperienceEntry, error)
+	ListDaggerheartCompanionExperiences(ctx context.Context) ([]DaggerheartCompanionExperienceEntry, error)
+	DeleteDaggerheartCompanionExperience(ctx context.Context, id string) error
+
+	PutDaggerheartLootEntry(ctx context.Context, entry DaggerheartLootEntry) error
+	GetDaggerheartLootEntry(ctx context.Context, id string) (DaggerheartLootEntry, error)
+	ListDaggerheartLootEntries(ctx context.Context) ([]DaggerheartLootEntry, error)
+	DeleteDaggerheartLootEntry(ctx context.Context, id string) error
+
+	PutDaggerheartDamageType(ctx context.Context, entry DaggerheartDamageTypeEntry) error
+	GetDaggerheartDamageType(ctx context.Context, id string) (DaggerheartDamageTypeEntry, error)
+	ListDaggerheartDamageTypes(ctx context.Context) ([]DaggerheartDamageTypeEntry, error)
+	DeleteDaggerheartDamageType(ctx context.Context, id string) error
+
+	PutDaggerheartDomain(ctx context.Context, domain DaggerheartDomain) error
+	GetDaggerheartDomain(ctx context.Context, id string) (DaggerheartDomain, error)
+	ListDaggerheartDomains(ctx context.Context) ([]DaggerheartDomain, error)
+	DeleteDaggerheartDomain(ctx context.Context, id string) error
+
+	PutDaggerheartDomainCard(ctx context.Context, card DaggerheartDomainCard) error
+	GetDaggerheartDomainCard(ctx context.Context, id string) (DaggerheartDomainCard, error)
+	ListDaggerheartDomainCards(ctx context.Context) ([]DaggerheartDomainCard, error)
+	ListDaggerheartDomainCardsByDomain(ctx context.Context, domainID string) ([]DaggerheartDomainCard, error)
+	DeleteDaggerheartDomainCard(ctx context.Context, id string) error
+
+	PutDaggerheartWeapon(ctx context.Context, weapon DaggerheartWeapon) error
+	GetDaggerheartWeapon(ctx context.Context, id string) (DaggerheartWeapon, error)
+	ListDaggerheartWeapons(ctx context.Context) ([]DaggerheartWeapon, error)
+	DeleteDaggerheartWeapon(ctx context.Context, id string) error
+
+	PutDaggerheartArmor(ctx context.Context, armor DaggerheartArmor) error
+	GetDaggerheartArmor(ctx context.Context, id string) (DaggerheartArmor, error)
+	ListDaggerheartArmor(ctx context.Context) ([]DaggerheartArmor, error)
+	DeleteDaggerheartArmor(ctx context.Context, id string) error
+
+	PutDaggerheartItem(ctx context.Context, item DaggerheartItem) error
+	GetDaggerheartItem(ctx context.Context, id string) (DaggerheartItem, error)
+	ListDaggerheartItems(ctx context.Context) ([]DaggerheartItem, error)
+	DeleteDaggerheartItem(ctx context.Context, id string) error
+
+	PutDaggerheartEnvironment(ctx context.Context, env DaggerheartEnvironment) error
+	GetDaggerheartEnvironment(ctx context.Context, id string) (DaggerheartEnvironment, error)
+	ListDaggerheartEnvironments(ctx context.Context) ([]DaggerheartEnvironment, error)
+	DeleteDaggerheartEnvironment(ctx context.Context, id string) error
+
+	PutDaggerheartContentString(ctx context.Context, entry DaggerheartContentString) error
 }

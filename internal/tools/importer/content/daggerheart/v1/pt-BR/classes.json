@@ -1,0 +1,233 @@
+{
+  "system_id": "daggerheart",
+  "system_version": "v1",
+  "source": "Daggerheart SRD v1 (paraphrased)",
+  "locale": "pt-BR",
+  "items": [
+    {
+      "id": "class.guardian",
+      "name": "Guardião",
+      "starting_evasion": 9,
+      "starting_hp": 7,
+      "starting_items": ["item.basic-supplies"],
+      "features": [
+        {
+          "id": "feature.guardian-unstoppable",
+          "name": "Imparável",
+          "description": "Uma vez por descanso longo, entre em um estado Imparável com um dado Imparável (d4 no nível 1, d6 no nível 5). Comece em 1; cada vez que causar ao menos 1 PV, aumente em 1. Quando exceder o máximo ou a cena terminar, o dado é removido. Enquanto Imparável, reduza a severidade do dano físico em um passo, some o valor do dado aos seus danos e não pode ficar Restringido ou Vulnerável.",
+          "level": 1
+        }
+      ],
+      "hope_feature": {
+        "name": "Tanque de Linha de Frente",
+        "description": "Gaste 3 Esperança para limpar 2 espaços de Armadura.",
+        "hope_cost": 3
+      },
+      "domain_ids": ["domain.valor", "domain.blade"]
+    },
+    {
+      "id": "class.bard",
+      "name": "Bardo",
+      "starting_evasion": 10,
+      "starting_hp": 5,
+      "starting_items": ["item.basic-supplies", "item.instrument-kit"],
+      "features": [
+        {
+          "id": "feature.bard-rally",
+          "name": "Rali",
+          "description": "Uma vez por sessão, reúna o grupo para dar a você e a cada aliado um Dado de Rali (d6 no nível 1, d8 no nível 5). Um PC pode gastar o dado para somá-lo a uma rolagem de ação, reação ou dano, ou limpar Estresse igual ao resultado. Dados não usados somem no fim da sessão.",
+          "level": 1
+        }
+      ],
+      "hope_feature": {
+        "name": "Fazer Cena",
+        "description": "Gaste 3 Esperança para Distrair temporariamente um alvo em alcance próximo, dando -2 na Dificuldade dele.",
+        "hope_cost": 3
+      },
+      "domain_ids": ["domain.grace", "domain.codex"]
+    },
+    {
+      "id": "class.druid",
+      "name": "Druida",
+      "starting_evasion": 10,
+      "starting_hp": 6,
+      "starting_items": ["item.basic-supplies", "item.herbal-tonic"],
+      "features": [
+        {
+          "id": "feature.druid-beastform",
+          "name": "Forma de Besta",
+          "description": "Marque um Estresse para se transformar em uma forma de besta do seu nível de tier ou menor. Enquanto estiver transformado, você não pode usar armas nem feitiços de domínio, mas pode usar outras habilidades. Feitiços ativos continuam. Você ganha as características da forma, soma o bônus de Evasão dela e usa o traço indicado para atacar. A Armadura permanece marcada; se marcar seu último PV, você sai da forma.",
+          "level": 1
+        },
+        {
+          "id": "feature.druid-wildtouch",
+          "name": "Toque Selvagem",
+          "description": "Você pode produzir efeitos naturais sutis e inofensivos à vontade, como fazer uma flor crescer, chamar uma brisa ou acender uma fogueira.",
+          "level": 1
+        }
+      ],
+      "hope_feature": {
+        "name": "Evolução",
+        "description": "Gaste 3 Esperança para entrar em Forma de Besta sem marcar Estresse. Escolha um traço para receber +1 até sair da forma.",
+        "hope_cost": 3
+      },
+      "domain_ids": ["domain.sage", "domain.arcana"]
+    },
+    {
+      "id": "class.ranger",
+      "name": "Patrulheiro",
+      "starting_evasion": 12,
+      "starting_hp": 6,
+      "starting_items": ["item.basic-supplies", "item.trail-rations"],
+      "features": [
+        {
+          "id": "feature.ranger-focus",
+          "name": "Foco do Caçador",
+          "description": "Gaste uma Esperança e faça um ataque. Em sucesso, cause o dano normal e faça o alvo virar seu Foco. Enquanto o Foco durar, você sabe a direção dele; quando causa dano, ele marca um Estresse; e quando falha um ataque contra ele, pode encerrar o Foco para rerrolar seus Dados de Dualidade.",
+          "level": 1
+        }
+      ],
+      "hope_feature": {
+        "name": "Segurar o Avanço",
+        "description": "Gaste 3 Esperança após um ataque com arma bem-sucedido para usar a mesma rolagem contra dois alvos adicionais no alcance.",
+        "hope_cost": 3
+      },
+      "domain_ids": ["domain.bone", "domain.sage"]
+    },
+    {
+      "id": "class.rogue",
+      "name": "Ladino",
+      "starting_evasion": 12,
+      "starting_hp": 6,
+      "starting_items": ["item.basic-supplies", "item.lockpicks"],
+      "features": [
+        {
+          "id": "feature.rogue-cloaked",
+          "name": "Encoberto",
+          "description": "Sempre que você estaria Oculto, você fica Encoberto. Além dos benefícios de Oculto, se ficar parado, continua invisível mesmo quando um adversário vai para onde normalmente o veria. Você perde o Encoberto ao atacar ou terminar um movimento na linha de visão.",
+          "level": 1
+        },
+        {
+          "id": "feature.rogue-sneak-attack",
+          "name": "Ataque Furtivo",
+          "description": "Ao acertar enquanto Encoberto ou quando um aliado está em alcance corpo a corpo do alvo, adicione d6s ao dano iguais ao seu tier.",
+          "level": 1
+        }
+      ],
+      "hope_feature": {
+        "name": "Esquiva do Ladino",
+        "description": "Gaste 3 Esperança para ganhar +2 de Evasão até que um ataque acerte você; caso contrário, dura até o próximo descanso.",
+        "hope_cost": 3
+      },
+      "domain_ids": ["domain.midnight", "domain.grace"]
+    },
+    {
+      "id": "class.seraph",
+      "name": "Serafim",
+      "starting_evasion": 9,
+      "starting_hp": 7,
+      "starting_items": ["item.basic-supplies", "item.sun-charm"],
+      "features": [
+        {
+          "id": "feature.seraph-prayer-dice",
+          "name": "Dados de Oração",
+          "description": "No início de cada sessão, role d4s iguais ao traço de Conjuração da sua subclasse para formar seus Dados de Oração. Gaste quaisquer deles para ajudar você ou um aliado em alcance longo: reduzir dano recebido, somar a uma rolagem depois de feita, ou ganhar Esperança igual ao dado. Dados não usados somem no fim da sessão.",
+          "level": 1
+        }
+      ],
+      "hope_feature": {
+        "name": "Suporte de Vida",
+        "description": "Gaste 3 Esperança para limpar 1 Ponto de Vida de um aliado em alcance próximo.",
+        "hope_cost": 3
+      },
+      "domain_ids": ["domain.splendor", "domain.valor"]
+    },
+    {
+      "id": "class.sorcerer",
+      "name": "Feiticeiro",
+      "starting_evasion": 10,
+      "starting_hp": 6,
+      "starting_items": ["item.basic-supplies", "item.arcane-focus"],
+      "features": [
+        {
+          "id": "feature.sorcerer-arcane-sense",
+          "name": "Sentido Arcano",
+          "description": "Você sente a presença de pessoas e objetos mágicos em alcance próximo.",
+          "level": 1
+        },
+        {
+          "id": "feature.sorcerer-minor-illusion",
+          "name": "Ilusão Menor",
+          "description": "Faça uma rolagem de Conjuração (10). Em sucesso, crie uma ilusão visual pequena, até o seu tamanho, em alcance próximo; ela convence qualquer um em alcance próximo ou além.",
+          "level": 1
+        },
+        {
+          "id": "feature.sorcerer-channel-raw-power",
+          "name": "Canalizar Poder Bruto",
+          "description": "Uma vez por descanso longo, mova uma carta de domínio do seu equipamento para o seu cofre e escolha: ganhar Esperança igual ao nível da carta ou somar duas vezes o nível da carta ao dano de um feitiço que cause dano.",
+          "level": 1
+        }
+      ],
+      "hope_feature": {
+        "name": "Magia Volátil",
+        "description": "Gaste 3 Esperança para rerrolar qualquer quantidade de dados de dano em um ataque que cause dano mágico.",
+        "hope_cost": 3
+      },
+      "domain_ids": ["domain.arcana", "domain.midnight"]
+    },
+    {
+      "id": "class.warrior",
+      "name": "Guerreiro",
+      "starting_evasion": 11,
+      "starting_hp": 6,
+      "starting_items": ["item.basic-supplies", "item.weapon-kit"],
+      "features": [
+        {
+          "id": "feature.warrior-attack-of-opportunity",
+          "name": "Golpe de Despedida",
+          "description": "Quando um adversário em alcance corpo a corpo tenta sair, faça uma reação usando qualquer traço contra a Dificuldade dele. Em sucesso escolha um efeito (dois no crítico): impedir o movimento, causar dano igual ao da arma primária, ou se mover com ele.",
+          "level": 1
+        },
+        {
+          "id": "feature.warrior-combat-training",
+          "name": "Treino de Combate",
+          "description": "Ignore a carga ao equipar armas. Quando causar dano físico, some seu nível ao dano.",
+          "level": 1
+        }
+      ],
+      "hope_feature": {
+        "name": "Sem Piedade",
+        "description": "Gaste 3 Esperança para ganhar +1 em rolagens de ataque até o próximo descanso.",
+        "hope_cost": 3
+      },
+      "domain_ids": ["domain.blade", "domain.bone"]
+    },
+    {
+      "id": "class.wizard",
+      "name": "Mago",
+      "starting_evasion": 11,
+      "starting_hp": 5,
+      "starting_items": ["item.basic-supplies", "item.field-notes"],
+      "features": [
+        {
+          "id": "feature.wizard-prestidigitation",
+          "name": "Prestidigitação",
+          "description": "Você pode realizar magia sutil e inofensiva à vontade, como mudar cores, criar cheiros, acender velas, fazer objetos pequenos flutuarem, iluminar um cômodo ou reparar um item pequeno.",
+          "level": 1
+        },
+        {
+          "id": "feature.wizard-strange-patterns",
+          "name": "Padrões Estranhos",
+          "description": "Escolha um número de 1 a 12. Quando ele sair em um Dado de Dualidade, ganhe uma Esperança ou limpe um Estresse. Você pode mudar o número após um descanso longo.",
+          "level": 1
+        }
+      ],
+      "hope_feature": {
+        "name": "Desta Vez Não",
+        "description": "Gaste 3 Esperança para forçar um adversário em alcance longo a rerrolar um ataque ou rolagem de dano.",
+        "hope_cost": 3
+      },
+      "domain_ids": ["domain.codex", "domain.splendor"]
+    }
+  ]
+}

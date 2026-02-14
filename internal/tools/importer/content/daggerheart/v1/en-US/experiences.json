@@ -1,0 +1,98 @@
+{
+  "system_id": "daggerheart",
+  "system_version": "v1",
+  "source": "Daggerheart SRD v1 (paraphrased)",
+  "locale": "en-US",
+  "items": [
+    {
+      "id": "experience.acrobatics",
+      "name": "Acrobatics",
+      "description": ""
+    },
+    {
+      "id": "experience.hunt-from-above",
+      "name": "Hunt from Above",
+      "description": ""
+    },
+    {
+      "id": "experience.navigation",
+      "name": "Navigation",
+      "description": ""
+    },
+    {
+      "id": "experience.ambusher",
+      "name": "Ambusher",
+      "description": ""
+    },
+    {
+      "id": "experience.intimidation",
+      "name": "Intimidation",
+      "description": ""
+    },
+    {
+      "id": "experience.nobility",
+      "name": "Nobility",
+      "description": ""
+    },
+    {
+      "id": "experience.bartering",
+      "name": "Bartering",
+      "description": ""
+    },
+    {
+      "id": "experience.intrusion",
+      "name": "Intrusion",
+      "description": ""
+    },
+    {
+      "id": "experience.quick-reflexes",
+      "name": "Quick Reflexes",
+      "description": ""
+    },
+    {
+      "id": "experience.blademaster",
+      "name": "Blademaster",
+      "description": ""
+    },
+    {
+      "id": "experience.keen-senses",
+      "name": "Keen Senses",
+      "description": ""
+    },
+    {
+      "id": "experience.socialite",
+      "name": "Socialite",
+      "description": ""
+    },
+    {
+      "id": "experience.bodyguard",
+      "name": "Bodyguard",
+      "description": ""
+    },
+    {
+      "id": "experience.magical-knowledge",
+      "name": "Magical Knowledge",
+      "description": ""
+    },
+    {
+      "id": "experience.stealth",
+      "name": "Stealth",
+      "description": ""
+    },
+    {
+      "id": "experience.commander",
+      "name": "Commander",
+      "description": ""
+    },
+    {
+      "id": "experience.natures-friend",
+      "name": "Wild Ally",
+      "description": ""
+    },
+    {
+      "id": "experience.tracker",
+      "name": "Tracker",
+      "description": ""
+    }
+  ]
+}

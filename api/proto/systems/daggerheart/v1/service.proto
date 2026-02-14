@@ -95,6 +95,9 @@ service DaggerheartService {
   // Roll adversary attack dice (d20-based).
   rpc SessionAdversaryAttackRoll(SessionAdversaryAttackRollRequest) returns (SessionAdversaryAttackRollResponse);
 
+  // Resolve an adversary action check (optional dramatic roll).
+  rpc SessionAdversaryActionCheck(SessionAdversaryActionCheckRequest) returns (SessionAdversaryActionCheckResponse);
+
   // Run a full adversary attack flow (roll, outcome, damage roll, apply damage).
   rpc SessionAdversaryAttackFlow(SessionAdversaryAttackFlowRequest) returns (SessionAdversaryAttackFlowResponse);
 
@@ -554,8 +557,20 @@ message SessionActionRollRequest {
   // Optional modifiers applied to the roll.
   repeated ActionRollModifier modifiers = 7;
 
+  // Count of advantage dice (d6). Cancels against disadvantage.
+  int32 advantage = 8;
+
+  // Count of disadvantage dice (d6). Cancels against advantage.
+  int32 disadvantage = 9;
+
+  // Whether the roll is underwater (optional rules).
+  bool underwater = 10;
+
+  // Optional breath countdown to advance for underwater actions.
+  string breath_countdown_id = 11;
+
   // Optional RNG configuration for deterministic rolls.
-  common.v1.RngRequest rng = 8;
+  common.v1.RngRequest rng = 12;
 }
 
 message SessionActionRollResponse {
@@ -623,14 +638,16 @@ message SessionAttackFlowRequest {
   string trait = 4;
   int32 difficulty = 5;
   repeated ActionRollModifier modifiers = 6;
-  string target_id = 7;
-  repeated DiceSpec damage_dice = 8;
-  int32 damage_modifier = 9;
-  DaggerheartAttackDamageSpec damage = 10;
-  bool require_damage_roll = 11;
-  bool damage_critical = 12;
-  common.v1.RngRequest action_rng = 13;
-  common.v1.RngRequest damage_rng = 14;
+  bool underwater = 7;
+  string breath_countdown_id = 8;
+  string target_id = 9;
+  repeated DiceSpec damage_dice = 10;
+  int32 damage_modifier = 11;
+  DaggerheartAttackDamageSpec damage = 12;
+  bool require_damage_roll = 13;
+  bool damage_critical = 14;
+  common.v1.RngRequest action_rng = 15;
+  common.v1.RngRequest damage_rng = 16;
 }
 
 message SessionAttackFlowResponse {
@@ -665,6 +682,26 @@ message SessionAdversaryAttackRollRequest {
   int32 advantage = 5;
   int32 disadvantage = 6;
   common.v1.RngRequest rng = 7;
+}
+
+message SessionAdversaryActionCheckRequest {
+  string campaign_id = 1;
+  string session_id = 2;
+  string adversary_id = 3;
+  int32 difficulty = 4;
+  bool dramatic = 5;
+  int32 modifier = 6;
+  common.v1.RngRequest rng = 7;
+}
+
+message SessionAdversaryActionCheckResponse {
+  uint64 roll_seq = 1;
+  bool auto_success = 2;
+  bool success = 3;
+  int32 roll = 4;
+  int32 modifier = 5;
+  int32 total = 6;
+  common.v1.RngResponse rng = 7;
 }
 
 message SessionAdversaryAttackRollResponse {

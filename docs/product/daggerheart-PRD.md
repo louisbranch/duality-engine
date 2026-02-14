@@ -1,4 +1,4 @@
-# Project Requirement Document: Daggerheart Core Mechanics (Setting-Agnostic)
+# Daggerheart PRD: Core Mechanics (Setting-Agnostic)
 
 ## Purpose
 Define the core, setting-agnostic mechanics of the Daggerheart system for digital implementation. This document captures what the system must support and why, without prescribing technical design or content catalogs. It is intended to enable the same mechanics to run in any setting by swapping content data.
@@ -39,7 +39,7 @@ Define the core, setting-agnostic mechanics of the Daggerheart system for digita
   - Action roll total = Hope die + Fear die + modifiers.
   - Difficulty comparison determines success/failure.
   - Outcome category is defined by higher die (or matching dice for critical success).
-  - Critical success counts as a Hope outcome and grants an additional benefit.
+  - Critical success counts as a Hope outcome, grants 1 Hope, and clears 1 Stress.
 
 ### Roll Types
 - **Action Roll:** Standard resolution for risky or meaningful actions.
@@ -48,8 +48,11 @@ Define the core, setting-agnostic mechanics of the Daggerheart system for digita
 - **Attack Roll:** Action roll targeting an opponent; difficulty equals target’s Evasion (PCs) or Difficulty (adversaries).
 - **Damage Roll:** Dice pool defined by weapon/spell; resolves damage amount and type.
 - **Reaction Roll:** Defensive roll to avoid or mitigate effects; does not generate Hope/Fear, does not trigger GM moves, and cannot be aided.
+- **Reaction Roll (critical):** Ignores success-side effects; does not grant Hope or clear Stress.
 - **Group Action Roll:** One leader action roll; supporting PCs make reaction rolls; leader gains +1 per success and −1 per failure.
 - **Tag Team Roll:** Once per session per player to initiate; spend 3 Hope; two PCs roll and select one result for both actions; combined damage on attack.
+  - Hope outcome grants Hope to all participants; Fear outcome grants Fear to GM per participating PC.
+  - Counts as one action roll for countdowns and roll-tracking effects.
 
 ### Advantage/Disadvantage
 - **What:** Adds/subtracts a d6 to/from the roll total.
@@ -76,6 +79,8 @@ Define the core, setting-agnostic mechanics of the Daggerheart system for digita
 ### Resource Rules
 - Hope is a capped metacurrency (0–6) used to power features, aid allies, and special roll interactions.
 - Stress is a capped resource (default 6, can grow) used to power features or absorb consequences.
+- If a PC must mark Stress when all Stress is marked, mark 1 HP instead.
+- When a PC marks their last Stress, they become Vulnerable until at least 1 Stress is cleared.
 - HP marks damage severity; at 0 HP remaining, a death move is required.
 - Armor Slots reduce damage severity by one threshold per slot spent.
 
@@ -104,6 +109,8 @@ Define the core, setting-agnostic mechanics of the Daggerheart system for digita
 - Damage amount is compared against Major/Severe thresholds to determine HP marks (1, 2, or 3).
 - Optional massive damage rule supports 4 HP on extreme hits.
 - Damage types: physical and magic; some effects are direct damage (no armor reduction).
+- Armor reduction: mark 1 Armor Slot to reduce severity by one step (Severe->Major->Minor->None).
+- Unarmored baseline: Armor Score 0; Major threshold = level; Severe threshold = 2 x level.
 
 ### Critical Damage
 - On critical success during an attack roll, add the maximum possible dice result to the rolled damage total.
@@ -118,6 +125,8 @@ Define the core, setting-agnostic mechanics of the Daggerheart system for digita
 - Each rest allows two downtime moves.
 - Rest triggers resource refresh for features with per-rest usage.
 - GM gains Fear on party rests (scaled by rest type).
+  - Short rest: GM gains 1d4 Fear.
+  - Long rest: GM gains 1d4 + number of PCs Fear and may advance one long-term countdown.
 
 ## Death and Scars
 - When HP hits zero, player chooses a death move:
@@ -179,13 +188,14 @@ Define the core, setting-agnostic mechanics of the Daggerheart system for digita
 ### GM Dice
 - Adversary attack rolls use a single d20 plus attack modifier.
 - Adversary advantage/disadvantage uses roll-high/roll-low on d20.
+- Adversary action rolls default to auto-success unless dramatic; optional d20 check uses Difficulty and can add Experience by spending Fear.
 
 ## Optional Rules (Must Be Togglable)
 - Spotlight tracker tokens.
 - Defined range grid conversions.
 - Massive damage.
 - Fate rolls.
-- Underwater combat and breath countdowns.
+- Underwater combat and breath countdowns (attack disadvantage; breath countdown 3 advances on actions and can advance extra on failures).
 - PC vs PC conflict resolution.
 - Gold coins as a lower denomination.
 

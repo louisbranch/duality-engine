@@ -1562,6 +1562,16 @@ func formatEventType(eventType string, loc *message.Printer) string {
 		return loc.Sprintf("event.session_started")
 	case "session.ended":
 		return loc.Sprintf("event.session_ended")
+	case "session.gate_opened":
+		return loc.Sprintf("event.session_gate_opened")
+	case "session.gate_resolved":
+		return loc.Sprintf("event.session_gate_resolved")
+	case "session.gate_abandoned":
+		return loc.Sprintf("event.session_gate_abandoned")
+	case "session.spotlight_set":
+		return loc.Sprintf("event.session_spotlight_set")
+	case "session.spotlight_cleared":
+		return loc.Sprintf("event.session_spotlight_cleared")
 	// Invite events
 	case "invite.created":
 		return loc.Sprintf("event.invite_created")
@@ -1590,6 +1600,8 @@ func formatEventType(eventType string, loc *message.Printer) string {
 		return loc.Sprintf("event.action_reaction_resolved")
 	case "action.damage_roll_resolved":
 		return loc.Sprintf("event.action_damage_roll_resolved")
+	case "action.adversary_action_resolved":
+		return loc.Sprintf("event.action_adversary_action_resolved")
 	default:
 		// Fallback: capitalize and format unknown types
 		parts := strings.Split(eventType, ".")

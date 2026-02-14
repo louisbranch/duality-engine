@@ -46,6 +46,7 @@ const (
 	DaggerheartService_SessionAttackFlow_FullMethodName           = "/systems.daggerheart.v1.DaggerheartService/SessionAttackFlow"
 	DaggerheartService_SessionReactionFlow_FullMethodName         = "/systems.daggerheart.v1.DaggerheartService/SessionReactionFlow"
 	DaggerheartService_SessionAdversaryAttackRoll_FullMethodName  = "/systems.daggerheart.v1.DaggerheartService/SessionAdversaryAttackRoll"
+	DaggerheartService_SessionAdversaryActionCheck_FullMethodName = "/systems.daggerheart.v1.DaggerheartService/SessionAdversaryActionCheck"
 	DaggerheartService_SessionAdversaryAttackFlow_FullMethodName  = "/systems.daggerheart.v1.DaggerheartService/SessionAdversaryAttackFlow"
 	DaggerheartService_SessionGroupActionFlow_FullMethodName      = "/systems.daggerheart.v1.DaggerheartService/SessionGroupActionFlow"
 	DaggerheartService_SessionTagTeamFlow_FullMethodName          = "/systems.daggerheart.v1.DaggerheartService/SessionTagTeamFlow"
@@ -117,6 +118,8 @@ type DaggerheartServiceClient interface {
 	SessionReactionFlow(ctx context.Context, in *SessionReactionFlowRequest, opts ...grpc.CallOption) (*SessionReactionFlowResponse, error)
 	// Roll adversary attack dice (d20-based).
 	SessionAdversaryAttackRoll(ctx context.Context, in *SessionAdversaryAttackRollRequest, opts ...grpc.CallOption) (*SessionAdversaryAttackRollResponse, error)
+	// Resolve an adversary action check (optional dramatic roll).
+	SessionAdversaryActionCheck(ctx context.Context, in *SessionAdversaryActionCheckRequest, opts ...grpc.CallOption) (*SessionAdversaryActionCheckResponse, error)
 	// Run a full adversary attack flow (roll, outcome, damage roll, apply damage).
 	SessionAdversaryAttackFlow(ctx context.Context, in *SessionAdversaryAttackFlowRequest, opts ...grpc.CallOption) (*SessionAdversaryAttackFlowResponse, error)
 	// Run a group action flow (supporter reactions + leader roll + outcome).
@@ -411,6 +414,16 @@ func (c *daggerheartServiceClient) SessionAdversaryAttackRoll(ctx context.Contex
 	return out, nil
 }
 
+func (c *daggerheartServiceClient) SessionAdversaryActionCheck(ctx context.Context, in *SessionAdversaryActionCheckRequest, opts ...grpc.CallOption) (*SessionAdversaryActionCheckResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SessionAdversaryActionCheckResponse)
+	err := c.cc.Invoke(ctx, DaggerheartService_SessionAdversaryActionCheck_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *daggerheartServiceClient) SessionAdversaryAttackFlow(ctx context.Context, in *SessionAdversaryAttackFlowRequest, opts ...grpc.CallOption) (*SessionAdversaryAttackFlowResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SessionAdversaryAttackFlowResponse)
@@ -543,6 +556,8 @@ type DaggerheartServiceServer interface {
 	SessionReactionFlow(context.Context, *SessionReactionFlowRequest) (*SessionReactionFlowResponse, error)
 	// Roll adversary attack dice (d20-based).
 	SessionAdversaryAttackRoll(context.Context, *SessionAdversaryAttackRollRequest) (*SessionAdversaryAttackRollResponse, error)
+	// Resolve an adversary action check (optional dramatic roll).
+	SessionAdversaryActionCheck(context.Context, *SessionAdversaryActionCheckRequest) (*SessionAdversaryActionCheckResponse, error)
 	// Run a full adversary attack flow (roll, outcome, damage roll, apply damage).
 	SessionAdversaryAttackFlow(context.Context, *SessionAdversaryAttackFlowRequest) (*SessionAdversaryAttackFlowResponse, error)
 	// Run a group action flow (supporter reactions + leader roll + outcome).
@@ -647,6 +662,9 @@ func (UnimplementedDaggerheartServiceServer) SessionReactionFlow(context.Context
 }
 func (UnimplementedDaggerheartServiceServer) SessionAdversaryAttackRoll(context.Context, *SessionAdversaryAttackRollRequest) (*SessionAdversaryAttackRollResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SessionAdversaryAttackRoll not implemented")
+}
+func (UnimplementedDaggerheartServiceServer) SessionAdversaryActionCheck(context.Context, *SessionAdversaryActionCheckRequest) (*SessionAdversaryActionCheckResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SessionAdversaryActionCheck not implemented")
 }
 func (UnimplementedDaggerheartServiceServer) SessionAdversaryAttackFlow(context.Context, *SessionAdversaryAttackFlowRequest) (*SessionAdversaryAttackFlowResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SessionAdversaryAttackFlow not implemented")
@@ -1176,6 +1194,24 @@ func _DaggerheartService_SessionAdversaryAttackRoll_Handler(srv interface{}, ctx
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DaggerheartService_SessionAdversaryActionCheck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SessionAdversaryActionCheckRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DaggerheartServiceServer).SessionAdversaryActionCheck(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DaggerheartService_SessionAdversaryActionCheck_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DaggerheartServiceServer).SessionAdversaryActionCheck(ctx, req.(*SessionAdversaryActionCheckRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _DaggerheartService_SessionAdversaryAttackFlow_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SessionAdversaryAttackFlowRequest)
 	if err := dec(in); err != nil {
@@ -1416,6 +1452,10 @@ var DaggerheartService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SessionAdversaryAttackRoll",
 			Handler:    _DaggerheartService_SessionAdversaryAttackRoll_Handler,
+		},
+		{
+			MethodName: "SessionAdversaryActionCheck",
+			Handler:    _DaggerheartService_SessionAdversaryActionCheck_Handler,
 		},
 		{
 			MethodName: "SessionAdversaryAttackFlow",

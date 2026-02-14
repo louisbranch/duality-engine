@@ -1,6 +1,8 @@
 package game
 
 import (
+	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
@@ -11,6 +13,8 @@ import (
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/invite"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/participant"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/session"
+	"github.com/louisbranch/fracturing.space/internal/services/game/storage"
+	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
@@ -278,6 +282,81 @@ func sessionStatusToProto(status session.SessionStatus) campaignv1.SessionStatus
 	}
 }
 
+func sessionGateToProto(gate storage.SessionGate) (*campaignv1.SessionGate, error) {
+	metadata, err := structFromJSON(gate.MetadataJSON)
+	if err != nil {
+		return nil, err
+	}
+	resolution, err := structFromJSON(gate.ResolutionJSON)
+	if err != nil {
+		return nil, err
+	}
+	return &campaignv1.SessionGate{
+		Id:                  gate.GateID,
+		CampaignId:          gate.CampaignID,
+		SessionId:           gate.SessionID,
+		Type:                gate.GateType,
+		Status:              sessionGateStatusToProto(gate.Status),
+		Reason:              gate.Reason,
+		CreatedAt:           timestamppb.New(gate.CreatedAt),
+		CreatedByActorType:  gate.CreatedByActorType,
+		CreatedByActorId:    gate.CreatedByActorID,
+		ResolvedAt:          timestampOrNil(gate.ResolvedAt),
+		ResolvedByActorType: gate.ResolvedByActorType,
+		ResolvedByActorId:   gate.ResolvedByActorID,
+		Metadata:            metadata,
+		Resolution:          resolution,
+	}, nil
+}
+
+func sessionGateStatusToProto(status string) campaignv1.SessionGateStatus {
+	switch strings.ToLower(strings.TrimSpace(status)) {
+	case string(session.GateStatusOpen):
+		return campaignv1.SessionGateStatus_SESSION_GATE_OPEN
+	case string(session.GateStatusResolved):
+		return campaignv1.SessionGateStatus_SESSION_GATE_RESOLVED
+	case string(session.GateStatusAbandoned):
+		return campaignv1.SessionGateStatus_SESSION_GATE_ABANDONED
+	default:
+		return campaignv1.SessionGateStatus_SESSION_GATE_STATUS_UNSPECIFIED
+	}
+}
+
+func sessionSpotlightToProto(spotlight storage.SessionSpotlight) *campaignv1.SessionSpotlight {
+	return &campaignv1.SessionSpotlight{
+		CampaignId:         spotlight.CampaignID,
+		SessionId:          spotlight.SessionID,
+		Type:               sessionSpotlightTypeToProto(spotlight.SpotlightType),
+		CharacterId:        spotlight.CharacterID,
+		UpdatedAt:          timestamppb.New(spotlight.UpdatedAt),
+		UpdatedByActorType: spotlight.UpdatedByActorType,
+		UpdatedByActorId:   spotlight.UpdatedByActorID,
+	}
+}
+
+func sessionSpotlightTypeToProto(value string) campaignv1.SessionSpotlightType {
+	trimmed := strings.ToLower(strings.TrimSpace(value))
+	switch trimmed {
+	case string(session.SpotlightTypeGM):
+		return campaignv1.SessionSpotlightType_SESSION_SPOTLIGHT_TYPE_GM
+	case string(session.SpotlightTypeCharacter):
+		return campaignv1.SessionSpotlightType_SESSION_SPOTLIGHT_TYPE_CHARACTER
+	default:
+		return campaignv1.SessionSpotlightType_SESSION_SPOTLIGHT_TYPE_UNSPECIFIED
+	}
+}
+
+func sessionSpotlightTypeFromProto(value campaignv1.SessionSpotlightType) (session.SpotlightType, error) {
+	switch value {
+	case campaignv1.SessionSpotlightType_SESSION_SPOTLIGHT_TYPE_GM:
+		return session.SpotlightTypeGM, nil
+	case campaignv1.SessionSpotlightType_SESSION_SPOTLIGHT_TYPE_CHARACTER:
+		return session.SpotlightTypeCharacter, nil
+	default:
+		return "", fmt.Errorf("spotlight type is required")
+	}
+}
+
 // Timestamp helpers
 
 func timestampOrNil(value *time.Time) *timestamppb.Timestamp {
@@ -285,4 +364,31 @@ func timestampOrNil(value *time.Time) *timestamppb.Timestamp {
 		return nil
 	}
 	return timestamppb.New(value.UTC())
+}
+
+func structToMap(input *structpb.Struct) map[string]any {
+	if input == nil {
+		return nil
+	}
+	return input.AsMap()
+}
+
+func structFromJSON(data []byte) (*structpb.Struct, error) {
+	if len(data) == 0 {
+		return nil, nil
+	}
+	var payload map[string]any
+	if err := json.Unmarshal(data, &payload); err != nil {
+		return nil, err
+	}
+	return structpb.NewStruct(payload)
+}
+
+func validateStructPayload(values map[string]any) error {
+	for key := range values {
+		if strings.TrimSpace(key) == "" {
+			return fmt.Errorf("payload keys must be non-empty")
+		}
+	}
+	return nil
 }

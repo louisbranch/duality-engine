@@ -84,6 +84,9 @@ func (s *DaggerheartService) CreateAdversary(ctx context.Context, in *pb.Daggerh
 		if _, err := s.stores.Session.GetSession(ctx, campaignID, sessionID); err != nil {
 			return nil, handleDomainError(err)
 		}
+		if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+			return nil, err
+		}
 	}
 
 	adversaryID, err := id.NewID()
@@ -188,6 +191,13 @@ func (s *DaggerheartService) UpdateAdversary(ctx context.Context, in *pb.Daggerh
 		return nil, handleDomainError(err)
 	}
 
+	currentSessionID := strings.TrimSpace(current.SessionID)
+	if currentSessionID != "" {
+		if err := s.ensureNoOpenSessionGate(ctx, campaignID, currentSessionID); err != nil {
+			return nil, err
+		}
+	}
+
 	name := current.Name
 	if in.Name != nil {
 		name = strings.TrimSpace(in.Name.GetValue())
@@ -230,6 +240,9 @@ func (s *DaggerheartService) UpdateAdversary(ctx context.Context, in *pb.Daggerh
 		}
 		if _, err := s.stores.Session.GetSession(ctx, campaignID, sessionID); err != nil {
 			return nil, handleDomainError(err)
+		}
+		if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+			return nil, err
 		}
 	}
 
@@ -325,6 +338,13 @@ func (s *DaggerheartService) DeleteAdversary(ctx context.Context, in *pb.Daggerh
 		return nil, handleDomainError(err)
 	}
 
+	sessionID := strings.TrimSpace(current.SessionID)
+	if sessionID != "" {
+		if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+			return nil, err
+		}
+	}
+
 	payload := daggerheart.AdversaryDeletedPayload{
 		AdversaryID: adversaryID,
 		Reason:      strings.TrimSpace(in.GetReason()),
@@ -338,7 +358,7 @@ func (s *DaggerheartService) DeleteAdversary(ctx context.Context, in *pb.Daggerh
 		CampaignID:    campaignID,
 		Timestamp:     time.Now().UTC(),
 		Type:          daggerheart.EventTypeAdversaryDeleted,
-		SessionID:     current.SessionID,
+		SessionID:     sessionID,
 		RequestID:     grpcmeta.RequestIDFromContext(ctx),
 		InvocationID:  grpcmeta.InvocationIDFromContext(ctx),
 		ActorType:     event.ActorTypeSystem,

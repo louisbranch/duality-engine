@@ -9,6 +9,7 @@ package gamev1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	structpb "google.golang.org/protobuf/types/known/structpb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
@@ -69,6 +70,107 @@ func (x SessionStatus) Number() protoreflect.EnumNumber {
 // Deprecated: Use SessionStatus.Descriptor instead.
 func (SessionStatus) EnumDescriptor() ([]byte, []int) {
 	return file_game_v1_session_proto_rawDescGZIP(), []int{0}
+}
+
+type SessionGateStatus int32
+
+const (
+	SessionGateStatus_SESSION_GATE_STATUS_UNSPECIFIED SessionGateStatus = 0
+	SessionGateStatus_SESSION_GATE_OPEN               SessionGateStatus = 1
+	SessionGateStatus_SESSION_GATE_RESOLVED           SessionGateStatus = 2
+	SessionGateStatus_SESSION_GATE_ABANDONED          SessionGateStatus = 3
+)
+
+// Enum value maps for SessionGateStatus.
+var (
+	SessionGateStatus_name = map[int32]string{
+		0: "SESSION_GATE_STATUS_UNSPECIFIED",
+		1: "SESSION_GATE_OPEN",
+		2: "SESSION_GATE_RESOLVED",
+		3: "SESSION_GATE_ABANDONED",
+	}
+	SessionGateStatus_value = map[string]int32{
+		"SESSION_GATE_STATUS_UNSPECIFIED": 0,
+		"SESSION_GATE_OPEN":               1,
+		"SESSION_GATE_RESOLVED":           2,
+		"SESSION_GATE_ABANDONED":          3,
+	}
+)
+
+func (x SessionGateStatus) Enum() *SessionGateStatus {
+	p := new(SessionGateStatus)
+	*p = x
+	return p
+}
+
+func (x SessionGateStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SessionGateStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_game_v1_session_proto_enumTypes[1].Descriptor()
+}
+
+func (SessionGateStatus) Type() protoreflect.EnumType {
+	return &file_game_v1_session_proto_enumTypes[1]
+}
+
+func (x SessionGateStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SessionGateStatus.Descriptor instead.
+func (SessionGateStatus) EnumDescriptor() ([]byte, []int) {
+	return file_game_v1_session_proto_rawDescGZIP(), []int{1}
+}
+
+type SessionSpotlightType int32
+
+const (
+	SessionSpotlightType_SESSION_SPOTLIGHT_TYPE_UNSPECIFIED SessionSpotlightType = 0
+	SessionSpotlightType_SESSION_SPOTLIGHT_TYPE_GM          SessionSpotlightType = 1
+	SessionSpotlightType_SESSION_SPOTLIGHT_TYPE_CHARACTER   SessionSpotlightType = 2
+)
+
+// Enum value maps for SessionSpotlightType.
+var (
+	SessionSpotlightType_name = map[int32]string{
+		0: "SESSION_SPOTLIGHT_TYPE_UNSPECIFIED",
+		1: "SESSION_SPOTLIGHT_TYPE_GM",
+		2: "SESSION_SPOTLIGHT_TYPE_CHARACTER",
+	}
+	SessionSpotlightType_value = map[string]int32{
+		"SESSION_SPOTLIGHT_TYPE_UNSPECIFIED": 0,
+		"SESSION_SPOTLIGHT_TYPE_GM":          1,
+		"SESSION_SPOTLIGHT_TYPE_CHARACTER":   2,
+	}
+)
+
+func (x SessionSpotlightType) Enum() *SessionSpotlightType {
+	p := new(SessionSpotlightType)
+	*p = x
+	return p
+}
+
+func (x SessionSpotlightType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SessionSpotlightType) Descriptor() protoreflect.EnumDescriptor {
+	return file_game_v1_session_proto_enumTypes[2].Descriptor()
+}
+
+func (SessionSpotlightType) Type() protoreflect.EnumType {
+	return &file_game_v1_session_proto_enumTypes[2]
+}
+
+func (x SessionSpotlightType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SessionSpotlightType.Descriptor instead.
+func (SessionSpotlightType) EnumDescriptor() ([]byte, []int) {
+	return file_game_v1_session_proto_rawDescGZIP(), []int{2}
 }
 
 // Session represents a gameplay session within a campaign.
@@ -172,6 +274,246 @@ func (x *Session) GetVersion() int64 {
 	return 0
 }
 
+type SessionGate struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	Id                  string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CampaignId          string                 `protobuf:"bytes,2,opt,name=campaign_id,json=campaignId,proto3" json:"campaign_id,omitempty"`
+	SessionId           string                 `protobuf:"bytes,3,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Type                string                 `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
+	Status              SessionGateStatus      `protobuf:"varint,5,opt,name=status,proto3,enum=game.v1.SessionGateStatus" json:"status,omitempty"`
+	Reason              string                 `protobuf:"bytes,6,opt,name=reason,proto3" json:"reason,omitempty"`
+	CreatedAt           *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	CreatedByActorType  string                 `protobuf:"bytes,8,opt,name=created_by_actor_type,json=createdByActorType,proto3" json:"created_by_actor_type,omitempty"`
+	CreatedByActorId    string                 `protobuf:"bytes,9,opt,name=created_by_actor_id,json=createdByActorId,proto3" json:"created_by_actor_id,omitempty"`
+	ResolvedAt          *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=resolved_at,json=resolvedAt,proto3" json:"resolved_at,omitempty"`
+	ResolvedByActorType string                 `protobuf:"bytes,11,opt,name=resolved_by_actor_type,json=resolvedByActorType,proto3" json:"resolved_by_actor_type,omitempty"`
+	ResolvedByActorId   string                 `protobuf:"bytes,12,opt,name=resolved_by_actor_id,json=resolvedByActorId,proto3" json:"resolved_by_actor_id,omitempty"`
+	Metadata            *structpb.Struct       `protobuf:"bytes,13,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	Resolution          *structpb.Struct       `protobuf:"bytes,14,opt,name=resolution,proto3" json:"resolution,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *SessionGate) Reset() {
+	*x = SessionGate{}
+	mi := &file_game_v1_session_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SessionGate) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SessionGate) ProtoMessage() {}
+
+func (x *SessionGate) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_session_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SessionGate.ProtoReflect.Descriptor instead.
+func (*SessionGate) Descriptor() ([]byte, []int) {
+	return file_game_v1_session_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *SessionGate) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *SessionGate) GetCampaignId() string {
+	if x != nil {
+		return x.CampaignId
+	}
+	return ""
+}
+
+func (x *SessionGate) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *SessionGate) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *SessionGate) GetStatus() SessionGateStatus {
+	if x != nil {
+		return x.Status
+	}
+	return SessionGateStatus_SESSION_GATE_STATUS_UNSPECIFIED
+}
+
+func (x *SessionGate) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+func (x *SessionGate) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *SessionGate) GetCreatedByActorType() string {
+	if x != nil {
+		return x.CreatedByActorType
+	}
+	return ""
+}
+
+func (x *SessionGate) GetCreatedByActorId() string {
+	if x != nil {
+		return x.CreatedByActorId
+	}
+	return ""
+}
+
+func (x *SessionGate) GetResolvedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ResolvedAt
+	}
+	return nil
+}
+
+func (x *SessionGate) GetResolvedByActorType() string {
+	if x != nil {
+		return x.ResolvedByActorType
+	}
+	return ""
+}
+
+func (x *SessionGate) GetResolvedByActorId() string {
+	if x != nil {
+		return x.ResolvedByActorId
+	}
+	return ""
+}
+
+func (x *SessionGate) GetMetadata() *structpb.Struct {
+	if x != nil {
+		return x.Metadata
+	}
+	return nil
+}
+
+func (x *SessionGate) GetResolution() *structpb.Struct {
+	if x != nil {
+		return x.Resolution
+	}
+	return nil
+}
+
+type SessionSpotlight struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	CampaignId         string                 `protobuf:"bytes,1,opt,name=campaign_id,json=campaignId,proto3" json:"campaign_id,omitempty"`
+	SessionId          string                 `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Type               SessionSpotlightType   `protobuf:"varint,3,opt,name=type,proto3,enum=game.v1.SessionSpotlightType" json:"type,omitempty"`
+	CharacterId        string                 `protobuf:"bytes,4,opt,name=character_id,json=characterId,proto3" json:"character_id,omitempty"`
+	UpdatedAt          *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	UpdatedByActorType string                 `protobuf:"bytes,6,opt,name=updated_by_actor_type,json=updatedByActorType,proto3" json:"updated_by_actor_type,omitempty"`
+	UpdatedByActorId   string                 `protobuf:"bytes,7,opt,name=updated_by_actor_id,json=updatedByActorId,proto3" json:"updated_by_actor_id,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *SessionSpotlight) Reset() {
+	*x = SessionSpotlight{}
+	mi := &file_game_v1_session_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SessionSpotlight) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SessionSpotlight) ProtoMessage() {}
+
+func (x *SessionSpotlight) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_session_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SessionSpotlight.ProtoReflect.Descriptor instead.
+func (*SessionSpotlight) Descriptor() ([]byte, []int) {
+	return file_game_v1_session_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *SessionSpotlight) GetCampaignId() string {
+	if x != nil {
+		return x.CampaignId
+	}
+	return ""
+}
+
+func (x *SessionSpotlight) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *SessionSpotlight) GetType() SessionSpotlightType {
+	if x != nil {
+		return x.Type
+	}
+	return SessionSpotlightType_SESSION_SPOTLIGHT_TYPE_UNSPECIFIED
+}
+
+func (x *SessionSpotlight) GetCharacterId() string {
+	if x != nil {
+		return x.CharacterId
+	}
+	return ""
+}
+
+func (x *SessionSpotlight) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
+func (x *SessionSpotlight) GetUpdatedByActorType() string {
+	if x != nil {
+		return x.UpdatedByActorType
+	}
+	return ""
+}
+
+func (x *SessionSpotlight) GetUpdatedByActorId() string {
+	if x != nil {
+		return x.UpdatedByActorId
+	}
+	return ""
+}
+
 type StartSessionRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The campaign ID to start a session for.
@@ -184,7 +526,7 @@ type StartSessionRequest struct {
 
 func (x *StartSessionRequest) Reset() {
 	*x = StartSessionRequest{}
-	mi := &file_game_v1_session_proto_msgTypes[1]
+	mi := &file_game_v1_session_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -196,7 +538,7 @@ func (x *StartSessionRequest) String() string {
 func (*StartSessionRequest) ProtoMessage() {}
 
 func (x *StartSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_session_proto_msgTypes[1]
+	mi := &file_game_v1_session_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -209,7 +551,7 @@ func (x *StartSessionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartSessionRequest.ProtoReflect.Descriptor instead.
 func (*StartSessionRequest) Descriptor() ([]byte, []int) {
-	return file_game_v1_session_proto_rawDescGZIP(), []int{1}
+	return file_game_v1_session_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *StartSessionRequest) GetCampaignId() string {
@@ -235,7 +577,7 @@ type StartSessionResponse struct {
 
 func (x *StartSessionResponse) Reset() {
 	*x = StartSessionResponse{}
-	mi := &file_game_v1_session_proto_msgTypes[2]
+	mi := &file_game_v1_session_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -247,7 +589,7 @@ func (x *StartSessionResponse) String() string {
 func (*StartSessionResponse) ProtoMessage() {}
 
 func (x *StartSessionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_session_proto_msgTypes[2]
+	mi := &file_game_v1_session_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -260,7 +602,7 @@ func (x *StartSessionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartSessionResponse.ProtoReflect.Descriptor instead.
 func (*StartSessionResponse) Descriptor() ([]byte, []int) {
-	return file_game_v1_session_proto_rawDescGZIP(), []int{2}
+	return file_game_v1_session_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *StartSessionResponse) GetSession() *Session {
@@ -285,7 +627,7 @@ type ListSessionsRequest struct {
 
 func (x *ListSessionsRequest) Reset() {
 	*x = ListSessionsRequest{}
-	mi := &file_game_v1_session_proto_msgTypes[3]
+	mi := &file_game_v1_session_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -297,7 +639,7 @@ func (x *ListSessionsRequest) String() string {
 func (*ListSessionsRequest) ProtoMessage() {}
 
 func (x *ListSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_session_proto_msgTypes[3]
+	mi := &file_game_v1_session_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -310,7 +652,7 @@ func (x *ListSessionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_game_v1_session_proto_rawDescGZIP(), []int{3}
+	return file_game_v1_session_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ListSessionsRequest) GetCampaignId() string {
@@ -344,7 +686,7 @@ type ListSessionsResponse struct {
 
 func (x *ListSessionsResponse) Reset() {
 	*x = ListSessionsResponse{}
-	mi := &file_game_v1_session_proto_msgTypes[4]
+	mi := &file_game_v1_session_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -356,7 +698,7 @@ func (x *ListSessionsResponse) String() string {
 func (*ListSessionsResponse) ProtoMessage() {}
 
 func (x *ListSessionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_session_proto_msgTypes[4]
+	mi := &file_game_v1_session_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -369,7 +711,7 @@ func (x *ListSessionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSessionsResponse.ProtoReflect.Descriptor instead.
 func (*ListSessionsResponse) Descriptor() ([]byte, []int) {
-	return file_game_v1_session_proto_rawDescGZIP(), []int{4}
+	return file_game_v1_session_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ListSessionsResponse) GetSessions() []*Session {
@@ -398,7 +740,7 @@ type GetSessionRequest struct {
 
 func (x *GetSessionRequest) Reset() {
 	*x = GetSessionRequest{}
-	mi := &file_game_v1_session_proto_msgTypes[5]
+	mi := &file_game_v1_session_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -410,7 +752,7 @@ func (x *GetSessionRequest) String() string {
 func (*GetSessionRequest) ProtoMessage() {}
 
 func (x *GetSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_session_proto_msgTypes[5]
+	mi := &file_game_v1_session_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -423,7 +765,7 @@ func (x *GetSessionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSessionRequest.ProtoReflect.Descriptor instead.
 func (*GetSessionRequest) Descriptor() ([]byte, []int) {
-	return file_game_v1_session_proto_rawDescGZIP(), []int{5}
+	return file_game_v1_session_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetSessionRequest) GetCampaignId() string {
@@ -449,7 +791,7 @@ type GetSessionResponse struct {
 
 func (x *GetSessionResponse) Reset() {
 	*x = GetSessionResponse{}
-	mi := &file_game_v1_session_proto_msgTypes[6]
+	mi := &file_game_v1_session_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -461,7 +803,7 @@ func (x *GetSessionResponse) String() string {
 func (*GetSessionResponse) ProtoMessage() {}
 
 func (x *GetSessionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_session_proto_msgTypes[6]
+	mi := &file_game_v1_session_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -474,7 +816,7 @@ func (x *GetSessionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSessionResponse.ProtoReflect.Descriptor instead.
 func (*GetSessionResponse) Descriptor() ([]byte, []int) {
-	return file_game_v1_session_proto_rawDescGZIP(), []int{6}
+	return file_game_v1_session_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *GetSessionResponse) GetSession() *Session {
@@ -496,7 +838,7 @@ type EndSessionRequest struct {
 
 func (x *EndSessionRequest) Reset() {
 	*x = EndSessionRequest{}
-	mi := &file_game_v1_session_proto_msgTypes[7]
+	mi := &file_game_v1_session_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -508,7 +850,7 @@ func (x *EndSessionRequest) String() string {
 func (*EndSessionRequest) ProtoMessage() {}
 
 func (x *EndSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_session_proto_msgTypes[7]
+	mi := &file_game_v1_session_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -521,7 +863,7 @@ func (x *EndSessionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EndSessionRequest.ProtoReflect.Descriptor instead.
 func (*EndSessionRequest) Descriptor() ([]byte, []int) {
-	return file_game_v1_session_proto_rawDescGZIP(), []int{7}
+	return file_game_v1_session_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *EndSessionRequest) GetCampaignId() string {
@@ -547,7 +889,7 @@ type EndSessionResponse struct {
 
 func (x *EndSessionResponse) Reset() {
 	*x = EndSessionResponse{}
-	mi := &file_game_v1_session_proto_msgTypes[8]
+	mi := &file_game_v1_session_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -559,7 +901,7 @@ func (x *EndSessionResponse) String() string {
 func (*EndSessionResponse) ProtoMessage() {}
 
 func (x *EndSessionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_session_proto_msgTypes[8]
+	mi := &file_game_v1_session_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -572,7 +914,7 @@ func (x *EndSessionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EndSessionResponse.ProtoReflect.Descriptor instead.
 func (*EndSessionResponse) Descriptor() ([]byte, []int) {
-	return file_game_v1_session_proto_rawDescGZIP(), []int{8}
+	return file_game_v1_session_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *EndSessionResponse) GetSession() *Session {
@@ -582,11 +924,683 @@ func (x *EndSessionResponse) GetSession() *Session {
 	return nil
 }
 
+type OpenSessionGateRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CampaignId    string                 `protobuf:"bytes,1,opt,name=campaign_id,json=campaignId,proto3" json:"campaign_id,omitempty"`
+	SessionId     string                 `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	GateType      string                 `protobuf:"bytes,3,opt,name=gate_type,json=gateType,proto3" json:"gate_type,omitempty"`
+	Reason        string                 `protobuf:"bytes,4,opt,name=reason,proto3" json:"reason,omitempty"`
+	GateId        string                 `protobuf:"bytes,5,opt,name=gate_id,json=gateId,proto3" json:"gate_id,omitempty"`
+	Metadata      *structpb.Struct       `protobuf:"bytes,6,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *OpenSessionGateRequest) Reset() {
+	*x = OpenSessionGateRequest{}
+	mi := &file_game_v1_session_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OpenSessionGateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OpenSessionGateRequest) ProtoMessage() {}
+
+func (x *OpenSessionGateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_session_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OpenSessionGateRequest.ProtoReflect.Descriptor instead.
+func (*OpenSessionGateRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_session_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *OpenSessionGateRequest) GetCampaignId() string {
+	if x != nil {
+		return x.CampaignId
+	}
+	return ""
+}
+
+func (x *OpenSessionGateRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *OpenSessionGateRequest) GetGateType() string {
+	if x != nil {
+		return x.GateType
+	}
+	return ""
+}
+
+func (x *OpenSessionGateRequest) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+func (x *OpenSessionGateRequest) GetGateId() string {
+	if x != nil {
+		return x.GateId
+	}
+	return ""
+}
+
+func (x *OpenSessionGateRequest) GetMetadata() *structpb.Struct {
+	if x != nil {
+		return x.Metadata
+	}
+	return nil
+}
+
+type OpenSessionGateResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Gate          *SessionGate           `protobuf:"bytes,1,opt,name=gate,proto3" json:"gate,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *OpenSessionGateResponse) Reset() {
+	*x = OpenSessionGateResponse{}
+	mi := &file_game_v1_session_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OpenSessionGateResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OpenSessionGateResponse) ProtoMessage() {}
+
+func (x *OpenSessionGateResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_session_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OpenSessionGateResponse.ProtoReflect.Descriptor instead.
+func (*OpenSessionGateResponse) Descriptor() ([]byte, []int) {
+	return file_game_v1_session_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *OpenSessionGateResponse) GetGate() *SessionGate {
+	if x != nil {
+		return x.Gate
+	}
+	return nil
+}
+
+type ResolveSessionGateRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CampaignId    string                 `protobuf:"bytes,1,opt,name=campaign_id,json=campaignId,proto3" json:"campaign_id,omitempty"`
+	SessionId     string                 `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	GateId        string                 `protobuf:"bytes,3,opt,name=gate_id,json=gateId,proto3" json:"gate_id,omitempty"`
+	Decision      string                 `protobuf:"bytes,4,opt,name=decision,proto3" json:"decision,omitempty"`
+	Resolution    *structpb.Struct       `protobuf:"bytes,5,opt,name=resolution,proto3" json:"resolution,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ResolveSessionGateRequest) Reset() {
+	*x = ResolveSessionGateRequest{}
+	mi := &file_game_v1_session_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResolveSessionGateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResolveSessionGateRequest) ProtoMessage() {}
+
+func (x *ResolveSessionGateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_session_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResolveSessionGateRequest.ProtoReflect.Descriptor instead.
+func (*ResolveSessionGateRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_session_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ResolveSessionGateRequest) GetCampaignId() string {
+	if x != nil {
+		return x.CampaignId
+	}
+	return ""
+}
+
+func (x *ResolveSessionGateRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *ResolveSessionGateRequest) GetGateId() string {
+	if x != nil {
+		return x.GateId
+	}
+	return ""
+}
+
+func (x *ResolveSessionGateRequest) GetDecision() string {
+	if x != nil {
+		return x.Decision
+	}
+	return ""
+}
+
+func (x *ResolveSessionGateRequest) GetResolution() *structpb.Struct {
+	if x != nil {
+		return x.Resolution
+	}
+	return nil
+}
+
+type ResolveSessionGateResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Gate          *SessionGate           `protobuf:"bytes,1,opt,name=gate,proto3" json:"gate,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ResolveSessionGateResponse) Reset() {
+	*x = ResolveSessionGateResponse{}
+	mi := &file_game_v1_session_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResolveSessionGateResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResolveSessionGateResponse) ProtoMessage() {}
+
+func (x *ResolveSessionGateResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_session_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResolveSessionGateResponse.ProtoReflect.Descriptor instead.
+func (*ResolveSessionGateResponse) Descriptor() ([]byte, []int) {
+	return file_game_v1_session_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *ResolveSessionGateResponse) GetGate() *SessionGate {
+	if x != nil {
+		return x.Gate
+	}
+	return nil
+}
+
+type AbandonSessionGateRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CampaignId    string                 `protobuf:"bytes,1,opt,name=campaign_id,json=campaignId,proto3" json:"campaign_id,omitempty"`
+	SessionId     string                 `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	GateId        string                 `protobuf:"bytes,3,opt,name=gate_id,json=gateId,proto3" json:"gate_id,omitempty"`
+	Reason        string                 `protobuf:"bytes,4,opt,name=reason,proto3" json:"reason,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AbandonSessionGateRequest) Reset() {
+	*x = AbandonSessionGateRequest{}
+	mi := &file_game_v1_session_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AbandonSessionGateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AbandonSessionGateRequest) ProtoMessage() {}
+
+func (x *AbandonSessionGateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_session_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AbandonSessionGateRequest.ProtoReflect.Descriptor instead.
+func (*AbandonSessionGateRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_session_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *AbandonSessionGateRequest) GetCampaignId() string {
+	if x != nil {
+		return x.CampaignId
+	}
+	return ""
+}
+
+func (x *AbandonSessionGateRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *AbandonSessionGateRequest) GetGateId() string {
+	if x != nil {
+		return x.GateId
+	}
+	return ""
+}
+
+func (x *AbandonSessionGateRequest) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+type AbandonSessionGateResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Gate          *SessionGate           `protobuf:"bytes,1,opt,name=gate,proto3" json:"gate,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AbandonSessionGateResponse) Reset() {
+	*x = AbandonSessionGateResponse{}
+	mi := &file_game_v1_session_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AbandonSessionGateResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AbandonSessionGateResponse) ProtoMessage() {}
+
+func (x *AbandonSessionGateResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_session_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AbandonSessionGateResponse.ProtoReflect.Descriptor instead.
+func (*AbandonSessionGateResponse) Descriptor() ([]byte, []int) {
+	return file_game_v1_session_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *AbandonSessionGateResponse) GetGate() *SessionGate {
+	if x != nil {
+		return x.Gate
+	}
+	return nil
+}
+
+type GetSessionSpotlightRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CampaignId    string                 `protobuf:"bytes,1,opt,name=campaign_id,json=campaignId,proto3" json:"campaign_id,omitempty"`
+	SessionId     string                 `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSessionSpotlightRequest) Reset() {
+	*x = GetSessionSpotlightRequest{}
+	mi := &file_game_v1_session_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSessionSpotlightRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSessionSpotlightRequest) ProtoMessage() {}
+
+func (x *GetSessionSpotlightRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_session_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSessionSpotlightRequest.ProtoReflect.Descriptor instead.
+func (*GetSessionSpotlightRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_session_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *GetSessionSpotlightRequest) GetCampaignId() string {
+	if x != nil {
+		return x.CampaignId
+	}
+	return ""
+}
+
+func (x *GetSessionSpotlightRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+type GetSessionSpotlightResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Spotlight     *SessionSpotlight      `protobuf:"bytes,1,opt,name=spotlight,proto3" json:"spotlight,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSessionSpotlightResponse) Reset() {
+	*x = GetSessionSpotlightResponse{}
+	mi := &file_game_v1_session_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSessionSpotlightResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSessionSpotlightResponse) ProtoMessage() {}
+
+func (x *GetSessionSpotlightResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_session_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSessionSpotlightResponse.ProtoReflect.Descriptor instead.
+func (*GetSessionSpotlightResponse) Descriptor() ([]byte, []int) {
+	return file_game_v1_session_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *GetSessionSpotlightResponse) GetSpotlight() *SessionSpotlight {
+	if x != nil {
+		return x.Spotlight
+	}
+	return nil
+}
+
+type SetSessionSpotlightRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CampaignId    string                 `protobuf:"bytes,1,opt,name=campaign_id,json=campaignId,proto3" json:"campaign_id,omitempty"`
+	SessionId     string                 `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Type          SessionSpotlightType   `protobuf:"varint,3,opt,name=type,proto3,enum=game.v1.SessionSpotlightType" json:"type,omitempty"`
+	CharacterId   string                 `protobuf:"bytes,4,opt,name=character_id,json=characterId,proto3" json:"character_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetSessionSpotlightRequest) Reset() {
+	*x = SetSessionSpotlightRequest{}
+	mi := &file_game_v1_session_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetSessionSpotlightRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetSessionSpotlightRequest) ProtoMessage() {}
+
+func (x *SetSessionSpotlightRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_session_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetSessionSpotlightRequest.ProtoReflect.Descriptor instead.
+func (*SetSessionSpotlightRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_session_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *SetSessionSpotlightRequest) GetCampaignId() string {
+	if x != nil {
+		return x.CampaignId
+	}
+	return ""
+}
+
+func (x *SetSessionSpotlightRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *SetSessionSpotlightRequest) GetType() SessionSpotlightType {
+	if x != nil {
+		return x.Type
+	}
+	return SessionSpotlightType_SESSION_SPOTLIGHT_TYPE_UNSPECIFIED
+}
+
+func (x *SetSessionSpotlightRequest) GetCharacterId() string {
+	if x != nil {
+		return x.CharacterId
+	}
+	return ""
+}
+
+type SetSessionSpotlightResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Spotlight     *SessionSpotlight      `protobuf:"bytes,1,opt,name=spotlight,proto3" json:"spotlight,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetSessionSpotlightResponse) Reset() {
+	*x = SetSessionSpotlightResponse{}
+	mi := &file_game_v1_session_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetSessionSpotlightResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetSessionSpotlightResponse) ProtoMessage() {}
+
+func (x *SetSessionSpotlightResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_session_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetSessionSpotlightResponse.ProtoReflect.Descriptor instead.
+func (*SetSessionSpotlightResponse) Descriptor() ([]byte, []int) {
+	return file_game_v1_session_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *SetSessionSpotlightResponse) GetSpotlight() *SessionSpotlight {
+	if x != nil {
+		return x.Spotlight
+	}
+	return nil
+}
+
+type ClearSessionSpotlightRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CampaignId    string                 `protobuf:"bytes,1,opt,name=campaign_id,json=campaignId,proto3" json:"campaign_id,omitempty"`
+	SessionId     string                 `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Reason        string                 `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClearSessionSpotlightRequest) Reset() {
+	*x = ClearSessionSpotlightRequest{}
+	mi := &file_game_v1_session_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClearSessionSpotlightRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClearSessionSpotlightRequest) ProtoMessage() {}
+
+func (x *ClearSessionSpotlightRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_session_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClearSessionSpotlightRequest.ProtoReflect.Descriptor instead.
+func (*ClearSessionSpotlightRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_session_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *ClearSessionSpotlightRequest) GetCampaignId() string {
+	if x != nil {
+		return x.CampaignId
+	}
+	return ""
+}
+
+func (x *ClearSessionSpotlightRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *ClearSessionSpotlightRequest) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+type ClearSessionSpotlightResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Spotlight     *SessionSpotlight      `protobuf:"bytes,1,opt,name=spotlight,proto3" json:"spotlight,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClearSessionSpotlightResponse) Reset() {
+	*x = ClearSessionSpotlightResponse{}
+	mi := &file_game_v1_session_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClearSessionSpotlightResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClearSessionSpotlightResponse) ProtoMessage() {}
+
+func (x *ClearSessionSpotlightResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_session_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClearSessionSpotlightResponse.ProtoReflect.Descriptor instead.
+func (*ClearSessionSpotlightResponse) Descriptor() ([]byte, []int) {
+	return file_game_v1_session_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *ClearSessionSpotlightResponse) GetSpotlight() *SessionSpotlight {
+	if x != nil {
+		return x.Spotlight
+	}
+	return nil
+}
+
 var File_game_v1_session_proto protoreflect.FileDescriptor
 
 const file_game_v1_session_proto_rawDesc = "" +
 	"\n" +
-	"\x15game/v1/session.proto\x12\agame.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc5\x02\n" +
+	"\x15game/v1/session.proto\x12\agame.v1\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc5\x02\n" +
 	"\aSession\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1f\n" +
 	"\vcampaign_id\x18\x02 \x01(\tR\n" +
@@ -598,7 +1612,40 @@ const file_game_v1_session_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x125\n" +
 	"\bended_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\aendedAt\x12\x18\n" +
-	"\aversion\x18\b \x01(\x03R\aversion\"J\n" +
+	"\aversion\x18\b \x01(\x03R\aversion\"\xeb\x04\n" +
+	"\vSessionGate\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1f\n" +
+	"\vcampaign_id\x18\x02 \x01(\tR\n" +
+	"campaignId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x03 \x01(\tR\tsessionId\x12\x12\n" +
+	"\x04type\x18\x04 \x01(\tR\x04type\x122\n" +
+	"\x06status\x18\x05 \x01(\x0e2\x1a.game.v1.SessionGateStatusR\x06status\x12\x16\n" +
+	"\x06reason\x18\x06 \x01(\tR\x06reason\x129\n" +
+	"\n" +
+	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x121\n" +
+	"\x15created_by_actor_type\x18\b \x01(\tR\x12createdByActorType\x12-\n" +
+	"\x13created_by_actor_id\x18\t \x01(\tR\x10createdByActorId\x12;\n" +
+	"\vresolved_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"resolvedAt\x123\n" +
+	"\x16resolved_by_actor_type\x18\v \x01(\tR\x13resolvedByActorType\x12/\n" +
+	"\x14resolved_by_actor_id\x18\f \x01(\tR\x11resolvedByActorId\x123\n" +
+	"\bmetadata\x18\r \x01(\v2\x17.google.protobuf.StructR\bmetadata\x127\n" +
+	"\n" +
+	"resolution\x18\x0e \x01(\v2\x17.google.protobuf.StructR\n" +
+	"resolution\"\xc5\x02\n" +
+	"\x10SessionSpotlight\x12\x1f\n" +
+	"\vcampaign_id\x18\x01 \x01(\tR\n" +
+	"campaignId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x02 \x01(\tR\tsessionId\x121\n" +
+	"\x04type\x18\x03 \x01(\x0e2\x1d.game.v1.SessionSpotlightTypeR\x04type\x12!\n" +
+	"\fcharacter_id\x18\x04 \x01(\tR\vcharacterId\x129\n" +
+	"\n" +
+	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x121\n" +
+	"\x15updated_by_actor_type\x18\x06 \x01(\tR\x12updatedByActorType\x12-\n" +
+	"\x13updated_by_actor_id\x18\a \x01(\tR\x10updatedByActorId\"J\n" +
 	"\x13StartSessionRequest\x12\x1f\n" +
 	"\vcampaign_id\x18\x01 \x01(\tR\n" +
 	"campaignId\x12\x12\n" +
@@ -627,18 +1674,89 @@ const file_game_v1_session_proto_rawDesc = "" +
 	"\n" +
 	"session_id\x18\x02 \x01(\tR\tsessionId\"@\n" +
 	"\x12EndSessionResponse\x12*\n" +
-	"\asession\x18\x01 \x01(\v2\x10.game.v1.SessionR\asession*V\n" +
+	"\asession\x18\x01 \x01(\v2\x10.game.v1.SessionR\asession\"\xdb\x01\n" +
+	"\x16OpenSessionGateRequest\x12\x1f\n" +
+	"\vcampaign_id\x18\x01 \x01(\tR\n" +
+	"campaignId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x02 \x01(\tR\tsessionId\x12\x1b\n" +
+	"\tgate_type\x18\x03 \x01(\tR\bgateType\x12\x16\n" +
+	"\x06reason\x18\x04 \x01(\tR\x06reason\x12\x17\n" +
+	"\agate_id\x18\x05 \x01(\tR\x06gateId\x123\n" +
+	"\bmetadata\x18\x06 \x01(\v2\x17.google.protobuf.StructR\bmetadata\"C\n" +
+	"\x17OpenSessionGateResponse\x12(\n" +
+	"\x04gate\x18\x01 \x01(\v2\x14.game.v1.SessionGateR\x04gate\"\xc9\x01\n" +
+	"\x19ResolveSessionGateRequest\x12\x1f\n" +
+	"\vcampaign_id\x18\x01 \x01(\tR\n" +
+	"campaignId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x02 \x01(\tR\tsessionId\x12\x17\n" +
+	"\agate_id\x18\x03 \x01(\tR\x06gateId\x12\x1a\n" +
+	"\bdecision\x18\x04 \x01(\tR\bdecision\x127\n" +
+	"\n" +
+	"resolution\x18\x05 \x01(\v2\x17.google.protobuf.StructR\n" +
+	"resolution\"F\n" +
+	"\x1aResolveSessionGateResponse\x12(\n" +
+	"\x04gate\x18\x01 \x01(\v2\x14.game.v1.SessionGateR\x04gate\"\x8c\x01\n" +
+	"\x19AbandonSessionGateRequest\x12\x1f\n" +
+	"\vcampaign_id\x18\x01 \x01(\tR\n" +
+	"campaignId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x02 \x01(\tR\tsessionId\x12\x17\n" +
+	"\agate_id\x18\x03 \x01(\tR\x06gateId\x12\x16\n" +
+	"\x06reason\x18\x04 \x01(\tR\x06reason\"F\n" +
+	"\x1aAbandonSessionGateResponse\x12(\n" +
+	"\x04gate\x18\x01 \x01(\v2\x14.game.v1.SessionGateR\x04gate\"\\\n" +
+	"\x1aGetSessionSpotlightRequest\x12\x1f\n" +
+	"\vcampaign_id\x18\x01 \x01(\tR\n" +
+	"campaignId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x02 \x01(\tR\tsessionId\"V\n" +
+	"\x1bGetSessionSpotlightResponse\x127\n" +
+	"\tspotlight\x18\x01 \x01(\v2\x19.game.v1.SessionSpotlightR\tspotlight\"\xb2\x01\n" +
+	"\x1aSetSessionSpotlightRequest\x12\x1f\n" +
+	"\vcampaign_id\x18\x01 \x01(\tR\n" +
+	"campaignId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x02 \x01(\tR\tsessionId\x121\n" +
+	"\x04type\x18\x03 \x01(\x0e2\x1d.game.v1.SessionSpotlightTypeR\x04type\x12!\n" +
+	"\fcharacter_id\x18\x04 \x01(\tR\vcharacterId\"V\n" +
+	"\x1bSetSessionSpotlightResponse\x127\n" +
+	"\tspotlight\x18\x01 \x01(\v2\x19.game.v1.SessionSpotlightR\tspotlight\"v\n" +
+	"\x1cClearSessionSpotlightRequest\x12\x1f\n" +
+	"\vcampaign_id\x18\x01 \x01(\tR\n" +
+	"campaignId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x02 \x01(\tR\tsessionId\x12\x16\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\"X\n" +
+	"\x1dClearSessionSpotlightResponse\x127\n" +
+	"\tspotlight\x18\x01 \x01(\v2\x19.game.v1.SessionSpotlightR\tspotlight*V\n" +
 	"\rSessionStatus\x12\x1e\n" +
 	"\x1aSESSION_STATUS_UNSPECIFIED\x10\x00\x12\x12\n" +
 	"\x0eSESSION_ACTIVE\x10\x01\x12\x11\n" +
-	"\rSESSION_ENDED\x10\x022\xb8\x02\n" +
+	"\rSESSION_ENDED\x10\x02*\x86\x01\n" +
+	"\x11SessionGateStatus\x12#\n" +
+	"\x1fSESSION_GATE_STATUS_UNSPECIFIED\x10\x00\x12\x15\n" +
+	"\x11SESSION_GATE_OPEN\x10\x01\x12\x19\n" +
+	"\x15SESSION_GATE_RESOLVED\x10\x02\x12\x1a\n" +
+	"\x16SESSION_GATE_ABANDONED\x10\x03*\x83\x01\n" +
+	"\x14SessionSpotlightType\x12&\n" +
+	"\"SESSION_SPOTLIGHT_TYPE_UNSPECIFIED\x10\x00\x12\x1d\n" +
+	"\x19SESSION_SPOTLIGHT_TYPE_GM\x10\x01\x12$\n" +
+	" SESSION_SPOTLIGHT_TYPE_CHARACTER\x10\x022\xf8\x06\n" +
 	"\x0eSessionService\x12K\n" +
 	"\fStartSession\x12\x1c.game.v1.StartSessionRequest\x1a\x1d.game.v1.StartSessionResponse\x12K\n" +
 	"\fListSessions\x12\x1c.game.v1.ListSessionsRequest\x1a\x1d.game.v1.ListSessionsResponse\x12E\n" +
 	"\n" +
 	"GetSession\x12\x1a.game.v1.GetSessionRequest\x1a\x1b.game.v1.GetSessionResponse\x12E\n" +
 	"\n" +
-	"EndSession\x12\x1a.game.v1.EndSessionRequest\x1a\x1b.game.v1.EndSessionResponseBCZAgithub.com/louisbranch/fracturing.space/api/gen/go/game/v1;gamev1b\x06proto3"
+	"EndSession\x12\x1a.game.v1.EndSessionRequest\x1a\x1b.game.v1.EndSessionResponse\x12T\n" +
+	"\x0fOpenSessionGate\x12\x1f.game.v1.OpenSessionGateRequest\x1a .game.v1.OpenSessionGateResponse\x12]\n" +
+	"\x12ResolveSessionGate\x12\".game.v1.ResolveSessionGateRequest\x1a#.game.v1.ResolveSessionGateResponse\x12]\n" +
+	"\x12AbandonSessionGate\x12\".game.v1.AbandonSessionGateRequest\x1a#.game.v1.AbandonSessionGateResponse\x12`\n" +
+	"\x13GetSessionSpotlight\x12#.game.v1.GetSessionSpotlightRequest\x1a$.game.v1.GetSessionSpotlightResponse\x12`\n" +
+	"\x13SetSessionSpotlight\x12#.game.v1.SetSessionSpotlightRequest\x1a$.game.v1.SetSessionSpotlightResponse\x12f\n" +
+	"\x15ClearSessionSpotlight\x12%.game.v1.ClearSessionSpotlightRequest\x1a&.game.v1.ClearSessionSpotlightResponseBCZAgithub.com/louisbranch/fracturing.space/api/gen/go/game/v1;gamev1b\x06proto3"
 
 var (
 	file_game_v1_session_proto_rawDescOnce sync.Once
@@ -652,43 +1770,88 @@ func file_game_v1_session_proto_rawDescGZIP() []byte {
 	return file_game_v1_session_proto_rawDescData
 }
 
-var file_game_v1_session_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_game_v1_session_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_game_v1_session_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_game_v1_session_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
 var file_game_v1_session_proto_goTypes = []any{
-	(SessionStatus)(0),            // 0: game.v1.SessionStatus
-	(*Session)(nil),               // 1: game.v1.Session
-	(*StartSessionRequest)(nil),   // 2: game.v1.StartSessionRequest
-	(*StartSessionResponse)(nil),  // 3: game.v1.StartSessionResponse
-	(*ListSessionsRequest)(nil),   // 4: game.v1.ListSessionsRequest
-	(*ListSessionsResponse)(nil),  // 5: game.v1.ListSessionsResponse
-	(*GetSessionRequest)(nil),     // 6: game.v1.GetSessionRequest
-	(*GetSessionResponse)(nil),    // 7: game.v1.GetSessionResponse
-	(*EndSessionRequest)(nil),     // 8: game.v1.EndSessionRequest
-	(*EndSessionResponse)(nil),    // 9: game.v1.EndSessionResponse
-	(*timestamppb.Timestamp)(nil), // 10: google.protobuf.Timestamp
+	(SessionStatus)(0),                    // 0: game.v1.SessionStatus
+	(SessionGateStatus)(0),                // 1: game.v1.SessionGateStatus
+	(SessionSpotlightType)(0),             // 2: game.v1.SessionSpotlightType
+	(*Session)(nil),                       // 3: game.v1.Session
+	(*SessionGate)(nil),                   // 4: game.v1.SessionGate
+	(*SessionSpotlight)(nil),              // 5: game.v1.SessionSpotlight
+	(*StartSessionRequest)(nil),           // 6: game.v1.StartSessionRequest
+	(*StartSessionResponse)(nil),          // 7: game.v1.StartSessionResponse
+	(*ListSessionsRequest)(nil),           // 8: game.v1.ListSessionsRequest
+	(*ListSessionsResponse)(nil),          // 9: game.v1.ListSessionsResponse
+	(*GetSessionRequest)(nil),             // 10: game.v1.GetSessionRequest
+	(*GetSessionResponse)(nil),            // 11: game.v1.GetSessionResponse
+	(*EndSessionRequest)(nil),             // 12: game.v1.EndSessionRequest
+	(*EndSessionResponse)(nil),            // 13: game.v1.EndSessionResponse
+	(*OpenSessionGateRequest)(nil),        // 14: game.v1.OpenSessionGateRequest
+	(*OpenSessionGateResponse)(nil),       // 15: game.v1.OpenSessionGateResponse
+	(*ResolveSessionGateRequest)(nil),     // 16: game.v1.ResolveSessionGateRequest
+	(*ResolveSessionGateResponse)(nil),    // 17: game.v1.ResolveSessionGateResponse
+	(*AbandonSessionGateRequest)(nil),     // 18: game.v1.AbandonSessionGateRequest
+	(*AbandonSessionGateResponse)(nil),    // 19: game.v1.AbandonSessionGateResponse
+	(*GetSessionSpotlightRequest)(nil),    // 20: game.v1.GetSessionSpotlightRequest
+	(*GetSessionSpotlightResponse)(nil),   // 21: game.v1.GetSessionSpotlightResponse
+	(*SetSessionSpotlightRequest)(nil),    // 22: game.v1.SetSessionSpotlightRequest
+	(*SetSessionSpotlightResponse)(nil),   // 23: game.v1.SetSessionSpotlightResponse
+	(*ClearSessionSpotlightRequest)(nil),  // 24: game.v1.ClearSessionSpotlightRequest
+	(*ClearSessionSpotlightResponse)(nil), // 25: game.v1.ClearSessionSpotlightResponse
+	(*timestamppb.Timestamp)(nil),         // 26: google.protobuf.Timestamp
+	(*structpb.Struct)(nil),               // 27: google.protobuf.Struct
 }
 var file_game_v1_session_proto_depIdxs = []int32{
 	0,  // 0: game.v1.Session.status:type_name -> game.v1.SessionStatus
-	10, // 1: game.v1.Session.started_at:type_name -> google.protobuf.Timestamp
-	10, // 2: game.v1.Session.updated_at:type_name -> google.protobuf.Timestamp
-	10, // 3: game.v1.Session.ended_at:type_name -> google.protobuf.Timestamp
-	1,  // 4: game.v1.StartSessionResponse.session:type_name -> game.v1.Session
-	1,  // 5: game.v1.ListSessionsResponse.sessions:type_name -> game.v1.Session
-	1,  // 6: game.v1.GetSessionResponse.session:type_name -> game.v1.Session
-	1,  // 7: game.v1.EndSessionResponse.session:type_name -> game.v1.Session
-	2,  // 8: game.v1.SessionService.StartSession:input_type -> game.v1.StartSessionRequest
-	4,  // 9: game.v1.SessionService.ListSessions:input_type -> game.v1.ListSessionsRequest
-	6,  // 10: game.v1.SessionService.GetSession:input_type -> game.v1.GetSessionRequest
-	8,  // 11: game.v1.SessionService.EndSession:input_type -> game.v1.EndSessionRequest
-	3,  // 12: game.v1.SessionService.StartSession:output_type -> game.v1.StartSessionResponse
-	5,  // 13: game.v1.SessionService.ListSessions:output_type -> game.v1.ListSessionsResponse
-	7,  // 14: game.v1.SessionService.GetSession:output_type -> game.v1.GetSessionResponse
-	9,  // 15: game.v1.SessionService.EndSession:output_type -> game.v1.EndSessionResponse
-	12, // [12:16] is the sub-list for method output_type
-	8,  // [8:12] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	26, // 1: game.v1.Session.started_at:type_name -> google.protobuf.Timestamp
+	26, // 2: game.v1.Session.updated_at:type_name -> google.protobuf.Timestamp
+	26, // 3: game.v1.Session.ended_at:type_name -> google.protobuf.Timestamp
+	1,  // 4: game.v1.SessionGate.status:type_name -> game.v1.SessionGateStatus
+	26, // 5: game.v1.SessionGate.created_at:type_name -> google.protobuf.Timestamp
+	26, // 6: game.v1.SessionGate.resolved_at:type_name -> google.protobuf.Timestamp
+	27, // 7: game.v1.SessionGate.metadata:type_name -> google.protobuf.Struct
+	27, // 8: game.v1.SessionGate.resolution:type_name -> google.protobuf.Struct
+	2,  // 9: game.v1.SessionSpotlight.type:type_name -> game.v1.SessionSpotlightType
+	26, // 10: game.v1.SessionSpotlight.updated_at:type_name -> google.protobuf.Timestamp
+	3,  // 11: game.v1.StartSessionResponse.session:type_name -> game.v1.Session
+	3,  // 12: game.v1.ListSessionsResponse.sessions:type_name -> game.v1.Session
+	3,  // 13: game.v1.GetSessionResponse.session:type_name -> game.v1.Session
+	3,  // 14: game.v1.EndSessionResponse.session:type_name -> game.v1.Session
+	27, // 15: game.v1.OpenSessionGateRequest.metadata:type_name -> google.protobuf.Struct
+	4,  // 16: game.v1.OpenSessionGateResponse.gate:type_name -> game.v1.SessionGate
+	27, // 17: game.v1.ResolveSessionGateRequest.resolution:type_name -> google.protobuf.Struct
+	4,  // 18: game.v1.ResolveSessionGateResponse.gate:type_name -> game.v1.SessionGate
+	4,  // 19: game.v1.AbandonSessionGateResponse.gate:type_name -> game.v1.SessionGate
+	5,  // 20: game.v1.GetSessionSpotlightResponse.spotlight:type_name -> game.v1.SessionSpotlight
+	2,  // 21: game.v1.SetSessionSpotlightRequest.type:type_name -> game.v1.SessionSpotlightType
+	5,  // 22: game.v1.SetSessionSpotlightResponse.spotlight:type_name -> game.v1.SessionSpotlight
+	5,  // 23: game.v1.ClearSessionSpotlightResponse.spotlight:type_name -> game.v1.SessionSpotlight
+	6,  // 24: game.v1.SessionService.StartSession:input_type -> game.v1.StartSessionRequest
+	8,  // 25: game.v1.SessionService.ListSessions:input_type -> game.v1.ListSessionsRequest
+	10, // 26: game.v1.SessionService.GetSession:input_type -> game.v1.GetSessionRequest
+	12, // 27: game.v1.SessionService.EndSession:input_type -> game.v1.EndSessionRequest
+	14, // 28: game.v1.SessionService.OpenSessionGate:input_type -> game.v1.OpenSessionGateRequest
+	16, // 29: game.v1.SessionService.ResolveSessionGate:input_type -> game.v1.ResolveSessionGateRequest
+	18, // 30: game.v1.SessionService.AbandonSessionGate:input_type -> game.v1.AbandonSessionGateRequest
+	20, // 31: game.v1.SessionService.GetSessionSpotlight:input_type -> game.v1.GetSessionSpotlightRequest
+	22, // 32: game.v1.SessionService.SetSessionSpotlight:input_type -> game.v1.SetSessionSpotlightRequest
+	24, // 33: game.v1.SessionService.ClearSessionSpotlight:input_type -> game.v1.ClearSessionSpotlightRequest
+	7,  // 34: game.v1.SessionService.StartSession:output_type -> game.v1.StartSessionResponse
+	9,  // 35: game.v1.SessionService.ListSessions:output_type -> game.v1.ListSessionsResponse
+	11, // 36: game.v1.SessionService.GetSession:output_type -> game.v1.GetSessionResponse
+	13, // 37: game.v1.SessionService.EndSession:output_type -> game.v1.EndSessionResponse
+	15, // 38: game.v1.SessionService.OpenSessionGate:output_type -> game.v1.OpenSessionGateResponse
+	17, // 39: game.v1.SessionService.ResolveSessionGate:output_type -> game.v1.ResolveSessionGateResponse
+	19, // 40: game.v1.SessionService.AbandonSessionGate:output_type -> game.v1.AbandonSessionGateResponse
+	21, // 41: game.v1.SessionService.GetSessionSpotlight:output_type -> game.v1.GetSessionSpotlightResponse
+	23, // 42: game.v1.SessionService.SetSessionSpotlight:output_type -> game.v1.SetSessionSpotlightResponse
+	25, // 43: game.v1.SessionService.ClearSessionSpotlight:output_type -> game.v1.ClearSessionSpotlightResponse
+	34, // [34:44] is the sub-list for method output_type
+	24, // [24:34] is the sub-list for method input_type
+	24, // [24:24] is the sub-list for extension type_name
+	24, // [24:24] is the sub-list for extension extendee
+	0,  // [0:24] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_session_proto_init() }
@@ -701,8 +1864,8 @@ func file_game_v1_session_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_session_proto_rawDesc), len(file_game_v1_session_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   9,
+			NumEnums:      3,
+			NumMessages:   23,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

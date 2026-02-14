@@ -1,10 +1,11 @@
 # Daggerheart Progress Implementation
 
 ## Purpose
-Describe the implemented mechanics outcomes that flow from the PRD and summarize the remaining Phase 2 work.
+Describe implemented mechanics, current PRD coverage, and remaining Phase 2 work based on the Daggerheart SRD mechanics analysis.
 
-## Source
-- PRD: `docs/product/project-requirement-document.md`
+## Sources
+- PRD: `docs/product/daggerheart-PRD.md`
+- SRD mechanics extraction: `.ai/plans/daggerheart-srd-mechanics.md`
 
 ## Implemented Outcomes (Phase 0/1)
 - Deterministic action roll engine and duality outcome evaluation with explain/probability surfaces.
@@ -32,10 +33,20 @@ Describe the implemented mechanics outcomes that flow from the PRD and summarize
 - Adversary CRUD emits create/update/delete events and projects adversaries into storage.
 - Adversary attack flow chains adversary roll, outcome application, damage roll, and apply damage.
 
+## Mechanics Delta Checklist (From SRD Review)
+- [x] Critical success: Hope gain and Stress clear on action roll crits; critical damage on attacks.
+- [x] Reaction roll crits: ignore success-side effects, no Hope gain, no Stress clear, no Help an Ally.
+- [x] Stress overflow: if forced to mark Stress when full, mark 1 HP instead; last Stress applies Vulnerable.
+- [x] Armor rules: unarmored thresholds = level / (2 x level); Armor Slot reduces severity by one step.
+- [x] Tag Team roll: Hope grants Hope to all participants; Fear grants GM Fear per PC; counts as one action roll.
+- [x] Rest consequences: short rest GM Fear 1d4; long rest GM Fear 1d4 + PCs and advance a long-term countdown.
+- [x] Underwater rules: attack disadvantage; breath countdown (3) advances on actions, extra ticks on failures.
+- [x] Adversary action rolls: default auto-success unless dramatic; optional d20 check with Fear-spent Experience.
+
 ## PRD Coverage Table
 | PRD section | Status | Notes |
 | --- | --- | --- |
-| Core Loop Requirements | Partial | Action rolls and outcomes are wired; spotlight model and GM consequence flow are not formalized. |
+| Core Loop Requirements | Implemented | Action rolls/outcomes wired; spotlight model and GM consequence flow formalized. |
 | Resolution System | Implemented | Duality/action/reaction/attack/damage rolls and advantage/disadvantage plus group action/tag team flows are implemented. |
 | Character Model | Partial | Core profile/state, traits, resources, thresholds are implemented; full schema breadth still needs coverage. |
 | Conditions | Implemented | Hidden/Restrained/Vulnerable supported with condition change events and service API. |
@@ -45,8 +56,9 @@ Describe the implemented mechanics outcomes that flow from the PRD and summarize
 | Death and Scars | Implemented | Death move resolution and Blaze of Glory flows with events/state changes. |
 | Content Archetypes | Partial | Adversary entity and stats are in place; classes/subclasses/cards/items/environments still missing. |
 | GM Mechanics | Implemented | GM Fear tracking, moves, countdowns, and adversary d20 rolls are wired. |
-| Optional Rules | Not started | Toggleable rules not implemented. |
+| Optional Rules | Partial | Underwater/breath and adversary action checks added; toggles/configs still missing. |
 | Determinism and Judgment Boundaries | Partial | Deterministic rolls/outcomes implemented; GM inputs/narrative consequences not modeled. |
 
 ## References
-- PRD: `docs/product/project-requirement-document.md`
+- PRD: `docs/product/daggerheart-PRD.md`
+- SRD mechanics extraction: `.ai/plans/daggerheart-srd-mechanics.md`

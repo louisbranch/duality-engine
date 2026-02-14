@@ -38,6 +38,7 @@ func TestDaggerheartApplyConditions(t *testing.T) {
 
 	campaignClient := gamev1.NewCampaignServiceClient(conn)
 	characterClient := gamev1.NewCharacterServiceClient(conn)
+	sessionClient := gamev1.NewSessionServiceClient(conn)
 	eventClient := gamev1.NewEventServiceClient(conn)
 	daggerheartClient := daggerheartv1.NewDaggerheartServiceClient(conn)
 
@@ -64,7 +65,20 @@ func TestDaggerheartApplyConditions(t *testing.T) {
 	characterID := createCharacter(t, ctx, characterClient, campaignID, "Condition Hero")
 	patchDaggerheartProfile(t, ctx, characterClient, campaignID, characterID)
 
-	addResp, err := daggerheartClient.ApplyConditions(ctx, &daggerheartv1.DaggerheartApplyConditionsRequest{
+	startSession, err := sessionClient.StartSession(ctx, &gamev1.StartSessionRequest{
+		CampaignId: campaignID,
+		Name:       "Condition Session",
+	})
+	if err != nil {
+		t.Fatalf("start session: %v", err)
+	}
+	if startSession.GetSession() == nil {
+		t.Fatal("expected session")
+	}
+	sessionID := startSession.GetSession().GetId()
+	sessionCtx := withSessionID(ctx, sessionID)
+
+	addResp, err := daggerheartClient.ApplyConditions(sessionCtx, &daggerheartv1.DaggerheartApplyConditionsRequest{
 		CampaignId:  campaignID,
 		CharacterId: characterID,
 		Add:         []daggerheartv1.DaggerheartCondition{daggerheartv1.DaggerheartCondition_DAGGERHEART_CONDITION_HIDDEN},
@@ -80,7 +94,7 @@ func TestDaggerheartApplyConditions(t *testing.T) {
 		t.Fatal("expected hidden condition after add")
 	}
 
-	changeResp, err := daggerheartClient.ApplyConditions(ctx, &daggerheartv1.DaggerheartApplyConditionsRequest{
+	changeResp, err := daggerheartClient.ApplyConditions(sessionCtx, &daggerheartv1.DaggerheartApplyConditionsRequest{
 		CampaignId:  campaignID,
 		CharacterId: characterID,
 		Add:         []daggerheartv1.DaggerheartCondition{daggerheartv1.DaggerheartCondition_DAGGERHEART_CONDITION_VULNERABLE},

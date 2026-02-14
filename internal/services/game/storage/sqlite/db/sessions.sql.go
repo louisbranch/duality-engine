@@ -19,6 +19,20 @@ func (q *Queries) ClearActiveSession(ctx context.Context, campaignID string) err
 	return err
 }
 
+const clearSessionSpotlight = `-- name: ClearSessionSpotlight :exec
+DELETE FROM session_spotlight WHERE campaign_id = ? AND session_id = ?
+`
+
+type ClearSessionSpotlightParams struct {
+	CampaignID string `json:"campaign_id"`
+	SessionID  string `json:"session_id"`
+}
+
+func (q *Queries) ClearSessionSpotlight(ctx context.Context, arg ClearSessionSpotlightParams) error {
+	_, err := q.db.ExecContext(ctx, clearSessionSpotlight, arg.CampaignID, arg.SessionID)
+	return err
+}
+
 const getActiveSession = `-- name: GetActiveSession :one
 SELECT s.campaign_id, s.id, s.name, s.status, s.started_at, s.updated_at, s.ended_at FROM sessions s
 JOIN campaign_active_session cas ON s.campaign_id = cas.campaign_id AND s.id = cas.session_id
@@ -36,6 +50,40 @@ func (q *Queries) GetActiveSession(ctx context.Context, campaignID string) (Sess
 		&i.StartedAt,
 		&i.UpdatedAt,
 		&i.EndedAt,
+	)
+	return i, err
+}
+
+const getOpenSessionGate = `-- name: GetOpenSessionGate :one
+SELECT campaign_id, session_id, gate_id, gate_type, status, reason, created_at, created_by_actor_type, created_by_actor_id, resolved_at, resolved_by_actor_type, resolved_by_actor_id, metadata_json, resolution_json FROM session_gates
+WHERE campaign_id = ? AND session_id = ? AND status = 'open'
+ORDER BY created_at DESC
+LIMIT 1
+`
+
+type GetOpenSessionGateParams struct {
+	CampaignID string `json:"campaign_id"`
+	SessionID  string `json:"session_id"`
+}
+
+func (q *Queries) GetOpenSessionGate(ctx context.Context, arg GetOpenSessionGateParams) (SessionGate, error) {
+	row := q.db.QueryRowContext(ctx, getOpenSessionGate, arg.CampaignID, arg.SessionID)
+	var i SessionGate
+	err := row.Scan(
+		&i.CampaignID,
+		&i.SessionID,
+		&i.GateID,
+		&i.GateType,
+		&i.Status,
+		&i.Reason,
+		&i.CreatedAt,
+		&i.CreatedByActorType,
+		&i.CreatedByActorID,
+		&i.ResolvedAt,
+		&i.ResolvedByActorType,
+		&i.ResolvedByActorID,
+		&i.MetadataJson,
+		&i.ResolutionJson,
 	)
 	return i, err
 }
@@ -60,6 +108,64 @@ func (q *Queries) GetSession(ctx context.Context, arg GetSessionParams) (Session
 		&i.StartedAt,
 		&i.UpdatedAt,
 		&i.EndedAt,
+	)
+	return i, err
+}
+
+const getSessionGate = `-- name: GetSessionGate :one
+SELECT campaign_id, session_id, gate_id, gate_type, status, reason, created_at, created_by_actor_type, created_by_actor_id, resolved_at, resolved_by_actor_type, resolved_by_actor_id, metadata_json, resolution_json FROM session_gates
+WHERE campaign_id = ? AND session_id = ? AND gate_id = ?
+`
+
+type GetSessionGateParams struct {
+	CampaignID string `json:"campaign_id"`
+	SessionID  string `json:"session_id"`
+	GateID     string `json:"gate_id"`
+}
+
+func (q *Queries) GetSessionGate(ctx context.Context, arg GetSessionGateParams) (SessionGate, error) {
+	row := q.db.QueryRowContext(ctx, getSessionGate, arg.CampaignID, arg.SessionID, arg.GateID)
+	var i SessionGate
+	err := row.Scan(
+		&i.CampaignID,
+		&i.SessionID,
+		&i.GateID,
+		&i.GateType,
+		&i.Status,
+		&i.Reason,
+		&i.CreatedAt,
+		&i.CreatedByActorType,
+		&i.CreatedByActorID,
+		&i.ResolvedAt,
+		&i.ResolvedByActorType,
+		&i.ResolvedByActorID,
+		&i.MetadataJson,
+		&i.ResolutionJson,
+	)
+	return i, err
+}
+
+const getSessionSpotlight = `-- name: GetSessionSpotlight :one
+SELECT campaign_id, session_id, spotlight_type, character_id, updated_at, updated_by_actor_type, updated_by_actor_id FROM session_spotlight
+WHERE campaign_id = ? AND session_id = ?
+`
+
+type GetSessionSpotlightParams struct {
+	CampaignID string `json:"campaign_id"`
+	SessionID  string `json:"session_id"`
+}
+
+func (q *Queries) GetSessionSpotlight(ctx context.Context, arg GetSessionSpotlightParams) (SessionSpotlight, error) {
+	row := q.db.QueryRowContext(ctx, getSessionSpotlight, arg.CampaignID, arg.SessionID)
+	var i SessionSpotlight
+	err := row.Scan(
+		&i.CampaignID,
+		&i.SessionID,
+		&i.SpotlightType,
+		&i.CharacterID,
+		&i.UpdatedAt,
+		&i.UpdatedByActorType,
+		&i.UpdatedByActorID,
 	)
 	return i, err
 }
@@ -229,6 +335,100 @@ func (q *Queries) PutSession(ctx context.Context, arg PutSessionParams) error {
 		arg.StartedAt,
 		arg.UpdatedAt,
 		arg.EndedAt,
+	)
+	return err
+}
+
+const putSessionGate = `-- name: PutSessionGate :exec
+INSERT INTO session_gates (
+    campaign_id, session_id, gate_id, gate_type, status, reason,
+    created_at, created_by_actor_type, created_by_actor_id,
+    resolved_at, resolved_by_actor_type, resolved_by_actor_id,
+    metadata_json, resolution_json
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(campaign_id, session_id, gate_id) DO UPDATE SET
+    gate_type = excluded.gate_type,
+    status = excluded.status,
+    reason = excluded.reason,
+    created_at = excluded.created_at,
+    created_by_actor_type = excluded.created_by_actor_type,
+    created_by_actor_id = excluded.created_by_actor_id,
+    resolved_at = excluded.resolved_at,
+    resolved_by_actor_type = excluded.resolved_by_actor_type,
+    resolved_by_actor_id = excluded.resolved_by_actor_id,
+    metadata_json = excluded.metadata_json,
+    resolution_json = excluded.resolution_json
+`
+
+type PutSessionGateParams struct {
+	CampaignID          string         `json:"campaign_id"`
+	SessionID           string         `json:"session_id"`
+	GateID              string         `json:"gate_id"`
+	GateType            string         `json:"gate_type"`
+	Status              string         `json:"status"`
+	Reason              string         `json:"reason"`
+	CreatedAt           int64          `json:"created_at"`
+	CreatedByActorType  string         `json:"created_by_actor_type"`
+	CreatedByActorID    string         `json:"created_by_actor_id"`
+	ResolvedAt          sql.NullInt64  `json:"resolved_at"`
+	ResolvedByActorType sql.NullString `json:"resolved_by_actor_type"`
+	ResolvedByActorID   sql.NullString `json:"resolved_by_actor_id"`
+	MetadataJson        []byte         `json:"metadata_json"`
+	ResolutionJson      []byte         `json:"resolution_json"`
+}
+
+func (q *Queries) PutSessionGate(ctx context.Context, arg PutSessionGateParams) error {
+	_, err := q.db.ExecContext(ctx, putSessionGate,
+		arg.CampaignID,
+		arg.SessionID,
+		arg.GateID,
+		arg.GateType,
+		arg.Status,
+		arg.Reason,
+		arg.CreatedAt,
+		arg.CreatedByActorType,
+		arg.CreatedByActorID,
+		arg.ResolvedAt,
+		arg.ResolvedByActorType,
+		arg.ResolvedByActorID,
+		arg.MetadataJson,
+		arg.ResolutionJson,
+	)
+	return err
+}
+
+const putSessionSpotlight = `-- name: PutSessionSpotlight :exec
+INSERT INTO session_spotlight (
+    campaign_id, session_id, spotlight_type, character_id,
+    updated_at, updated_by_actor_type, updated_by_actor_id
+) VALUES (?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(campaign_id, session_id) DO UPDATE SET
+    spotlight_type = excluded.spotlight_type,
+    character_id = excluded.character_id,
+    updated_at = excluded.updated_at,
+    updated_by_actor_type = excluded.updated_by_actor_type,
+    updated_by_actor_id = excluded.updated_by_actor_id
+`
+
+type PutSessionSpotlightParams struct {
+	CampaignID         string `json:"campaign_id"`
+	SessionID          string `json:"session_id"`
+	SpotlightType      string `json:"spotlight_type"`
+	CharacterID        string `json:"character_id"`
+	UpdatedAt          int64  `json:"updated_at"`
+	UpdatedByActorType string `json:"updated_by_actor_type"`
+	UpdatedByActorID   string `json:"updated_by_actor_id"`
+}
+
+func (q *Queries) PutSessionSpotlight(ctx context.Context, arg PutSessionSpotlightParams) error {
+	_, err := q.db.ExecContext(ctx, putSessionSpotlight,
+		arg.CampaignID,
+		arg.SessionID,
+		arg.SpotlightType,
+		arg.CharacterID,
+		arg.UpdatedAt,
+		arg.UpdatedByActorType,
+		arg.UpdatedByActorID,
 	)
 	return err
 }

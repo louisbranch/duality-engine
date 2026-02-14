@@ -835,6 +835,12 @@ func (s *CharacterService) PatchCharacterProfile(ctx context.Context, in *campai
 		if dhProfile.Level == 0 {
 			dhProfile.Level = daggerheart.PCLevelDefault
 		}
+		dhProfile.MajorThreshold, dhProfile.SevereThreshold = daggerheart.DeriveThresholds(
+			dhProfile.Level,
+			dhProfile.ArmorScore,
+			dhProfile.MajorThreshold,
+			dhProfile.SevereThreshold,
+		)
 
 		experiences := make([]daggerheart.Experience, 0, len(dhProfile.Experiences))
 		for _, experience := range dhProfile.Experiences {

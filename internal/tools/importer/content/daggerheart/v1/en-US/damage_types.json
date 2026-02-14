@@ -1,0 +1,23 @@
+{
+  "system_id": "daggerheart",
+  "system_version": "v1",
+  "source": "Daggerheart SRD v1 (paraphrased)",
+  "locale": "en-US",
+  "items": [
+    {
+      "id": "damage-type.physical",
+      "name": "Physical",
+      "description": "Injury from mundane force, weapons, or impacts."
+    },
+    {
+      "id": "damage-type.magic",
+      "name": "Magic",
+      "description": "Harm delivered by spells, supernatural forces, or arcane effects."
+    },
+    {
+      "id": "damage-type.mixed",
+      "name": "Mixed",
+      "description": "A blend of physical and magical harm."
+    }
+  ]
+}

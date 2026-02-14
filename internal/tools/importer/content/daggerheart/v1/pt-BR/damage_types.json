@@ -1,0 +1,23 @@
+{
+  "system_id": "daggerheart",
+  "system_version": "v1",
+  "source": "Daggerheart SRD v1 (paraphrased)",
+  "locale": "pt-BR",
+  "items": [
+    {
+      "id": "damage-type.physical",
+      "name": "Físico",
+      "description": "Ferimento por força mundana, armas ou impactos."
+    },
+    {
+      "id": "damage-type.magic",
+      "name": "Mágico",
+      "description": "Dano causado por magia, forças sobrenaturais ou efeitos arcanos."
+    },
+    {
+      "id": "damage-type.mixed",
+      "name": "Misto",
+      "description": "Combinação de dano físico e mágico."
+    }
+  ]
+}

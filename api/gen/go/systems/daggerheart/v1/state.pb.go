@@ -852,13 +852,14 @@ func (x *DaggerheartDamageRequest) GetSourceCharacterIds() []string {
 }
 
 type DaggerheartRestRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	RestType      DaggerheartRestType    `protobuf:"varint,1,opt,name=rest_type,json=restType,proto3,enum=systems.daggerheart.v1.DaggerheartRestType" json:"rest_type,omitempty"`
-	Interrupted   bool                   `protobuf:"varint,2,opt,name=interrupted,proto3" json:"interrupted,omitempty"`
-	PartySize     int32                  `protobuf:"varint,3,opt,name=party_size,json=partySize,proto3" json:"party_size,omitempty"`
-	Rng           *v1.RngRequest         `protobuf:"bytes,4,opt,name=rng,proto3" json:"rng,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	RestType            DaggerheartRestType    `protobuf:"varint,1,opt,name=rest_type,json=restType,proto3,enum=systems.daggerheart.v1.DaggerheartRestType" json:"rest_type,omitempty"`
+	Interrupted         bool                   `protobuf:"varint,2,opt,name=interrupted,proto3" json:"interrupted,omitempty"`
+	PartySize           int32                  `protobuf:"varint,3,opt,name=party_size,json=partySize,proto3" json:"party_size,omitempty"`
+	Rng                 *v1.RngRequest         `protobuf:"bytes,4,opt,name=rng,proto3" json:"rng,omitempty"`
+	LongTermCountdownId string                 `protobuf:"bytes,5,opt,name=long_term_countdown_id,json=longTermCountdownId,proto3" json:"long_term_countdown_id,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *DaggerheartRestRequest) Reset() {
@@ -917,6 +918,13 @@ func (x *DaggerheartRestRequest) GetRng() *v1.RngRequest {
 		return x.Rng
 	}
 	return nil
+}
+
+func (x *DaggerheartRestRequest) GetLongTermCountdownId() string {
+	if x != nil {
+		return x.LongTermCountdownId
+	}
+	return ""
 }
 
 type DaggerheartDowntimeRequest struct {
@@ -1085,13 +1093,14 @@ const file_systems_daggerheart_v1_state_proto_rawDesc = "" +
 	"\x0emassive_damage\x18\b \x01(\bR\rmassiveDamage\x12\x16\n" +
 	"\x06source\x18\t \x01(\tR\x06source\x120\n" +
 	"\x14source_character_ids\x18\n" +
-	" \x03(\tR\x12sourceCharacterIds\"\xcc\x01\n" +
+	" \x03(\tR\x12sourceCharacterIds\"\x81\x02\n" +
 	"\x16DaggerheartRestRequest\x12H\n" +
 	"\trest_type\x18\x01 \x01(\x0e2+.systems.daggerheart.v1.DaggerheartRestTypeR\brestType\x12 \n" +
 	"\vinterrupted\x18\x02 \x01(\bR\vinterrupted\x12\x1d\n" +
 	"\n" +
 	"party_size\x18\x03 \x01(\x05R\tpartySize\x12'\n" +
-	"\x03rng\x18\x04 \x01(\v2\x15.common.v1.RngRequestR\x03rng\"\x8f\x01\n" +
+	"\x03rng\x18\x04 \x01(\v2\x15.common.v1.RngRequestR\x03rng\x123\n" +
+	"\x16long_term_countdown_id\x18\x05 \x01(\tR\x13longTermCountdownId\"\x8f\x01\n" +
 	"\x1aDaggerheartDowntimeRequest\x12C\n" +
 	"\x04move\x18\x01 \x01(\x0e2/.systems.daggerheart.v1.DaggerheartDowntimeMoveR\x04move\x12,\n" +
 	"\x12prepare_with_group\x18\x02 \x01(\bR\x10prepareWithGroup\"r\n" +

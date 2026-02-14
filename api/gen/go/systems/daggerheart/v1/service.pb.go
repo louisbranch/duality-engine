@@ -3702,8 +3702,16 @@ type SessionActionRollRequest struct {
 	Difficulty int32 `protobuf:"varint,6,opt,name=difficulty,proto3" json:"difficulty,omitempty"`
 	// Optional modifiers applied to the roll.
 	Modifiers []*ActionRollModifier `protobuf:"bytes,7,rep,name=modifiers,proto3" json:"modifiers,omitempty"`
+	// Count of advantage dice (d6). Cancels against disadvantage.
+	Advantage int32 `protobuf:"varint,8,opt,name=advantage,proto3" json:"advantage,omitempty"`
+	// Count of disadvantage dice (d6). Cancels against advantage.
+	Disadvantage int32 `protobuf:"varint,9,opt,name=disadvantage,proto3" json:"disadvantage,omitempty"`
+	// Whether the roll is underwater (optional rules).
+	Underwater bool `protobuf:"varint,10,opt,name=underwater,proto3" json:"underwater,omitempty"`
+	// Optional breath countdown to advance for underwater actions.
+	BreathCountdownId string `protobuf:"bytes,11,opt,name=breath_countdown_id,json=breathCountdownId,proto3" json:"breath_countdown_id,omitempty"`
 	// Optional RNG configuration for deterministic rolls.
-	Rng           *v1.RngRequest `protobuf:"bytes,8,opt,name=rng,proto3" json:"rng,omitempty"`
+	Rng           *v1.RngRequest `protobuf:"bytes,12,opt,name=rng,proto3" json:"rng,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3785,6 +3793,34 @@ func (x *SessionActionRollRequest) GetModifiers() []*ActionRollModifier {
 		return x.Modifiers
 	}
 	return nil
+}
+
+func (x *SessionActionRollRequest) GetAdvantage() int32 {
+	if x != nil {
+		return x.Advantage
+	}
+	return 0
+}
+
+func (x *SessionActionRollRequest) GetDisadvantage() int32 {
+	if x != nil {
+		return x.Disadvantage
+	}
+	return 0
+}
+
+func (x *SessionActionRollRequest) GetUnderwater() bool {
+	if x != nil {
+		return x.Underwater
+	}
+	return false
+}
+
+func (x *SessionActionRollRequest) GetBreathCountdownId() string {
+	if x != nil {
+		return x.BreathCountdownId
+	}
+	return ""
 }
 
 func (x *SessionActionRollRequest) GetRng() *v1.RngRequest {
@@ -4217,14 +4253,16 @@ type SessionAttackFlowRequest struct {
 	Trait             string                       `protobuf:"bytes,4,opt,name=trait,proto3" json:"trait,omitempty"`
 	Difficulty        int32                        `protobuf:"varint,5,opt,name=difficulty,proto3" json:"difficulty,omitempty"`
 	Modifiers         []*ActionRollModifier        `protobuf:"bytes,6,rep,name=modifiers,proto3" json:"modifiers,omitempty"`
-	TargetId          string                       `protobuf:"bytes,7,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`
-	DamageDice        []*DiceSpec                  `protobuf:"bytes,8,rep,name=damage_dice,json=damageDice,proto3" json:"damage_dice,omitempty"`
-	DamageModifier    int32                        `protobuf:"varint,9,opt,name=damage_modifier,json=damageModifier,proto3" json:"damage_modifier,omitempty"`
-	Damage            *DaggerheartAttackDamageSpec `protobuf:"bytes,10,opt,name=damage,proto3" json:"damage,omitempty"`
-	RequireDamageRoll bool                         `protobuf:"varint,11,opt,name=require_damage_roll,json=requireDamageRoll,proto3" json:"require_damage_roll,omitempty"`
-	DamageCritical    bool                         `protobuf:"varint,12,opt,name=damage_critical,json=damageCritical,proto3" json:"damage_critical,omitempty"`
-	ActionRng         *v1.RngRequest               `protobuf:"bytes,13,opt,name=action_rng,json=actionRng,proto3" json:"action_rng,omitempty"`
-	DamageRng         *v1.RngRequest               `protobuf:"bytes,14,opt,name=damage_rng,json=damageRng,proto3" json:"damage_rng,omitempty"`
+	Underwater        bool                         `protobuf:"varint,7,opt,name=underwater,proto3" json:"underwater,omitempty"`
+	BreathCountdownId string                       `protobuf:"bytes,8,opt,name=breath_countdown_id,json=breathCountdownId,proto3" json:"breath_countdown_id,omitempty"`
+	TargetId          string                       `protobuf:"bytes,9,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`
+	DamageDice        []*DiceSpec                  `protobuf:"bytes,10,rep,name=damage_dice,json=damageDice,proto3" json:"damage_dice,omitempty"`
+	DamageModifier    int32                        `protobuf:"varint,11,opt,name=damage_modifier,json=damageModifier,proto3" json:"damage_modifier,omitempty"`
+	Damage            *DaggerheartAttackDamageSpec `protobuf:"bytes,12,opt,name=damage,proto3" json:"damage,omitempty"`
+	RequireDamageRoll bool                         `protobuf:"varint,13,opt,name=require_damage_roll,json=requireDamageRoll,proto3" json:"require_damage_roll,omitempty"`
+	DamageCritical    bool                         `protobuf:"varint,14,opt,name=damage_critical,json=damageCritical,proto3" json:"damage_critical,omitempty"`
+	ActionRng         *v1.RngRequest               `protobuf:"bytes,15,opt,name=action_rng,json=actionRng,proto3" json:"action_rng,omitempty"`
+	DamageRng         *v1.RngRequest               `protobuf:"bytes,16,opt,name=damage_rng,json=damageRng,proto3" json:"damage_rng,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -4299,6 +4337,20 @@ func (x *SessionAttackFlowRequest) GetModifiers() []*ActionRollModifier {
 		return x.Modifiers
 	}
 	return nil
+}
+
+func (x *SessionAttackFlowRequest) GetUnderwater() bool {
+	if x != nil {
+		return x.Underwater
+	}
+	return false
+}
+
+func (x *SessionAttackFlowRequest) GetBreathCountdownId() string {
+	if x != nil {
+		return x.BreathCountdownId
+	}
+	return ""
 }
 
 func (x *SessionAttackFlowRequest) GetTargetId() string {
@@ -4677,6 +4729,190 @@ func (x *SessionAdversaryAttackRollRequest) GetRng() *v1.RngRequest {
 	return nil
 }
 
+type SessionAdversaryActionCheckRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CampaignId    string                 `protobuf:"bytes,1,opt,name=campaign_id,json=campaignId,proto3" json:"campaign_id,omitempty"`
+	SessionId     string                 `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	AdversaryId   string                 `protobuf:"bytes,3,opt,name=adversary_id,json=adversaryId,proto3" json:"adversary_id,omitempty"`
+	Difficulty    int32                  `protobuf:"varint,4,opt,name=difficulty,proto3" json:"difficulty,omitempty"`
+	Dramatic      bool                   `protobuf:"varint,5,opt,name=dramatic,proto3" json:"dramatic,omitempty"`
+	Modifier      int32                  `protobuf:"varint,6,opt,name=modifier,proto3" json:"modifier,omitempty"`
+	Rng           *v1.RngRequest         `protobuf:"bytes,7,opt,name=rng,proto3" json:"rng,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SessionAdversaryActionCheckRequest) Reset() {
+	*x = SessionAdversaryActionCheckRequest{}
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[59]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SessionAdversaryActionCheckRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SessionAdversaryActionCheckRequest) ProtoMessage() {}
+
+func (x *SessionAdversaryActionCheckRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[59]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SessionAdversaryActionCheckRequest.ProtoReflect.Descriptor instead.
+func (*SessionAdversaryActionCheckRequest) Descriptor() ([]byte, []int) {
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{59}
+}
+
+func (x *SessionAdversaryActionCheckRequest) GetCampaignId() string {
+	if x != nil {
+		return x.CampaignId
+	}
+	return ""
+}
+
+func (x *SessionAdversaryActionCheckRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *SessionAdversaryActionCheckRequest) GetAdversaryId() string {
+	if x != nil {
+		return x.AdversaryId
+	}
+	return ""
+}
+
+func (x *SessionAdversaryActionCheckRequest) GetDifficulty() int32 {
+	if x != nil {
+		return x.Difficulty
+	}
+	return 0
+}
+
+func (x *SessionAdversaryActionCheckRequest) GetDramatic() bool {
+	if x != nil {
+		return x.Dramatic
+	}
+	return false
+}
+
+func (x *SessionAdversaryActionCheckRequest) GetModifier() int32 {
+	if x != nil {
+		return x.Modifier
+	}
+	return 0
+}
+
+func (x *SessionAdversaryActionCheckRequest) GetRng() *v1.RngRequest {
+	if x != nil {
+		return x.Rng
+	}
+	return nil
+}
+
+type SessionAdversaryActionCheckResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RollSeq       uint64                 `protobuf:"varint,1,opt,name=roll_seq,json=rollSeq,proto3" json:"roll_seq,omitempty"`
+	AutoSuccess   bool                   `protobuf:"varint,2,opt,name=auto_success,json=autoSuccess,proto3" json:"auto_success,omitempty"`
+	Success       bool                   `protobuf:"varint,3,opt,name=success,proto3" json:"success,omitempty"`
+	Roll          int32                  `protobuf:"varint,4,opt,name=roll,proto3" json:"roll,omitempty"`
+	Modifier      int32                  `protobuf:"varint,5,opt,name=modifier,proto3" json:"modifier,omitempty"`
+	Total         int32                  `protobuf:"varint,6,opt,name=total,proto3" json:"total,omitempty"`
+	Rng           *v1.RngResponse        `protobuf:"bytes,7,opt,name=rng,proto3" json:"rng,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SessionAdversaryActionCheckResponse) Reset() {
+	*x = SessionAdversaryActionCheckResponse{}
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[60]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SessionAdversaryActionCheckResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SessionAdversaryActionCheckResponse) ProtoMessage() {}
+
+func (x *SessionAdversaryActionCheckResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[60]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SessionAdversaryActionCheckResponse.ProtoReflect.Descriptor instead.
+func (*SessionAdversaryActionCheckResponse) Descriptor() ([]byte, []int) {
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{60}
+}
+
+func (x *SessionAdversaryActionCheckResponse) GetRollSeq() uint64 {
+	if x != nil {
+		return x.RollSeq
+	}
+	return 0
+}
+
+func (x *SessionAdversaryActionCheckResponse) GetAutoSuccess() bool {
+	if x != nil {
+		return x.AutoSuccess
+	}
+	return false
+}
+
+func (x *SessionAdversaryActionCheckResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *SessionAdversaryActionCheckResponse) GetRoll() int32 {
+	if x != nil {
+		return x.Roll
+	}
+	return 0
+}
+
+func (x *SessionAdversaryActionCheckResponse) GetModifier() int32 {
+	if x != nil {
+		return x.Modifier
+	}
+	return 0
+}
+
+func (x *SessionAdversaryActionCheckResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *SessionAdversaryActionCheckResponse) GetRng() *v1.RngResponse {
+	if x != nil {
+		return x.Rng
+	}
+	return nil
+}
+
 type SessionAdversaryAttackRollResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RollSeq       uint64                 `protobuf:"varint,1,opt,name=roll_seq,json=rollSeq,proto3" json:"roll_seq,omitempty"`
@@ -4690,7 +4926,7 @@ type SessionAdversaryAttackRollResponse struct {
 
 func (x *SessionAdversaryAttackRollResponse) Reset() {
 	*x = SessionAdversaryAttackRollResponse{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[59]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[61]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4702,7 +4938,7 @@ func (x *SessionAdversaryAttackRollResponse) String() string {
 func (*SessionAdversaryAttackRollResponse) ProtoMessage() {}
 
 func (x *SessionAdversaryAttackRollResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[59]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[61]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4715,7 +4951,7 @@ func (x *SessionAdversaryAttackRollResponse) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use SessionAdversaryAttackRollResponse.ProtoReflect.Descriptor instead.
 func (*SessionAdversaryAttackRollResponse) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{59}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{61}
 }
 
 func (x *SessionAdversaryAttackRollResponse) GetRollSeq() uint64 {
@@ -4776,7 +5012,7 @@ type SessionAdversaryAttackFlowRequest struct {
 
 func (x *SessionAdversaryAttackFlowRequest) Reset() {
 	*x = SessionAdversaryAttackFlowRequest{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[60]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[62]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4788,7 +5024,7 @@ func (x *SessionAdversaryAttackFlowRequest) String() string {
 func (*SessionAdversaryAttackFlowRequest) ProtoMessage() {}
 
 func (x *SessionAdversaryAttackFlowRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[60]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[62]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4801,7 +5037,7 @@ func (x *SessionAdversaryAttackFlowRequest) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use SessionAdversaryAttackFlowRequest.ProtoReflect.Descriptor instead.
 func (*SessionAdversaryAttackFlowRequest) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{60}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{62}
 }
 
 func (x *SessionAdversaryAttackFlowRequest) GetCampaignId() string {
@@ -4921,7 +5157,7 @@ type SessionAdversaryAttackFlowResponse struct {
 
 func (x *SessionAdversaryAttackFlowResponse) Reset() {
 	*x = SessionAdversaryAttackFlowResponse{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[61]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[63]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4933,7 +5169,7 @@ func (x *SessionAdversaryAttackFlowResponse) String() string {
 func (*SessionAdversaryAttackFlowResponse) ProtoMessage() {}
 
 func (x *SessionAdversaryAttackFlowResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[61]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[63]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4946,7 +5182,7 @@ func (x *SessionAdversaryAttackFlowResponse) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use SessionAdversaryAttackFlowResponse.ProtoReflect.Descriptor instead.
 func (*SessionAdversaryAttackFlowResponse) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{61}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{63}
 }
 
 func (x *SessionAdversaryAttackFlowResponse) GetAttackRoll() *SessionAdversaryAttackRollResponse {
@@ -4989,7 +5225,7 @@ type GroupActionSupporter struct {
 
 func (x *GroupActionSupporter) Reset() {
 	*x = GroupActionSupporter{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[62]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[64]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5001,7 +5237,7 @@ func (x *GroupActionSupporter) String() string {
 func (*GroupActionSupporter) ProtoMessage() {}
 
 func (x *GroupActionSupporter) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[62]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[64]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5014,7 +5250,7 @@ func (x *GroupActionSupporter) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupActionSupporter.ProtoReflect.Descriptor instead.
 func (*GroupActionSupporter) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{62}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{64}
 }
 
 func (x *GroupActionSupporter) GetCharacterId() string {
@@ -5056,7 +5292,7 @@ type GroupActionSupporterRoll struct {
 
 func (x *GroupActionSupporterRoll) Reset() {
 	*x = GroupActionSupporterRoll{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[63]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[65]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5068,7 +5304,7 @@ func (x *GroupActionSupporterRoll) String() string {
 func (*GroupActionSupporterRoll) ProtoMessage() {}
 
 func (x *GroupActionSupporterRoll) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[63]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[65]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5081,7 +5317,7 @@ func (x *GroupActionSupporterRoll) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupActionSupporterRoll.ProtoReflect.Descriptor instead.
 func (*GroupActionSupporterRoll) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{63}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{65}
 }
 
 func (x *GroupActionSupporterRoll) GetCharacterId() string {
@@ -5121,7 +5357,7 @@ type SessionGroupActionFlowRequest struct {
 
 func (x *SessionGroupActionFlowRequest) Reset() {
 	*x = SessionGroupActionFlowRequest{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[64]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[66]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5133,7 +5369,7 @@ func (x *SessionGroupActionFlowRequest) String() string {
 func (*SessionGroupActionFlowRequest) ProtoMessage() {}
 
 func (x *SessionGroupActionFlowRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[64]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[66]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5146,7 +5382,7 @@ func (x *SessionGroupActionFlowRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SessionGroupActionFlowRequest.ProtoReflect.Descriptor instead.
 func (*SessionGroupActionFlowRequest) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{64}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{66}
 }
 
 func (x *SessionGroupActionFlowRequest) GetCampaignId() string {
@@ -5219,7 +5455,7 @@ type SessionGroupActionFlowResponse struct {
 
 func (x *SessionGroupActionFlowResponse) Reset() {
 	*x = SessionGroupActionFlowResponse{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[65]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[67]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5231,7 +5467,7 @@ func (x *SessionGroupActionFlowResponse) String() string {
 func (*SessionGroupActionFlowResponse) ProtoMessage() {}
 
 func (x *SessionGroupActionFlowResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[65]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[67]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5244,7 +5480,7 @@ func (x *SessionGroupActionFlowResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SessionGroupActionFlowResponse.ProtoReflect.Descriptor instead.
 func (*SessionGroupActionFlowResponse) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{65}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{67}
 }
 
 func (x *SessionGroupActionFlowResponse) GetLeaderRoll() *SessionActionRollResponse {
@@ -5301,7 +5537,7 @@ type TagTeamParticipant struct {
 
 func (x *TagTeamParticipant) Reset() {
 	*x = TagTeamParticipant{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[66]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[68]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5313,7 +5549,7 @@ func (x *TagTeamParticipant) String() string {
 func (*TagTeamParticipant) ProtoMessage() {}
 
 func (x *TagTeamParticipant) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[66]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[68]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5326,7 +5562,7 @@ func (x *TagTeamParticipant) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TagTeamParticipant.ProtoReflect.Descriptor instead.
 func (*TagTeamParticipant) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{66}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{68}
 }
 
 func (x *TagTeamParticipant) GetCharacterId() string {
@@ -5371,7 +5607,7 @@ type SessionTagTeamFlowRequest struct {
 
 func (x *SessionTagTeamFlowRequest) Reset() {
 	*x = SessionTagTeamFlowRequest{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[67]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[69]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5383,7 +5619,7 @@ func (x *SessionTagTeamFlowRequest) String() string {
 func (*SessionTagTeamFlowRequest) ProtoMessage() {}
 
 func (x *SessionTagTeamFlowRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[67]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[69]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5396,7 +5632,7 @@ func (x *SessionTagTeamFlowRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SessionTagTeamFlowRequest.ProtoReflect.Descriptor instead.
 func (*SessionTagTeamFlowRequest) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{67}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{69}
 }
 
 func (x *SessionTagTeamFlowRequest) GetCampaignId() string {
@@ -5454,7 +5690,7 @@ type SessionTagTeamFlowResponse struct {
 
 func (x *SessionTagTeamFlowResponse) Reset() {
 	*x = SessionTagTeamFlowResponse{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[68]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[70]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5466,7 +5702,7 @@ func (x *SessionTagTeamFlowResponse) String() string {
 func (*SessionTagTeamFlowResponse) ProtoMessage() {}
 
 func (x *SessionTagTeamFlowResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[68]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[70]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5479,7 +5715,7 @@ func (x *SessionTagTeamFlowResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SessionTagTeamFlowResponse.ProtoReflect.Descriptor instead.
 func (*SessionTagTeamFlowResponse) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{68}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{70}
 }
 
 func (x *SessionTagTeamFlowResponse) GetFirstRoll() *SessionActionRollResponse {
@@ -5532,7 +5768,7 @@ type ApplyRollOutcomeRequest struct {
 
 func (x *ApplyRollOutcomeRequest) Reset() {
 	*x = ApplyRollOutcomeRequest{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[69]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[71]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5544,7 +5780,7 @@ func (x *ApplyRollOutcomeRequest) String() string {
 func (*ApplyRollOutcomeRequest) ProtoMessage() {}
 
 func (x *ApplyRollOutcomeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[69]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[71]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5557,7 +5793,7 @@ func (x *ApplyRollOutcomeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplyRollOutcomeRequest.ProtoReflect.Descriptor instead.
 func (*ApplyRollOutcomeRequest) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{69}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{71}
 }
 
 func (x *ApplyRollOutcomeRequest) GetSessionId() string {
@@ -5592,7 +5828,7 @@ type ApplyRollOutcomeResponse struct {
 
 func (x *ApplyRollOutcomeResponse) Reset() {
 	*x = ApplyRollOutcomeResponse{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[70]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[72]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5604,7 +5840,7 @@ func (x *ApplyRollOutcomeResponse) String() string {
 func (*ApplyRollOutcomeResponse) ProtoMessage() {}
 
 func (x *ApplyRollOutcomeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[70]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[72]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5617,7 +5853,7 @@ func (x *ApplyRollOutcomeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplyRollOutcomeResponse.ProtoReflect.Descriptor instead.
 func (*ApplyRollOutcomeResponse) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{70}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{72}
 }
 
 func (x *ApplyRollOutcomeResponse) GetRollSeq() uint64 {
@@ -5652,7 +5888,7 @@ type DaggerheartApplyAttackOutcomeRequest struct {
 
 func (x *DaggerheartApplyAttackOutcomeRequest) Reset() {
 	*x = DaggerheartApplyAttackOutcomeRequest{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[71]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[73]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5664,7 +5900,7 @@ func (x *DaggerheartApplyAttackOutcomeRequest) String() string {
 func (*DaggerheartApplyAttackOutcomeRequest) ProtoMessage() {}
 
 func (x *DaggerheartApplyAttackOutcomeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[71]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[73]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5677,7 +5913,7 @@ func (x *DaggerheartApplyAttackOutcomeRequest) ProtoReflect() protoreflect.Messa
 
 // Deprecated: Use DaggerheartApplyAttackOutcomeRequest.ProtoReflect.Descriptor instead.
 func (*DaggerheartApplyAttackOutcomeRequest) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{71}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{73}
 }
 
 func (x *DaggerheartApplyAttackOutcomeRequest) GetSessionId() string {
@@ -5713,7 +5949,7 @@ type DaggerheartApplyAdversaryAttackOutcomeRequest struct {
 
 func (x *DaggerheartApplyAdversaryAttackOutcomeRequest) Reset() {
 	*x = DaggerheartApplyAdversaryAttackOutcomeRequest{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[72]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[74]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5725,7 +5961,7 @@ func (x *DaggerheartApplyAdversaryAttackOutcomeRequest) String() string {
 func (*DaggerheartApplyAdversaryAttackOutcomeRequest) ProtoMessage() {}
 
 func (x *DaggerheartApplyAdversaryAttackOutcomeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[72]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[74]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5738,7 +5974,7 @@ func (x *DaggerheartApplyAdversaryAttackOutcomeRequest) ProtoReflect() protorefl
 
 // Deprecated: Use DaggerheartApplyAdversaryAttackOutcomeRequest.ProtoReflect.Descriptor instead.
 func (*DaggerheartApplyAdversaryAttackOutcomeRequest) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{72}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{74}
 }
 
 func (x *DaggerheartApplyAdversaryAttackOutcomeRequest) GetSessionId() string {
@@ -5781,7 +6017,7 @@ type DaggerheartAttackOutcomeResult struct {
 
 func (x *DaggerheartAttackOutcomeResult) Reset() {
 	*x = DaggerheartAttackOutcomeResult{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[73]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[75]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5793,7 +6029,7 @@ func (x *DaggerheartAttackOutcomeResult) String() string {
 func (*DaggerheartAttackOutcomeResult) ProtoMessage() {}
 
 func (x *DaggerheartAttackOutcomeResult) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[73]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[75]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5806,7 +6042,7 @@ func (x *DaggerheartAttackOutcomeResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DaggerheartAttackOutcomeResult.ProtoReflect.Descriptor instead.
 func (*DaggerheartAttackOutcomeResult) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{73}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{75}
 }
 
 func (x *DaggerheartAttackOutcomeResult) GetOutcome() Outcome {
@@ -5849,7 +6085,7 @@ type DaggerheartApplyAttackOutcomeResponse struct {
 
 func (x *DaggerheartApplyAttackOutcomeResponse) Reset() {
 	*x = DaggerheartApplyAttackOutcomeResponse{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[74]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[76]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5861,7 +6097,7 @@ func (x *DaggerheartApplyAttackOutcomeResponse) String() string {
 func (*DaggerheartApplyAttackOutcomeResponse) ProtoMessage() {}
 
 func (x *DaggerheartApplyAttackOutcomeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[74]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[76]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5874,7 +6110,7 @@ func (x *DaggerheartApplyAttackOutcomeResponse) ProtoReflect() protoreflect.Mess
 
 // Deprecated: Use DaggerheartApplyAttackOutcomeResponse.ProtoReflect.Descriptor instead.
 func (*DaggerheartApplyAttackOutcomeResponse) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{74}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{76}
 }
 
 func (x *DaggerheartApplyAttackOutcomeResponse) GetRollSeq() uint64 {
@@ -5918,7 +6154,7 @@ type DaggerheartAdversaryAttackOutcomeResult struct {
 
 func (x *DaggerheartAdversaryAttackOutcomeResult) Reset() {
 	*x = DaggerheartAdversaryAttackOutcomeResult{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[75]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[77]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5930,7 +6166,7 @@ func (x *DaggerheartAdversaryAttackOutcomeResult) String() string {
 func (*DaggerheartAdversaryAttackOutcomeResult) ProtoMessage() {}
 
 func (x *DaggerheartAdversaryAttackOutcomeResult) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[75]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[77]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5943,7 +6179,7 @@ func (x *DaggerheartAdversaryAttackOutcomeResult) ProtoReflect() protoreflect.Me
 
 // Deprecated: Use DaggerheartAdversaryAttackOutcomeResult.ProtoReflect.Descriptor instead.
 func (*DaggerheartAdversaryAttackOutcomeResult) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{75}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{77}
 }
 
 func (x *DaggerheartAdversaryAttackOutcomeResult) GetSuccess() bool {
@@ -5993,7 +6229,7 @@ type DaggerheartApplyAdversaryAttackOutcomeResponse struct {
 
 func (x *DaggerheartApplyAdversaryAttackOutcomeResponse) Reset() {
 	*x = DaggerheartApplyAdversaryAttackOutcomeResponse{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[76]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[78]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6005,7 +6241,7 @@ func (x *DaggerheartApplyAdversaryAttackOutcomeResponse) String() string {
 func (*DaggerheartApplyAdversaryAttackOutcomeResponse) ProtoMessage() {}
 
 func (x *DaggerheartApplyAdversaryAttackOutcomeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[76]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[78]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6018,7 +6254,7 @@ func (x *DaggerheartApplyAdversaryAttackOutcomeResponse) ProtoReflect() protoref
 
 // Deprecated: Use DaggerheartApplyAdversaryAttackOutcomeResponse.ProtoReflect.Descriptor instead.
 func (*DaggerheartApplyAdversaryAttackOutcomeResponse) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{76}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{78}
 }
 
 func (x *DaggerheartApplyAdversaryAttackOutcomeResponse) GetRollSeq() uint64 {
@@ -6059,7 +6295,7 @@ type DaggerheartApplyReactionOutcomeRequest struct {
 
 func (x *DaggerheartApplyReactionOutcomeRequest) Reset() {
 	*x = DaggerheartApplyReactionOutcomeRequest{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[77]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[79]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6071,7 +6307,7 @@ func (x *DaggerheartApplyReactionOutcomeRequest) String() string {
 func (*DaggerheartApplyReactionOutcomeRequest) ProtoMessage() {}
 
 func (x *DaggerheartApplyReactionOutcomeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[77]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[79]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6084,7 +6320,7 @@ func (x *DaggerheartApplyReactionOutcomeRequest) ProtoReflect() protoreflect.Mes
 
 // Deprecated: Use DaggerheartApplyReactionOutcomeRequest.ProtoReflect.Descriptor instead.
 func (*DaggerheartApplyReactionOutcomeRequest) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{77}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{79}
 }
 
 func (x *DaggerheartApplyReactionOutcomeRequest) GetSessionId() string {
@@ -6114,7 +6350,7 @@ type DaggerheartReactionOutcomeResult struct {
 
 func (x *DaggerheartReactionOutcomeResult) Reset() {
 	*x = DaggerheartReactionOutcomeResult{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[78]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[80]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6126,7 +6362,7 @@ func (x *DaggerheartReactionOutcomeResult) String() string {
 func (*DaggerheartReactionOutcomeResult) ProtoMessage() {}
 
 func (x *DaggerheartReactionOutcomeResult) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[78]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[80]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6139,7 +6375,7 @@ func (x *DaggerheartReactionOutcomeResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DaggerheartReactionOutcomeResult.ProtoReflect.Descriptor instead.
 func (*DaggerheartReactionOutcomeResult) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{78}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{80}
 }
 
 func (x *DaggerheartReactionOutcomeResult) GetOutcome() Outcome {
@@ -6188,7 +6424,7 @@ type DaggerheartApplyReactionOutcomeResponse struct {
 
 func (x *DaggerheartApplyReactionOutcomeResponse) Reset() {
 	*x = DaggerheartApplyReactionOutcomeResponse{}
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[79]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[81]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6200,7 +6436,7 @@ func (x *DaggerheartApplyReactionOutcomeResponse) String() string {
 func (*DaggerheartApplyReactionOutcomeResponse) ProtoMessage() {}
 
 func (x *DaggerheartApplyReactionOutcomeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[79]
+	mi := &file_systems_daggerheart_v1_service_proto_msgTypes[81]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6213,7 +6449,7 @@ func (x *DaggerheartApplyReactionOutcomeResponse) ProtoReflect() protoreflect.Me
 
 // Deprecated: Use DaggerheartApplyReactionOutcomeResponse.ProtoReflect.Descriptor instead.
 func (*DaggerheartApplyReactionOutcomeResponse) Descriptor() ([]byte, []int) {
-	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{79}
+	return file_systems_daggerheart_v1_service_proto_rawDescGZIP(), []int{81}
 }
 
 func (x *DaggerheartApplyReactionOutcomeResponse) GetRollSeq() uint64 {
@@ -6579,7 +6815,7 @@ const file_systems_daggerheart_v1_service_proto_rawDesc = "" +
 	"\x10RollDiceResponse\x126\n" +
 	"\x05rolls\x18\x01 \x03(\v2 .systems.daggerheart.v1.DiceRollR\x05rolls\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x05R\x05total\x12(\n" +
-	"\x03rng\x18\x03 \x01(\v2\x16.common.v1.RngResponseR\x03rng\"\xe5\x02\n" +
+	"\x03rng\x18\x03 \x01(\v2\x16.common.v1.RngResponseR\x03rng\"\xf7\x03\n" +
 	"\x18SessionActionRollRequest\x12\x1f\n" +
 	"\vcampaign_id\x18\x01 \x01(\tR\n" +
 	"campaignId\x12\x1d\n" +
@@ -6591,8 +6827,15 @@ const file_systems_daggerheart_v1_service_proto_rawDesc = "" +
 	"\n" +
 	"difficulty\x18\x06 \x01(\x05R\n" +
 	"difficulty\x12H\n" +
-	"\tmodifiers\x18\a \x03(\v2*.systems.daggerheart.v1.ActionRollModifierR\tmodifiers\x12'\n" +
-	"\x03rng\x18\b \x01(\v2\x15.common.v1.RngRequestR\x03rng\"\x92\x02\n" +
+	"\tmodifiers\x18\a \x03(\v2*.systems.daggerheart.v1.ActionRollModifierR\tmodifiers\x12\x1c\n" +
+	"\tadvantage\x18\b \x01(\x05R\tadvantage\x12\"\n" +
+	"\fdisadvantage\x18\t \x01(\x05R\fdisadvantage\x12\x1e\n" +
+	"\n" +
+	"underwater\x18\n" +
+	" \x01(\bR\n" +
+	"underwater\x12.\n" +
+	"\x13breath_countdown_id\x18\v \x01(\tR\x11breathCountdownId\x12'\n" +
+	"\x03rng\x18\f \x01(\v2\x15.common.v1.RngRequestR\x03rng\"\x92\x02\n" +
 	"\x19SessionActionRollResponse\x12\x19\n" +
 	"\broll_seq\x18\x01 \x01(\x04R\arollSeq\x12\x19\n" +
 	"\bhope_die\x18\x02 \x01(\x05R\ahopeDie\x12\x19\n" +
@@ -6635,7 +6878,7 @@ const file_systems_daggerheart_v1_service_proto_rawDesc = "" +
 	"\x06direct\x18\x06 \x01(\bR\x06direct\x12%\n" +
 	"\x0emassive_damage\x18\a \x01(\bR\rmassiveDamage\x12\x16\n" +
 	"\x06source\x18\b \x01(\tR\x06source\x120\n" +
-	"\x14source_character_ids\x18\t \x03(\tR\x12sourceCharacterIds\"\x98\x05\n" +
+	"\x14source_character_ids\x18\t \x03(\tR\x12sourceCharacterIds\"\xe8\x05\n" +
 	"\x18SessionAttackFlowRequest\x12\x1f\n" +
 	"\vcampaign_id\x18\x01 \x01(\tR\n" +
 	"campaignId\x12\x1d\n" +
@@ -6646,19 +6889,23 @@ const file_systems_daggerheart_v1_service_proto_rawDesc = "" +
 	"\n" +
 	"difficulty\x18\x05 \x01(\x05R\n" +
 	"difficulty\x12H\n" +
-	"\tmodifiers\x18\x06 \x03(\v2*.systems.daggerheart.v1.ActionRollModifierR\tmodifiers\x12\x1b\n" +
-	"\ttarget_id\x18\a \x01(\tR\btargetId\x12A\n" +
-	"\vdamage_dice\x18\b \x03(\v2 .systems.daggerheart.v1.DiceSpecR\n" +
+	"\tmodifiers\x18\x06 \x03(\v2*.systems.daggerheart.v1.ActionRollModifierR\tmodifiers\x12\x1e\n" +
+	"\n" +
+	"underwater\x18\a \x01(\bR\n" +
+	"underwater\x12.\n" +
+	"\x13breath_countdown_id\x18\b \x01(\tR\x11breathCountdownId\x12\x1b\n" +
+	"\ttarget_id\x18\t \x01(\tR\btargetId\x12A\n" +
+	"\vdamage_dice\x18\n" +
+	" \x03(\v2 .systems.daggerheart.v1.DiceSpecR\n" +
 	"damageDice\x12'\n" +
-	"\x0fdamage_modifier\x18\t \x01(\x05R\x0edamageModifier\x12K\n" +
-	"\x06damage\x18\n" +
-	" \x01(\v23.systems.daggerheart.v1.DaggerheartAttackDamageSpecR\x06damage\x12.\n" +
-	"\x13require_damage_roll\x18\v \x01(\bR\x11requireDamageRoll\x12'\n" +
-	"\x0fdamage_critical\x18\f \x01(\bR\x0edamageCritical\x124\n" +
+	"\x0fdamage_modifier\x18\v \x01(\x05R\x0edamageModifier\x12K\n" +
+	"\x06damage\x18\f \x01(\v23.systems.daggerheart.v1.DaggerheartAttackDamageSpecR\x06damage\x12.\n" +
+	"\x13require_damage_roll\x18\r \x01(\bR\x11requireDamageRoll\x12'\n" +
+	"\x0fdamage_critical\x18\x0e \x01(\bR\x0edamageCritical\x124\n" +
 	"\n" +
-	"action_rng\x18\r \x01(\v2\x15.common.v1.RngRequestR\tactionRng\x124\n" +
+	"action_rng\x18\x0f \x01(\v2\x15.common.v1.RngRequestR\tactionRng\x124\n" +
 	"\n" +
-	"damage_rng\x18\x0e \x01(\v2\x15.common.v1.RngRequestR\tdamageRng\"\xdd\x03\n" +
+	"damage_rng\x18\x10 \x01(\v2\x15.common.v1.RngRequestR\tdamageRng\"\xdd\x03\n" +
 	"\x19SessionAttackFlowResponse\x12R\n" +
 	"\vaction_roll\x18\x01 \x01(\v21.systems.daggerheart.v1.SessionActionRollResponseR\n" +
 	"actionRoll\x12S\n" +
@@ -6693,7 +6940,27 @@ const file_systems_daggerheart_v1_service_proto_rawDesc = "" +
 	"\x0fattack_modifier\x18\x04 \x01(\x05R\x0eattackModifier\x12\x1c\n" +
 	"\tadvantage\x18\x05 \x01(\x05R\tadvantage\x12\"\n" +
 	"\fdisadvantage\x18\x06 \x01(\x05R\fdisadvantage\x12'\n" +
-	"\x03rng\x18\a \x01(\v2\x15.common.v1.RngRequestR\x03rng\"\xa9\x01\n" +
+	"\x03rng\x18\a \x01(\v2\x15.common.v1.RngRequestR\x03rng\"\x88\x02\n" +
+	"\"SessionAdversaryActionCheckRequest\x12\x1f\n" +
+	"\vcampaign_id\x18\x01 \x01(\tR\n" +
+	"campaignId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x02 \x01(\tR\tsessionId\x12!\n" +
+	"\fadversary_id\x18\x03 \x01(\tR\vadversaryId\x12\x1e\n" +
+	"\n" +
+	"difficulty\x18\x04 \x01(\x05R\n" +
+	"difficulty\x12\x1a\n" +
+	"\bdramatic\x18\x05 \x01(\bR\bdramatic\x12\x1a\n" +
+	"\bmodifier\x18\x06 \x01(\x05R\bmodifier\x12'\n" +
+	"\x03rng\x18\a \x01(\v2\x15.common.v1.RngRequestR\x03rng\"\xed\x01\n" +
+	"#SessionAdversaryActionCheckResponse\x12\x19\n" +
+	"\broll_seq\x18\x01 \x01(\x04R\arollSeq\x12!\n" +
+	"\fauto_success\x18\x02 \x01(\bR\vautoSuccess\x12\x18\n" +
+	"\asuccess\x18\x03 \x01(\bR\asuccess\x12\x12\n" +
+	"\x04roll\x18\x04 \x01(\x05R\x04roll\x12\x1a\n" +
+	"\bmodifier\x18\x05 \x01(\x05R\bmodifier\x12\x14\n" +
+	"\x05total\x18\x06 \x01(\x05R\x05total\x12(\n" +
+	"\x03rng\x18\a \x01(\v2\x16.common.v1.RngResponseR\x03rng\"\xa9\x01\n" +
 	"\"SessionAdversaryAttackRollResponse\x12\x19\n" +
 	"\broll_seq\x18\x01 \x01(\x04R\arollSeq\x12\x12\n" +
 	"\x04roll\x18\x02 \x01(\x05R\x04roll\x12\x14\n" +
@@ -6859,7 +7126,7 @@ const file_systems_daggerheart_v1_service_proto_rawDesc = "" +
 	"\bRollKind\x12\x19\n" +
 	"\x15ROLL_KIND_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10ROLL_KIND_ACTION\x10\x01\x12\x16\n" +
-	"\x12ROLL_KIND_REACTION\x10\x022\x92#\n" +
+	"\x12ROLL_KIND_REACTION\x10\x022\xab$\n" +
 	"\x12DaggerheartService\x12c\n" +
 	"\n" +
 	"ActionRoll\x12).systems.daggerheart.v1.ActionRollRequest\x1a*.systems.daggerheart.v1.ActionRollResponse\x12o\n" +
@@ -6888,7 +7155,8 @@ const file_systems_daggerheart_v1_service_proto_rawDesc = "" +
 	"\x11SessionDamageRoll\x120.systems.daggerheart.v1.SessionDamageRollRequest\x1a1.systems.daggerheart.v1.SessionDamageRollResponse\x12x\n" +
 	"\x11SessionAttackFlow\x120.systems.daggerheart.v1.SessionAttackFlowRequest\x1a1.systems.daggerheart.v1.SessionAttackFlowResponse\x12~\n" +
 	"\x13SessionReactionFlow\x122.systems.daggerheart.v1.SessionReactionFlowRequest\x1a3.systems.daggerheart.v1.SessionReactionFlowResponse\x12\x93\x01\n" +
-	"\x1aSessionAdversaryAttackRoll\x129.systems.daggerheart.v1.SessionAdversaryAttackRollRequest\x1a:.systems.daggerheart.v1.SessionAdversaryAttackRollResponse\x12\x93\x01\n" +
+	"\x1aSessionAdversaryAttackRoll\x129.systems.daggerheart.v1.SessionAdversaryAttackRollRequest\x1a:.systems.daggerheart.v1.SessionAdversaryAttackRollResponse\x12\x96\x01\n" +
+	"\x1bSessionAdversaryActionCheck\x12:.systems.daggerheart.v1.SessionAdversaryActionCheckRequest\x1a;.systems.daggerheart.v1.SessionAdversaryActionCheckResponse\x12\x93\x01\n" +
 	"\x1aSessionAdversaryAttackFlow\x129.systems.daggerheart.v1.SessionAdversaryAttackFlowRequest\x1a:.systems.daggerheart.v1.SessionAdversaryAttackFlowResponse\x12\x87\x01\n" +
 	"\x16SessionGroupActionFlow\x125.systems.daggerheart.v1.SessionGroupActionFlowRequest\x1a6.systems.daggerheart.v1.SessionGroupActionFlowResponse\x12{\n" +
 	"\x12SessionTagTeamFlow\x121.systems.daggerheart.v1.SessionTagTeamFlowRequest\x1a2.systems.daggerheart.v1.SessionTagTeamFlowResponse\x12u\n" +
@@ -6910,7 +7178,7 @@ func file_systems_daggerheart_v1_service_proto_rawDescGZIP() []byte {
 }
 
 var file_systems_daggerheart_v1_service_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_systems_daggerheart_v1_service_proto_msgTypes = make([]protoimpl.MessageInfo, 80)
+var file_systems_daggerheart_v1_service_proto_msgTypes = make([]protoimpl.MessageInfo, 82)
 var file_systems_daggerheart_v1_service_proto_goTypes = []any{
 	(DaggerheartCountdownKind)(0),                          // 0: systems.daggerheart.v1.DaggerheartCountdownKind
 	(DaggerheartCountdownDirection)(0),                     // 1: systems.daggerheart.v1.DaggerheartCountdownDirection
@@ -6974,254 +7242,260 @@ var file_systems_daggerheart_v1_service_proto_goTypes = []any{
 	(*SessionReactionFlowRequest)(nil),                     // 59: systems.daggerheart.v1.SessionReactionFlowRequest
 	(*SessionReactionFlowResponse)(nil),                    // 60: systems.daggerheart.v1.SessionReactionFlowResponse
 	(*SessionAdversaryAttackRollRequest)(nil),              // 61: systems.daggerheart.v1.SessionAdversaryAttackRollRequest
-	(*SessionAdversaryAttackRollResponse)(nil),             // 62: systems.daggerheart.v1.SessionAdversaryAttackRollResponse
-	(*SessionAdversaryAttackFlowRequest)(nil),              // 63: systems.daggerheart.v1.SessionAdversaryAttackFlowRequest
-	(*SessionAdversaryAttackFlowResponse)(nil),             // 64: systems.daggerheart.v1.SessionAdversaryAttackFlowResponse
-	(*GroupActionSupporter)(nil),                           // 65: systems.daggerheart.v1.GroupActionSupporter
-	(*GroupActionSupporterRoll)(nil),                       // 66: systems.daggerheart.v1.GroupActionSupporterRoll
-	(*SessionGroupActionFlowRequest)(nil),                  // 67: systems.daggerheart.v1.SessionGroupActionFlowRequest
-	(*SessionGroupActionFlowResponse)(nil),                 // 68: systems.daggerheart.v1.SessionGroupActionFlowResponse
-	(*TagTeamParticipant)(nil),                             // 69: systems.daggerheart.v1.TagTeamParticipant
-	(*SessionTagTeamFlowRequest)(nil),                      // 70: systems.daggerheart.v1.SessionTagTeamFlowRequest
-	(*SessionTagTeamFlowResponse)(nil),                     // 71: systems.daggerheart.v1.SessionTagTeamFlowResponse
-	(*ApplyRollOutcomeRequest)(nil),                        // 72: systems.daggerheart.v1.ApplyRollOutcomeRequest
-	(*ApplyRollOutcomeResponse)(nil),                       // 73: systems.daggerheart.v1.ApplyRollOutcomeResponse
-	(*DaggerheartApplyAttackOutcomeRequest)(nil),           // 74: systems.daggerheart.v1.DaggerheartApplyAttackOutcomeRequest
-	(*DaggerheartApplyAdversaryAttackOutcomeRequest)(nil),  // 75: systems.daggerheart.v1.DaggerheartApplyAdversaryAttackOutcomeRequest
-	(*DaggerheartAttackOutcomeResult)(nil),                 // 76: systems.daggerheart.v1.DaggerheartAttackOutcomeResult
-	(*DaggerheartApplyAttackOutcomeResponse)(nil),          // 77: systems.daggerheart.v1.DaggerheartApplyAttackOutcomeResponse
-	(*DaggerheartAdversaryAttackOutcomeResult)(nil),        // 78: systems.daggerheart.v1.DaggerheartAdversaryAttackOutcomeResult
-	(*DaggerheartApplyAdversaryAttackOutcomeResponse)(nil), // 79: systems.daggerheart.v1.DaggerheartApplyAdversaryAttackOutcomeResponse
-	(*DaggerheartApplyReactionOutcomeRequest)(nil),         // 80: systems.daggerheart.v1.DaggerheartApplyReactionOutcomeRequest
-	(*DaggerheartReactionOutcomeResult)(nil),               // 81: systems.daggerheart.v1.DaggerheartReactionOutcomeResult
-	(*DaggerheartApplyReactionOutcomeResponse)(nil),        // 82: systems.daggerheart.v1.DaggerheartApplyReactionOutcomeResponse
-	(*DaggerheartDamageRequest)(nil),                       // 83: systems.daggerheart.v1.DaggerheartDamageRequest
-	(*DaggerheartCharacterState)(nil),                      // 84: systems.daggerheart.v1.DaggerheartCharacterState
-	(*DaggerheartRestRequest)(nil),                         // 85: systems.daggerheart.v1.DaggerheartRestRequest
-	(*DaggerheartSnapshot)(nil),                            // 86: systems.daggerheart.v1.DaggerheartSnapshot
-	(*DaggerheartDowntimeRequest)(nil),                     // 87: systems.daggerheart.v1.DaggerheartDowntimeRequest
-	(*DaggerheartLoadoutSwapRequest)(nil),                  // 88: systems.daggerheart.v1.DaggerheartLoadoutSwapRequest
-	(DaggerheartDeathMove)(0),                              // 89: systems.daggerheart.v1.DaggerheartDeathMove
-	(*v1.RngRequest)(nil),                                  // 90: common.v1.RngRequest
-	(DaggerheartLifeState)(0),                              // 91: systems.daggerheart.v1.DaggerheartLifeState
-	(DaggerheartCondition)(0),                              // 92: systems.daggerheart.v1.DaggerheartCondition
-	(*wrapperspb.StringValue)(nil),                         // 93: google.protobuf.StringValue
-	(*timestamppb.Timestamp)(nil),                          // 94: google.protobuf.Timestamp
-	(*wrapperspb.Int32Value)(nil),                          // 95: google.protobuf.Int32Value
-	(Outcome)(0),                                           // 96: systems.daggerheart.v1.Outcome
-	(*v1.RngResponse)(nil),                                 // 97: common.v1.RngResponse
-	(*Intermediates)(nil),                                  // 98: systems.daggerheart.v1.Intermediates
-	(*ExplainStep)(nil),                                    // 99: systems.daggerheart.v1.ExplainStep
-	(*OutcomeCount)(nil),                                   // 100: systems.daggerheart.v1.OutcomeCount
-	(*DiceSpec)(nil),                                       // 101: systems.daggerheart.v1.DiceSpec
-	(*DiceRoll)(nil),                                       // 102: systems.daggerheart.v1.DiceRoll
-	(*ActionRollModifier)(nil),                             // 103: systems.daggerheart.v1.ActionRollModifier
-	(DaggerheartDamageType)(0),                             // 104: systems.daggerheart.v1.DaggerheartDamageType
-	(*OutcomeUpdated)(nil),                                 // 105: systems.daggerheart.v1.OutcomeUpdated
+	(*SessionAdversaryActionCheckRequest)(nil),             // 62: systems.daggerheart.v1.SessionAdversaryActionCheckRequest
+	(*SessionAdversaryActionCheckResponse)(nil),            // 63: systems.daggerheart.v1.SessionAdversaryActionCheckResponse
+	(*SessionAdversaryAttackRollResponse)(nil),             // 64: systems.daggerheart.v1.SessionAdversaryAttackRollResponse
+	(*SessionAdversaryAttackFlowRequest)(nil),              // 65: systems.daggerheart.v1.SessionAdversaryAttackFlowRequest
+	(*SessionAdversaryAttackFlowResponse)(nil),             // 66: systems.daggerheart.v1.SessionAdversaryAttackFlowResponse
+	(*GroupActionSupporter)(nil),                           // 67: systems.daggerheart.v1.GroupActionSupporter
+	(*GroupActionSupporterRoll)(nil),                       // 68: systems.daggerheart.v1.GroupActionSupporterRoll
+	(*SessionGroupActionFlowRequest)(nil),                  // 69: systems.daggerheart.v1.SessionGroupActionFlowRequest
+	(*SessionGroupActionFlowResponse)(nil),                 // 70: systems.daggerheart.v1.SessionGroupActionFlowResponse
+	(*TagTeamParticipant)(nil),                             // 71: systems.daggerheart.v1.TagTeamParticipant
+	(*SessionTagTeamFlowRequest)(nil),                      // 72: systems.daggerheart.v1.SessionTagTeamFlowRequest
+	(*SessionTagTeamFlowResponse)(nil),                     // 73: systems.daggerheart.v1.SessionTagTeamFlowResponse
+	(*ApplyRollOutcomeRequest)(nil),                        // 74: systems.daggerheart.v1.ApplyRollOutcomeRequest
+	(*ApplyRollOutcomeResponse)(nil),                       // 75: systems.daggerheart.v1.ApplyRollOutcomeResponse
+	(*DaggerheartApplyAttackOutcomeRequest)(nil),           // 76: systems.daggerheart.v1.DaggerheartApplyAttackOutcomeRequest
+	(*DaggerheartApplyAdversaryAttackOutcomeRequest)(nil),  // 77: systems.daggerheart.v1.DaggerheartApplyAdversaryAttackOutcomeRequest
+	(*DaggerheartAttackOutcomeResult)(nil),                 // 78: systems.daggerheart.v1.DaggerheartAttackOutcomeResult
+	(*DaggerheartApplyAttackOutcomeResponse)(nil),          // 79: systems.daggerheart.v1.DaggerheartApplyAttackOutcomeResponse
+	(*DaggerheartAdversaryAttackOutcomeResult)(nil),        // 80: systems.daggerheart.v1.DaggerheartAdversaryAttackOutcomeResult
+	(*DaggerheartApplyAdversaryAttackOutcomeResponse)(nil), // 81: systems.daggerheart.v1.DaggerheartApplyAdversaryAttackOutcomeResponse
+	(*DaggerheartApplyReactionOutcomeRequest)(nil),         // 82: systems.daggerheart.v1.DaggerheartApplyReactionOutcomeRequest
+	(*DaggerheartReactionOutcomeResult)(nil),               // 83: systems.daggerheart.v1.DaggerheartReactionOutcomeResult
+	(*DaggerheartApplyReactionOutcomeResponse)(nil),        // 84: systems.daggerheart.v1.DaggerheartApplyReactionOutcomeResponse
+	(*DaggerheartDamageRequest)(nil),                       // 85: systems.daggerheart.v1.DaggerheartDamageRequest
+	(*DaggerheartCharacterState)(nil),                      // 86: systems.daggerheart.v1.DaggerheartCharacterState
+	(*DaggerheartRestRequest)(nil),                         // 87: systems.daggerheart.v1.DaggerheartRestRequest
+	(*DaggerheartSnapshot)(nil),                            // 88: systems.daggerheart.v1.DaggerheartSnapshot
+	(*DaggerheartDowntimeRequest)(nil),                     // 89: systems.daggerheart.v1.DaggerheartDowntimeRequest
+	(*DaggerheartLoadoutSwapRequest)(nil),                  // 90: systems.daggerheart.v1.DaggerheartLoadoutSwapRequest
+	(DaggerheartDeathMove)(0),                              // 91: systems.daggerheart.v1.DaggerheartDeathMove
+	(*v1.RngRequest)(nil),                                  // 92: common.v1.RngRequest
+	(DaggerheartLifeState)(0),                              // 93: systems.daggerheart.v1.DaggerheartLifeState
+	(DaggerheartCondition)(0),                              // 94: systems.daggerheart.v1.DaggerheartCondition
+	(*wrapperspb.StringValue)(nil),                         // 95: google.protobuf.StringValue
+	(*timestamppb.Timestamp)(nil),                          // 96: google.protobuf.Timestamp
+	(*wrapperspb.Int32Value)(nil),                          // 97: google.protobuf.Int32Value
+	(Outcome)(0),                                           // 98: systems.daggerheart.v1.Outcome
+	(*v1.RngResponse)(nil),                                 // 99: common.v1.RngResponse
+	(*Intermediates)(nil),                                  // 100: systems.daggerheart.v1.Intermediates
+	(*ExplainStep)(nil),                                    // 101: systems.daggerheart.v1.ExplainStep
+	(*OutcomeCount)(nil),                                   // 102: systems.daggerheart.v1.OutcomeCount
+	(*DiceSpec)(nil),                                       // 103: systems.daggerheart.v1.DiceSpec
+	(*DiceRoll)(nil),                                       // 104: systems.daggerheart.v1.DiceRoll
+	(*ActionRollModifier)(nil),                             // 105: systems.daggerheart.v1.ActionRollModifier
+	(DaggerheartDamageType)(0),                             // 106: systems.daggerheart.v1.DaggerheartDamageType
+	(*OutcomeUpdated)(nil),                                 // 107: systems.daggerheart.v1.OutcomeUpdated
 }
 var file_systems_daggerheart_v1_service_proto_depIdxs = []int32{
-	83,  // 0: systems.daggerheart.v1.DaggerheartApplyDamageRequest.damage:type_name -> systems.daggerheart.v1.DaggerheartDamageRequest
-	84,  // 1: systems.daggerheart.v1.DaggerheartApplyDamageResponse.state:type_name -> systems.daggerheart.v1.DaggerheartCharacterState
-	85,  // 2: systems.daggerheart.v1.DaggerheartApplyRestRequest.rest:type_name -> systems.daggerheart.v1.DaggerheartRestRequest
-	84,  // 3: systems.daggerheart.v1.DaggerheartCharacterStateEntry.state:type_name -> systems.daggerheart.v1.DaggerheartCharacterState
-	86,  // 4: systems.daggerheart.v1.DaggerheartApplyRestResponse.snapshot:type_name -> systems.daggerheart.v1.DaggerheartSnapshot
+	85,  // 0: systems.daggerheart.v1.DaggerheartApplyDamageRequest.damage:type_name -> systems.daggerheart.v1.DaggerheartDamageRequest
+	86,  // 1: systems.daggerheart.v1.DaggerheartApplyDamageResponse.state:type_name -> systems.daggerheart.v1.DaggerheartCharacterState
+	87,  // 2: systems.daggerheart.v1.DaggerheartApplyRestRequest.rest:type_name -> systems.daggerheart.v1.DaggerheartRestRequest
+	86,  // 3: systems.daggerheart.v1.DaggerheartCharacterStateEntry.state:type_name -> systems.daggerheart.v1.DaggerheartCharacterState
+	88,  // 4: systems.daggerheart.v1.DaggerheartApplyRestResponse.snapshot:type_name -> systems.daggerheart.v1.DaggerheartSnapshot
 	6,   // 5: systems.daggerheart.v1.DaggerheartApplyRestResponse.character_states:type_name -> systems.daggerheart.v1.DaggerheartCharacterStateEntry
-	87,  // 6: systems.daggerheart.v1.DaggerheartApplyDowntimeMoveRequest.move:type_name -> systems.daggerheart.v1.DaggerheartDowntimeRequest
-	84,  // 7: systems.daggerheart.v1.DaggerheartApplyDowntimeMoveResponse.state:type_name -> systems.daggerheart.v1.DaggerheartCharacterState
-	88,  // 8: systems.daggerheart.v1.DaggerheartSwapLoadoutRequest.swap:type_name -> systems.daggerheart.v1.DaggerheartLoadoutSwapRequest
-	84,  // 9: systems.daggerheart.v1.DaggerheartSwapLoadoutResponse.state:type_name -> systems.daggerheart.v1.DaggerheartCharacterState
-	89,  // 10: systems.daggerheart.v1.DaggerheartApplyDeathMoveRequest.move:type_name -> systems.daggerheart.v1.DaggerheartDeathMove
-	90,  // 11: systems.daggerheart.v1.DaggerheartApplyDeathMoveRequest.rng:type_name -> common.v1.RngRequest
-	89,  // 12: systems.daggerheart.v1.DaggerheartDeathMoveResult.move:type_name -> systems.daggerheart.v1.DaggerheartDeathMove
-	91,  // 13: systems.daggerheart.v1.DaggerheartDeathMoveResult.life_state:type_name -> systems.daggerheart.v1.DaggerheartLifeState
-	84,  // 14: systems.daggerheart.v1.DaggerheartApplyDeathMoveResponse.state:type_name -> systems.daggerheart.v1.DaggerheartCharacterState
+	89,  // 6: systems.daggerheart.v1.DaggerheartApplyDowntimeMoveRequest.move:type_name -> systems.daggerheart.v1.DaggerheartDowntimeRequest
+	86,  // 7: systems.daggerheart.v1.DaggerheartApplyDowntimeMoveResponse.state:type_name -> systems.daggerheart.v1.DaggerheartCharacterState
+	90,  // 8: systems.daggerheart.v1.DaggerheartSwapLoadoutRequest.swap:type_name -> systems.daggerheart.v1.DaggerheartLoadoutSwapRequest
+	86,  // 9: systems.daggerheart.v1.DaggerheartSwapLoadoutResponse.state:type_name -> systems.daggerheart.v1.DaggerheartCharacterState
+	91,  // 10: systems.daggerheart.v1.DaggerheartApplyDeathMoveRequest.move:type_name -> systems.daggerheart.v1.DaggerheartDeathMove
+	92,  // 11: systems.daggerheart.v1.DaggerheartApplyDeathMoveRequest.rng:type_name -> common.v1.RngRequest
+	91,  // 12: systems.daggerheart.v1.DaggerheartDeathMoveResult.move:type_name -> systems.daggerheart.v1.DaggerheartDeathMove
+	93,  // 13: systems.daggerheart.v1.DaggerheartDeathMoveResult.life_state:type_name -> systems.daggerheart.v1.DaggerheartLifeState
+	86,  // 14: systems.daggerheart.v1.DaggerheartApplyDeathMoveResponse.state:type_name -> systems.daggerheart.v1.DaggerheartCharacterState
 	13,  // 15: systems.daggerheart.v1.DaggerheartApplyDeathMoveResponse.result:type_name -> systems.daggerheart.v1.DaggerheartDeathMoveResult
-	92,  // 16: systems.daggerheart.v1.DaggerheartApplyConditionsRequest.add:type_name -> systems.daggerheart.v1.DaggerheartCondition
-	92,  // 17: systems.daggerheart.v1.DaggerheartApplyConditionsRequest.remove:type_name -> systems.daggerheart.v1.DaggerheartCondition
-	84,  // 18: systems.daggerheart.v1.DaggerheartApplyConditionsResponse.state:type_name -> systems.daggerheart.v1.DaggerheartCharacterState
-	92,  // 19: systems.daggerheart.v1.DaggerheartApplyConditionsResponse.added:type_name -> systems.daggerheart.v1.DaggerheartCondition
-	92,  // 20: systems.daggerheart.v1.DaggerheartApplyConditionsResponse.removed:type_name -> systems.daggerheart.v1.DaggerheartCondition
+	94,  // 16: systems.daggerheart.v1.DaggerheartApplyConditionsRequest.add:type_name -> systems.daggerheart.v1.DaggerheartCondition
+	94,  // 17: systems.daggerheart.v1.DaggerheartApplyConditionsRequest.remove:type_name -> systems.daggerheart.v1.DaggerheartCondition
+	86,  // 18: systems.daggerheart.v1.DaggerheartApplyConditionsResponse.state:type_name -> systems.daggerheart.v1.DaggerheartCharacterState
+	94,  // 19: systems.daggerheart.v1.DaggerheartApplyConditionsResponse.added:type_name -> systems.daggerheart.v1.DaggerheartCondition
+	94,  // 20: systems.daggerheart.v1.DaggerheartApplyConditionsResponse.removed:type_name -> systems.daggerheart.v1.DaggerheartCondition
 	0,   // 21: systems.daggerheart.v1.DaggerheartCountdown.kind:type_name -> systems.daggerheart.v1.DaggerheartCountdownKind
 	1,   // 22: systems.daggerheart.v1.DaggerheartCountdown.direction:type_name -> systems.daggerheart.v1.DaggerheartCountdownDirection
 	0,   // 23: systems.daggerheart.v1.DaggerheartCreateCountdownRequest.kind:type_name -> systems.daggerheart.v1.DaggerheartCountdownKind
 	1,   // 24: systems.daggerheart.v1.DaggerheartCreateCountdownRequest.direction:type_name -> systems.daggerheart.v1.DaggerheartCountdownDirection
 	19,  // 25: systems.daggerheart.v1.DaggerheartCreateCountdownResponse.countdown:type_name -> systems.daggerheart.v1.DaggerheartCountdown
 	19,  // 26: systems.daggerheart.v1.DaggerheartUpdateCountdownResponse.countdown:type_name -> systems.daggerheart.v1.DaggerheartCountdown
-	93,  // 27: systems.daggerheart.v1.DaggerheartAdversary.session_id:type_name -> google.protobuf.StringValue
-	94,  // 28: systems.daggerheart.v1.DaggerheartAdversary.created_at:type_name -> google.protobuf.Timestamp
-	94,  // 29: systems.daggerheart.v1.DaggerheartAdversary.updated_at:type_name -> google.protobuf.Timestamp
-	93,  // 30: systems.daggerheart.v1.DaggerheartCreateAdversaryRequest.session_id:type_name -> google.protobuf.StringValue
-	95,  // 31: systems.daggerheart.v1.DaggerheartCreateAdversaryRequest.hp:type_name -> google.protobuf.Int32Value
-	95,  // 32: systems.daggerheart.v1.DaggerheartCreateAdversaryRequest.hp_max:type_name -> google.protobuf.Int32Value
-	95,  // 33: systems.daggerheart.v1.DaggerheartCreateAdversaryRequest.stress:type_name -> google.protobuf.Int32Value
-	95,  // 34: systems.daggerheart.v1.DaggerheartCreateAdversaryRequest.stress_max:type_name -> google.protobuf.Int32Value
-	95,  // 35: systems.daggerheart.v1.DaggerheartCreateAdversaryRequest.evasion:type_name -> google.protobuf.Int32Value
-	95,  // 36: systems.daggerheart.v1.DaggerheartCreateAdversaryRequest.major_threshold:type_name -> google.protobuf.Int32Value
-	95,  // 37: systems.daggerheart.v1.DaggerheartCreateAdversaryRequest.severe_threshold:type_name -> google.protobuf.Int32Value
-	95,  // 38: systems.daggerheart.v1.DaggerheartCreateAdversaryRequest.armor:type_name -> google.protobuf.Int32Value
+	95,  // 27: systems.daggerheart.v1.DaggerheartAdversary.session_id:type_name -> google.protobuf.StringValue
+	96,  // 28: systems.daggerheart.v1.DaggerheartAdversary.created_at:type_name -> google.protobuf.Timestamp
+	96,  // 29: systems.daggerheart.v1.DaggerheartAdversary.updated_at:type_name -> google.protobuf.Timestamp
+	95,  // 30: systems.daggerheart.v1.DaggerheartCreateAdversaryRequest.session_id:type_name -> google.protobuf.StringValue
+	97,  // 31: systems.daggerheart.v1.DaggerheartCreateAdversaryRequest.hp:type_name -> google.protobuf.Int32Value
+	97,  // 32: systems.daggerheart.v1.DaggerheartCreateAdversaryRequest.hp_max:type_name -> google.protobuf.Int32Value
+	97,  // 33: systems.daggerheart.v1.DaggerheartCreateAdversaryRequest.stress:type_name -> google.protobuf.Int32Value
+	97,  // 34: systems.daggerheart.v1.DaggerheartCreateAdversaryRequest.stress_max:type_name -> google.protobuf.Int32Value
+	97,  // 35: systems.daggerheart.v1.DaggerheartCreateAdversaryRequest.evasion:type_name -> google.protobuf.Int32Value
+	97,  // 36: systems.daggerheart.v1.DaggerheartCreateAdversaryRequest.major_threshold:type_name -> google.protobuf.Int32Value
+	97,  // 37: systems.daggerheart.v1.DaggerheartCreateAdversaryRequest.severe_threshold:type_name -> google.protobuf.Int32Value
+	97,  // 38: systems.daggerheart.v1.DaggerheartCreateAdversaryRequest.armor:type_name -> google.protobuf.Int32Value
 	26,  // 39: systems.daggerheart.v1.DaggerheartCreateAdversaryResponse.adversary:type_name -> systems.daggerheart.v1.DaggerheartAdversary
-	93,  // 40: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.name:type_name -> google.protobuf.StringValue
-	93,  // 41: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.kind:type_name -> google.protobuf.StringValue
-	93,  // 42: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.session_id:type_name -> google.protobuf.StringValue
-	93,  // 43: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.notes:type_name -> google.protobuf.StringValue
-	95,  // 44: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.hp:type_name -> google.protobuf.Int32Value
-	95,  // 45: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.hp_max:type_name -> google.protobuf.Int32Value
-	95,  // 46: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.stress:type_name -> google.protobuf.Int32Value
-	95,  // 47: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.stress_max:type_name -> google.protobuf.Int32Value
-	95,  // 48: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.evasion:type_name -> google.protobuf.Int32Value
-	95,  // 49: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.major_threshold:type_name -> google.protobuf.Int32Value
-	95,  // 50: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.severe_threshold:type_name -> google.protobuf.Int32Value
-	95,  // 51: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.armor:type_name -> google.protobuf.Int32Value
+	95,  // 40: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.name:type_name -> google.protobuf.StringValue
+	95,  // 41: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.kind:type_name -> google.protobuf.StringValue
+	95,  // 42: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.session_id:type_name -> google.protobuf.StringValue
+	95,  // 43: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.notes:type_name -> google.protobuf.StringValue
+	97,  // 44: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.hp:type_name -> google.protobuf.Int32Value
+	97,  // 45: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.hp_max:type_name -> google.protobuf.Int32Value
+	97,  // 46: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.stress:type_name -> google.protobuf.Int32Value
+	97,  // 47: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.stress_max:type_name -> google.protobuf.Int32Value
+	97,  // 48: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.evasion:type_name -> google.protobuf.Int32Value
+	97,  // 49: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.major_threshold:type_name -> google.protobuf.Int32Value
+	97,  // 50: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.severe_threshold:type_name -> google.protobuf.Int32Value
+	97,  // 51: systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest.armor:type_name -> google.protobuf.Int32Value
 	26,  // 52: systems.daggerheart.v1.DaggerheartUpdateAdversaryResponse.adversary:type_name -> systems.daggerheart.v1.DaggerheartAdversary
 	26,  // 53: systems.daggerheart.v1.DaggerheartDeleteAdversaryResponse.adversary:type_name -> systems.daggerheart.v1.DaggerheartAdversary
 	26,  // 54: systems.daggerheart.v1.DaggerheartGetAdversaryResponse.adversary:type_name -> systems.daggerheart.v1.DaggerheartAdversary
-	93,  // 55: systems.daggerheart.v1.DaggerheartListAdversariesRequest.session_id:type_name -> google.protobuf.StringValue
+	95,  // 55: systems.daggerheart.v1.DaggerheartListAdversariesRequest.session_id:type_name -> google.protobuf.StringValue
 	26,  // 56: systems.daggerheart.v1.DaggerheartListAdversariesResponse.adversaries:type_name -> systems.daggerheart.v1.DaggerheartAdversary
-	91,  // 57: systems.daggerheart.v1.DaggerheartBlazeOfGloryResult.life_state:type_name -> systems.daggerheart.v1.DaggerheartLifeState
-	84,  // 58: systems.daggerheart.v1.DaggerheartResolveBlazeOfGloryResponse.state:type_name -> systems.daggerheart.v1.DaggerheartCharacterState
+	93,  // 57: systems.daggerheart.v1.DaggerheartBlazeOfGloryResult.life_state:type_name -> systems.daggerheart.v1.DaggerheartLifeState
+	86,  // 58: systems.daggerheart.v1.DaggerheartResolveBlazeOfGloryResponse.state:type_name -> systems.daggerheart.v1.DaggerheartCharacterState
 	38,  // 59: systems.daggerheart.v1.DaggerheartResolveBlazeOfGloryResponse.result:type_name -> systems.daggerheart.v1.DaggerheartBlazeOfGloryResult
-	90,  // 60: systems.daggerheart.v1.ActionRollRequest.rng:type_name -> common.v1.RngRequest
-	96,  // 61: systems.daggerheart.v1.ActionRollResponse.outcome:type_name -> systems.daggerheart.v1.Outcome
-	97,  // 62: systems.daggerheart.v1.ActionRollResponse.rng:type_name -> common.v1.RngResponse
-	96,  // 63: systems.daggerheart.v1.DualityOutcomeResponse.outcome:type_name -> systems.daggerheart.v1.Outcome
-	96,  // 64: systems.daggerheart.v1.DualityExplainResponse.outcome:type_name -> systems.daggerheart.v1.Outcome
-	98,  // 65: systems.daggerheart.v1.DualityExplainResponse.intermediates:type_name -> systems.daggerheart.v1.Intermediates
-	99,  // 66: systems.daggerheart.v1.DualityExplainResponse.steps:type_name -> systems.daggerheart.v1.ExplainStep
-	100, // 67: systems.daggerheart.v1.DualityProbabilityResponse.outcome_counts:type_name -> systems.daggerheart.v1.OutcomeCount
-	96,  // 68: systems.daggerheart.v1.RulesVersionResponse.outcomes:type_name -> systems.daggerheart.v1.Outcome
-	101, // 69: systems.daggerheart.v1.RollDiceRequest.dice:type_name -> systems.daggerheart.v1.DiceSpec
-	90,  // 70: systems.daggerheart.v1.RollDiceRequest.rng:type_name -> common.v1.RngRequest
-	102, // 71: systems.daggerheart.v1.RollDiceResponse.rolls:type_name -> systems.daggerheart.v1.DiceRoll
-	97,  // 72: systems.daggerheart.v1.RollDiceResponse.rng:type_name -> common.v1.RngResponse
+	92,  // 60: systems.daggerheart.v1.ActionRollRequest.rng:type_name -> common.v1.RngRequest
+	98,  // 61: systems.daggerheart.v1.ActionRollResponse.outcome:type_name -> systems.daggerheart.v1.Outcome
+	99,  // 62: systems.daggerheart.v1.ActionRollResponse.rng:type_name -> common.v1.RngResponse
+	98,  // 63: systems.daggerheart.v1.DualityOutcomeResponse.outcome:type_name -> systems.daggerheart.v1.Outcome
+	98,  // 64: systems.daggerheart.v1.DualityExplainResponse.outcome:type_name -> systems.daggerheart.v1.Outcome
+	100, // 65: systems.daggerheart.v1.DualityExplainResponse.intermediates:type_name -> systems.daggerheart.v1.Intermediates
+	101, // 66: systems.daggerheart.v1.DualityExplainResponse.steps:type_name -> systems.daggerheart.v1.ExplainStep
+	102, // 67: systems.daggerheart.v1.DualityProbabilityResponse.outcome_counts:type_name -> systems.daggerheart.v1.OutcomeCount
+	98,  // 68: systems.daggerheart.v1.RulesVersionResponse.outcomes:type_name -> systems.daggerheart.v1.Outcome
+	103, // 69: systems.daggerheart.v1.RollDiceRequest.dice:type_name -> systems.daggerheart.v1.DiceSpec
+	92,  // 70: systems.daggerheart.v1.RollDiceRequest.rng:type_name -> common.v1.RngRequest
+	104, // 71: systems.daggerheart.v1.RollDiceResponse.rolls:type_name -> systems.daggerheart.v1.DiceRoll
+	99,  // 72: systems.daggerheart.v1.RollDiceResponse.rng:type_name -> common.v1.RngResponse
 	2,   // 73: systems.daggerheart.v1.SessionActionRollRequest.roll_kind:type_name -> systems.daggerheart.v1.RollKind
-	103, // 74: systems.daggerheart.v1.SessionActionRollRequest.modifiers:type_name -> systems.daggerheart.v1.ActionRollModifier
-	90,  // 75: systems.daggerheart.v1.SessionActionRollRequest.rng:type_name -> common.v1.RngRequest
-	97,  // 76: systems.daggerheart.v1.SessionActionRollResponse.rng:type_name -> common.v1.RngResponse
-	101, // 77: systems.daggerheart.v1.SessionDamageRollRequest.dice:type_name -> systems.daggerheart.v1.DiceSpec
-	90,  // 78: systems.daggerheart.v1.SessionDamageRollRequest.rng:type_name -> common.v1.RngRequest
-	102, // 79: systems.daggerheart.v1.SessionDamageRollResponse.rolls:type_name -> systems.daggerheart.v1.DiceRoll
-	97,  // 80: systems.daggerheart.v1.SessionDamageRollResponse.rng:type_name -> common.v1.RngResponse
-	104, // 81: systems.daggerheart.v1.DaggerheartAttackDamageSpec.damage_type:type_name -> systems.daggerheart.v1.DaggerheartDamageType
-	103, // 82: systems.daggerheart.v1.SessionAttackFlowRequest.modifiers:type_name -> systems.daggerheart.v1.ActionRollModifier
-	101, // 83: systems.daggerheart.v1.SessionAttackFlowRequest.damage_dice:type_name -> systems.daggerheart.v1.DiceSpec
+	105, // 74: systems.daggerheart.v1.SessionActionRollRequest.modifiers:type_name -> systems.daggerheart.v1.ActionRollModifier
+	92,  // 75: systems.daggerheart.v1.SessionActionRollRequest.rng:type_name -> common.v1.RngRequest
+	99,  // 76: systems.daggerheart.v1.SessionActionRollResponse.rng:type_name -> common.v1.RngResponse
+	103, // 77: systems.daggerheart.v1.SessionDamageRollRequest.dice:type_name -> systems.daggerheart.v1.DiceSpec
+	92,  // 78: systems.daggerheart.v1.SessionDamageRollRequest.rng:type_name -> common.v1.RngRequest
+	104, // 79: systems.daggerheart.v1.SessionDamageRollResponse.rolls:type_name -> systems.daggerheart.v1.DiceRoll
+	99,  // 80: systems.daggerheart.v1.SessionDamageRollResponse.rng:type_name -> common.v1.RngResponse
+	106, // 81: systems.daggerheart.v1.DaggerheartAttackDamageSpec.damage_type:type_name -> systems.daggerheart.v1.DaggerheartDamageType
+	105, // 82: systems.daggerheart.v1.SessionAttackFlowRequest.modifiers:type_name -> systems.daggerheart.v1.ActionRollModifier
+	103, // 83: systems.daggerheart.v1.SessionAttackFlowRequest.damage_dice:type_name -> systems.daggerheart.v1.DiceSpec
 	56,  // 84: systems.daggerheart.v1.SessionAttackFlowRequest.damage:type_name -> systems.daggerheart.v1.DaggerheartAttackDamageSpec
-	90,  // 85: systems.daggerheart.v1.SessionAttackFlowRequest.action_rng:type_name -> common.v1.RngRequest
-	90,  // 86: systems.daggerheart.v1.SessionAttackFlowRequest.damage_rng:type_name -> common.v1.RngRequest
+	92,  // 85: systems.daggerheart.v1.SessionAttackFlowRequest.action_rng:type_name -> common.v1.RngRequest
+	92,  // 86: systems.daggerheart.v1.SessionAttackFlowRequest.damage_rng:type_name -> common.v1.RngRequest
 	53,  // 87: systems.daggerheart.v1.SessionAttackFlowResponse.action_roll:type_name -> systems.daggerheart.v1.SessionActionRollResponse
-	73,  // 88: systems.daggerheart.v1.SessionAttackFlowResponse.roll_outcome:type_name -> systems.daggerheart.v1.ApplyRollOutcomeResponse
-	77,  // 89: systems.daggerheart.v1.SessionAttackFlowResponse.attack_outcome:type_name -> systems.daggerheart.v1.DaggerheartApplyAttackOutcomeResponse
+	75,  // 88: systems.daggerheart.v1.SessionAttackFlowResponse.roll_outcome:type_name -> systems.daggerheart.v1.ApplyRollOutcomeResponse
+	79,  // 89: systems.daggerheart.v1.SessionAttackFlowResponse.attack_outcome:type_name -> systems.daggerheart.v1.DaggerheartApplyAttackOutcomeResponse
 	55,  // 90: systems.daggerheart.v1.SessionAttackFlowResponse.damage_roll:type_name -> systems.daggerheart.v1.SessionDamageRollResponse
 	4,   // 91: systems.daggerheart.v1.SessionAttackFlowResponse.damage_applied:type_name -> systems.daggerheart.v1.DaggerheartApplyDamageResponse
-	103, // 92: systems.daggerheart.v1.SessionReactionFlowRequest.modifiers:type_name -> systems.daggerheart.v1.ActionRollModifier
-	90,  // 93: systems.daggerheart.v1.SessionReactionFlowRequest.reaction_rng:type_name -> common.v1.RngRequest
+	105, // 92: systems.daggerheart.v1.SessionReactionFlowRequest.modifiers:type_name -> systems.daggerheart.v1.ActionRollModifier
+	92,  // 93: systems.daggerheart.v1.SessionReactionFlowRequest.reaction_rng:type_name -> common.v1.RngRequest
 	53,  // 94: systems.daggerheart.v1.SessionReactionFlowResponse.action_roll:type_name -> systems.daggerheart.v1.SessionActionRollResponse
-	73,  // 95: systems.daggerheart.v1.SessionReactionFlowResponse.roll_outcome:type_name -> systems.daggerheart.v1.ApplyRollOutcomeResponse
-	82,  // 96: systems.daggerheart.v1.SessionReactionFlowResponse.reaction_outcome:type_name -> systems.daggerheart.v1.DaggerheartApplyReactionOutcomeResponse
-	90,  // 97: systems.daggerheart.v1.SessionAdversaryAttackRollRequest.rng:type_name -> common.v1.RngRequest
-	97,  // 98: systems.daggerheart.v1.SessionAdversaryAttackRollResponse.rng:type_name -> common.v1.RngResponse
-	101, // 99: systems.daggerheart.v1.SessionAdversaryAttackFlowRequest.damage_dice:type_name -> systems.daggerheart.v1.DiceSpec
-	56,  // 100: systems.daggerheart.v1.SessionAdversaryAttackFlowRequest.damage:type_name -> systems.daggerheart.v1.DaggerheartAttackDamageSpec
-	90,  // 101: systems.daggerheart.v1.SessionAdversaryAttackFlowRequest.attack_rng:type_name -> common.v1.RngRequest
-	90,  // 102: systems.daggerheart.v1.SessionAdversaryAttackFlowRequest.damage_rng:type_name -> common.v1.RngRequest
-	62,  // 103: systems.daggerheart.v1.SessionAdversaryAttackFlowResponse.attack_roll:type_name -> systems.daggerheart.v1.SessionAdversaryAttackRollResponse
-	79,  // 104: systems.daggerheart.v1.SessionAdversaryAttackFlowResponse.attack_outcome:type_name -> systems.daggerheart.v1.DaggerheartApplyAdversaryAttackOutcomeResponse
-	55,  // 105: systems.daggerheart.v1.SessionAdversaryAttackFlowResponse.damage_roll:type_name -> systems.daggerheart.v1.SessionDamageRollResponse
-	4,   // 106: systems.daggerheart.v1.SessionAdversaryAttackFlowResponse.damage_applied:type_name -> systems.daggerheart.v1.DaggerheartApplyDamageResponse
-	103, // 107: systems.daggerheart.v1.GroupActionSupporter.modifiers:type_name -> systems.daggerheart.v1.ActionRollModifier
-	90,  // 108: systems.daggerheart.v1.GroupActionSupporter.rng:type_name -> common.v1.RngRequest
-	53,  // 109: systems.daggerheart.v1.GroupActionSupporterRoll.action_roll:type_name -> systems.daggerheart.v1.SessionActionRollResponse
-	103, // 110: systems.daggerheart.v1.SessionGroupActionFlowRequest.leader_modifiers:type_name -> systems.daggerheart.v1.ActionRollModifier
-	65,  // 111: systems.daggerheart.v1.SessionGroupActionFlowRequest.supporters:type_name -> systems.daggerheart.v1.GroupActionSupporter
-	90,  // 112: systems.daggerheart.v1.SessionGroupActionFlowRequest.leader_rng:type_name -> common.v1.RngRequest
-	53,  // 113: systems.daggerheart.v1.SessionGroupActionFlowResponse.leader_roll:type_name -> systems.daggerheart.v1.SessionActionRollResponse
-	73,  // 114: systems.daggerheart.v1.SessionGroupActionFlowResponse.leader_outcome:type_name -> systems.daggerheart.v1.ApplyRollOutcomeResponse
-	66,  // 115: systems.daggerheart.v1.SessionGroupActionFlowResponse.supporter_rolls:type_name -> systems.daggerheart.v1.GroupActionSupporterRoll
-	103, // 116: systems.daggerheart.v1.TagTeamParticipant.modifiers:type_name -> systems.daggerheart.v1.ActionRollModifier
-	90,  // 117: systems.daggerheart.v1.TagTeamParticipant.rng:type_name -> common.v1.RngRequest
-	69,  // 118: systems.daggerheart.v1.SessionTagTeamFlowRequest.first:type_name -> systems.daggerheart.v1.TagTeamParticipant
-	69,  // 119: systems.daggerheart.v1.SessionTagTeamFlowRequest.second:type_name -> systems.daggerheart.v1.TagTeamParticipant
-	53,  // 120: systems.daggerheart.v1.SessionTagTeamFlowResponse.first_roll:type_name -> systems.daggerheart.v1.SessionActionRollResponse
-	53,  // 121: systems.daggerheart.v1.SessionTagTeamFlowResponse.second_roll:type_name -> systems.daggerheart.v1.SessionActionRollResponse
-	73,  // 122: systems.daggerheart.v1.SessionTagTeamFlowResponse.selected_outcome:type_name -> systems.daggerheart.v1.ApplyRollOutcomeResponse
-	105, // 123: systems.daggerheart.v1.ApplyRollOutcomeResponse.updated:type_name -> systems.daggerheart.v1.OutcomeUpdated
-	96,  // 124: systems.daggerheart.v1.DaggerheartAttackOutcomeResult.outcome:type_name -> systems.daggerheart.v1.Outcome
-	76,  // 125: systems.daggerheart.v1.DaggerheartApplyAttackOutcomeResponse.result:type_name -> systems.daggerheart.v1.DaggerheartAttackOutcomeResult
-	78,  // 126: systems.daggerheart.v1.DaggerheartApplyAdversaryAttackOutcomeResponse.result:type_name -> systems.daggerheart.v1.DaggerheartAdversaryAttackOutcomeResult
-	96,  // 127: systems.daggerheart.v1.DaggerheartReactionOutcomeResult.outcome:type_name -> systems.daggerheart.v1.Outcome
-	81,  // 128: systems.daggerheart.v1.DaggerheartApplyReactionOutcomeResponse.result:type_name -> systems.daggerheart.v1.DaggerheartReactionOutcomeResult
-	40,  // 129: systems.daggerheart.v1.DaggerheartService.ActionRoll:input_type -> systems.daggerheart.v1.ActionRollRequest
-	42,  // 130: systems.daggerheart.v1.DaggerheartService.DualityOutcome:input_type -> systems.daggerheart.v1.DualityOutcomeRequest
-	44,  // 131: systems.daggerheart.v1.DaggerheartService.DualityExplain:input_type -> systems.daggerheart.v1.DualityExplainRequest
-	46,  // 132: systems.daggerheart.v1.DaggerheartService.DualityProbability:input_type -> systems.daggerheart.v1.DualityProbabilityRequest
-	48,  // 133: systems.daggerheart.v1.DaggerheartService.RulesVersion:input_type -> systems.daggerheart.v1.RulesVersionRequest
-	50,  // 134: systems.daggerheart.v1.DaggerheartService.RollDice:input_type -> systems.daggerheart.v1.RollDiceRequest
-	3,   // 135: systems.daggerheart.v1.DaggerheartService.ApplyDamage:input_type -> systems.daggerheart.v1.DaggerheartApplyDamageRequest
-	5,   // 136: systems.daggerheart.v1.DaggerheartService.ApplyRest:input_type -> systems.daggerheart.v1.DaggerheartApplyRestRequest
-	8,   // 137: systems.daggerheart.v1.DaggerheartService.ApplyDowntimeMove:input_type -> systems.daggerheart.v1.DaggerheartApplyDowntimeMoveRequest
-	10,  // 138: systems.daggerheart.v1.DaggerheartService.SwapLoadout:input_type -> systems.daggerheart.v1.DaggerheartSwapLoadoutRequest
-	12,  // 139: systems.daggerheart.v1.DaggerheartService.ApplyDeathMove:input_type -> systems.daggerheart.v1.DaggerheartApplyDeathMoveRequest
-	15,  // 140: systems.daggerheart.v1.DaggerheartService.ApplyConditions:input_type -> systems.daggerheart.v1.DaggerheartApplyConditionsRequest
-	17,  // 141: systems.daggerheart.v1.DaggerheartService.ApplyGmMove:input_type -> systems.daggerheart.v1.DaggerheartApplyGmMoveRequest
-	20,  // 142: systems.daggerheart.v1.DaggerheartService.CreateCountdown:input_type -> systems.daggerheart.v1.DaggerheartCreateCountdownRequest
-	22,  // 143: systems.daggerheart.v1.DaggerheartService.UpdateCountdown:input_type -> systems.daggerheart.v1.DaggerheartUpdateCountdownRequest
-	24,  // 144: systems.daggerheart.v1.DaggerheartService.DeleteCountdown:input_type -> systems.daggerheart.v1.DaggerheartDeleteCountdownRequest
-	27,  // 145: systems.daggerheart.v1.DaggerheartService.CreateAdversary:input_type -> systems.daggerheart.v1.DaggerheartCreateAdversaryRequest
-	29,  // 146: systems.daggerheart.v1.DaggerheartService.UpdateAdversary:input_type -> systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest
-	31,  // 147: systems.daggerheart.v1.DaggerheartService.DeleteAdversary:input_type -> systems.daggerheart.v1.DaggerheartDeleteAdversaryRequest
-	33,  // 148: systems.daggerheart.v1.DaggerheartService.GetAdversary:input_type -> systems.daggerheart.v1.DaggerheartGetAdversaryRequest
-	35,  // 149: systems.daggerheart.v1.DaggerheartService.ListAdversaries:input_type -> systems.daggerheart.v1.DaggerheartListAdversariesRequest
-	37,  // 150: systems.daggerheart.v1.DaggerheartService.ResolveBlazeOfGlory:input_type -> systems.daggerheart.v1.DaggerheartResolveBlazeOfGloryRequest
-	52,  // 151: systems.daggerheart.v1.DaggerheartService.SessionActionRoll:input_type -> systems.daggerheart.v1.SessionActionRollRequest
-	54,  // 152: systems.daggerheart.v1.DaggerheartService.SessionDamageRoll:input_type -> systems.daggerheart.v1.SessionDamageRollRequest
-	57,  // 153: systems.daggerheart.v1.DaggerheartService.SessionAttackFlow:input_type -> systems.daggerheart.v1.SessionAttackFlowRequest
-	59,  // 154: systems.daggerheart.v1.DaggerheartService.SessionReactionFlow:input_type -> systems.daggerheart.v1.SessionReactionFlowRequest
-	61,  // 155: systems.daggerheart.v1.DaggerheartService.SessionAdversaryAttackRoll:input_type -> systems.daggerheart.v1.SessionAdversaryAttackRollRequest
-	63,  // 156: systems.daggerheart.v1.DaggerheartService.SessionAdversaryAttackFlow:input_type -> systems.daggerheart.v1.SessionAdversaryAttackFlowRequest
-	67,  // 157: systems.daggerheart.v1.DaggerheartService.SessionGroupActionFlow:input_type -> systems.daggerheart.v1.SessionGroupActionFlowRequest
-	70,  // 158: systems.daggerheart.v1.DaggerheartService.SessionTagTeamFlow:input_type -> systems.daggerheart.v1.SessionTagTeamFlowRequest
-	72,  // 159: systems.daggerheart.v1.DaggerheartService.ApplyRollOutcome:input_type -> systems.daggerheart.v1.ApplyRollOutcomeRequest
-	74,  // 160: systems.daggerheart.v1.DaggerheartService.ApplyAttackOutcome:input_type -> systems.daggerheart.v1.DaggerheartApplyAttackOutcomeRequest
-	75,  // 161: systems.daggerheart.v1.DaggerheartService.ApplyAdversaryAttackOutcome:input_type -> systems.daggerheart.v1.DaggerheartApplyAdversaryAttackOutcomeRequest
-	80,  // 162: systems.daggerheart.v1.DaggerheartService.ApplyReactionOutcome:input_type -> systems.daggerheart.v1.DaggerheartApplyReactionOutcomeRequest
-	41,  // 163: systems.daggerheart.v1.DaggerheartService.ActionRoll:output_type -> systems.daggerheart.v1.ActionRollResponse
-	43,  // 164: systems.daggerheart.v1.DaggerheartService.DualityOutcome:output_type -> systems.daggerheart.v1.DualityOutcomeResponse
-	45,  // 165: systems.daggerheart.v1.DaggerheartService.DualityExplain:output_type -> systems.daggerheart.v1.DualityExplainResponse
-	47,  // 166: systems.daggerheart.v1.DaggerheartService.DualityProbability:output_type -> systems.daggerheart.v1.DualityProbabilityResponse
-	49,  // 167: systems.daggerheart.v1.DaggerheartService.RulesVersion:output_type -> systems.daggerheart.v1.RulesVersionResponse
-	51,  // 168: systems.daggerheart.v1.DaggerheartService.RollDice:output_type -> systems.daggerheart.v1.RollDiceResponse
-	4,   // 169: systems.daggerheart.v1.DaggerheartService.ApplyDamage:output_type -> systems.daggerheart.v1.DaggerheartApplyDamageResponse
-	7,   // 170: systems.daggerheart.v1.DaggerheartService.ApplyRest:output_type -> systems.daggerheart.v1.DaggerheartApplyRestResponse
-	9,   // 171: systems.daggerheart.v1.DaggerheartService.ApplyDowntimeMove:output_type -> systems.daggerheart.v1.DaggerheartApplyDowntimeMoveResponse
-	11,  // 172: systems.daggerheart.v1.DaggerheartService.SwapLoadout:output_type -> systems.daggerheart.v1.DaggerheartSwapLoadoutResponse
-	14,  // 173: systems.daggerheart.v1.DaggerheartService.ApplyDeathMove:output_type -> systems.daggerheart.v1.DaggerheartApplyDeathMoveResponse
-	16,  // 174: systems.daggerheart.v1.DaggerheartService.ApplyConditions:output_type -> systems.daggerheart.v1.DaggerheartApplyConditionsResponse
-	18,  // 175: systems.daggerheart.v1.DaggerheartService.ApplyGmMove:output_type -> systems.daggerheart.v1.DaggerheartApplyGmMoveResponse
-	21,  // 176: systems.daggerheart.v1.DaggerheartService.CreateCountdown:output_type -> systems.daggerheart.v1.DaggerheartCreateCountdownResponse
-	23,  // 177: systems.daggerheart.v1.DaggerheartService.UpdateCountdown:output_type -> systems.daggerheart.v1.DaggerheartUpdateCountdownResponse
-	25,  // 178: systems.daggerheart.v1.DaggerheartService.DeleteCountdown:output_type -> systems.daggerheart.v1.DaggerheartDeleteCountdownResponse
-	28,  // 179: systems.daggerheart.v1.DaggerheartService.CreateAdversary:output_type -> systems.daggerheart.v1.DaggerheartCreateAdversaryResponse
-	30,  // 180: systems.daggerheart.v1.DaggerheartService.UpdateAdversary:output_type -> systems.daggerheart.v1.DaggerheartUpdateAdversaryResponse
-	32,  // 181: systems.daggerheart.v1.DaggerheartService.DeleteAdversary:output_type -> systems.daggerheart.v1.DaggerheartDeleteAdversaryResponse
-	34,  // 182: systems.daggerheart.v1.DaggerheartService.GetAdversary:output_type -> systems.daggerheart.v1.DaggerheartGetAdversaryResponse
-	36,  // 183: systems.daggerheart.v1.DaggerheartService.ListAdversaries:output_type -> systems.daggerheart.v1.DaggerheartListAdversariesResponse
-	39,  // 184: systems.daggerheart.v1.DaggerheartService.ResolveBlazeOfGlory:output_type -> systems.daggerheart.v1.DaggerheartResolveBlazeOfGloryResponse
-	53,  // 185: systems.daggerheart.v1.DaggerheartService.SessionActionRoll:output_type -> systems.daggerheart.v1.SessionActionRollResponse
-	55,  // 186: systems.daggerheart.v1.DaggerheartService.SessionDamageRoll:output_type -> systems.daggerheart.v1.SessionDamageRollResponse
-	58,  // 187: systems.daggerheart.v1.DaggerheartService.SessionAttackFlow:output_type -> systems.daggerheart.v1.SessionAttackFlowResponse
-	60,  // 188: systems.daggerheart.v1.DaggerheartService.SessionReactionFlow:output_type -> systems.daggerheart.v1.SessionReactionFlowResponse
-	62,  // 189: systems.daggerheart.v1.DaggerheartService.SessionAdversaryAttackRoll:output_type -> systems.daggerheart.v1.SessionAdversaryAttackRollResponse
-	64,  // 190: systems.daggerheart.v1.DaggerheartService.SessionAdversaryAttackFlow:output_type -> systems.daggerheart.v1.SessionAdversaryAttackFlowResponse
-	68,  // 191: systems.daggerheart.v1.DaggerheartService.SessionGroupActionFlow:output_type -> systems.daggerheart.v1.SessionGroupActionFlowResponse
-	71,  // 192: systems.daggerheart.v1.DaggerheartService.SessionTagTeamFlow:output_type -> systems.daggerheart.v1.SessionTagTeamFlowResponse
-	73,  // 193: systems.daggerheart.v1.DaggerheartService.ApplyRollOutcome:output_type -> systems.daggerheart.v1.ApplyRollOutcomeResponse
-	77,  // 194: systems.daggerheart.v1.DaggerheartService.ApplyAttackOutcome:output_type -> systems.daggerheart.v1.DaggerheartApplyAttackOutcomeResponse
-	79,  // 195: systems.daggerheart.v1.DaggerheartService.ApplyAdversaryAttackOutcome:output_type -> systems.daggerheart.v1.DaggerheartApplyAdversaryAttackOutcomeResponse
-	82,  // 196: systems.daggerheart.v1.DaggerheartService.ApplyReactionOutcome:output_type -> systems.daggerheart.v1.DaggerheartApplyReactionOutcomeResponse
-	163, // [163:197] is the sub-list for method output_type
-	129, // [129:163] is the sub-list for method input_type
-	129, // [129:129] is the sub-list for extension type_name
-	129, // [129:129] is the sub-list for extension extendee
-	0,   // [0:129] is the sub-list for field type_name
+	75,  // 95: systems.daggerheart.v1.SessionReactionFlowResponse.roll_outcome:type_name -> systems.daggerheart.v1.ApplyRollOutcomeResponse
+	84,  // 96: systems.daggerheart.v1.SessionReactionFlowResponse.reaction_outcome:type_name -> systems.daggerheart.v1.DaggerheartApplyReactionOutcomeResponse
+	92,  // 97: systems.daggerheart.v1.SessionAdversaryAttackRollRequest.rng:type_name -> common.v1.RngRequest
+	92,  // 98: systems.daggerheart.v1.SessionAdversaryActionCheckRequest.rng:type_name -> common.v1.RngRequest
+	99,  // 99: systems.daggerheart.v1.SessionAdversaryActionCheckResponse.rng:type_name -> common.v1.RngResponse
+	99,  // 100: systems.daggerheart.v1.SessionAdversaryAttackRollResponse.rng:type_name -> common.v1.RngResponse
+	103, // 101: systems.daggerheart.v1.SessionAdversaryAttackFlowRequest.damage_dice:type_name -> systems.daggerheart.v1.DiceSpec
+	56,  // 102: systems.daggerheart.v1.SessionAdversaryAttackFlowRequest.damage:type_name -> systems.daggerheart.v1.DaggerheartAttackDamageSpec
+	92,  // 103: systems.daggerheart.v1.SessionAdversaryAttackFlowRequest.attack_rng:type_name -> common.v1.RngRequest
+	92,  // 104: systems.daggerheart.v1.SessionAdversaryAttackFlowRequest.damage_rng:type_name -> common.v1.RngRequest
+	64,  // 105: systems.daggerheart.v1.SessionAdversaryAttackFlowResponse.attack_roll:type_name -> systems.daggerheart.v1.SessionAdversaryAttackRollResponse
+	81,  // 106: systems.daggerheart.v1.SessionAdversaryAttackFlowResponse.attack_outcome:type_name -> systems.daggerheart.v1.DaggerheartApplyAdversaryAttackOutcomeResponse
+	55,  // 107: systems.daggerheart.v1.SessionAdversaryAttackFlowResponse.damage_roll:type_name -> systems.daggerheart.v1.SessionDamageRollResponse
+	4,   // 108: systems.daggerheart.v1.SessionAdversaryAttackFlowResponse.damage_applied:type_name -> systems.daggerheart.v1.DaggerheartApplyDamageResponse
+	105, // 109: systems.daggerheart.v1.GroupActionSupporter.modifiers:type_name -> systems.daggerheart.v1.ActionRollModifier
+	92,  // 110: systems.daggerheart.v1.GroupActionSupporter.rng:type_name -> common.v1.RngRequest
+	53,  // 111: systems.daggerheart.v1.GroupActionSupporterRoll.action_roll:type_name -> systems.daggerheart.v1.SessionActionRollResponse
+	105, // 112: systems.daggerheart.v1.SessionGroupActionFlowRequest.leader_modifiers:type_name -> systems.daggerheart.v1.ActionRollModifier
+	67,  // 113: systems.daggerheart.v1.SessionGroupActionFlowRequest.supporters:type_name -> systems.daggerheart.v1.GroupActionSupporter
+	92,  // 114: systems.daggerheart.v1.SessionGroupActionFlowRequest.leader_rng:type_name -> common.v1.RngRequest
+	53,  // 115: systems.daggerheart.v1.SessionGroupActionFlowResponse.leader_roll:type_name -> systems.daggerheart.v1.SessionActionRollResponse
+	75,  // 116: systems.daggerheart.v1.SessionGroupActionFlowResponse.leader_outcome:type_name -> systems.daggerheart.v1.ApplyRollOutcomeResponse
+	68,  // 117: systems.daggerheart.v1.SessionGroupActionFlowResponse.supporter_rolls:type_name -> systems.daggerheart.v1.GroupActionSupporterRoll
+	105, // 118: systems.daggerheart.v1.TagTeamParticipant.modifiers:type_name -> systems.daggerheart.v1.ActionRollModifier
+	92,  // 119: systems.daggerheart.v1.TagTeamParticipant.rng:type_name -> common.v1.RngRequest
+	71,  // 120: systems.daggerheart.v1.SessionTagTeamFlowRequest.first:type_name -> systems.daggerheart.v1.TagTeamParticipant
+	71,  // 121: systems.daggerheart.v1.SessionTagTeamFlowRequest.second:type_name -> systems.daggerheart.v1.TagTeamParticipant
+	53,  // 122: systems.daggerheart.v1.SessionTagTeamFlowResponse.first_roll:type_name -> systems.daggerheart.v1.SessionActionRollResponse
+	53,  // 123: systems.daggerheart.v1.SessionTagTeamFlowResponse.second_roll:type_name -> systems.daggerheart.v1.SessionActionRollResponse
+	75,  // 124: systems.daggerheart.v1.SessionTagTeamFlowResponse.selected_outcome:type_name -> systems.daggerheart.v1.ApplyRollOutcomeResponse
+	107, // 125: systems.daggerheart.v1.ApplyRollOutcomeResponse.updated:type_name -> systems.daggerheart.v1.OutcomeUpdated
+	98,  // 126: systems.daggerheart.v1.DaggerheartAttackOutcomeResult.outcome:type_name -> systems.daggerheart.v1.Outcome
+	78,  // 127: systems.daggerheart.v1.DaggerheartApplyAttackOutcomeResponse.result:type_name -> systems.daggerheart.v1.DaggerheartAttackOutcomeResult
+	80,  // 128: systems.daggerheart.v1.DaggerheartApplyAdversaryAttackOutcomeResponse.result:type_name -> systems.daggerheart.v1.DaggerheartAdversaryAttackOutcomeResult
+	98,  // 129: systems.daggerheart.v1.DaggerheartReactionOutcomeResult.outcome:type_name -> systems.daggerheart.v1.Outcome
+	83,  // 130: systems.daggerheart.v1.DaggerheartApplyReactionOutcomeResponse.result:type_name -> systems.daggerheart.v1.DaggerheartReactionOutcomeResult
+	40,  // 131: systems.daggerheart.v1.DaggerheartService.ActionRoll:input_type -> systems.daggerheart.v1.ActionRollRequest
+	42,  // 132: systems.daggerheart.v1.DaggerheartService.DualityOutcome:input_type -> systems.daggerheart.v1.DualityOutcomeRequest
+	44,  // 133: systems.daggerheart.v1.DaggerheartService.DualityExplain:input_type -> systems.daggerheart.v1.DualityExplainRequest
+	46,  // 134: systems.daggerheart.v1.DaggerheartService.DualityProbability:input_type -> systems.daggerheart.v1.DualityProbabilityRequest
+	48,  // 135: systems.daggerheart.v1.DaggerheartService.RulesVersion:input_type -> systems.daggerheart.v1.RulesVersionRequest
+	50,  // 136: systems.daggerheart.v1.DaggerheartService.RollDice:input_type -> systems.daggerheart.v1.RollDiceRequest
+	3,   // 137: systems.daggerheart.v1.DaggerheartService.ApplyDamage:input_type -> systems.daggerheart.v1.DaggerheartApplyDamageRequest
+	5,   // 138: systems.daggerheart.v1.DaggerheartService.ApplyRest:input_type -> systems.daggerheart.v1.DaggerheartApplyRestRequest
+	8,   // 139: systems.daggerheart.v1.DaggerheartService.ApplyDowntimeMove:input_type -> systems.daggerheart.v1.DaggerheartApplyDowntimeMoveRequest
+	10,  // 140: systems.daggerheart.v1.DaggerheartService.SwapLoadout:input_type -> systems.daggerheart.v1.DaggerheartSwapLoadoutRequest
+	12,  // 141: systems.daggerheart.v1.DaggerheartService.ApplyDeathMove:input_type -> systems.daggerheart.v1.DaggerheartApplyDeathMoveRequest
+	15,  // 142: systems.daggerheart.v1.DaggerheartService.ApplyConditions:input_type -> systems.daggerheart.v1.DaggerheartApplyConditionsRequest
+	17,  // 143: systems.daggerheart.v1.DaggerheartService.ApplyGmMove:input_type -> systems.daggerheart.v1.DaggerheartApplyGmMoveRequest
+	20,  // 144: systems.daggerheart.v1.DaggerheartService.CreateCountdown:input_type -> systems.daggerheart.v1.DaggerheartCreateCountdownRequest
+	22,  // 145: systems.daggerheart.v1.DaggerheartService.UpdateCountdown:input_type -> systems.daggerheart.v1.DaggerheartUpdateCountdownRequest
+	24,  // 146: systems.daggerheart.v1.DaggerheartService.DeleteCountdown:input_type -> systems.daggerheart.v1.DaggerheartDeleteCountdownRequest
+	27,  // 147: systems.daggerheart.v1.DaggerheartService.CreateAdversary:input_type -> systems.daggerheart.v1.DaggerheartCreateAdversaryRequest
+	29,  // 148: systems.daggerheart.v1.DaggerheartService.UpdateAdversary:input_type -> systems.daggerheart.v1.DaggerheartUpdateAdversaryRequest
+	31,  // 149: systems.daggerheart.v1.DaggerheartService.DeleteAdversary:input_type -> systems.daggerheart.v1.DaggerheartDeleteAdversaryRequest
+	33,  // 150: systems.daggerheart.v1.DaggerheartService.GetAdversary:input_type -> systems.daggerheart.v1.DaggerheartGetAdversaryRequest
+	35,  // 151: systems.daggerheart.v1.DaggerheartService.ListAdversaries:input_type -> systems.daggerheart.v1.DaggerheartListAdversariesRequest
+	37,  // 152: systems.daggerheart.v1.DaggerheartService.ResolveBlazeOfGlory:input_type -> systems.daggerheart.v1.DaggerheartResolveBlazeOfGloryRequest
+	52,  // 153: systems.daggerheart.v1.DaggerheartService.SessionActionRoll:input_type -> systems.daggerheart.v1.SessionActionRollRequest
+	54,  // 154: systems.daggerheart.v1.DaggerheartService.SessionDamageRoll:input_type -> systems.daggerheart.v1.SessionDamageRollRequest
+	57,  // 155: systems.daggerheart.v1.DaggerheartService.SessionAttackFlow:input_type -> systems.daggerheart.v1.SessionAttackFlowRequest
+	59,  // 156: systems.daggerheart.v1.DaggerheartService.SessionReactionFlow:input_type -> systems.daggerheart.v1.SessionReactionFlowRequest
+	61,  // 157: systems.daggerheart.v1.DaggerheartService.SessionAdversaryAttackRoll:input_type -> systems.daggerheart.v1.SessionAdversaryAttackRollRequest
+	62,  // 158: systems.daggerheart.v1.DaggerheartService.SessionAdversaryActionCheck:input_type -> systems.daggerheart.v1.SessionAdversaryActionCheckRequest
+	65,  // 159: systems.daggerheart.v1.DaggerheartService.SessionAdversaryAttackFlow:input_type -> systems.daggerheart.v1.SessionAdversaryAttackFlowRequest
+	69,  // 160: systems.daggerheart.v1.DaggerheartService.SessionGroupActionFlow:input_type -> systems.daggerheart.v1.SessionGroupActionFlowRequest
+	72,  // 161: systems.daggerheart.v1.DaggerheartService.SessionTagTeamFlow:input_type -> systems.daggerheart.v1.SessionTagTeamFlowRequest
+	74,  // 162: systems.daggerheart.v1.DaggerheartService.ApplyRollOutcome:input_type -> systems.daggerheart.v1.ApplyRollOutcomeRequest
+	76,  // 163: systems.daggerheart.v1.DaggerheartService.ApplyAttackOutcome:input_type -> systems.daggerheart.v1.DaggerheartApplyAttackOutcomeRequest
+	77,  // 164: systems.daggerheart.v1.DaggerheartService.ApplyAdversaryAttackOutcome:input_type -> systems.daggerheart.v1.DaggerheartApplyAdversaryAttackOutcomeRequest
+	82,  // 165: systems.daggerheart.v1.DaggerheartService.ApplyReactionOutcome:input_type -> systems.daggerheart.v1.DaggerheartApplyReactionOutcomeRequest
+	41,  // 166: systems.daggerheart.v1.DaggerheartService.ActionRoll:output_type -> systems.daggerheart.v1.ActionRollResponse
+	43,  // 167: systems.daggerheart.v1.DaggerheartService.DualityOutcome:output_type -> systems.daggerheart.v1.DualityOutcomeResponse
+	45,  // 168: systems.daggerheart.v1.DaggerheartService.DualityExplain:output_type -> systems.daggerheart.v1.DualityExplainResponse
+	47,  // 169: systems.daggerheart.v1.DaggerheartService.DualityProbability:output_type -> systems.daggerheart.v1.DualityProbabilityResponse
+	49,  // 170: systems.daggerheart.v1.DaggerheartService.RulesVersion:output_type -> systems.daggerheart.v1.RulesVersionResponse
+	51,  // 171: systems.daggerheart.v1.DaggerheartService.RollDice:output_type -> systems.daggerheart.v1.RollDiceResponse
+	4,   // 172: systems.daggerheart.v1.DaggerheartService.ApplyDamage:output_type -> systems.daggerheart.v1.DaggerheartApplyDamageResponse
+	7,   // 173: systems.daggerheart.v1.DaggerheartService.ApplyRest:output_type -> systems.daggerheart.v1.DaggerheartApplyRestResponse
+	9,   // 174: systems.daggerheart.v1.DaggerheartService.ApplyDowntimeMove:output_type -> systems.daggerheart.v1.DaggerheartApplyDowntimeMoveResponse
+	11,  // 175: systems.daggerheart.v1.DaggerheartService.SwapLoadout:output_type -> systems.daggerheart.v1.DaggerheartSwapLoadoutResponse
+	14,  // 176: systems.daggerheart.v1.DaggerheartService.ApplyDeathMove:output_type -> systems.daggerheart.v1.DaggerheartApplyDeathMoveResponse
+	16,  // 177: systems.daggerheart.v1.DaggerheartService.ApplyConditions:output_type -> systems.daggerheart.v1.DaggerheartApplyConditionsResponse
+	18,  // 178: systems.daggerheart.v1.DaggerheartService.ApplyGmMove:output_type -> systems.daggerheart.v1.DaggerheartApplyGmMoveResponse
+	21,  // 179: systems.daggerheart.v1.DaggerheartService.CreateCountdown:output_type -> systems.daggerheart.v1.DaggerheartCreateCountdownResponse
+	23,  // 180: systems.daggerheart.v1.DaggerheartService.UpdateCountdown:output_type -> systems.daggerheart.v1.DaggerheartUpdateCountdownResponse
+	25,  // 181: systems.daggerheart.v1.DaggerheartService.DeleteCountdown:output_type -> systems.daggerheart.v1.DaggerheartDeleteCountdownResponse
+	28,  // 182: systems.daggerheart.v1.DaggerheartService.CreateAdversary:output_type -> systems.daggerheart.v1.DaggerheartCreateAdversaryResponse
+	30,  // 183: systems.daggerheart.v1.DaggerheartService.UpdateAdversary:output_type -> systems.daggerheart.v1.DaggerheartUpdateAdversaryResponse
+	32,  // 184: systems.daggerheart.v1.DaggerheartService.DeleteAdversary:output_type -> systems.daggerheart.v1.DaggerheartDeleteAdversaryResponse
+	34,  // 185: systems.daggerheart.v1.DaggerheartService.GetAdversary:output_type -> systems.daggerheart.v1.DaggerheartGetAdversaryResponse
+	36,  // 186: systems.daggerheart.v1.DaggerheartService.ListAdversaries:output_type -> systems.daggerheart.v1.DaggerheartListAdversariesResponse
+	39,  // 187: systems.daggerheart.v1.DaggerheartService.ResolveBlazeOfGlory:output_type -> systems.daggerheart.v1.DaggerheartResolveBlazeOfGloryResponse
+	53,  // 188: systems.daggerheart.v1.DaggerheartService.SessionActionRoll:output_type -> systems.daggerheart.v1.SessionActionRollResponse
+	55,  // 189: systems.daggerheart.v1.DaggerheartService.SessionDamageRoll:output_type -> systems.daggerheart.v1.SessionDamageRollResponse
+	58,  // 190: systems.daggerheart.v1.DaggerheartService.SessionAttackFlow:output_type -> systems.daggerheart.v1.SessionAttackFlowResponse
+	60,  // 191: systems.daggerheart.v1.DaggerheartService.SessionReactionFlow:output_type -> systems.daggerheart.v1.SessionReactionFlowResponse
+	64,  // 192: systems.daggerheart.v1.DaggerheartService.SessionAdversaryAttackRoll:output_type -> systems.daggerheart.v1.SessionAdversaryAttackRollResponse
+	63,  // 193: systems.daggerheart.v1.DaggerheartService.SessionAdversaryActionCheck:output_type -> systems.daggerheart.v1.SessionAdversaryActionCheckResponse
+	66,  // 194: systems.daggerheart.v1.DaggerheartService.SessionAdversaryAttackFlow:output_type -> systems.daggerheart.v1.SessionAdversaryAttackFlowResponse
+	70,  // 195: systems.daggerheart.v1.DaggerheartService.SessionGroupActionFlow:output_type -> systems.daggerheart.v1.SessionGroupActionFlowResponse
+	73,  // 196: systems.daggerheart.v1.DaggerheartService.SessionTagTeamFlow:output_type -> systems.daggerheart.v1.SessionTagTeamFlowResponse
+	75,  // 197: systems.daggerheart.v1.DaggerheartService.ApplyRollOutcome:output_type -> systems.daggerheart.v1.ApplyRollOutcomeResponse
+	79,  // 198: systems.daggerheart.v1.DaggerheartService.ApplyAttackOutcome:output_type -> systems.daggerheart.v1.DaggerheartApplyAttackOutcomeResponse
+	81,  // 199: systems.daggerheart.v1.DaggerheartService.ApplyAdversaryAttackOutcome:output_type -> systems.daggerheart.v1.DaggerheartApplyAdversaryAttackOutcomeResponse
+	84,  // 200: systems.daggerheart.v1.DaggerheartService.ApplyReactionOutcome:output_type -> systems.daggerheart.v1.DaggerheartApplyReactionOutcomeResponse
+	166, // [166:201] is the sub-list for method output_type
+	131, // [131:166] is the sub-list for method input_type
+	131, // [131:131] is the sub-list for extension type_name
+	131, // [131:131] is the sub-list for extension extendee
+	0,   // [0:131] is the sub-list for field type_name
 }
 
 func init() { file_systems_daggerheart_v1_service_proto_init() }
@@ -7248,7 +7522,7 @@ func file_systems_daggerheart_v1_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_systems_daggerheart_v1_service_proto_rawDesc), len(file_systems_daggerheart_v1_service_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   80,
+			NumMessages:   82,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

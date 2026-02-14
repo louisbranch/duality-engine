@@ -60,6 +60,14 @@ func (s *DaggerheartService) ApplyDamage(ctx context.Context, in *pb.Daggerheart
 		return nil, status.Error(codes.FailedPrecondition, "campaign system does not support daggerheart damage")
 	}
 
+	sessionID := strings.TrimSpace(grpcmeta.SessionIDFromContext(ctx))
+	if sessionID == "" {
+		return nil, status.Error(codes.InvalidArgument, "session id is required")
+	}
+	if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+		return nil, err
+	}
+
 	if in.Damage == nil {
 		return nil, status.Error(codes.InvalidArgument, "damage is required")
 	}
@@ -206,6 +214,14 @@ func (s *DaggerheartService) ApplyRest(ctx context.Context, in *pb.DaggerheartAp
 		return nil, status.Error(codes.FailedPrecondition, "campaign system does not support daggerheart rest")
 	}
 
+	sessionID := strings.TrimSpace(grpcmeta.SessionIDFromContext(ctx))
+	if sessionID == "" {
+		return nil, status.Error(codes.InvalidArgument, "session id is required")
+	}
+	if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+		return nil, err
+	}
+
 	if in.Rest == nil {
 		return nil, status.Error(codes.InvalidArgument, "rest is required")
 	}
@@ -244,6 +260,7 @@ func (s *DaggerheartService) ApplyRest(ctx context.Context, in *pb.DaggerheartAp
 	}
 	shortBefore := currentSnap.ConsecutiveShortRests
 	shortAfter := outcome.State.ConsecutiveShortRests
+	longTermCountdownID := strings.TrimSpace(in.Rest.GetLongTermCountdownId())
 
 	payload := daggerheart.RestTakenPayload{
 		RestType:         daggerheartRestTypeToString(restType),
@@ -281,6 +298,18 @@ func (s *DaggerheartService) ApplyRest(ctx context.Context, in *pb.DaggerheartAp
 	adapter := daggerheart.NewAdapter(s.stores.Daggerheart)
 	if err := adapter.ApplyEvent(ctx, stored); err != nil {
 		return nil, status.Errorf(codes.Internal, "apply event: %v", err)
+	}
+
+	if outcome.AdvanceCountdown && longTermCountdownID != "" {
+		if _, err := s.UpdateCountdown(ctx, &pb.DaggerheartUpdateCountdownRequest{
+			CampaignId:  campaignID,
+			SessionId:   sessionID,
+			CountdownId: longTermCountdownID,
+			Delta:       1,
+			Reason:      "long_rest",
+		}); err != nil {
+			return nil, err
+		}
 	}
 
 	updatedSnap, err := s.stores.Daggerheart.GetDaggerheartSnapshot(ctx, campaignID)
@@ -347,6 +376,14 @@ func (s *DaggerheartService) ApplyDowntimeMove(ctx context.Context, in *pb.Dagge
 	}
 	if c.System != commonv1.GameSystem_GAME_SYSTEM_DAGGERHEART {
 		return nil, status.Error(codes.FailedPrecondition, "campaign system does not support daggerheart downtime")
+	}
+
+	sessionID := strings.TrimSpace(grpcmeta.SessionIDFromContext(ctx))
+	if sessionID == "" {
+		return nil, status.Error(codes.InvalidArgument, "session id is required")
+	}
+	if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+		return nil, err
 	}
 
 	if in.Move == nil {
@@ -428,6 +465,9 @@ func (s *DaggerheartService) ApplyDowntimeMove(ctx context.Context, in *pb.Dagge
 	if err := adapter.ApplyEvent(ctx, stored); err != nil {
 		return nil, status.Errorf(codes.Internal, "apply event: %v", err)
 	}
+	if err := s.applyStressVulnerableCondition(ctx, campaignID, grpcmeta.SessionIDFromContext(ctx), characterID, current.Conditions, stressBefore, stressAfter, profile.StressMax, nil, grpcmeta.RequestIDFromContext(ctx), c.System.String()); err != nil {
+		return nil, err
+	}
 
 	updated, err := s.stores.Daggerheart.GetDaggerheartCharacterState(ctx, campaignID, characterID)
 	if err != nil {
@@ -471,6 +511,14 @@ func (s *DaggerheartService) SwapLoadout(ctx context.Context, in *pb.Daggerheart
 	}
 	if c.System != commonv1.GameSystem_GAME_SYSTEM_DAGGERHEART {
 		return nil, status.Error(codes.FailedPrecondition, "campaign system does not support daggerheart loadout")
+	}
+
+	sessionID := strings.TrimSpace(grpcmeta.SessionIDFromContext(ctx))
+	if sessionID == "" {
+		return nil, status.Error(codes.InvalidArgument, "session id is required")
+	}
+	if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+		return nil, err
 	}
 
 	if in.Swap == nil {
@@ -549,6 +597,9 @@ func (s *DaggerheartService) SwapLoadout(ctx context.Context, in *pb.Daggerheart
 	adapter := daggerheart.NewAdapter(s.stores.Daggerheart)
 	if err := adapter.ApplyEvent(ctx, stored); err != nil {
 		return nil, status.Errorf(codes.Internal, "apply event: %v", err)
+	}
+	if err := s.applyStressVulnerableCondition(ctx, campaignID, grpcmeta.SessionIDFromContext(ctx), characterID, current.Conditions, stressBefore, stressAfter, profile.StressMax, nil, grpcmeta.RequestIDFromContext(ctx), c.System.String()); err != nil {
+		return nil, err
 	}
 	if !in.Swap.InRest && in.Swap.RecallCost > 0 {
 		spendPayload := daggerheart.StressSpentPayload{
@@ -629,6 +680,14 @@ func (s *DaggerheartService) ApplyDeathMove(ctx context.Context, in *pb.Daggerhe
 	}
 	if c.System != commonv1.GameSystem_GAME_SYSTEM_DAGGERHEART {
 		return nil, status.Error(codes.FailedPrecondition, "campaign system does not support daggerheart death moves")
+	}
+
+	sessionID := strings.TrimSpace(grpcmeta.SessionIDFromContext(ctx))
+	if sessionID == "" {
+		return nil, status.Error(codes.InvalidArgument, "session id is required")
+	}
+	if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+		return nil, err
 	}
 
 	move, err := daggerheartDeathMoveFromProto(in.Move)
@@ -778,6 +837,9 @@ func (s *DaggerheartService) ApplyDeathMove(ctx context.Context, in *pb.Daggerhe
 			return nil, err
 		}
 	}
+	if err := s.applyStressVulnerableCondition(ctx, campaignID, grpcmeta.SessionIDFromContext(ctx), characterID, state.Conditions, stressBefore, stressAfter, stressMax, nil, grpcmeta.RequestIDFromContext(ctx), c.System.String()); err != nil {
+		return nil, err
+	}
 
 	updated, err := s.stores.Daggerheart.GetDaggerheartCharacterState(ctx, campaignID, characterID)
 	if err != nil {
@@ -831,6 +893,14 @@ func (s *DaggerheartService) ApplyConditions(ctx context.Context, in *pb.Daggerh
 	}
 	if c.System != commonv1.GameSystem_GAME_SYSTEM_DAGGERHEART {
 		return nil, status.Error(codes.FailedPrecondition, "campaign system does not support daggerheart conditions")
+	}
+
+	sessionID := strings.TrimSpace(grpcmeta.SessionIDFromContext(ctx))
+	if sessionID == "" {
+		return nil, status.Error(codes.InvalidArgument, "session id is required")
+	}
+	if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+		return nil, err
 	}
 
 	addConditions, err := daggerheartConditionsFromProto(in.GetAdd())
@@ -913,7 +983,6 @@ func (s *DaggerheartService) ApplyConditions(ctx context.Context, in *pb.Daggerh
 		if err != nil {
 			return nil, handleDomainError(err)
 		}
-		sessionID := strings.TrimSpace(grpcmeta.SessionIDFromContext(ctx))
 		if sessionID != "" && rollEvent.SessionID != sessionID {
 			return nil, status.Error(codes.InvalidArgument, "roll seq does not match session")
 		}
@@ -1019,6 +1088,9 @@ func (s *DaggerheartService) ApplyGmMove(ctx context.Context, in *pb.Daggerheart
 	}
 	if sess.Status != session.SessionStatusActive {
 		return nil, status.Error(codes.FailedPrecondition, "session is not active")
+	}
+	if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+		return nil, err
 	}
 
 	gmFearBefore := 0
@@ -1170,6 +1242,9 @@ func (s *DaggerheartService) CreateCountdown(ctx context.Context, in *pb.Daggerh
 	if sess.Status != session.SessionStatusActive {
 		return nil, status.Error(codes.FailedPrecondition, "session is not active")
 	}
+	if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+		return nil, err
+	}
 
 	countdownID := strings.TrimSpace(in.GetCountdownId())
 	if countdownID == "" {
@@ -1281,6 +1356,9 @@ func (s *DaggerheartService) UpdateCountdown(ctx context.Context, in *pb.Daggerh
 	}
 	if sess.Status != session.SessionStatusActive {
 		return nil, status.Error(codes.FailedPrecondition, "session is not active")
+	}
+	if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+		return nil, err
 	}
 
 	storedCountdown, err := s.stores.Daggerheart.GetDaggerheartCountdown(ctx, campaignID, countdownID)
@@ -1404,6 +1482,9 @@ func (s *DaggerheartService) DeleteCountdown(ctx context.Context, in *pb.Daggerh
 	if sess.Status != session.SessionStatusActive {
 		return nil, status.Error(codes.FailedPrecondition, "session is not active")
 	}
+	if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+		return nil, err
+	}
 
 	if _, err := s.stores.Daggerheart.GetDaggerheartCountdown(ctx, campaignID, countdownID); err != nil {
 		return nil, handleDomainError(err)
@@ -1478,6 +1559,14 @@ func (s *DaggerheartService) ResolveBlazeOfGlory(ctx context.Context, in *pb.Dag
 	}
 	if c.System != commonv1.GameSystem_GAME_SYSTEM_DAGGERHEART {
 		return nil, status.Error(codes.FailedPrecondition, "campaign system does not support daggerheart blaze of glory")
+	}
+
+	sessionID := strings.TrimSpace(grpcmeta.SessionIDFromContext(ctx))
+	if sessionID == "" {
+		return nil, status.Error(codes.InvalidArgument, "session id is required")
+	}
+	if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+		return nil, err
 	}
 
 	state, err := s.stores.Daggerheart.GetDaggerheartCharacterState(ctx, campaignID, characterID)
@@ -1640,6 +1729,9 @@ func (s *DaggerheartService) SessionActionRoll(ctx context.Context, in *pb.Sessi
 	if sess.Status != session.SessionStatusActive {
 		return nil, status.Error(codes.FailedPrecondition, "session is not active")
 	}
+	if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+		return nil, err
+	}
 
 	state, err := s.stores.Daggerheart.GetDaggerheartCharacterState(ctx, campaignID, characterID)
 	if err != nil {
@@ -1648,6 +1740,17 @@ func (s *DaggerheartService) SessionActionRoll(ctx context.Context, in *pb.Sessi
 
 	modifierTotal, modifierList := normalizeActionModifiers(in.GetModifiers())
 	rollKind := normalizeRollKind(in.GetRollKind())
+	advantage := int(in.GetAdvantage())
+	disadvantage := int(in.GetDisadvantage())
+	if advantage < 0 {
+		advantage = 0
+	}
+	if disadvantage < 0 {
+		disadvantage = 0
+	}
+	if in.GetUnderwater() && rollKind == pb.RollKind_ROLL_KIND_ACTION {
+		disadvantage++
+	}
 	hopeSpends := hopeSpendsFromModifiers(in.GetModifiers())
 	spendEventCount := 0
 	totalSpend := 0
@@ -1766,7 +1869,13 @@ func (s *DaggerheartService) SessionActionRoll(ctx context.Context, in *pb.Sessi
 	difficulty := int(in.GetDifficulty())
 	result, generateHopeFear, triggerGMMove, critNegatesEffects, err := resolveRoll(
 		rollKind,
-		daggerheartdomain.ActionRequest{Modifier: modifierTotal, Difficulty: &difficulty, Seed: seed},
+		daggerheartdomain.ActionRequest{
+			Modifier:     modifierTotal,
+			Difficulty:   &difficulty,
+			Seed:         seed,
+			Advantage:    advantage,
+			Disadvantage: disadvantage,
+		},
 	)
 	if err != nil {
 		if errors.Is(err, daggerheartdomain.ErrInvalidDifficulty) {
@@ -1815,9 +1924,15 @@ func (s *DaggerheartService) SessionActionRoll(ctx context.Context, in *pb.Sessi
 		"hope_fear":    generateHopeFear,
 		"gm_move":      triggerGMMove,
 		"crit_negates": critNegatesEffects,
+		"advantage":    advantage,
+		"disadvantage": disadvantage,
+		"underwater":   in.GetUnderwater(),
 	}
 	if len(modifierList) > 0 {
 		systemData["modifiers"] = modifierList
+	}
+	if countdownID := strings.TrimSpace(in.GetBreathCountdownId()); countdownID != "" {
+		systemData["breath_countdown_id"] = countdownID
 	}
 
 	payload := event.RollResolvedPayload{
@@ -1848,6 +1963,11 @@ func (s *DaggerheartService) SessionActionRoll(ctx context.Context, in *pb.Sessi
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "append event: %v", err)
+	}
+
+	failed := result.Difficulty != nil && !result.MeetsDifficulty
+	if err := s.advanceBreathCountdown(ctx, campaignID, sessionID, strings.TrimSpace(in.GetBreathCountdownId()), failed); err != nil {
+		return nil, err
 	}
 
 	return &pb.SessionActionRollResponse{
@@ -1921,6 +2041,9 @@ func (s *DaggerheartService) SessionDamageRoll(ctx context.Context, in *pb.Sessi
 	}
 	if sess.Status != session.SessionStatusActive {
 		return nil, status.Error(codes.FailedPrecondition, "session is not active")
+	}
+	if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+		return nil, err
 	}
 
 	diceSpecs, err := damageDiceFromProto(in.GetDice())
@@ -2066,14 +2189,16 @@ func (s *DaggerheartService) SessionAttackFlow(ctx context.Context, in *pb.Sessi
 	}
 
 	rollResp, err := s.SessionActionRoll(ctx, &pb.SessionActionRollRequest{
-		CampaignId:  campaignID,
-		SessionId:   sessionID,
-		CharacterId: attackerID,
-		Trait:       trait,
-		RollKind:    pb.RollKind_ROLL_KIND_ACTION,
-		Difficulty:  in.GetDifficulty(),
-		Modifiers:   in.GetModifiers(),
-		Rng:         in.GetActionRng(),
+		CampaignId:        campaignID,
+		SessionId:         sessionID,
+		CharacterId:       attackerID,
+		Trait:             trait,
+		RollKind:          pb.RollKind_ROLL_KIND_ACTION,
+		Difficulty:        in.GetDifficulty(),
+		Modifiers:         in.GetModifiers(),
+		Underwater:        in.GetUnderwater(),
+		BreathCountdownId: in.GetBreathCountdownId(),
+		Rng:               in.GetActionRng(),
 	})
 	if err != nil {
 		return nil, err
@@ -2282,6 +2407,9 @@ func (s *DaggerheartService) SessionAdversaryAttackRoll(ctx context.Context, in 
 	if sess.Status != session.SessionStatusActive {
 		return nil, status.Error(codes.FailedPrecondition, "session is not active")
 	}
+	if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+		return nil, err
+	}
 
 	if _, err := s.loadAdversaryForSession(ctx, campaignID, sessionID, adversaryID); err != nil {
 		return nil, err
@@ -2388,6 +2516,167 @@ func (s *DaggerheartService) SessionAdversaryAttackRoll(ctx context.Context, in 
 			SeedSource: seedSource,
 			RollMode:   rollMode,
 		},
+	}, nil
+}
+
+func (s *DaggerheartService) SessionAdversaryActionCheck(ctx context.Context, in *pb.SessionAdversaryActionCheckRequest) (*pb.SessionAdversaryActionCheckResponse, error) {
+	if in == nil {
+		return nil, status.Error(codes.InvalidArgument, "session adversary action check request is required")
+	}
+	if s.stores.Campaign == nil {
+		return nil, status.Error(codes.Internal, "campaign store is not configured")
+	}
+	if s.stores.Session == nil {
+		return nil, status.Error(codes.Internal, "session store is not configured")
+	}
+	if s.stores.Daggerheart == nil {
+		return nil, status.Error(codes.Internal, "daggerheart store is not configured")
+	}
+	if s.stores.Event == nil {
+		return nil, status.Error(codes.Internal, "event store is not configured")
+	}
+	if s.seedFunc == nil {
+		return nil, status.Error(codes.Internal, "seed generator is not configured")
+	}
+
+	campaignID := strings.TrimSpace(in.GetCampaignId())
+	if campaignID == "" {
+		return nil, status.Error(codes.InvalidArgument, "campaign id is required")
+	}
+	sessionID := strings.TrimSpace(in.GetSessionId())
+	if sessionID == "" {
+		return nil, status.Error(codes.InvalidArgument, "session id is required")
+	}
+	adversaryID := strings.TrimSpace(in.GetAdversaryId())
+	if adversaryID == "" {
+		return nil, status.Error(codes.InvalidArgument, "adversary id is required")
+	}
+	if in.GetDifficulty() < 0 {
+		return nil, status.Error(codes.InvalidArgument, "difficulty must be non-negative")
+	}
+
+	c, err := s.stores.Campaign.Get(ctx, campaignID)
+	if err != nil {
+		return nil, handleDomainError(err)
+	}
+	if err := campaign.ValidateCampaignOperation(c.Status, campaign.CampaignOpSessionAction); err != nil {
+		return nil, handleDomainError(err)
+	}
+	if c.System != commonv1.GameSystem_GAME_SYSTEM_DAGGERHEART {
+		return nil, status.Error(codes.FailedPrecondition, "campaign system does not support daggerheart adversary checks")
+	}
+
+	sess, err := s.stores.Session.GetSession(ctx, campaignID, sessionID)
+	if err != nil {
+		return nil, handleDomainError(err)
+	}
+	if sess.Status != session.SessionStatusActive {
+		return nil, status.Error(codes.FailedPrecondition, "session is not active")
+	}
+	if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+		return nil, err
+	}
+
+	if _, err := s.loadAdversaryForSession(ctx, campaignID, sessionID, adversaryID); err != nil {
+		return nil, err
+	}
+
+	latestSeq, err := s.stores.Event.GetLatestEventSeq(ctx, campaignID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "load latest event seq: %v", err)
+	}
+	rollSeq := latestSeq + 1
+
+	difficulty := int(in.GetDifficulty())
+	modifier := int(in.GetModifier())
+	autoSuccess := !in.GetDramatic()
+	success := true
+	roll := 0
+	total := 0
+	var rngInfo *daggerheart.RollRngInfo
+	var rngResp *commonv1.RngResponse
+
+	if !autoSuccess {
+		seed, seedSource, rollMode, err := random.ResolveSeed(
+			in.GetRng(),
+			s.seedFunc,
+			func(mode commonv1.RollMode) bool { return mode == commonv1.RollMode_REPLAY },
+		)
+		if err != nil {
+			if errors.Is(err, random.ErrSeedOutOfRange()) {
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+			return nil, status.Errorf(codes.Internal, "failed to resolve seed: %v", err)
+		}
+		result, err := dice.RollDice(dice.Request{
+			Dice: []dice.Spec{{Sides: 20, Count: 1}},
+			Seed: seed,
+		})
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to roll adversary action die: %v", err)
+		}
+		roll = result.Rolls[0].Results[0]
+		total = roll + modifier
+		success = total >= difficulty
+		rngInfo = &daggerheart.RollRngInfo{
+			SeedUsed:   uint64(seed),
+			RngAlgo:    random.RngAlgoMathRandV1,
+			SeedSource: seedSource,
+			RollMode:   rollMode.String(),
+		}
+		rngResp = &commonv1.RngResponse{
+			SeedUsed:   uint64(seed),
+			RngAlgo:    random.RngAlgoMathRandV1,
+			SeedSource: seedSource,
+			RollMode:   rollMode,
+		}
+	} else {
+		total = modifier
+	}
+
+	payload := daggerheart.AdversaryActionResolvedPayload{
+		AdversaryID: adversaryID,
+		RollSeq:     rollSeq,
+		Difficulty:  difficulty,
+		Dramatic:    in.GetDramatic(),
+		AutoSuccess: autoSuccess,
+		Roll:        roll,
+		Modifier:    modifier,
+		Total:       total,
+		Success:     success,
+		Rng:         rngInfo,
+	}
+	payloadJSON, err := json.Marshal(payload)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "encode adversary action payload: %v", err)
+	}
+
+	stored, err := s.stores.Event.AppendEvent(ctx, event.Event{
+		CampaignID:    campaignID,
+		Timestamp:     time.Now().UTC(),
+		Type:          daggerheart.EventTypeAdversaryActionResolved,
+		SessionID:     sessionID,
+		RequestID:     grpcmeta.RequestIDFromContext(ctx),
+		InvocationID:  grpcmeta.InvocationIDFromContext(ctx),
+		ActorType:     event.ActorTypeSystem,
+		EntityType:    "adversary",
+		EntityID:      adversaryID,
+		SystemID:      c.System.String(),
+		SystemVersion: daggerheart.SystemVersion,
+		PayloadJSON:   payloadJSON,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "append adversary action event: %v", err)
+	}
+
+	return &pb.SessionAdversaryActionCheckResponse{
+		RollSeq:     stored.Seq,
+		AutoSuccess: autoSuccess,
+		Success:     success,
+		Roll:        int32(roll),
+		Modifier:    int32(modifier),
+		Total:       int32(total),
+		Rng:         rngResp,
 	}, nil
 }
 
@@ -2790,9 +3079,11 @@ func (s *DaggerheartService) SessionTagTeamFlow(ctx context.Context, in *pb.Sess
 	}
 
 	ctxWithMeta := withCampaignSessionMetadata(ctx, campaignID, sessionID)
+	applyTargets := []string{firstID, secondID}
 	selectedOutcome, err := s.ApplyRollOutcome(ctxWithMeta, &pb.ApplyRollOutcomeRequest{
 		SessionId: sessionID,
 		RollSeq:   selectedRoll.GetRollSeq(),
+		Targets:   applyTargets,
 	})
 	if err != nil {
 		return nil, err
@@ -2886,6 +3177,9 @@ func (s *DaggerheartService) ApplyRollOutcome(ctx context.Context, in *pb.ApplyR
 	}
 	if sess.Status != session.SessionStatusActive {
 		return nil, status.Error(codes.FailedPrecondition, "session is not active")
+	}
+	if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+		return nil, err
 	}
 
 	rollEvent, err := s.stores.Event.GetEventBySeq(ctx, campaignID, in.GetRollSeq())
@@ -3058,6 +3352,10 @@ func (s *DaggerheartService) ApplyRollOutcome(ctx context.Context, in *pb.ApplyR
 			if err := adapter.ApplyEvent(ctx, storedState); err != nil {
 				return nil, status.Errorf(codes.Internal, "apply character state event: %v", err)
 			}
+			rollSeq := in.GetRollSeq()
+			if err := s.applyStressVulnerableCondition(ctx, campaignID, sessionID, target, state.Conditions, stressBefore, stressAfter, profile.StressMax, &rollSeq, rollRequestID, c.System.String()); err != nil {
+				return nil, err
+			}
 		}
 
 		if hopeAfter != hopeBefore {
@@ -3102,6 +3400,12 @@ func (s *DaggerheartService) ApplyRollOutcome(ctx context.Context, in *pb.ApplyR
 		return nil, status.Errorf(codes.Internal, "append outcome applied event: %v", err)
 	}
 
+	if requiresComplication {
+		if err := s.openGMConsequenceGate(ctx, campaignID, sessionID, in.GetRollSeq(), rollRequestID); err != nil {
+			return nil, err
+		}
+	}
+
 	response := &pb.ApplyRollOutcomeResponse{
 		RollSeq:              in.GetRollSeq(),
 		RequiresComplication: requiresComplication,
@@ -3119,6 +3423,95 @@ func (s *DaggerheartService) ApplyRollOutcome(ctx context.Context, in *pb.ApplyR
 	}
 
 	return response, nil
+}
+
+func (s *DaggerheartService) openGMConsequenceGate(ctx context.Context, campaignID, sessionID string, rollSeq uint64, rollRequestID string) error {
+	if s.stores.SessionGate == nil {
+		return status.Error(codes.Internal, "session gate store is not configured")
+	}
+	if s.stores.SessionSpotlight == nil {
+		return status.Error(codes.Internal, "session spotlight store is not configured")
+	}
+	if s.stores.Event == nil {
+		return status.Error(codes.Internal, "event store is not configured")
+	}
+
+	if _, err := s.stores.SessionGate.GetOpenSessionGate(ctx, campaignID, sessionID); err == nil {
+		return nil
+	} else if !errors.Is(err, storage.ErrNotFound) {
+		return status.Errorf(codes.Internal, "check session gate: %v", err)
+	}
+
+	gateID, err := id.NewID()
+	if err != nil {
+		return status.Errorf(codes.Internal, "generate gate id: %v", err)
+	}
+	gateType, err := session.NormalizeGateType("gm_consequence")
+	if err != nil {
+		return status.Errorf(codes.Internal, "normalize gate type: %v", err)
+	}
+	metadata := map[string]any{
+		"roll_seq":   rollSeq,
+		"request_id": rollRequestID,
+	}
+	payload := event.SessionGateOpenedPayload{
+		GateID:   gateID,
+		GateType: gateType,
+		Reason:   "gm_consequence",
+		Metadata: metadata,
+	}
+	payloadJSON, err := json.Marshal(payload)
+	if err != nil {
+		return status.Errorf(codes.Internal, "encode session gate payload: %v", err)
+	}
+	storedGate, err := s.stores.Event.AppendEvent(ctx, event.Event{
+		CampaignID:   campaignID,
+		Timestamp:    time.Now().UTC(),
+		Type:         event.TypeSessionGateOpened,
+		SessionID:    sessionID,
+		RequestID:    rollRequestID,
+		InvocationID: grpcmeta.InvocationIDFromContext(ctx),
+		ActorType:    event.ActorTypeSystem,
+		EntityType:   "session_gate",
+		EntityID:     gateID,
+		PayloadJSON:  payloadJSON,
+	})
+	if err != nil {
+		return status.Errorf(codes.Internal, "append session gate event: %v", err)
+	}
+	gateApplier := projection.Applier{SessionGate: s.stores.SessionGate}
+	if err := gateApplier.Apply(ctx, storedGate); err != nil {
+		return status.Errorf(codes.Internal, "apply session gate event: %v", err)
+	}
+
+	spotlightPayload := event.SessionSpotlightSetPayload{
+		SpotlightType: string(session.SpotlightTypeGM),
+	}
+	spotlightJSON, err := json.Marshal(spotlightPayload)
+	if err != nil {
+		return status.Errorf(codes.Internal, "encode spotlight payload: %v", err)
+	}
+	storedSpotlight, err := s.stores.Event.AppendEvent(ctx, event.Event{
+		CampaignID:   campaignID,
+		Timestamp:    time.Now().UTC(),
+		Type:         event.TypeSessionSpotlightSet,
+		SessionID:    sessionID,
+		RequestID:    rollRequestID,
+		InvocationID: grpcmeta.InvocationIDFromContext(ctx),
+		ActorType:    event.ActorTypeSystem,
+		EntityType:   "session_spotlight",
+		EntityID:     sessionID,
+		PayloadJSON:  spotlightJSON,
+	})
+	if err != nil {
+		return status.Errorf(codes.Internal, "append spotlight event: %v", err)
+	}
+	spotlightApplier := projection.Applier{SessionSpotlight: s.stores.SessionSpotlight}
+	if err := spotlightApplier.Apply(ctx, storedSpotlight); err != nil {
+		return status.Errorf(codes.Internal, "apply spotlight event: %v", err)
+	}
+
+	return nil
 }
 
 func (s *DaggerheartService) ApplyAttackOutcome(ctx context.Context, in *pb.DaggerheartApplyAttackOutcomeRequest) (*pb.DaggerheartApplyAttackOutcomeResponse, error) {
@@ -3170,6 +3563,9 @@ func (s *DaggerheartService) ApplyAttackOutcome(ctx context.Context, in *pb.Dagg
 	}
 	if sess.Status != session.SessionStatusActive {
 		return nil, status.Error(codes.FailedPrecondition, "session is not active")
+	}
+	if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+		return nil, err
 	}
 
 	rollEvent, err := s.stores.Event.GetEventBySeq(ctx, campaignID, in.GetRollSeq())
@@ -3333,6 +3729,9 @@ func (s *DaggerheartService) ApplyAdversaryAttackOutcome(ctx context.Context, in
 	if sess.Status != session.SessionStatusActive {
 		return nil, status.Error(codes.FailedPrecondition, "session is not active")
 	}
+	if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+		return nil, err
+	}
 
 	rollEvent, err := s.stores.Event.GetEventBySeq(ctx, campaignID, in.GetRollSeq())
 	if err != nil {
@@ -3479,6 +3878,9 @@ func (s *DaggerheartService) ApplyReactionOutcome(ctx context.Context, in *pb.Da
 	if sess.Status != session.SessionStatusActive {
 		return nil, status.Error(codes.FailedPrecondition, "session is not active")
 	}
+	if err := s.ensureNoOpenSessionGate(ctx, campaignID, sessionID); err != nil {
+		return nil, err
+	}
 
 	rollEvent, err := s.stores.Event.GetEventBySeq(ctx, campaignID, in.GetRollSeq())
 	if err != nil {
@@ -3517,7 +3919,7 @@ func (s *DaggerheartService) ApplyReactionOutcome(ctx context.Context, in *pb.Da
 	if !ok {
 		return nil, status.Error(codes.InvalidArgument, "roll outcome is invalid")
 	}
-	critNegates := boolFromSystemData(rollPayload.SystemData, "crit_negates", false)
+	critNegates := boolFromSystemData(rollPayload.SystemData, "crit_negates", crit)
 	effectsNegated := crit && critNegates
 	actorID := stringFromSystemData(rollPayload.SystemData, "character_id")
 	if actorID == "" {
@@ -3580,6 +3982,178 @@ func (s *DaggerheartService) ApplyReactionOutcome(ctx context.Context, in *pb.Da
 			EffectsNegated:     effectsNegated,
 		},
 	}, nil
+}
+
+func (s *DaggerheartService) applyStressVulnerableCondition(
+	ctx context.Context,
+	campaignID string,
+	sessionID string,
+	characterID string,
+	conditions []string,
+	stressBefore int,
+	stressAfter int,
+	stressMax int,
+	rollSeq *uint64,
+	requestID string,
+	systemID string,
+) error {
+	if stressMax <= 0 {
+		return nil
+	}
+	if stressBefore == stressAfter {
+		return nil
+	}
+	shouldAdd := stressBefore < stressMax && stressAfter == stressMax
+	shouldRemove := stressBefore == stressMax && stressAfter < stressMax
+	if !shouldAdd && !shouldRemove {
+		return nil
+	}
+
+	normalized, err := daggerheart.NormalizeConditions(conditions)
+	if err != nil {
+		return status.Errorf(codes.Internal, "invalid stored conditions: %v", err)
+	}
+	hasVulnerable := containsString(normalized, daggerheart.ConditionVulnerable)
+	if shouldAdd && hasVulnerable {
+		return nil
+	}
+	if shouldRemove && !hasVulnerable {
+		return nil
+	}
+
+	afterSet := make(map[string]struct{}, len(normalized)+1)
+	for _, value := range normalized {
+		afterSet[value] = struct{}{}
+	}
+	if shouldAdd {
+		afterSet[daggerheart.ConditionVulnerable] = struct{}{}
+	}
+	if shouldRemove {
+		delete(afterSet, daggerheart.ConditionVulnerable)
+	}
+	afterList := make([]string, 0, len(afterSet))
+	for value := range afterSet {
+		afterList = append(afterList, value)
+	}
+	after, err := daggerheart.NormalizeConditions(afterList)
+	if err != nil {
+		return status.Errorf(codes.Internal, "invalid condition set: %v", err)
+	}
+	added, removed := daggerheart.DiffConditions(normalized, after)
+	if len(added) == 0 && len(removed) == 0 {
+		return nil
+	}
+
+	payload := daggerheart.ConditionChangedPayload{
+		CharacterID:      characterID,
+		ConditionsBefore: normalized,
+		ConditionsAfter:  after,
+		Added:            added,
+		Removed:          removed,
+		RollSeq:          rollSeq,
+	}
+	payloadJSON, err := json.Marshal(payload)
+	if err != nil {
+		return status.Errorf(codes.Internal, "encode condition payload: %v", err)
+	}
+
+	stored, err := s.stores.Event.AppendEvent(ctx, event.Event{
+		CampaignID:    campaignID,
+		Timestamp:     time.Now().UTC(),
+		Type:          daggerheart.EventTypeConditionChanged,
+		SessionID:     sessionID,
+		RequestID:     requestID,
+		InvocationID:  grpcmeta.InvocationIDFromContext(ctx),
+		ActorType:     event.ActorTypeSystem,
+		EntityType:    "character",
+		EntityID:      characterID,
+		SystemID:      systemID,
+		SystemVersion: daggerheart.SystemVersion,
+		PayloadJSON:   payloadJSON,
+	})
+	if err != nil {
+		return status.Errorf(codes.Internal, "append condition event: %v", err)
+	}
+	adapter := daggerheart.NewAdapter(s.stores.Daggerheart)
+	if err := adapter.ApplyEvent(ctx, stored); err != nil {
+		return status.Errorf(codes.Internal, "apply condition event: %v", err)
+	}
+
+	return nil
+}
+
+func (s *DaggerheartService) advanceBreathCountdown(
+	ctx context.Context,
+	campaignID string,
+	sessionID string,
+	countdownID string,
+	failed bool,
+) error {
+	countdownID = strings.TrimSpace(countdownID)
+	if countdownID == "" {
+		return nil
+	}
+	if s.stores.Daggerheart == nil {
+		return status.Error(codes.Internal, "daggerheart store is not configured")
+	}
+	if s.stores.Event == nil {
+		return status.Error(codes.Internal, "event store is not configured")
+	}
+
+	if _, err := s.stores.Daggerheart.GetDaggerheartCountdown(ctx, campaignID, countdownID); err != nil {
+		if !errors.Is(err, storage.ErrNotFound) {
+			return handleDomainError(err)
+		}
+		_, createErr := s.CreateCountdown(ctx, &pb.DaggerheartCreateCountdownRequest{
+			CampaignId:  campaignID,
+			SessionId:   sessionID,
+			CountdownId: countdownID,
+			Name:        "Breath",
+			Kind:        pb.DaggerheartCountdownKind_DAGGERHEART_COUNTDOWN_KIND_CONSEQUENCE,
+			Current:     0,
+			Max:         3,
+			Direction:   pb.DaggerheartCountdownDirection_DAGGERHEART_COUNTDOWN_DIRECTION_INCREASE,
+			Looping:     false,
+		})
+		if createErr != nil && status.Code(createErr) != codes.FailedPrecondition {
+			return createErr
+		}
+	}
+
+	delta := int32(1)
+	reason := "breath_tick"
+	if failed {
+		delta = 2
+		reason = "breath_failure"
+	}
+	if _, err := s.UpdateCountdown(ctx, &pb.DaggerheartUpdateCountdownRequest{
+		CampaignId:  campaignID,
+		SessionId:   sessionID,
+		CountdownId: countdownID,
+		Delta:       delta,
+		Reason:      reason,
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *DaggerheartService) ensureNoOpenSessionGate(ctx context.Context, campaignID, sessionID string) error {
+	if s.stores.SessionGate == nil {
+		return status.Error(codes.Internal, "session gate store is not configured")
+	}
+	if strings.TrimSpace(campaignID) == "" || strings.TrimSpace(sessionID) == "" {
+		return nil
+	}
+	gate, err := s.stores.SessionGate.GetOpenSessionGate(ctx, campaignID, sessionID)
+	if err == nil {
+		return status.Errorf(codes.FailedPrecondition, "session gate is open: %s", gate.GateID)
+	}
+	if errors.Is(err, storage.ErrNotFound) {
+		return nil
+	}
+	return status.Errorf(codes.Internal, "load session gate: %v", err)
 }
 
 func normalizeActionModifiers(modifiers []*pb.ActionRollModifier) (int, []map[string]any) {

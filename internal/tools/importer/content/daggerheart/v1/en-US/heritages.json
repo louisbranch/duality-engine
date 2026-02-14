@@ -1,0 +1,203 @@
+{
+  "system_id": "daggerheart",
+  "system_version": "v1",
+  "source": "Daggerheart SRD v1 (paraphrased)",
+  "locale": "en-US",
+  "items": [
+    {
+      "id": "heritage.human",
+      "name": "Human",
+      "kind": "ancestry",
+      "features": [
+        {
+          "id": "feature.human-adaptable",
+          "name": "Adaptable",
+          "description": "You can adjust quickly to new situations and change course when needed.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.dwarf",
+      "name": "Dwarf",
+      "kind": "ancestry",
+      "features": [
+        {
+          "id": "feature.dwarf-stoneborn",
+          "name": "Stoneborn",
+          "description": "You shrug off exhaustion; reduce stress from physical harm by 1 once per rest.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.elf",
+      "name": "Elf",
+      "kind": "ancestry",
+      "features": [
+        {
+          "id": "feature.elf-keen-senses",
+          "name": "Keen Senses",
+          "description": "Gain +1 to notice hidden details in the wild.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.orc",
+      "name": "Orc",
+      "kind": "ancestry",
+      "features": [
+        {
+          "id": "feature.orc-relentless",
+          "name": "Relentless",
+          "description": "Once per rest, when you would fall, stay at 1 HP.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.goblin",
+      "name": "Goblin",
+      "kind": "ancestry",
+      "features": [
+        {
+          "id": "feature.goblin-scrap-savvy",
+          "name": "Scrap Savvy",
+          "description": "You can improvise tools; gain +1 on quick fixes.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.faerie",
+      "name": "Faerie",
+      "kind": "ancestry",
+      "features": [
+        {
+          "id": "feature.faerie-glimmerwing",
+          "name": "Glimmerwing",
+          "description": "You can hover briefly and shed faint light.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.highborne",
+      "name": "Highborne",
+      "kind": "community",
+      "features": [
+        {
+          "id": "feature.highborne-noble-bearing",
+          "name": "Noble Bearing",
+          "description": "In formal settings, gain +1 to social rolls.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.loreborne",
+      "name": "Loreborne",
+      "kind": "community",
+      "features": [
+        {
+          "id": "feature.loreborne-well-read",
+          "name": "Well-Read",
+          "description": "Gain advantage on rolls about the history, culture, or politics of notable people or places.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.orderborne",
+      "name": "Orderborne",
+      "kind": "community",
+      "features": [
+        {
+          "id": "feature.orderborne-dedicated",
+          "name": "Dedicated",
+          "description": "Write three sayings or values from your upbringing. Once per rest, when you describe acting by one, you may roll a d20 as your Hope Die.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.ridgeborne",
+      "name": "Ridgeborne",
+      "kind": "community",
+      "features": [
+        {
+          "id": "feature.ridgeborne-steady",
+          "name": "Steady",
+          "description": "Gain advantage on rolls to cross dangerous cliffs or ledges, navigate harsh terrain, or use survival know-how.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.seaborne",
+      "name": "Seaborne",
+      "kind": "community",
+      "features": [
+        {
+          "id": "feature.seaborne-saltwise",
+          "name": "Saltwise",
+          "description": "You are at home on the water; gain +1 to sailing or swimming rolls.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.slyborne",
+      "name": "Slyborne",
+      "kind": "community",
+      "features": [
+        {
+          "id": "feature.slyborne-scoundrel",
+          "name": "Scoundrel",
+          "description": "Gain advantage on rolls to deal with criminals, spot lies, or find a safe place to hide.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.underborne",
+      "name": "Underborne",
+      "kind": "community",
+      "features": [
+        {
+          "id": "feature.underborne-low-light-living",
+          "name": "Low-Light Living",
+          "description": "In dim light or heavy shadow, gain advantage on rolls to hide, investigate, or notice details there.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.wanderborne",
+      "name": "Wanderborne",
+      "kind": "community",
+      "features": [
+        {
+          "id": "feature.wanderborne-nomadic-pack",
+          "name": "Nomadic Pack",
+          "description": "Add a Nomadic Pack to your inventory. Once per session, spend a Hope to pull a useful mundane item from it; work with the GM to choose it.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.wildborne",
+      "name": "Wildborne",
+      "kind": "community",
+      "features": [
+        {
+          "id": "feature.wildborne-trailwise",
+          "name": "Trailwise",
+          "description": "You move quietly through wild terrain; gain +1 to stealth outdoors.",
+          "level": 1
+        }
+      ]
+    }
+  ]
+}

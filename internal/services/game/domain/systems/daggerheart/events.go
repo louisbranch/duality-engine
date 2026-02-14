@@ -27,6 +27,7 @@ const (
 	EventTypeCountdownUpdated        event.Type = "action.countdown_updated"
 	EventTypeCountdownDeleted        event.Type = "action.countdown_deleted"
 	EventTypeAdversaryRollResolved   event.Type = "action.adversary_roll_resolved"
+	EventTypeAdversaryActionResolved event.Type = "action.adversary_action_resolved"
 	EventTypeAdversaryAttackResolved event.Type = "action.adversary_attack_resolved"
 	EventTypeAdversaryCreated        event.Type = "action.adversary_created"
 	EventTypeAdversaryUpdated        event.Type = "action.adversary_updated"
@@ -280,6 +281,20 @@ type AdversaryRollResolvedPayload struct {
 	Total        int    `json:"total"`
 	Advantage    int    `json:"advantage,omitempty"`
 	Disadvantage int    `json:"disadvantage,omitempty"`
+}
+
+// AdversaryActionResolvedPayload captures the payload for action.adversary_action_resolved events.
+type AdversaryActionResolvedPayload struct {
+	AdversaryID string       `json:"adversary_id"`
+	RollSeq     uint64       `json:"roll_seq"`
+	Difficulty  int          `json:"difficulty"`
+	Dramatic    bool         `json:"dramatic"`
+	AutoSuccess bool         `json:"auto_success"`
+	Roll        int          `json:"roll,omitempty"`
+	Modifier    int          `json:"modifier,omitempty"`
+	Total       int          `json:"total,omitempty"`
+	Success     bool         `json:"success"`
+	Rng         *RollRngInfo `json:"rng,omitempty"`
 }
 
 // AdversaryAttackResolvedPayload captures the payload for action.adversary_attack_resolved events.
