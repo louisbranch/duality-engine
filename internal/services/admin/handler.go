@@ -152,9 +152,17 @@ func (h *Handler) localizer(w http.ResponseWriter, r *http.Request) (*message.Pr
 }
 
 func (h *Handler) pageContext(lang string, loc *message.Printer, r *http.Request) templates.PageContext {
+	path := ""
+	query := ""
+	if r != nil && r.URL != nil {
+		path = r.URL.Path
+		query = r.URL.RawQuery
+	}
 	return templates.PageContext{
 		Lang:          lang,
 		Loc:           loc,
+		CurrentPath:   path,
+		CurrentQuery:  query,
 		Impersonation: h.impersonationView(r),
 	}
 }
@@ -352,6 +360,10 @@ func (h *Handler) handleUserRoutes(w http.ResponseWriter, r *http.Request) {
 	}
 	userPath := strings.TrimPrefix(r.URL.Path, "/users/")
 	parts := splitPathParts(userPath)
+	if len(parts) == 2 && parts[1] == "invites" {
+		h.handleUserInvites(w, r, parts[0])
+		return
+	}
 	if len(parts) == 1 && strings.TrimSpace(parts[0]) != "" {
 		h.handleUserDetail(w, r, parts[0])
 		return
@@ -379,7 +391,31 @@ func (h *Handler) handleUserDetail(w http.ResponseWriter, r *http.Request, userI
 	}
 	h.populateUserInvitesIfImpersonating(ctx, view.Detail, view.Impersonation, loc)
 
-	h.renderUserDetail(w, r, view, pageCtx, loc)
+	h.renderUserDetail(w, r, view, pageCtx, loc, "details")
+}
+
+// handleUserInvites renders the user pending invites tab.
+func (h *Handler) handleUserInvites(w http.ResponseWriter, r *http.Request, userID string) {
+	loc, lang := h.localizer(w, r)
+	pageCtx := h.pageContext(lang, loc, r)
+	view := templates.UserDetailPageView{Impersonation: pageCtx.Impersonation}
+
+	if message := strings.TrimSpace(r.URL.Query().Get("message")); message != "" {
+		view.Message = message
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), grpcRequestTimeout)
+	defer cancel()
+
+	detail, message := h.loadUserDetail(ctx, userID, loc)
+	view.Detail = detail
+	if message != "" && view.Message == "" {
+		view.Message = message
+	}
+
+	h.populateUserInvitesIfImpersonating(ctx, view.Detail, view.Impersonation, loc)
+
+	h.renderUserDetail(w, r, view, pageCtx, loc, "invites")
 }
 
 // handleCreateUser creates a user from a form submission.
@@ -459,21 +495,21 @@ func (h *Handler) handleImpersonateUser(w http.ResponseWriter, r *http.Request) 
 
 	if err := r.ParseForm(); err != nil {
 		view.Message = loc.Sprintf("error.user_impersonate_invalid")
-		h.renderUserDetail(w, r, view, pageCtx, loc)
+		h.renderUserDetail(w, r, view, pageCtx, loc, "details")
 		return
 	}
 
 	userID := strings.TrimSpace(r.FormValue("user_id"))
 	if userID == "" {
 		view.Message = loc.Sprintf("error.user_id_required")
-		h.renderUserDetail(w, r, view, pageCtx, loc)
+		h.renderUserDetail(w, r, view, pageCtx, loc, "details")
 		return
 	}
 
 	client := h.authClient()
 	if client == nil {
 		view.Message = loc.Sprintf("error.user_service_unavailable")
-		h.renderUserDetail(w, r, view, pageCtx, loc)
+		h.renderUserDetail(w, r, view, pageCtx, loc, "details")
 		return
 	}
 
@@ -484,7 +520,7 @@ func (h *Handler) handleImpersonateUser(w http.ResponseWriter, r *http.Request) 
 	if err != nil || response.GetUser() == nil {
 		log.Printf("get user for impersonation: %v", err)
 		view.Message = loc.Sprintf("error.user_not_found")
-		h.renderUserDetail(w, r, view, pageCtx, loc)
+		h.renderUserDetail(w, r, view, pageCtx, loc, "details")
 		return
 	}
 
@@ -498,7 +534,7 @@ func (h *Handler) handleImpersonateUser(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		log.Printf("impersonation session id: %v", err)
 		view.Message = loc.Sprintf("error.user_impersonate_failed")
-		h.renderUserDetail(w, r, view, pageCtx, loc)
+		h.renderUserDetail(w, r, view, pageCtx, loc, "details")
 		return
 	}
 
@@ -533,7 +569,7 @@ func (h *Handler) handleImpersonateUser(w http.ResponseWriter, r *http.Request) 
 	}
 	view.Message = loc.Sprintf("users.impersonate.success", label)
 
-	h.renderUserDetail(w, r, view, pageCtx, loc)
+	h.renderUserDetail(w, r, view, pageCtx, loc, "details")
 }
 
 // handleLogout clears the current impersonation session.
@@ -581,7 +617,7 @@ func (h *Handler) handleLogout(w http.ResponseWriter, r *http.Request) {
 				view.Message = message
 			}
 			h.populateUserInvitesIfImpersonating(ctx, view.Detail, view.Impersonation, loc)
-			h.renderUserDetail(w, r, view, pageCtx, loc)
+			h.renderUserDetail(w, r, view, pageCtx, loc, "details")
 			return
 		}
 	}
@@ -919,6 +955,11 @@ func (h *Handler) handleCampaignRoutes(w http.ResponseWriter, r *http.Request) {
 		h.handleCharacterSheet(w, r, parts[0], parts[2])
 		return
 	}
+	// /campaigns/{id}/characters/{characterId}/activity
+	if len(parts) == 4 && parts[1] == "characters" && parts[3] == "activity" {
+		h.handleCharacterActivity(w, r, parts[0], parts[2])
+		return
+	}
 	// /campaigns/{id}/participants
 	if len(parts) == 2 && parts[1] == "participants" {
 		h.handleParticipantsList(w, r, parts[0])
@@ -1093,13 +1134,13 @@ func (h *Handler) renderUsersTable(w http.ResponseWriter, r *http.Request, rows 
 	templ.Handler(templates.UsersTable(rows, message, loc)).ServeHTTP(w, r)
 }
 
-func (h *Handler) renderUserDetail(w http.ResponseWriter, r *http.Request, view templates.UserDetailPageView, pageCtx templates.PageContext, loc *message.Printer) {
+func (h *Handler) renderUserDetail(w http.ResponseWriter, r *http.Request, view templates.UserDetailPageView, pageCtx templates.PageContext, loc *message.Printer, activePage string) {
 	if isHTMXRequest(r) {
-		templ.Handler(templates.UserDetailPage(view, loc)).ServeHTTP(w, r)
+		templ.Handler(templates.UserDetailPage(view, activePage, loc)).ServeHTTP(w, r)
 		return
 	}
 
-	templ.Handler(templates.UserDetailFullPage(view, pageCtx)).ServeHTTP(w, r)
+	templ.Handler(templates.UserDetailFullPage(view, activePage, pageCtx)).ServeHTTP(w, r)
 }
 
 func (h *Handler) redirectToUserDetail(w http.ResponseWriter, r *http.Request, userID string) {
@@ -1602,7 +1643,7 @@ func formatInviteStatus(status statev1.InviteStatus, loc *message.Printer) (stri
 	case statev1.InviteStatus_CLAIMED:
 		return loc.Sprintf("label.invite_claimed"), "success"
 	case statev1.InviteStatus_REVOKED:
-		return loc.Sprintf("label.invite_revoked"), "danger"
+		return loc.Sprintf("label.invite_revoked"), "error"
 	default:
 		return loc.Sprintf("label.unspecified"), "secondary"
 	}
@@ -1956,6 +1997,15 @@ func (h *Handler) handleCharactersTable(w http.ResponseWriter, r *http.Request, 
 
 // handleCharacterSheet renders the character sheet page.
 func (h *Handler) handleCharacterSheet(w http.ResponseWriter, r *http.Request, campaignID string, characterID string) {
+	h.renderCharacterSheet(w, r, campaignID, characterID, "info")
+}
+
+// handleCharacterActivity renders the character activity tab.
+func (h *Handler) handleCharacterActivity(w http.ResponseWriter, r *http.Request, campaignID string, characterID string) {
+	h.renderCharacterSheet(w, r, campaignID, characterID, "activity")
+}
+
+func (h *Handler) renderCharacterSheet(w http.ResponseWriter, r *http.Request, campaignID string, characterID string, activePage string) {
 	loc, lang := h.localizer(w, r)
 	characterClient := h.characterClient()
 	if characterClient == nil {
@@ -1966,7 +2016,6 @@ func (h *Handler) handleCharacterSheet(w http.ResponseWriter, r *http.Request, c
 	ctx, cancel := context.WithTimeout(r.Context(), grpcRequestTimeout)
 	defer cancel()
 
-	// Get character sheet
 	response, err := characterClient.GetCharacterSheet(ctx, &statev1.GetCharacterSheetRequest{
 		CampaignId:  campaignID,
 		CharacterId: characterID,
@@ -1983,10 +2032,8 @@ func (h *Handler) handleCharacterSheet(w http.ResponseWriter, r *http.Request, c
 		return
 	}
 
-	// Get campaign name
 	campaignName := getCampaignName(h, r, campaignID, loc)
 
-	// Get recent events for this character
 	var recentEvents []templates.EventRow
 	if eventClient := h.eventClient(); eventClient != nil {
 		eventsResp, err := eventClient.ListEvents(ctx, &statev1.ListEventsRequest{
@@ -2037,11 +2084,11 @@ func (h *Handler) handleCharacterSheet(w http.ResponseWriter, r *http.Request, c
 	sheet := buildCharacterSheet(campaignID, campaignName, character, recentEvents, controller, loc)
 
 	if isHTMXRequest(r) {
-		templ.Handler(templates.CharacterSheetPage(sheet, loc)).ServeHTTP(w, r)
+		templ.Handler(templates.CharacterSheetPage(sheet, activePage, loc)).ServeHTTP(w, r)
 		return
 	}
 	pageCtx := h.pageContext(lang, loc, r)
-	templ.Handler(templates.CharacterSheetFullPage(sheet, pageCtx)).ServeHTTP(w, r)
+	templ.Handler(templates.CharacterSheetFullPage(sheet, activePage, pageCtx)).ServeHTTP(w, r)
 }
 
 // renderCharactersTable renders the characters table component.

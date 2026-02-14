@@ -9,21 +9,16 @@ templ InvitesListFullPage(campaignID string, campaignName string, page PageConte
 
 // InvitesListPage renders the invites list content.
 templ InvitesListPage(campaignID string, campaignName string, loc Localizer) {
-	<h2>{campaignName}</h2>
-	@CampaignSubNav(campaignID, "invites", loc)
-	<h3>{T(loc, "invites.heading")}</h3>
-	@InvitesLoading(campaignID, loc)
+	@PageHeader(PageHeading{Breadcrumbs: []Breadcrumb{{T(loc, "nav.campaigns"), "/campaigns"}, {campaignName, ""}}, Title: campaignName})
+	@CampaignSubNav(campaignID, "invites", loc) {
+		<h3>{T(loc, "invites.heading")}</h3>
+		@InvitesLoading(campaignID, loc)
+	}
 }
 
 // InvitesLoading renders the HTMX loading placeholder.
 templ InvitesLoading(campaignID string, loc Localizer) {
-	<div
-		hx-get={ "/campaigns/" + campaignID + "/invites/table" }
-		hx-trigger="load"
-		hx-swap="outerHTML"
-	>
-		<p>{T(loc, "invites.loading")}</p>
-	</div>
+	@LazyLoad("/campaigns/"+campaignID+"/invites/table", T(loc, "invites.loading"))
 }
 
 // InvitesTable renders the invites table.
@@ -31,7 +26,7 @@ templ InvitesTable(rows []InviteRow, message string, loc Localizer) {
 	if len(rows) == 0 {
 		@EmptyState(message)
 	} else {
-		<table>
+		<table class="table table-zebra">
 			<thead>
 				<tr>
 					<th>{T(loc, "invites.table.id")}</th>

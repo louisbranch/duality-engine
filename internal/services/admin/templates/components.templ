@@ -1,20 +1,93 @@
 package templates
 
-// TopNav renders the top navigation bar using PaperCSS split-nav.
+// TopNav renders the top navigation bar using DaisyUI navbar.
 templ TopNav(activePage string, page PageContext) {
-	<nav class="split-nav border fixed">
-		<div class="nav-brand">
-			<h3><a href="/">{AppName()}</a></h3>
+	<nav class="navbar bg-base-200 fixed top-0 w-full z-50">
+		<div class="navbar-start">
+			<h3 class="text-lg font-bold"><a href="/">{AppName()}</a></h3>
 		</div>
-		<div class="collapsible">
-			<input id="nav-collapsible" type="checkbox" name="nav-collapsible">
-			<label for="nav-collapsible">
-				<div class="bar1"></div>
-				<div class="bar2"></div>
-				<div class="bar3"></div>
-			</label>
-			<div class="collapsible-body">
-				<ul class="inline">
+		<div class="navbar-end hidden md:flex">
+			<ul class="menu menu-horizontal">
+				<li>
+					<a
+						href="/"
+						hx-get="/"
+						hx-target="#main"
+						hx-swap="innerHTML"
+						hx-push-url="true"
+						if activePage == "Dashboard" {
+							class="active"
+						}
+					>{T(page.Loc, "nav.dashboard")}</a>
+				</li>
+				<li>
+					<a
+						href="/systems"
+						hx-get="/systems"
+						hx-target="#main"
+						hx-swap="innerHTML"
+						hx-push-url="true"
+						if activePage == "Systems" {
+							class="active"
+						}
+					>{T(page.Loc, "nav.systems")}</a>
+				</li>
+				<li>
+					<a
+						href="/users"
+						hx-get="/users"
+						hx-target="#main"
+						hx-swap="innerHTML"
+						hx-push-url="true"
+						if activePage == "Users" {
+							class="active"
+						}
+					>{T(page.Loc, "nav.users")}</a>
+				</li>
+				<li>
+					<a
+						href="/campaigns"
+						hx-get="/campaigns"
+						hx-target="#main"
+						hx-swap="innerHTML"
+						hx-push-url="true"
+						if activePage == "Campaigns" {
+							class="active"
+						}
+					>{T(page.Loc, "nav.campaigns")}</a>
+				</li>
+			</ul>
+			if page.Impersonation != nil {
+				<span class="badge badge-secondary ml-2">{T(page.Loc, "impersonation.badge")}</span>
+				<span class="ml-1">{ImpersonationLabel(page.Impersonation)}</span>
+			}
+		<div class="dropdown dropdown-hover dropdown-end">
+			<div tabindex="0" role="button" class="btn btn-ghost btn-sm hover:bg-neutral">
+				{ActiveLanguageLabel(page)}
+			</div>
+			<ul tabindex="0" class="dropdown-content menu menu-sm rounded-box z-10 w-20 shadow">
+				for _, option := range LanguageOptions(page) {
+					<li>
+						<a
+							href={ templ.SafeURL(LanguageURL(page, option.Tag)) }
+							data-lang={ option.Tag }
+							if option.Active {
+								class="active"
+							}
+						>{option.Label}</a>
+					</li>
+				}
+			</ul>
+		</div>
+		</div>
+		<div class="navbar-end md:hidden">
+			<div class="dropdown dropdown-end">
+			<div tabindex="0" role="button" class="btn btn-soft btn-ghost">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+					</svg>
+				</div>
+				<ul tabindex="0" class="menu menu-sm dropdown-content bg-base-200 rounded-box z-10 mt-3 w-52 p-2 shadow">
 					<li>
 						<a
 							href="/"
@@ -64,26 +137,23 @@ templ TopNav(activePage string, page PageContext) {
 						>{T(page.Loc, "nav.campaigns")}</a>
 					</li>
 					if page.Impersonation != nil {
-						<li class="impersonation-indicator">
-							<span class="badge secondary">{T(page.Loc, "impersonation.badge")}</span>
+						<li class="menu-title">
+							<span class="badge badge-secondary">{T(page.Loc, "impersonation.badge")}</span>
 							<span>{ImpersonationLabel(page.Impersonation)}</span>
 						</li>
 					}
-					<li class="lang-selector">
-						<span>{T(page.Loc, "nav.language")}:</span>
-						<a
-							href={ templ.SafeURL("/?lang=en") }
-							if page.Lang == "en" {
-								class="active"
+					<li>
+						<span>
+							for _, option := range LanguageOptions(page) {
+								<a
+									href={ templ.SafeURL(LanguageURL(page, option.Tag)) }
+									data-lang={ option.Tag }
+									if option.Active {
+										class="font-bold"
+									}
+								>{option.Label}</a>
 							}
-						>{T(page.Loc, "nav.lang_en")}</a>
-						<span>/</span>
-						<a
-							href={ templ.SafeURL("/?lang=pt-BR") }
-							if page.Lang == "pt-BR" {
-								class="active"
-							}
-						>{T(page.Loc, "nav.lang_pt_br")}</a>
+						</span>
 					</li>
 				</ul>
 			</div>
@@ -91,108 +161,264 @@ templ TopNav(activePage string, page PageContext) {
 	</nav>
 }
 
-// CampaignSubNav renders the sub-navigation for campaign detail pages using PaperCSS tabs.
+// CampaignSubNav renders the sub-navigation for campaign detail pages using DaisyUI tabs.
+// The active tab's content is rendered inside a tab-content panel via children.
 templ CampaignSubNav(campaignID string, activePage string, loc Localizer) {
-	<div class="row flex-spaces tabs">
-		<input
-			id="tab-overview"
-			type="radio"
-			name="campaign-tabs"
-			if activePage == "overview" {
-				checked
-			}
-			hx-get={ "/campaigns/" + campaignID }
-			hx-target="#main"
-			hx-swap="innerHTML"
-			hx-push-url={ "/campaigns/" + campaignID }
-		/>
-		<label for="tab-overview">{T(loc, "tab.overview")}</label>
-		<input
-			id="tab-sessions"
-			type="radio"
-			name="campaign-tabs"
-			if activePage == "sessions" {
-				checked
-			}
-			hx-get={ "/campaigns/" + campaignID + "/sessions" }
-			hx-target="#main"
-			hx-swap="innerHTML"
-			hx-push-url={ "/campaigns/" + campaignID + "/sessions" }
-		/>
-		<label for="tab-sessions">{T(loc, "tab.sessions")}</label>
-		<input
-			id="tab-characters"
-			type="radio"
-			name="campaign-tabs"
-			if activePage == "characters" {
-				checked
-			}
-			hx-get={ "/campaigns/" + campaignID + "/characters" }
-			hx-target="#main"
-			hx-swap="innerHTML"
-			hx-push-url={ "/campaigns/" + campaignID + "/characters" }
-		/>
-		<label for="tab-characters">{T(loc, "tab.characters")}</label>
-		<input
-			id="tab-participants"
-			type="radio"
-			name="campaign-tabs"
-			if activePage == "participants" {
-				checked
-			}
-			hx-get={ "/campaigns/" + campaignID + "/participants" }
-			hx-target="#main"
-			hx-swap="innerHTML"
-			hx-push-url={ "/campaigns/" + campaignID + "/participants" }
-		/>
-		<label for="tab-participants">{T(loc, "tab.participants")}</label>
-		<input
-			id="tab-invites"
-			type="radio"
-			name="campaign-tabs"
-			if activePage == "invites" {
-				checked
-			}
-			hx-get={ "/campaigns/" + campaignID + "/invites" }
-			hx-target="#main"
-			hx-swap="innerHTML"
-			hx-push-url={ "/campaigns/" + campaignID + "/invites" }
-		/>
-		<label for="tab-invites">{T(loc, "tab.invites")}</label>
-		<input
-			id="tab-events"
-			type="radio"
-			name="campaign-tabs"
-			if activePage == "events" {
-				checked
-			}
-			hx-get={ "/campaigns/" + campaignID + "/events" }
-			hx-target="#main"
-			hx-swap="innerHTML"
-			hx-push-url={ "/campaigns/" + campaignID + "/events" }
-		/>
-		<label for="tab-events">{T(loc, "tab.events")}</label>
+	<div class="tabs tabs-box">
+		@campaignTabInput(campaignID, "overview", activePage, "/campaigns/"+campaignID, T(loc, "tab.overview"))
+		if activePage == "overview" {
+			<div class="tab-content p-4">
+				{ children... }
+			</div>
+		} else {
+			<div class="tab-content"></div>
+		}
+		@campaignTabInput(campaignID, "sessions", activePage, "/campaigns/"+campaignID+"/sessions", T(loc, "tab.sessions"))
+		if activePage == "sessions" {
+			<div class="tab-content p-4">
+				{ children... }
+			</div>
+		} else {
+			<div class="tab-content"></div>
+		}
+		@campaignTabInput(campaignID, "characters", activePage, "/campaigns/"+campaignID+"/characters", T(loc, "tab.characters"))
+		if activePage == "characters" {
+			<div class="tab-content p-4">
+				{ children... }
+			</div>
+		} else {
+			<div class="tab-content"></div>
+		}
+		@campaignTabInput(campaignID, "participants", activePage, "/campaigns/"+campaignID+"/participants", T(loc, "tab.participants"))
+		if activePage == "participants" {
+			<div class="tab-content p-4">
+				{ children... }
+			</div>
+		} else {
+			<div class="tab-content"></div>
+		}
+		@campaignTabInput(campaignID, "invites", activePage, "/campaigns/"+campaignID+"/invites", T(loc, "tab.invites"))
+		if activePage == "invites" {
+			<div class="tab-content p-4">
+				{ children... }
+			</div>
+		} else {
+			<div class="tab-content"></div>
+		}
+		@campaignTabInput(campaignID, "events", activePage, "/campaigns/"+campaignID+"/events", T(loc, "tab.events"))
+		if activePage == "events" {
+			<div class="tab-content p-4">
+				{ children... }
+			</div>
+		} else {
+			<div class="tab-content"></div>
+		}
 	</div>
 }
 
-// StatCard renders a dashboard stat card using PaperCSS card.
+// campaignTabInput renders a single radio-input tab.
+// The active tab is checked; inactive tabs use HTMX to navigate.
+templ campaignTabInput(campaignID string, page string, activePage string, url string, label string) {
+	if page == activePage {
+		<input
+			type="radio"
+			name={ "campaign-tabs-" + campaignID }
+			class="tab"
+			aria-label={ label }
+			checked
+		/>
+	} else {
+		<input
+			type="radio"
+			name={ "campaign-tabs-" + campaignID }
+			class="tab"
+			aria-label={ label }
+			hx-get={ url }
+			hx-target="#main"
+			hx-swap="innerHTML"
+			hx-push-url={ url }
+		/>
+	}
+}
+
+// UserSubNav renders the sub-navigation for user detail pages using DaisyUI tabs.
+// The active tab's content is rendered inside a tab-content panel via children.
+templ UserSubNav(userID string, activePage string, loc Localizer) {
+	<div class="tabs tabs-box">
+		@userTabInput(userID, "details", activePage, "/users/"+userID, T(loc, "tab.details"))
+		if activePage == "details" {
+			<div class="tab-content p-4">
+				{ children... }
+			</div>
+		} else {
+			<div class="tab-content"></div>
+		}
+		@userTabInput(userID, "invites", activePage, "/users/"+userID+"/invites", T(loc, "tab.pending_invites"))
+		if activePage == "invites" {
+			<div class="tab-content p-4">
+				{ children... }
+			</div>
+		} else {
+			<div class="tab-content"></div>
+		}
+	</div>
+}
+
+// userTabInput renders a single radio-input tab.
+// The active tab is checked; inactive tabs use HTMX to navigate.
+templ userTabInput(userID string, page string, activePage string, url string, label string) {
+	if page == activePage {
+		<input
+			type="radio"
+			name={ "user-tabs-" + userID }
+			class="tab"
+			aria-label={ label }
+			checked
+		/>
+	} else {
+		<input
+			type="radio"
+			name={ "user-tabs-" + userID }
+			class="tab"
+			aria-label={ label }
+			hx-get={ url }
+			hx-target="#main"
+			hx-swap="innerHTML"
+			hx-push-url={ url }
+		/>
+	}
+}
+
+// CharacterSubNav renders the sub-navigation for character pages using DaisyUI tabs.
+// The active tab's content is rendered inside a tab-content panel via children.
+templ CharacterSubNav(campaignID string, characterID string, activePage string, loc Localizer) {
+	<div class="tabs tabs-box">
+		@characterTabInput(campaignID, characterID, "info", activePage, "/campaigns/"+campaignID+"/characters/"+characterID, T(loc, "tab.info"))
+		if activePage == "info" {
+			<div class="tab-content p-4">
+				{ children... }
+			</div>
+		} else {
+			<div class="tab-content"></div>
+		}
+		@characterTabInput(campaignID, characterID, "activity", activePage, "/campaigns/"+campaignID+"/characters/"+characterID+"/activity", T(loc, "tab.activity"))
+		if activePage == "activity" {
+			<div class="tab-content p-4">
+				{ children... }
+			</div>
+		} else {
+			<div class="tab-content"></div>
+		}
+	</div>
+}
+
+// characterTabInput renders a single radio-input tab.
+// The active tab is checked; inactive tabs use HTMX to navigate.
+templ characterTabInput(campaignID string, characterID string, page string, activePage string, url string, label string) {
+	if page == activePage {
+		<input
+			type="radio"
+			name={ "character-tabs-" + characterID }
+			class="tab"
+			aria-label={ label }
+			checked
+		/>
+	} else {
+		<input
+			type="radio"
+			name={ "character-tabs-" + characterID }
+			class="tab"
+			aria-label={ label }
+			hx-get={ url }
+			hx-target="#main"
+			hx-swap="innerHTML"
+			hx-push-url={ url }
+		/>
+	}
+}
+
+// PageHeader renders a consistent page header with optional breadcrumbs,
+// heading, and action button.
+templ PageHeader(h PageHeading) {
+	if len(h.Breadcrumbs) > 0 {
+		@Breadcrumbs(h.Breadcrumbs)
+	}
+	<h2>{h.Title}</h2>
+	if h.ActionURL != "" {
+		<a
+			class="btn btn-soft"
+			href={ templ.SafeURL(h.ActionURL) }
+			hx-get={ h.ActionURL }
+			hx-target="#main"
+			hx-swap="innerHTML"
+			hx-push-url="true"
+		>{h.ActionLabel}</a>
+	}
+}
+
+// Breadcrumbs renders a DaisyUI breadcrumb trail from the given items.
+// The last item is rendered as plain text; all others as HTMX-enhanced links.
+templ Breadcrumbs(items []Breadcrumb) {
+	<div class="breadcrumbs text-sm">
+		<ul>
+			for _, item := range items {
+				if item.URL != "" {
+					<li>
+						<a
+							href={ templ.SafeURL(item.URL) }
+							hx-get={ item.URL }
+							hx-target="#main"
+							hx-swap="innerHTML"
+							hx-push-url="true"
+						>{item.Label}</a>
+					</li>
+				} else {
+					<li>{item.Label}</li>
+				}
+			}
+		</ul>
+	</div>
+}
+
+// LazyLoad renders an HTMX placeholder that loads content on page render.
+templ LazyLoad(url string, message string) {
+	<div hx-get={ url } hx-trigger="load" hx-swap="outerHTML">
+		<p>{message}</p>
+	</div>
+}
+
+// NavLink renders an HTMX-enhanced anchor that navigates within #main.
+templ NavLink(url string) {
+	<a
+		href={ templ.SafeURL(url) }
+		hx-get={ url }
+		hx-target="#main"
+		hx-swap="innerHTML"
+		hx-push-url="true"
+	>{ children... }</a>
+}
+
+// DetailRow renders a key-value table row for detail pages.
+templ DetailRow(label string, value string) {
+	<tr><td><strong>{label}</strong></td><td>{value}</td></tr>
+}
+
+// StatCard renders a dashboard stat card using DaisyUI stat.
 templ StatCard(label string, value string, icon string) {
-	<div class="card">
-		<div class="card-body">
-			<h4 class="card-title">{value}</h4>
-			<p class="card-text">{label}</p>
-		</div>
+	<div class="stat">
+		<div class="stat-value">{value}</div>
+		<div class="stat-title">{label}</div>
 	</div>
 }
 
-// StatusBadge renders a colored status badge using PaperCSS badge.
+// StatusBadge renders a colored status badge using DaisyUI badge.
 templ StatusBadge(status string, variant string) {
-	<span class={ "badge", variant }>{status}</span>
+	<span class={ "badge", "badge-" + variant }>{status}</span>
 }
 
 // EmptyState renders a centered empty state message.
 templ EmptyState(message string) {
-	<p class="text-center muted">{message}</p>
+	<p class="text-center opacity-60">{message}</p>
 }
 
 // LoadingSpinner renders a loading message.
@@ -200,19 +426,19 @@ templ LoadingSpinner(loc Localizer) {
 	<p>{T(loc, "common.loading")}</p>
 }
 
-// Pagination renders prev/next navigation controls using PaperCSS buttons.
+// Pagination renders prev/next navigation controls using DaisyUI buttons.
 templ Pagination(nextToken string, prevToken string, baseURL string, loc Localizer) {
-	<div class="row flex-center margin-top">
+	<div class="flex justify-center mt-4 gap-2">
 		if prevToken != "" {
 			<a
 				href={ templ.SafeURL(baseURL + "?page_token=" + prevToken) }
 				hx-get={ baseURL + "?page_token=" + prevToken }
 				hx-target="#main"
 				hx-swap="innerHTML"
-			class="paper-btn btn-small margin-right"
+			class="btn btn-soft btn-sm"
 		>{T(loc, "common.previous")}</a>
 		} else {
-			<button class="btn-small margin-right" disabled>{T(loc, "common.previous")}</button>
+			<button class="btn btn-soft btn-sm btn-disabled" disabled>{T(loc, "common.previous")}</button>
 		}
 		if nextToken != "" {
 			<a
@@ -220,10 +446,10 @@ templ Pagination(nextToken string, prevToken string, baseURL string, loc Localiz
 				hx-get={ baseURL + "?page_token=" + nextToken }
 				hx-target="#main"
 				hx-swap="innerHTML"
-			class="paper-btn btn-small"
+			class="btn btn-soft btn-sm"
 		>{T(loc, "common.next")}</a>
 		} else {
-			<button class="btn-small" disabled>{T(loc, "common.next")}</button>
+			<button class="btn btn-soft btn-sm btn-disabled" disabled>{T(loc, "common.next")}</button>
 		}
 	</div>
 }

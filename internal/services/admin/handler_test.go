@@ -681,7 +681,7 @@ func TestImpersonationMetadataInjection(t *testing.T) {
 	sessionID := "session-meta"
 	webHandler.impersonation.Set(sessionID, impersonationSession{userID: "user-impersonated"})
 
-	req := httptest.NewRequest(http.MethodGet, "http://example.com/users/user-lookup", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://example.com/users/user-lookup/invites", nil)
 	req.AddCookie(&http.Cookie{Name: impersonationCookieName, Value: sessionID})
 	recorder := httptest.NewRecorder()
 	handler.ServeHTTP(recorder, req)
@@ -715,6 +715,7 @@ func TestUserDetailPendingInvitesUsesImpersonationMetadata(t *testing.T) {
 	if inviteClient.lastPendingUserReq == nil {
 		t.Fatalf("expected pending invites request to be captured")
 	}
+	assertContains(t, recorder.Body.String(), "Pending Invites")
 }
 
 func TestInvitesTableUsesParticipantMetadataForImpersonation(t *testing.T) {

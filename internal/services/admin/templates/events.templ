@@ -11,57 +11,58 @@ templ EventLogFullPage(view EventLogView, page PageContext) {
 
 // EventLogPage renders the event log content.
 templ EventLogPage(view EventLogView, loc Localizer) {
-	<h2>{view.CampaignName}</h2>
-	@CampaignSubNav(view.CampaignID, "events", loc)
-	<h3>{T(loc, "events.heading")}</h3>
-	<p>{ T(loc, "events.count", view.TotalCount) }</p>
-	@EventFilterForm(view.CampaignID, view.SessionID, view.Filters, loc)
-	<div id="event-timeline-container">
-		@EventTimelineContent(view, loc)
-	</div>
+	@PageHeader(PageHeading{Breadcrumbs: []Breadcrumb{{T(loc, "nav.campaigns"), "/campaigns"}, {view.CampaignName, ""}}, Title: view.CampaignName})
+	@CampaignSubNav(view.CampaignID, "events", loc) {
+		<h3>{T(loc, "events.heading")}</h3>
+		<p>{ T(loc, "events.count", view.TotalCount) }</p>
+		@EventFilterForm(view.CampaignID, view.SessionID, view.Filters, loc)
+		<div id="event-timeline-container">
+			@EventTimelineContent(view, loc)
+		</div>
+	}
 }
 
 // EventFilterForm renders the filter controls for events.
 templ EventFilterForm(campaignID string, sessionID string, filters EventFilterOptions, loc Localizer) {
 	<form
-		class="border"
+		class="border border-base-300 rounded-lg p-4"
 		hx-get={ "/campaigns/" + campaignID + "/events/table" }
 		hx-target="#event-timeline-container"
 		hx-swap="innerHTML"
 		hx-trigger="change from:select, change from:input[type=date]"
 	>
-		<div class="row">
-			<div class="sm-6 md-3 col">
-				<label for="event_type">{T(loc, "events.filter.event_type")}</label>
-				<select id="event_type" name="event_type">
+		<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+			<div>
+				<label class="label" for="event_type">{T(loc, "events.filter.event_type")}</label>
+				<select id="event_type" name="event_type" class="select select-bordered w-full">
 					for _, opt := range GetEventTypeOptions(filters.EventType, loc) {
 						<option value={ opt.Value } selected?={ opt.Current }>{ opt.Label }</option>
 					}
 				</select>
 			</div>
-			<div class="sm-6 md-3 col">
-				<label for="actor_type">{T(loc, "events.filter.actor_type")}</label>
-				<select id="actor_type" name="actor_type">
+			<div>
+				<label class="label" for="actor_type">{T(loc, "events.filter.actor_type")}</label>
+				<select id="actor_type" name="actor_type" class="select select-bordered w-full">
 					for _, opt := range GetActorTypeOptions(filters.ActorType, loc) {
 						<option value={ opt.Value } selected?={ opt.Current }>{ opt.Label }</option>
 					}
 				</select>
 			</div>
-			<div class="sm-6 md-3 col">
-				<label for="entity_type">{T(loc, "events.filter.entity_type")}</label>
-				<select id="entity_type" name="entity_type">
+			<div>
+				<label class="label" for="entity_type">{T(loc, "events.filter.entity_type")}</label>
+				<select id="entity_type" name="entity_type" class="select select-bordered w-full">
 					for _, opt := range GetEntityTypeOptions(filters.EntityType, loc) {
 						<option value={ opt.Value } selected?={ opt.Current }>{ opt.Label }</option>
 					}
 				</select>
 			</div>
-			<div class="sm-6 md-3 col">
-				<label for="start_date">{T(loc, "events.filter.from_date")}</label>
-				<input type="date" id="start_date" name="start_date" value={ filters.StartDate }/>
+			<div>
+				<label class="label" for="start_date">{T(loc, "events.filter.from_date")}</label>
+				<input type="date" id="start_date" name="start_date" value={ filters.StartDate } class="input input-bordered w-full"/>
 			</div>
-			<div class="sm-6 md-3 col">
-				<label for="end_date">{T(loc, "events.filter.to_date")}</label>
-				<input type="date" id="end_date" name="end_date" value={ filters.EndDate }/>
+			<div>
+				<label class="label" for="end_date">{T(loc, "events.filter.to_date")}</label>
+				<input type="date" id="end_date" name="end_date" value={ filters.EndDate } class="input input-bordered w-full"/>
 			</div>
 		</div>
 	</form>
@@ -72,7 +73,7 @@ templ EventTimelineContent(view EventLogView, loc Localizer) {
 	if len(view.Events) == 0 {
 		@EmptyState(T(loc, "events.empty"))
 	} else {
-		<table>
+		<table class="table table-zebra">
 			<thead>
 				<tr>
 					<th>{T(loc, "events.table.event")}</th>
@@ -97,21 +98,21 @@ templ EventTableRow(event EventRow, loc Localizer) {
 		<td><strong>{ event.TypeDisplay }</strong></td>
 		<td>
 			if event.ActorTypeDisplay != "" {
-				<small>{ event.ActorTypeDisplay }</small>
+				{ event.ActorTypeDisplay }
 			}
 		</td>
 		<td>
 			if event.EntityName != "" {
-				<small>{ event.EntityType }:</small> { event.EntityName }
+				{ event.EntityType }: { event.EntityName }
 			}
 		</td>
-		<td><small>{ event.Timestamp }</small></td>
+		<td>{ event.Timestamp }</td>
 	</tr>
 	if event.PayloadJSON != "" && event.PayloadJSON != "{}" && event.PayloadJSON != "null" {
 		<tr class="payload-row">
 			<td colspan="4">
 				<details>
-					<summary><small>{T(loc, "events.payload")}</small></summary>
+					<summary>{T(loc, "events.payload")}</summary>
 					<pre><code>{ event.PayloadJSON }</code></pre>
 				</details>
 			</td>
@@ -124,7 +125,7 @@ templ EventTimeline(events []EventRow, campaignID string, loc Localizer) {
 	if len(events) == 0 {
 		@EmptyState(T(loc, "events.timeline.empty"))
 	} else {
-		<table>
+		<table class="table table-zebra">
 			<thead>
 				<tr>
 					<th>{T(loc, "events.table.event")}</th>
@@ -135,7 +136,7 @@ templ EventTimeline(events []EventRow, campaignID string, loc Localizer) {
 				for _, event := range events {
 					<tr>
 						<td>{ event.TypeDisplay }</td>
-						<td><small>{ event.Timestamp }</small></td>
+						<td>{ event.Timestamp }</td>
 					</tr>
 				}
 			</tbody>

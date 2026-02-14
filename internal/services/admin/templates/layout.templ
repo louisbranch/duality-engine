@@ -3,18 +3,20 @@ package templates
 // Layout wraps content in the base HTML shell with top navigation.
 templ Layout(title string, activePage string, page PageContext) {
 	<!DOCTYPE html>
-	<html lang={ page.Lang } class="dark">
+	<html lang={ page.Lang } data-theme="night">
 		<head>
 			<meta charset="utf-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1">
 			<title>{title}</title>
-			<link rel="stylesheet" href="https://unpkg.com/papercss@1.9.2/dist/paper.min.css" integrity="sha384-wMyZfjGAQ1ZgZgPm5qchzSB5HnjMhkNztmQTcnqZSdk5nrTqgiitoN+nL0XgczcG" crossorigin="anonymous">
+			<link href="https://cdn.jsdelivr.net/npm/daisyui@5.5.18" rel="stylesheet" type="text/css" integrity="sha384-ww1btmC3Ah3rEb6jt/coOxyQ9JYMoxQpFSB/bxdE20ZYMK4kWSb+TwcgbHR/GFCq" crossorigin="anonymous"/>
+			<link href="https://cdn.jsdelivr.net/npm/daisyui@5.5.18/theme/night.css" rel="stylesheet" type="text/css" integrity="sha384-ct77NF8TqvORUyD+5Lztd6YSkLycHMPcXYpANNBLLENMAYgVm+EZ41dZXMZdXrT3" crossorigin="anonymous"/>
+			<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.18" integrity="sha384-WrpyCFNrMmN/IC7KmMNiXxIouXEFpoDIuJ2P+ys++uYEzegAW2MSl+X6Unsahaij" crossorigin="anonymous"></script>
 			<link rel="stylesheet" href="/static/theme.css">
-			<script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js"></script>
+			<script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
 		</head>
 		<body>
 			@TopNav(activePage, page)
-			<div class="paper container margin-top" id="main">
+			<div class="max-w-screen-xl mx-auto px-4 pt-24" id="main">
 				{ children... }
 			</div>
 			<script>
@@ -32,8 +34,26 @@ templ Layout(title string, activePage string, page PageContext) {
 						}
 					});
 				}
+				function updateLanguageLinks() {
+					var links = document.querySelectorAll('[data-lang]');
+					if (!links.length) {
+						return;
+					}
+					var current = new URL(window.location.href);
+					links.forEach(function(link) {
+						var lang = link.getAttribute('data-lang');
+						if (!lang) {
+							return;
+						}
+						var next = new URL(current);
+						next.searchParams.set('lang', lang);
+						link.setAttribute('href', next.pathname + next.search + next.hash);
+					});
+				}
 				document.addEventListener('DOMContentLoaded', initClickableRows);
+				document.addEventListener('DOMContentLoaded', updateLanguageLinks);
 				document.addEventListener('htmx:afterSwap', initClickableRows);
+				document.addEventListener('htmx:afterSwap', updateLanguageLinks);
 			</script>
 		</body>
 	</html>

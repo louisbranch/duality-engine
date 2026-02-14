@@ -9,15 +9,13 @@ templ DashboardFullPage(page PageContext) {
 
 // DashboardPage renders the dashboard content.
 templ DashboardPage(loc Localizer) {
-	<h2>{T(loc, "dashboard.heading")}</h2>
+	@PageHeader(PageHeading{Title: T(loc, "dashboard.heading")})
 	@DashboardLoading(loc)
 }
 
 // DashboardLoading renders the HTMX loading placeholder.
 templ DashboardLoading(loc Localizer) {
-	<div hx-get="/dashboard/content" hx-trigger="load" hx-swap="outerHTML">
-		<p>{T(loc, "dashboard.loading")}</p>
-	</div>
+	@LazyLoad("/dashboard/content", T(loc, "dashboard.loading"))
 }
 
 // DashboardContent renders the main dashboard content.
@@ -29,27 +27,15 @@ templ DashboardContent(stats DashboardStats, activities []ActivityEvent, loc Loc
 	</div>
 }
 
-// DashboardStatsCards renders the stat cards grid using PaperCSS flexbox.
+// DashboardStatsCards renders the stat cards grid using Tailwind grid.
 templ DashboardStatsCards(stats DashboardStats, loc Localizer) {
-	<div class="row">
-		<div class="sm-6 md-2 col">
-			@StatCard(T(loc, "dashboard.stats.systems"), stats.TotalSystems, "")
-		</div>
-		<div class="sm-6 md-2 col">
-			@StatCard(T(loc, "dashboard.stats.users"), stats.TotalUsers, "")
-		</div>
-		<div class="sm-6 md-2 col">
-			@StatCard(T(loc, "dashboard.stats.campaigns"), stats.TotalCampaigns, "")
-		</div>
-		<div class="sm-6 md-2 col">
-			@StatCard(T(loc, "dashboard.stats.sessions"), stats.TotalSessions, "")
-		</div>
-		<div class="sm-6 md-2 col">
-			@StatCard(T(loc, "dashboard.stats.characters"), stats.TotalCharacters, "")
-		</div>
-		<div class="sm-6 md-2 col">
-			@StatCard(T(loc, "dashboard.stats.participants"), stats.TotalParticipants, "")
-		</div>
+	<div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+		@StatCard(T(loc, "dashboard.stats.systems"), stats.TotalSystems, "")
+		@StatCard(T(loc, "dashboard.stats.users"), stats.TotalUsers, "")
+		@StatCard(T(loc, "dashboard.stats.campaigns"), stats.TotalCampaigns, "")
+		@StatCard(T(loc, "dashboard.stats.sessions"), stats.TotalSessions, "")
+		@StatCard(T(loc, "dashboard.stats.characters"), stats.TotalCharacters, "")
+		@StatCard(T(loc, "dashboard.stats.participants"), stats.TotalParticipants, "")
 	</div>
 }
 
@@ -58,7 +44,7 @@ templ RecentActivityFeed(activities []ActivityEvent, loc Localizer) {
 	if len(activities) == 0 {
 		@EmptyState(T(loc, "dashboard.empty.recent_activity"))
 	} else {
-		<table class="table-hover">
+		<table class="table table-zebra">
 			<thead>
 				<tr>
 					<th>{T(loc, "dashboard.table.campaign")}</th>
@@ -70,16 +56,12 @@ templ RecentActivityFeed(activities []ActivityEvent, loc Localizer) {
 				for _, activity := range activities {
 					<tr>
 						<td>
-							<a
-								href={ templ.SafeURL("/campaigns/" + activity.CampaignID) }
-								hx-get={ "/campaigns/" + activity.CampaignID }
-								hx-target="#main"
-								hx-swap="innerHTML"
-								hx-push-url="true"
-							>{activity.CampaignName}</a>
+							@NavLink("/campaigns/" + activity.CampaignID) {
+								{activity.CampaignName}
+							}
 						</td>
 						<td>{activity.EventType}</td>
-						<td><small>{activity.Timestamp}</small></td>
+						<td>{activity.Timestamp}</td>
 					</tr>
 				}
 			</tbody>

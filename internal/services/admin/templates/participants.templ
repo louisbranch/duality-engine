@@ -9,21 +9,16 @@ templ ParticipantsListFullPage(campaignID string, campaignName string, page Page
 
 // ParticipantsListPage renders the participants list content.
 templ ParticipantsListPage(campaignID string, campaignName string, loc Localizer) {
-	<h2>{campaignName}</h2>
-	@CampaignSubNav(campaignID, "participants", loc)
-	<h3>{T(loc, "participants.heading")}</h3>
-	@ParticipantsLoading(campaignID, loc)
+	@PageHeader(PageHeading{Breadcrumbs: []Breadcrumb{{T(loc, "nav.campaigns"), "/campaigns"}, {campaignName, ""}}, Title: campaignName})
+	@CampaignSubNav(campaignID, "participants", loc) {
+		<h3>{T(loc, "participants.heading")}</h3>
+		@ParticipantsLoading(campaignID, loc)
+	}
 }
 
 // ParticipantsLoading renders the HTMX loading placeholder.
 templ ParticipantsLoading(campaignID string, loc Localizer) {
-	<div
-		hx-get={ "/campaigns/" + campaignID + "/participants/table" }
-		hx-trigger="load"
-		hx-swap="outerHTML"
-	>
-		<p>{T(loc, "participants.loading")}</p>
-	</div>
+	@LazyLoad("/campaigns/"+campaignID+"/participants/table", T(loc, "participants.loading"))
 }
 
 // ParticipantsTable renders the participants table.
@@ -31,7 +26,7 @@ templ ParticipantsTable(rows []ParticipantRow, message string, loc Localizer) {
 	if len(rows) == 0 {
 		@EmptyState(message)
 	} else {
-		<table>
+		<table class="table table-zebra">
 			<thead>
 				<tr>
 					<th>{T(loc, "participants.table.display_name")}</th>
