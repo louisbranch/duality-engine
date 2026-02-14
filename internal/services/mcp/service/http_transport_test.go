@@ -682,3 +682,182 @@ func TestHTTPTransport_ensureServerRunning(t *testing.T) {
 		t.Error("serverOnce should not be nil")
 	}
 }
+
+func TestHTTPTransport_handleMessages_InvalidSessionHeader(t *testing.T) {
+	transport := NewHTTPTransport("localhost:8081")
+
+	request := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"id":      1,
+		"method":  "tools/list",
+		"params":  map[string]interface{}{},
+	}
+	body, _ := json.Marshal(request)
+
+	req := httptest.NewRequest(http.MethodPost, "/mcp/messages", strings.NewReader(string(body)))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Mcp-Session-Id", "nonexistent-session")
+	setLocalhostHeaders(req)
+	w := httptest.NewRecorder()
+
+	transport.handleMessages(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestHTTPTransport_handleMessages_CookieSessionReuse(t *testing.T) {
+	transport := NewHTTPTransport("localhost:8081")
+
+	// First: create a session via initialize
+	initRequest := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"id":      1,
+		"method":  "initialize",
+		"params":  map[string]interface{}{},
+	}
+	initBody, _ := json.Marshal(initRequest)
+
+	initReq := httptest.NewRequest(http.MethodPost, "/mcp/messages", strings.NewReader(string(initBody)))
+	initReq.Header.Set("Content-Type", "application/json")
+	setLocalhostHeaders(initReq)
+	initResp := httptest.NewRecorder()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+	initReq = initReq.WithContext(ctx)
+
+	transport.handleMessages(initResp, initReq)
+
+	// Extract session cookie
+	var sessionCookie *http.Cookie
+	for _, cookie := range initResp.Result().Cookies() {
+		if cookie.Name == "mcp_session" {
+			sessionCookie = cookie
+			break
+		}
+	}
+	if sessionCookie == nil {
+		t.Fatal("expected mcp_session cookie")
+	}
+
+	// Second: use cookie to reuse session
+	listRequest := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"id":      2,
+		"method":  "tools/list",
+		"params":  map[string]interface{}{},
+	}
+	listBody, _ := json.Marshal(listRequest)
+
+	listReq := httptest.NewRequest(http.MethodPost, "/mcp/messages", strings.NewReader(string(listBody)))
+	listReq.Header.Set("Content-Type", "application/json")
+	listReq.AddCookie(sessionCookie)
+	setLocalhostHeaders(listReq)
+	listResp := httptest.NewRecorder()
+
+	listCtx, listCancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer listCancel()
+	listReq = listReq.WithContext(listCtx)
+
+	transport.handleMessages(listResp, listReq)
+
+	// Should not be a session error (400 with "Invalid or missing session ID")
+	if listResp.Code == http.StatusBadRequest && strings.Contains(listResp.Body.String(), "Invalid or missing session ID") {
+		t.Error("expected cookie-based session reuse, got session error")
+	}
+}
+
+func TestHTTPTransport_handleMessages_NotificationNoResponse(t *testing.T) {
+	transport := NewHTTPTransport("localhost:8081")
+
+	// Create a session first
+	ctx := context.Background()
+	conn, err := transport.Connect(ctx)
+	if err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+	sessionID := conn.SessionID()
+
+	// Send a notification (no ID field, or ID = zero)
+	notification := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"method":  "notifications/initialized",
+	}
+	body, _ := json.Marshal(notification)
+
+	req := httptest.NewRequest(http.MethodPost, "/mcp/messages", strings.NewReader(string(body)))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Mcp-Session-Id", sessionID)
+	setLocalhostHeaders(req)
+	w := httptest.NewRecorder()
+
+	transport.handleMessages(w, req)
+
+	// Notifications should return 204 No Content
+	if w.Code != http.StatusNoContent {
+		t.Errorf("notification status = %d, want %d", w.Code, http.StatusNoContent)
+	}
+}
+
+func TestHTTPTransport_handleSSE_CookieSession(t *testing.T) {
+	transport := NewHTTPTransport("localhost:8081")
+
+	ctx, cancel := context.WithCancel(context.Background())
+	conn, err := transport.Connect(ctx)
+	if err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+	sessionID := conn.SessionID()
+
+	req := httptest.NewRequest(http.MethodGet, "/mcp/sse", nil)
+	setLocalhostHeaders(req)
+	req.AddCookie(&http.Cookie{Name: "mcp_session", Value: sessionID})
+
+	// Cancel the context shortly to stop the SSE loop
+	go func() {
+		time.Sleep(50 * time.Millisecond)
+		cancel()
+	}()
+
+	w := httptest.NewRecorder()
+	req = req.WithContext(ctx)
+	transport.handleSSE(w, req)
+
+	if ct := w.Header().Get("Content-Type"); ct != "text/event-stream" {
+		t.Errorf("content-type = %q, want text/event-stream", ct)
+	}
+}
+
+func TestHTTPTransport_handleMessages_ResponseType(t *testing.T) {
+	transport := NewHTTPTransport("localhost:8081")
+
+	// Create a session
+	ctx := context.Background()
+	conn, err := transport.Connect(ctx)
+	if err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+	sessionID := conn.SessionID()
+
+	// Send a JSON-RPC response (not a request) — should be rejected
+	response := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"id":      1,
+		"result":  map[string]interface{}{},
+	}
+	body, _ := json.Marshal(response)
+
+	req := httptest.NewRequest(http.MethodPost, "/mcp/messages", strings.NewReader(string(body)))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Mcp-Session-Id", sessionID)
+	setLocalhostHeaders(req)
+	w := httptest.NewRecorder()
+
+	transport.handleMessages(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("response message status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}

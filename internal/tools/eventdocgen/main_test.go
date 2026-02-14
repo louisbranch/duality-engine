@@ -1,6 +1,8 @@
 package main
 
 import (
+	"go/ast"
+	"go/parser"
 	"go/token"
 	"os"
 	"path/filepath"
@@ -196,4 +198,195 @@ func TestFormatPosition(t *testing.T) {
 
 func tokenPosition(file string, line int) token.Position {
 	return token.Position{Filename: file, Line: line}
+}
+
+func TestResolveRoot(t *testing.T) {
+	t.Run("explicit flag", func(t *testing.T) {
+		got, err := resolveRoot("/some/path")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got != "/some/path" {
+			t.Errorf("got %q, want /some/path", got)
+		}
+	})
+
+	t.Run("empty flag uses cwd", func(t *testing.T) {
+		// From the project root, findModuleRoot should succeed.
+		got, err := resolveRoot("")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got == "" {
+			t.Error("expected non-empty root")
+		}
+	})
+}
+
+func TestSelectValueExpr(t *testing.T) {
+	a := &ast.BasicLit{Kind: token.STRING, Value: `"a"`}
+	b := &ast.BasicLit{Kind: token.STRING, Value: `"b"`}
+
+	t.Run("empty list", func(t *testing.T) {
+		if got := selectValueExpr(nil, 0); got != nil {
+			t.Error("expected nil for empty list")
+		}
+	})
+
+	t.Run("single value any index", func(t *testing.T) {
+		if got := selectValueExpr([]ast.Expr{a}, 5); got != a {
+			t.Error("expected single value to always be returned")
+		}
+	})
+
+	t.Run("multi value in range", func(t *testing.T) {
+		if got := selectValueExpr([]ast.Expr{a, b}, 1); got != b {
+			t.Error("expected second element")
+		}
+	})
+
+	t.Run("multi value out of range", func(t *testing.T) {
+		if got := selectValueExpr([]ast.Expr{a, b}, 5); got != nil {
+			t.Error("expected nil for out-of-range index")
+		}
+	})
+}
+
+func TestEventNameFromExpr(t *testing.T) {
+	t.Run("selector expr", func(t *testing.T) {
+		e := &ast.SelectorExpr{
+			X:   &ast.Ident{Name: "event"},
+			Sel: &ast.Ident{Name: "TypeFoo"},
+		}
+		if got := eventNameFromExpr(e); got != "TypeFoo" {
+			t.Errorf("got %q, want TypeFoo", got)
+		}
+	})
+
+	t.Run("ident expr", func(t *testing.T) {
+		e := &ast.Ident{Name: "TypeBar"}
+		if got := eventNameFromExpr(e); got != "TypeBar" {
+			t.Errorf("got %q, want TypeBar", got)
+		}
+	})
+
+	t.Run("other expr", func(t *testing.T) {
+		e := &ast.BasicLit{Kind: token.STRING, Value: `"literal"`}
+		if got := eventNameFromExpr(e); got != "" {
+			t.Errorf("got %q, want empty string", got)
+		}
+	})
+}
+
+func TestUnmappedPayloads(t *testing.T) {
+	t.Run("nil payloads", func(t *testing.T) {
+		result := unmappedPayloads(nil, nil)
+		if result != nil {
+			t.Error("expected nil for nil payloads")
+		}
+	})
+
+	t.Run("all used", func(t *testing.T) {
+		payloads := map[string]payloadDef{"A": {Name: "A"}}
+		used := map[string]struct{}{"A": {}}
+		result := unmappedPayloads(payloads, used)
+		if len(result) != 0 {
+			t.Errorf("expected 0 unmapped, got %d", len(result))
+		}
+	})
+
+	t.Run("some unmapped", func(t *testing.T) {
+		payloads := map[string]payloadDef{
+			"A": {Name: "A"},
+			"B": {Name: "B"},
+			"C": {Name: "C"},
+		}
+		used := map[string]struct{}{"A": {}}
+		result := unmappedPayloads(payloads, used)
+		if len(result) != 2 {
+			t.Fatalf("expected 2 unmapped, got %d", len(result))
+		}
+		// Should be sorted by name.
+		if result[0].Name != "B" || result[1].Name != "C" {
+			t.Errorf("expected [B, C], got [%s, %s]", result[0].Name, result[1].Name)
+		}
+	})
+}
+
+func TestExprString(t *testing.T) {
+	fset := token.NewFileSet()
+	e := &ast.Ident{Name: "MyType"}
+	got := exprString(fset, e)
+	if got != "MyType" {
+		t.Errorf("got %q, want MyType", got)
+	}
+}
+
+func TestParsePayloadFields(t *testing.T) {
+	t.Run("nil fields", func(t *testing.T) {
+		result := parsePayloadFields(nil, token.NewFileSet())
+		if result != nil {
+			t.Error("expected nil for nil fields")
+		}
+	})
+
+	t.Run("embedded field skipped", func(t *testing.T) {
+		// Parse a struct with an embedded field (no names).
+		src := `package x; type S struct { Embedded; Name string }` //nolint
+		fset := token.NewFileSet()
+		file, err := parser.ParseFile(fset, "test.go", src, 0)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var structType *ast.StructType
+		ast.Inspect(file, func(n ast.Node) bool {
+			if st, ok := n.(*ast.StructType); ok {
+				structType = st
+				return false
+			}
+			return true
+		})
+		if structType == nil {
+			t.Fatal("struct not found")
+		}
+		fields := parsePayloadFields(structType.Fields, fset)
+		// Only "Name" should be returned (embedded "Embedded" is skipped).
+		if len(fields) != 1 {
+			t.Fatalf("expected 1 field, got %d", len(fields))
+		}
+		if fields[0].Name != "Name" {
+			t.Errorf("got field %q, want Name", fields[0].Name)
+		}
+	})
+}
+
+func TestRenderCatalog_EmptyPackage(t *testing.T) {
+	// A package with no events should produce no section.
+	defs := packageDefs{Events: nil, Payloads: map[string]payloadDef{}}
+	output, err := renderCatalog([]packageDefs{defs}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(output, "## ") {
+		t.Error("expected no section header for empty package")
+	}
+}
+
+func TestRenderCatalog_NoPayload(t *testing.T) {
+	defs := packageDefs{
+		Events: []eventDef{{
+			Owner:     "Core",
+			Name:      "TypeOrphan",
+			Value:     "orphan",
+			DefinedAt: "foo.go:1",
+		}},
+		Payloads: map[string]payloadDef{},
+	}
+	output, err := renderCatalog([]packageDefs{defs}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(output, "Payload: not found") {
+		t.Error("expected 'Payload: not found' for event without matching payload")
+	}
 }

@@ -126,6 +126,143 @@ func TestPageCursorDirections(t *testing.T) {
 	}
 }
 
+func TestCursorValue(t *testing.T) {
+	c := Cursor{
+		Values: []CursorValue{
+			StringValue("name", "alice"),
+			IntValue("age", 30),
+			UintValue("seq", 42),
+		},
+	}
+
+	t.Run("found", func(t *testing.T) {
+		v, ok := c.Value("name")
+		if !ok {
+			t.Fatal("expected to find 'name'")
+		}
+		if v.StringValue != "alice" {
+			t.Errorf("expected alice, got %q", v.StringValue)
+		}
+	})
+
+	t.Run("not found", func(t *testing.T) {
+		_, ok := c.Value("missing")
+		if ok {
+			t.Fatal("expected not found")
+		}
+	})
+}
+
+func TestValueString(t *testing.T) {
+	c := Cursor{Values: []CursorValue{
+		StringValue("id", "abc"),
+		IntValue("num", 5),
+	}}
+
+	t.Run("success", func(t *testing.T) {
+		got, err := ValueString(c, "id")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got != "abc" {
+			t.Errorf("got %q, want abc", got)
+		}
+	})
+
+	t.Run("missing", func(t *testing.T) {
+		_, err := ValueString(c, "missing")
+		if err == nil {
+			t.Fatal("expected error for missing value")
+		}
+	})
+
+	t.Run("wrong kind", func(t *testing.T) {
+		_, err := ValueString(c, "num")
+		if err == nil {
+			t.Fatal("expected error for wrong kind")
+		}
+	})
+}
+
+func TestValueInt(t *testing.T) {
+	c := Cursor{Values: []CursorValue{
+		IntValue("age", 25),
+		StringValue("name", "bob"),
+	}}
+
+	t.Run("success", func(t *testing.T) {
+		got, err := ValueInt(c, "age")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got != 25 {
+			t.Errorf("got %d, want 25", got)
+		}
+	})
+
+	t.Run("missing", func(t *testing.T) {
+		_, err := ValueInt(c, "missing")
+		if err == nil {
+			t.Fatal("expected error for missing value")
+		}
+	})
+
+	t.Run("wrong kind", func(t *testing.T) {
+		_, err := ValueInt(c, "name")
+		if err == nil {
+			t.Fatal("expected error for wrong kind")
+		}
+	})
+}
+
+func TestValueUint(t *testing.T) {
+	c := Cursor{Values: []CursorValue{
+		UintValue("seq", 100),
+		StringValue("id", "x"),
+	}}
+
+	t.Run("success", func(t *testing.T) {
+		got, err := ValueUint(c, "seq")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got != 100 {
+			t.Errorf("got %d, want 100", got)
+		}
+	})
+
+	t.Run("missing", func(t *testing.T) {
+		_, err := ValueUint(c, "missing")
+		if err == nil {
+			t.Fatal("expected error for missing value")
+		}
+	})
+
+	t.Run("wrong kind", func(t *testing.T) {
+		_, err := ValueUint(c, "id")
+		if err == nil {
+			t.Fatal("expected error for wrong kind")
+		}
+	})
+}
+
+func TestCursorValueConstructors(t *testing.T) {
+	sv := StringValue("name", "val")
+	if sv.Kind != CursorValueString || sv.Name != "name" || sv.StringValue != "val" {
+		t.Errorf("StringValue: %+v", sv)
+	}
+
+	iv := IntValue("n", -7)
+	if iv.Kind != CursorValueInt || iv.Name != "n" || iv.IntValue != -7 {
+		t.Errorf("IntValue: %+v", iv)
+	}
+
+	uv := UintValue("u", 99)
+	if uv.Kind != CursorValueUint || uv.Name != "u" || uv.UintValue != 99 {
+		t.Errorf("UintValue: %+v", uv)
+	}
+}
+
 func TestFilterAndOrderHashesDiffer(t *testing.T) {
 	c := NewCursor([]CursorValue{UintValue("seq", 10)}, DirectionForward, false, "filter-a", "order-b")
 	if c.FilterHash == "" || c.OrderHash == "" {

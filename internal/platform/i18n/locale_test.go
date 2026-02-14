@@ -7,6 +7,35 @@ import (
 	"golang.org/x/text/language"
 )
 
+func TestSupportedLocales(t *testing.T) {
+	locales := SupportedLocales()
+	if len(locales) == 0 {
+		t.Fatal("expected at least one supported locale")
+	}
+	// Modifying the returned slice should not affect the source.
+	original := len(locales)
+	locales[0] = commonv1.Locale_LOCALE_UNSPECIFIED
+	if got := SupportedLocales(); len(got) != original {
+		t.Fatalf("mutation leaked: expected %d locales, got %d", original, len(got))
+	}
+}
+
+func TestSupportedTags(t *testing.T) {
+	tags := SupportedTags()
+	if len(tags) == 0 {
+		t.Fatal("expected at least one supported tag")
+	}
+}
+
+func TestDefaultLocaleAndTag(t *testing.T) {
+	if DefaultLocale() == commonv1.Locale_LOCALE_UNSPECIFIED {
+		t.Fatal("expected a specific default locale")
+	}
+	if DefaultTag() == (language.Tag{}) {
+		t.Fatal("expected a valid default tag")
+	}
+}
+
 func TestNormalizeLocale(t *testing.T) {
 	tests := []struct {
 		name  string
