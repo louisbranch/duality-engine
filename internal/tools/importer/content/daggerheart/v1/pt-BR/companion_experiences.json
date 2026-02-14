@@ -1,0 +1,28 @@
+{
+  "system_id": "daggerheart",
+  "system_version": "v1",
+  "source": "Daggerheart SRD v1 (paraphrased)",
+  "locale": "pt-BR",
+  "items": [
+    {"id": "companion-experience.bold-distraction", "name": "Distração Ousada", "description": ""},
+    {"id": "companion-experience.expert-climber", "name": "Escalador Experiente", "description": ""},
+    {"id": "companion-experience.fetch", "name": "Buscar", "description": ""},
+    {"id": "companion-experience.friendly", "name": "Amigável", "description": ""},
+    {"id": "companion-experience.guardian-of-the-forest", "name": "Guardião da Floresta", "description": ""},
+    {"id": "companion-experience.horrifying", "name": "Aterrorizante", "description": ""},
+    {"id": "companion-experience.intimidating", "name": "Intimidador", "description": ""},
+    {"id": "companion-experience.loyal-until-the-end", "name": "Leal Até o Fim", "description": ""},
+    {"id": "companion-experience.navigation", "name": "Navegação", "description": ""},
+    {"id": "companion-experience.nimble", "name": "Ágil", "description": ""},
+    {"id": "companion-experience.nobody-left-behind", "name": "Ninguém Fica Para Trás", "description": ""},
+    {"id": "companion-experience.on-high-alert", "name": "Em Alerta Máximo", "description": ""},
+    {"id": "companion-experience.protective", "name": "Protetor", "description": ""},
+    {"id": "companion-experience.royal-companion", "name": "Companheiro Real", "description": ""},
+    {"id": "companion-experience.scout", "name": "Batedor", "description": ""},
+    {"id": "companion-experience.service-animal", "name": "Animal de Serviço", "description": ""},
+    {"id": "companion-experience.trusted-mount", "name": "Montaria Confiável", "description": ""},
+    {"id": "companion-experience.vigilant", "name": "Vigilante", "description": ""},
+    {"id": "companion-experience.we-always-find-them", "name": "Nós Sempre Encontramos", "description": ""},
+    {"id": "companion-experience.you-cant-hit-what-you-cant-find", "name": "Você Não Acerta o Que Não Encontra", "description": ""}
+  ]
+}

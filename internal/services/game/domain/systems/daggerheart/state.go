@@ -132,9 +132,11 @@ func (s *CharacterState) GainResource(name string, amount int) (before, after in
 		s.hope = min(s.hope+amount, s.hopeMax)
 		return before, s.hope, nil
 	case ResourceStress:
-		before = s.stress
-		s.stress = min(s.stress+amount, s.stressMax)
-		return before, s.stress, nil
+		result, err := s.GainStress(amount)
+		if err != nil {
+			return 0, 0, err
+		}
+		return result.StressBefore, result.StressAfter, nil
 	case ResourceArmor:
 		before = s.armor
 		s.armor = min(s.armor+amount, s.armorMax)
@@ -142,6 +144,56 @@ func (s *CharacterState) GainResource(name string, amount int) (before, after in
 	default:
 		return 0, 0, unknownResourceError(name)
 	}
+}
+
+// StressGainResult captures the outcome of gaining stress with overflow handling.
+// LastStressMarked indicates the gain filled the final stress slot.
+// Overflow is the amount converted into HP loss when stress is already full.
+type StressGainResult struct {
+	StressBefore     int
+	StressAfter      int
+	HPBefore         int
+	HPAfter          int
+	Overflow         int
+	LastStressMarked bool
+}
+
+// GainStress applies stress gain with overflow rules.
+func (s *CharacterState) GainStress(amount int) (StressGainResult, error) {
+	result := StressGainResult{
+		StressBefore: s.stress,
+		HPBefore:     s.hp,
+	}
+	if amount <= 0 {
+		result.StressAfter = s.stress
+		result.HPAfter = s.hp
+		return result, nil
+	}
+
+	maxStress := s.stressMax
+	if s.stress >= maxStress {
+		result.Overflow = amount
+		result.StressAfter = maxStress
+		s.hp = max(s.hp-amount, 0)
+		result.HPAfter = s.hp
+		return result, nil
+	}
+
+	needed := maxStress - s.stress
+	if amount >= needed {
+		result.LastStressMarked = true
+		result.Overflow = amount - needed
+		s.stress = maxStress
+		if result.Overflow > 0 {
+			s.hp = max(s.hp-result.Overflow, 0)
+		}
+	} else {
+		s.stress += amount
+	}
+
+	result.StressAfter = s.stress
+	result.HPAfter = s.hp
+	return result, nil
 }
 
 // SpendResource decreases a named resource (hope or stress).

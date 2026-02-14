@@ -1,0 +1,53 @@
+{
+  "system_id": "daggerheart",
+  "system_version": "v1",
+  "source": "Daggerheart SRD v1 (paraphrased)",
+  "locale": "en-US",
+  "items": [
+    {
+      "id": "domain.arcana",
+      "name": "Arcana",
+      "description": "A domain of raw, enigmatic power used to bend energy and the elements."
+    },
+    {
+      "id": "domain.blade",
+      "name": "Blade",
+      "description": "A domain of martial precision and the skill to end fights with steel."
+    },
+    {
+      "id": "domain.bone",
+      "name": "Bone",
+      "description": "A domain of bodily mastery, resilience, and the thin line of life and death."
+    },
+    {
+      "id": "domain.codex",
+      "name": "Codex",
+      "description": "A domain of recorded knowledge, equations of power, and practiced study."
+    },
+    {
+      "id": "domain.grace",
+      "name": "Grace",
+      "description": "A domain of charm, performance, and shaping perception through presence."
+    },
+    {
+      "id": "domain.midnight",
+      "name": "Midnight",
+      "description": "A domain of obscurity, clever tricks, and the cloak of night."
+    },
+    {
+      "id": "domain.sage",
+      "name": "Sage",
+      "description": "A domain of earth's power, natural balance, and hard-won wisdom."
+    },
+    {
+      "id": "domain.splendor",
+      "name": "Splendor",
+      "description": "A domain of life, healing radiance, and the power to defy death."
+    },
+    {
+      "id": "domain.valor",
+      "name": "Valor",
+      "description": "A domain of courage, defense, and shields held against the odds."
+    }
+  ]
+}

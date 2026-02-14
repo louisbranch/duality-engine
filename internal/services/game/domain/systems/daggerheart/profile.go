@@ -139,13 +139,15 @@ type ProfileDefaults struct {
 func GetProfileDefaults(kind string) ProfileDefaults {
 	switch kind {
 	case "NPC":
+		level := NPCLevelDefault
+		major, severe := DeriveThresholds(level, NPCArmorScore, NPCMajorThreshold, NPCSevereThreshold)
 		return ProfileDefaults{
-			Level:           NPCLevelDefault,
+			Level:           level,
 			HpMax:           NPCHpMax,
 			StressMax:       NPCStressMax,
 			Evasion:         NPCEvasion,
-			MajorThreshold:  NPCMajorThreshold,
-			SevereThreshold: NPCSevereThreshold,
+			MajorThreshold:  major,
+			SevereThreshold: severe,
 			Proficiency:     NPCProficiency,
 			ArmorScore:      NPCArmorScore,
 			ArmorMax:        NPCArmorMax,
@@ -153,13 +155,15 @@ func GetProfileDefaults(kind string) ProfileDefaults {
 			Experiences:     nil,
 		}
 	default: // PC
+		level := PCLevelDefault
+		major, severe := DeriveThresholds(level, PCArmorScore, PCMajorThreshold, PCSevereThreshold)
 		return ProfileDefaults{
-			Level:           PCLevelDefault,
+			Level:           level,
 			HpMax:           PCHpMax,
 			StressMax:       PCStressMax,
 			Evasion:         PCEvasion,
-			MajorThreshold:  PCMajorThreshold,
-			SevereThreshold: PCSevereThreshold,
+			MajorThreshold:  major,
+			SevereThreshold: severe,
 			Proficiency:     PCProficiency,
 			ArmorScore:      PCArmorScore,
 			ArmorMax:        PCArmorMax,
@@ -167,6 +171,20 @@ func GetProfileDefaults(kind string) ProfileDefaults {
 			Experiences:     nil,
 		}
 	}
+}
+
+// UnarmoredThresholds returns the major/severe thresholds for unarmored characters.
+func UnarmoredThresholds(level int) (majorThreshold, severeThreshold int) {
+	return level, level * 2
+}
+
+// DeriveThresholds returns thresholds derived from level and armor score.
+// Unarmored characters use level-based thresholds; armored characters keep provided thresholds.
+func DeriveThresholds(level, armorScore, majorThreshold, severeThreshold int) (int, int) {
+	if armorScore == 0 {
+		return UnarmoredThresholds(level)
+	}
+	return majorThreshold, severeThreshold
 }
 
 // ValidateLevel validates level is within 1..10.

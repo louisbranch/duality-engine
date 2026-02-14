@@ -205,6 +205,13 @@ func withUserID(ctx context.Context, userID string) context.Context {
 	return metadata.NewOutgoingContext(ctx, metadata.Pairs(grpcmeta.UserIDHeader, userID))
 }
 
+func withSessionID(ctx context.Context, sessionID string) context.Context {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	return metadata.NewOutgoingContext(ctx, metadata.Pairs(grpcmeta.SessionIDHeader, sessionID))
+}
+
 func joinGrantToken(t *testing.T, campaignID, inviteID, userID string, now time.Time) string {
 	t.Helper()
 	if joinGrantPrivateKey == nil {

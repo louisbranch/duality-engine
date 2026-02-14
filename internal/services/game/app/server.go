@@ -30,12 +30,13 @@ import (
 
 // Server hosts the game service.
 type Server struct {
-	listener   net.Listener
-	grpcServer *grpc.Server
-	health     *health.Server
-	eventStore *storagesqlite.Store
-	projStore  *storagesqlite.Store
-	authConn   *grpc.ClientConn
+	listener     net.Listener
+	grpcServer   *grpc.Server
+	health       *health.Server
+	eventStore   *storagesqlite.Store
+	projStore    *storagesqlite.Store
+	contentStore *storagesqlite.Store
+	authConn     *grpc.ClientConn
 }
 
 // defaultAuthDialTimeout caps auth gRPC dial wait time.
@@ -55,25 +56,28 @@ func NewWithAddr(addr string) (*Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("listen on %s: %w", addr, err)
 	}
-	eventStore, projStore, err := openStores()
+	eventStore, projStore, contentStore, err := openStores()
 	if err != nil {
 		_ = listener.Close()
 		return nil, err
 	}
 	stores := gamegrpc.Stores{
-		Campaign:     projStore,
-		Participant:  projStore,
-		ClaimIndex:   projStore,
-		Invite:       projStore,
-		Character:    projStore,
-		Daggerheart:  projStore,
-		Session:      projStore,
-		Event:        eventStore,
-		Telemetry:    eventStore,
-		Statistics:   projStore,
-		Outcome:      eventStore,
-		Snapshot:     projStore,
-		CampaignFork: projStore,
+		Campaign:           projStore,
+		Participant:        projStore,
+		ClaimIndex:         projStore,
+		Invite:             projStore,
+		Character:          projStore,
+		Daggerheart:        projStore,
+		Session:            projStore,
+		SessionGate:        projStore,
+		SessionSpotlight:   projStore,
+		Event:              eventStore,
+		Telemetry:          eventStore,
+		Statistics:         projStore,
+		Outcome:            eventStore,
+		Snapshot:           projStore,
+		CampaignFork:       projStore,
+		DaggerheartContent: contentStore,
 	}
 
 	authConn, authClient, err := dialAuthGRPC(context.Background())
@@ -81,6 +85,7 @@ func NewWithAddr(addr string) (*Server, error) {
 		_ = listener.Close()
 		_ = eventStore.Close()
 		_ = projStore.Close()
+		_ = contentStore.Close()
 		return nil, err
 	}
 
@@ -93,13 +98,17 @@ func NewWithAddr(addr string) (*Server, error) {
 		grpc.StreamInterceptor(grpcmeta.StreamServerInterceptor(nil)),
 	)
 	daggerheartStores := daggerheartservice.Stores{
-		Campaign:    projStore,
-		Character:   projStore,
-		Session:     projStore,
-		Daggerheart: projStore,
-		Event:       eventStore,
+		Campaign:           projStore,
+		Character:          projStore,
+		Session:            projStore,
+		SessionGate:        projStore,
+		SessionSpotlight:   projStore,
+		Daggerheart:        projStore,
+		DaggerheartContent: contentStore,
+		Event:              eventStore,
 	}
 	daggerheartService := daggerheartservice.NewDaggerheartService(daggerheartStores, random.NewSeed)
+	contentService := daggerheartservice.NewDaggerheartContentService(daggerheartStores)
 	campaignService := gamegrpc.NewCampaignServiceWithAuth(stores, authClient)
 	participantService := gamegrpc.NewParticipantService(stores)
 	inviteService := gamegrpc.NewInviteServiceWithAuth(stores, authClient)
@@ -111,6 +120,7 @@ func NewWithAddr(addr string) (*Server, error) {
 	statisticsService := gamegrpc.NewStatisticsService(stores)
 	healthServer := health.NewServer()
 	daggerheartv1.RegisterDaggerheartServiceServer(grpcServer, daggerheartService)
+	daggerheartv1.RegisterDaggerheartContentServiceServer(grpcServer, contentService)
 	statev1.RegisterCampaignServiceServer(grpcServer, campaignService)
 	statev1.RegisterParticipantServiceServer(grpcServer, participantService)
 	statev1.RegisterInviteServiceServer(grpcServer, inviteService)
@@ -123,6 +133,7 @@ func NewWithAddr(addr string) (*Server, error) {
 	grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
 	healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
 	healthServer.SetServingStatus("systems.daggerheart.v1.DaggerheartService", grpc_health_v1.HealthCheckResponse_SERVING)
+	healthServer.SetServingStatus("systems.daggerheart.v1.DaggerheartContentService", grpc_health_v1.HealthCheckResponse_SERVING)
 	healthServer.SetServingStatus("game.v1.CampaignService", grpc_health_v1.HealthCheckResponse_SERVING)
 	healthServer.SetServingStatus("game.v1.ParticipantService", grpc_health_v1.HealthCheckResponse_SERVING)
 	healthServer.SetServingStatus("game.v1.InviteService", grpc_health_v1.HealthCheckResponse_SERVING)
@@ -134,12 +145,13 @@ func NewWithAddr(addr string) (*Server, error) {
 	healthServer.SetServingStatus("game.v1.StatisticsService", grpc_health_v1.HealthCheckResponse_SERVING)
 
 	return &Server{
-		listener:   listener,
-		grpcServer: grpcServer,
-		health:     healthServer,
-		eventStore: eventStore,
-		projStore:  projStore,
-		authConn:   authConn,
+		listener:     listener,
+		grpcServer:   grpcServer,
+		health:       healthServer,
+		eventStore:   eventStore,
+		projStore:    projStore,
+		contentStore: contentStore,
+		authConn:     authConn,
 	}, nil
 }
 
@@ -202,17 +214,23 @@ func (s *Server) Serve(ctx context.Context) error {
 	}
 }
 
-func openStores() (*storagesqlite.Store, *storagesqlite.Store, error) {
+func openStores() (*storagesqlite.Store, *storagesqlite.Store, *storagesqlite.Store, error) {
 	eventStore, err := openEventStore()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	projStore, err := openProjectionStore()
 	if err != nil {
 		_ = eventStore.Close()
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
-	return eventStore, projStore, nil
+	contentStore, err := openContentStore()
+	if err != nil {
+		_ = eventStore.Close()
+		_ = projStore.Close()
+		return nil, nil, nil, err
+	}
+	return eventStore, projStore, contentStore, nil
 }
 
 func dialAuthGRPC(ctx context.Context) (*grpc.ClientConn, authv1.AuthServiceClient, error) {
@@ -282,6 +300,21 @@ func openProjectionStore() (*storagesqlite.Store, error) {
 	return store, nil
 }
 
+func openContentStore() (*storagesqlite.Store, error) {
+	path := strings.TrimSpace(os.Getenv("FRACTURING_SPACE_GAME_CONTENT_DB_PATH"))
+	if path == "" {
+		path = filepath.Join("data", "game-content.db")
+	}
+	if err := ensureDir(path); err != nil {
+		return nil, err
+	}
+	store, err := storagesqlite.OpenContent(path)
+	if err != nil {
+		return nil, fmt.Errorf("open content store: %w", err)
+	}
+	return store, nil
+}
+
 func ensureDir(path string) error {
 	if dir := filepath.Dir(path); dir != "." {
 		if err := os.MkdirAll(dir, 0o755); err != nil {
@@ -303,6 +336,11 @@ func (s *Server) closeStores() {
 	if s.projStore != nil {
 		if err := s.projStore.Close(); err != nil {
 			log.Printf("close projection store: %v", err)
+		}
+	}
+	if s.contentStore != nil {
+		if err := s.contentStore.Close(); err != nil {
+			log.Printf("close content store: %v", err)
 		}
 	}
 	if s.authConn != nil {

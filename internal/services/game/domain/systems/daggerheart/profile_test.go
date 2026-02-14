@@ -82,6 +82,12 @@ func TestGetProfileDefaults(t *testing.T) {
 	if pc.Level != PCLevelDefault {
 		t.Errorf("expected PC level %d, got %d", PCLevelDefault, pc.Level)
 	}
+	if pc.MajorThreshold != pc.Level {
+		t.Errorf("expected PC unarmored major threshold %d, got %d", pc.Level, pc.MajorThreshold)
+	}
+	if pc.SevereThreshold != pc.Level*2 {
+		t.Errorf("expected PC unarmored severe threshold %d, got %d", pc.Level*2, pc.SevereThreshold)
+	}
 	if pc.Evasion != PCEvasion {
 		t.Errorf("expected PC evasion %d, got %d", PCEvasion, pc.Evasion)
 	}
@@ -92,6 +98,12 @@ func TestGetProfileDefaults(t *testing.T) {
 	}
 	if npc.Level != NPCLevelDefault {
 		t.Errorf("expected NPC level %d, got %d", NPCLevelDefault, npc.Level)
+	}
+	if npc.MajorThreshold != npc.Level {
+		t.Errorf("expected NPC unarmored major threshold %d, got %d", npc.Level, npc.MajorThreshold)
+	}
+	if npc.SevereThreshold != npc.Level*2 {
+		t.Errorf("expected NPC unarmored severe threshold %d, got %d", npc.Level*2, npc.SevereThreshold)
 	}
 	if npc.Evasion != NPCEvasion {
 		t.Errorf("expected NPC evasion %d, got %d", NPCEvasion, npc.Evasion)
@@ -104,6 +116,24 @@ func TestGetProfileDefaults(t *testing.T) {
 	}
 	if unknown.Level != PCLevelDefault {
 		t.Errorf("expected unknown kind to default to PC level %d, got %d", PCLevelDefault, unknown.Level)
+	}
+	if unknown.MajorThreshold != unknown.Level {
+		t.Errorf("expected unknown kind unarmored major threshold %d, got %d", unknown.Level, unknown.MajorThreshold)
+	}
+	if unknown.SevereThreshold != unknown.Level*2 {
+		t.Errorf("expected unknown kind unarmored severe threshold %d, got %d", unknown.Level*2, unknown.SevereThreshold)
+	}
+}
+
+func TestDeriveThresholds(t *testing.T) {
+	major, severe := DeriveThresholds(3, 0, 8, 12)
+	if major != 3 || severe != 6 {
+		t.Fatalf("unarmored thresholds = %d/%d, want 3/6", major, severe)
+	}
+
+	major, severe = DeriveThresholds(3, 2, 8, 12)
+	if major != 8 || severe != 12 {
+		t.Fatalf("armored thresholds = %d/%d, want 8/12", major, severe)
 	}
 }
 

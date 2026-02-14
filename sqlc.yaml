@@ -5,6 +5,7 @@ sql:
     schema:
       - "internal/services/game/storage/sqlite/migrations/events"
       - "internal/services/game/storage/sqlite/migrations/projections"
+      - "internal/services/game/storage/sqlite/migrations/content"
     gen:
       go:
         package: "db"

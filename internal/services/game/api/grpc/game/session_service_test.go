@@ -10,6 +10,7 @@ import (
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/event"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/session"
+	"github.com/louisbranch/fracturing.space/internal/services/game/storage"
 	"google.golang.org/grpc/codes"
 )
 
@@ -197,6 +198,135 @@ func TestListSessions_CampaignNotFound(t *testing.T) {
 	svc := NewSessionService(Stores{Campaign: campaignStore, Session: sessionStore})
 	_, err := svc.ListSessions(context.Background(), &statev1.ListSessionsRequest{CampaignId: "nonexistent"})
 	assertStatusCode(t, err, codes.NotFound)
+}
+
+func TestSetSessionSpotlight_Success(t *testing.T) {
+	campaignStore := newFakeCampaignStore()
+	sessionStore := newFakeSessionStore()
+	spotlightStore := newFakeSessionSpotlightStore()
+	eventStore := newFakeEventStore()
+	now := time.Date(2025, 2, 1, 12, 0, 0, 0, time.UTC)
+
+	campaignStore.campaigns["c1"] = campaign.Campaign{ID: "c1", Status: campaign.CampaignStatusActive}
+	sessionStore.sessions["c1"] = map[string]session.Session{
+		"s1": {ID: "s1", CampaignID: "c1", Status: session.SessionStatusActive, StartedAt: now, UpdatedAt: now},
+	}
+
+	svc := &SessionService{
+		stores: Stores{
+			Campaign:         campaignStore,
+			Session:          sessionStore,
+			SessionSpotlight: spotlightStore,
+			Event:            eventStore,
+		},
+		clock: fixedClock(now),
+	}
+
+	resp, err := svc.SetSessionSpotlight(context.Background(), &statev1.SetSessionSpotlightRequest{
+		CampaignId:  "c1",
+		SessionId:   "s1",
+		Type:        statev1.SessionSpotlightType_SESSION_SPOTLIGHT_TYPE_CHARACTER,
+		CharacterId: "char-1",
+	})
+	if err != nil {
+		t.Fatalf("SetSessionSpotlight returned error: %v", err)
+	}
+	if resp.GetSpotlight() == nil {
+		t.Fatal("expected spotlight in response")
+	}
+	if resp.GetSpotlight().GetCharacterId() != "char-1" {
+		t.Fatalf("spotlight character_id = %q, want %q", resp.GetSpotlight().GetCharacterId(), "char-1")
+	}
+	if got := len(eventStore.events["c1"]); got != 1 {
+		t.Fatalf("expected 1 event, got %d", got)
+	}
+	if eventStore.events["c1"][0].Type != event.TypeSessionSpotlightSet {
+		t.Fatalf("event type = %s, want %s", eventStore.events["c1"][0].Type, event.TypeSessionSpotlightSet)
+	}
+}
+
+func TestGetSessionSpotlight_Success(t *testing.T) {
+	campaignStore := newFakeCampaignStore()
+	sessionStore := newFakeSessionStore()
+	spotlightStore := newFakeSessionSpotlightStore()
+
+	campaignStore.campaigns["c1"] = campaign.Campaign{ID: "c1", Status: campaign.CampaignStatusActive}
+	sessionStore.sessions["c1"] = map[string]session.Session{
+		"s1": {ID: "s1", CampaignID: "c1", Status: session.SessionStatusActive, StartedAt: time.Now()},
+	}
+	spotlightStore.spotlights["c1"] = map[string]storage.SessionSpotlight{
+		"s1": {
+			CampaignID:    "c1",
+			SessionID:     "s1",
+			SpotlightType: string(session.SpotlightTypeGM),
+			UpdatedAt:     time.Now(),
+		},
+	}
+
+	svc := NewSessionService(Stores{
+		Campaign:         campaignStore,
+		Session:          sessionStore,
+		SessionSpotlight: spotlightStore,
+	})
+
+	resp, err := svc.GetSessionSpotlight(context.Background(), &statev1.GetSessionSpotlightRequest{
+		CampaignId: "c1",
+		SessionId:  "s1",
+	})
+	if err != nil {
+		t.Fatalf("GetSessionSpotlight returned error: %v", err)
+	}
+	if resp.GetSpotlight() == nil {
+		t.Fatal("expected spotlight in response")
+	}
+	if resp.GetSpotlight().GetType() != statev1.SessionSpotlightType_SESSION_SPOTLIGHT_TYPE_GM {
+		t.Fatalf("spotlight type = %v, want %v", resp.GetSpotlight().GetType(), statev1.SessionSpotlightType_SESSION_SPOTLIGHT_TYPE_GM)
+	}
+}
+
+func TestClearSessionSpotlight_Success(t *testing.T) {
+	campaignStore := newFakeCampaignStore()
+	sessionStore := newFakeSessionStore()
+	spotlightStore := newFakeSessionSpotlightStore()
+	eventStore := newFakeEventStore()
+
+	campaignStore.campaigns["c1"] = campaign.Campaign{ID: "c1", Status: campaign.CampaignStatusActive}
+	sessionStore.sessions["c1"] = map[string]session.Session{
+		"s1": {ID: "s1", CampaignID: "c1", Status: session.SessionStatusActive, StartedAt: time.Now()},
+	}
+	spotlightStore.spotlights["c1"] = map[string]storage.SessionSpotlight{
+		"s1": {
+			CampaignID:    "c1",
+			SessionID:     "s1",
+			SpotlightType: string(session.SpotlightTypeGM),
+			UpdatedAt:     time.Now(),
+		},
+	}
+
+	svc := NewSessionService(Stores{
+		Campaign:         campaignStore,
+		Session:          sessionStore,
+		SessionSpotlight: spotlightStore,
+		Event:            eventStore,
+	})
+
+	resp, err := svc.ClearSessionSpotlight(context.Background(), &statev1.ClearSessionSpotlightRequest{
+		CampaignId: "c1",
+		SessionId:  "s1",
+		Reason:     "scene shift",
+	})
+	if err != nil {
+		t.Fatalf("ClearSessionSpotlight returned error: %v", err)
+	}
+	if resp.GetSpotlight() == nil {
+		t.Fatal("expected spotlight in response")
+	}
+	if got := len(eventStore.events["c1"]); got != 1 {
+		t.Fatalf("expected 1 event, got %d", got)
+	}
+	if eventStore.events["c1"][0].Type != event.TypeSessionSpotlightCleared {
+		t.Fatalf("event type = %s, want %s", eventStore.events["c1"][0].Type, event.TypeSessionSpotlightCleared)
+	}
 }
 
 func TestListSessions_EmptyList(t *testing.T) {

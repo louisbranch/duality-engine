@@ -1,0 +1,158 @@
+{
+  "system_id": "daggerheart",
+  "system_version": "v1",
+  "source": "Daggerheart SRD v1 (paraphrased)",
+  "locale": "en-US",
+  "items": [
+    {
+      "id": "beastform.agile-scout",
+      "name": "Agile Scout",
+      "tier": 1,
+      "examples": "Fox, mouse, weasel",
+      "trait": "agility",
+      "trait_bonus": 1,
+      "evasion_bonus": 2,
+      "attack": {
+        "range": "melee",
+        "trait": "agility",
+        "damage_dice": [{"sides": 4, "count": 1}],
+        "damage_bonus": 0,
+        "damage_type": "physical"
+      },
+      "advantages": ["deceive", "locate", "sneak"],
+      "features": [
+        {
+          "id": "beastform-feature.agile-scout-agile",
+          "name": "Agile",
+          "description": "Your movement stays silent. Spend a Hope to move up to Far range without rolling."
+        },
+        {
+          "id": "beastform-feature.agile-scout-fragile",
+          "name": "Fragile",
+          "description": "When you take Major or worse damage, you drop out of Beastform."
+        }
+      ]
+    },
+    {
+      "id": "beastform.pack-predator",
+      "name": "Pack Predator",
+      "tier": 1,
+      "examples": "Coyote, hyena, wolf",
+      "trait": "strength",
+      "trait_bonus": 2,
+      "evasion_bonus": 1,
+      "attack": {
+        "range": "melee",
+        "trait": "strength",
+        "damage_dice": [{"sides": 8, "count": 1}],
+        "damage_bonus": 2,
+        "damage_type": "physical"
+      },
+      "advantages": ["attack", "sprint", "track"],
+      "features": [
+        {
+          "id": "beastform-feature.pack-predator-hobbling-strike",
+          "name": "Hobbling Strike",
+          "description": "When you hit a target in melee, you can mark a Stress to make them temporarily Vulnerable."
+        },
+        {
+          "id": "beastform-feature.pack-predator-pack-hunting",
+          "name": "Pack Hunting",
+          "description": "When you hit a target an ally struck immediately before you, add a d8 to your damage roll."
+        }
+      ]
+    },
+    {
+      "id": "beastform.armored-sentry",
+      "name": "Armored Sentry",
+      "tier": 2,
+      "examples": "Armadillo, pangolin, turtle",
+      "trait": "strength",
+      "trait_bonus": 1,
+      "evasion_bonus": 1,
+      "attack": {
+        "range": "melee",
+        "trait": "strength",
+        "damage_dice": [{"sides": 8, "count": 1}],
+        "damage_bonus": 2,
+        "damage_type": "physical"
+      },
+      "advantages": ["dig", "locate", "protect"],
+      "features": [
+        {
+          "id": "beastform-feature.armored-sentry-armored-shell",
+          "name": "Armored Shell",
+          "description": "You resist physical damage. Mark an Armor slot to withdraw into your shell; while shelled, physical damage is reduced by your Armor Score after resistance, and you cannot act until you emerge."
+        },
+        {
+          "id": "beastform-feature.armored-sentry-cannonball",
+          "name": "Cannonball",
+          "description": "Mark a Stress to let an ally launch you. They make an Agility or Strength attack against a target within Close range; on a hit, the target takes d12+2 physical damage using the thrower's Proficiency. Spend a Hope to also hit a second target within very close of the first for half damage."
+        }
+      ]
+    },
+    {
+      "id": "beastform.great-predator",
+      "name": "Great Predator",
+      "tier": 3,
+      "examples": "Dire wolf, velociraptor, sabertooth tiger",
+      "trait": "strength",
+      "trait_bonus": 2,
+      "evasion_bonus": 2,
+      "attack": {
+        "range": "melee",
+        "trait": "strength",
+        "damage_dice": [{"sides": 12, "count": 1}],
+        "damage_bonus": 8,
+        "damage_type": "physical"
+      },
+      "advantages": ["attack", "sneak", "sprint"],
+      "features": [
+        {
+          "id": "beastform-feature.great-predator-carrier",
+          "name": "Carrier",
+          "description": "You can carry up to two willing allies when you move."
+        },
+        {
+          "id": "beastform-feature.great-predator-vicious-maul",
+          "name": "Vicious Maul",
+          "description": "When you hit, spend a Hope to make the target temporarily Vulnerable and gain +1 Proficiency on that attack."
+        }
+      ]
+    },
+    {
+      "id": "beastform.massive-behemoth",
+      "name": "Massive Behemoth",
+      "tier": 4,
+      "examples": "Elephant, mammoth, rhinoceros",
+      "trait": "strength",
+      "trait_bonus": 3,
+      "evasion_bonus": 1,
+      "attack": {
+        "range": "melee",
+        "trait": "strength",
+        "damage_dice": [{"sides": 12, "count": 1}],
+        "damage_bonus": 12,
+        "damage_type": "physical"
+      },
+      "advantages": ["locate", "protect", "scare", "sprint"],
+      "features": [
+        {
+          "id": "beastform-feature.massive-behemoth-carrier",
+          "name": "Carrier",
+          "description": "You can carry up to four willing allies when you move."
+        },
+        {
+          "id": "beastform-feature.massive-behemoth-demolish",
+          "name": "Demolish",
+          "description": "Spend a Hope to move up to Far range in a straight line and attack all targets in melee along the path. On a hit, deal d8+10 physical damage using your Proficiency and make targets temporarily Vulnerable."
+        },
+        {
+          "id": "beastform-feature.massive-behemoth-undaunted",
+          "name": "Undaunted",
+          "description": "Gain +2 to all your damage thresholds."
+        }
+      ]
+    }
+  ]
+}

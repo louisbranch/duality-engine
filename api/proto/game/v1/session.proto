@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package game.v1;
 
+import "google/protobuf/struct.proto";
 import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/louisbranch/fracturing.space/api/gen/go/game/v1;gamev1";
@@ -18,10 +19,50 @@ message Session {
   int64 version = 8;
 }
 
+message SessionGate {
+  string id = 1;
+  string campaign_id = 2;
+  string session_id = 3;
+  string type = 4;
+  SessionGateStatus status = 5;
+  string reason = 6;
+  google.protobuf.Timestamp created_at = 7;
+  string created_by_actor_type = 8;
+  string created_by_actor_id = 9;
+  google.protobuf.Timestamp resolved_at = 10;
+  string resolved_by_actor_type = 11;
+  string resolved_by_actor_id = 12;
+  google.protobuf.Struct metadata = 13;
+  google.protobuf.Struct resolution = 14;
+}
+
+message SessionSpotlight {
+  string campaign_id = 1;
+  string session_id = 2;
+  SessionSpotlightType type = 3;
+  string character_id = 4;
+  google.protobuf.Timestamp updated_at = 5;
+  string updated_by_actor_type = 6;
+  string updated_by_actor_id = 7;
+}
+
 enum SessionStatus {
   SESSION_STATUS_UNSPECIFIED = 0;
   SESSION_ACTIVE = 1;
   SESSION_ENDED = 2;
+}
+
+enum SessionGateStatus {
+  SESSION_GATE_STATUS_UNSPECIFIED = 0;
+  SESSION_GATE_OPEN = 1;
+  SESSION_GATE_RESOLVED = 2;
+  SESSION_GATE_ABANDONED = 3;
+}
+
+enum SessionSpotlightType {
+  SESSION_SPOTLIGHT_TYPE_UNSPECIFIED = 0;
+  SESSION_SPOTLIGHT_TYPE_GM = 1;
+  SESSION_SPOTLIGHT_TYPE_CHARACTER = 2;
 }
 
 // SessionService manages session lifecycle.
@@ -38,6 +79,24 @@ service SessionService {
 
   // End a session by campaign ID and session ID.
   rpc EndSession(EndSessionRequest) returns (EndSessionResponse);
+
+  // Open a gate that blocks action events until resolved.
+  rpc OpenSessionGate(OpenSessionGateRequest) returns (OpenSessionGateResponse);
+
+  // Resolve an open session gate.
+  rpc ResolveSessionGate(ResolveSessionGateRequest) returns (ResolveSessionGateResponse);
+
+  // Abandon an open session gate.
+  rpc AbandonSessionGate(AbandonSessionGateRequest) returns (AbandonSessionGateResponse);
+
+  // Get the current session spotlight.
+  rpc GetSessionSpotlight(GetSessionSpotlightRequest) returns (GetSessionSpotlightResponse);
+
+  // Set the session spotlight.
+  rpc SetSessionSpotlight(SetSessionSpotlightRequest) returns (SetSessionSpotlightResponse);
+
+  // Clear the session spotlight.
+  rpc ClearSessionSpotlight(ClearSessionSpotlightRequest) returns (ClearSessionSpotlightResponse);
 
 }
 
@@ -92,4 +151,70 @@ message EndSessionRequest {
 
 message EndSessionResponse {
   Session session = 1;
+}
+
+message OpenSessionGateRequest {
+  string campaign_id = 1;
+  string session_id = 2;
+  string gate_type = 3;
+  string reason = 4;
+  string gate_id = 5;
+  google.protobuf.Struct metadata = 6;
+}
+
+message OpenSessionGateResponse {
+  SessionGate gate = 1;
+}
+
+message ResolveSessionGateRequest {
+  string campaign_id = 1;
+  string session_id = 2;
+  string gate_id = 3;
+  string decision = 4;
+  google.protobuf.Struct resolution = 5;
+}
+
+message ResolveSessionGateResponse {
+  SessionGate gate = 1;
+}
+
+message AbandonSessionGateRequest {
+  string campaign_id = 1;
+  string session_id = 2;
+  string gate_id = 3;
+  string reason = 4;
+}
+
+message AbandonSessionGateResponse {
+  SessionGate gate = 1;
+}
+
+message GetSessionSpotlightRequest {
+  string campaign_id = 1;
+  string session_id = 2;
+}
+
+message GetSessionSpotlightResponse {
+  SessionSpotlight spotlight = 1;
+}
+
+message SetSessionSpotlightRequest {
+  string campaign_id = 1;
+  string session_id = 2;
+  SessionSpotlightType type = 3;
+  string character_id = 4;
+}
+
+message SetSessionSpotlightResponse {
+  SessionSpotlight spotlight = 1;
+}
+
+message ClearSessionSpotlightRequest {
+  string campaign_id = 1;
+  string session_id = 2;
+  string reason = 3;
+}
+
+message ClearSessionSpotlightResponse {
+  SessionSpotlight spotlight = 1;
 }

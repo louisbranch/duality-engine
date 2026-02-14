@@ -102,6 +102,38 @@ type SessionEndedPayload struct {
 	SessionID string `json:"session_id"`
 }
 
+// SessionGateOpenedPayload captures the payload for session.gate_opened events.
+type SessionGateOpenedPayload struct {
+	GateID   string         `json:"gate_id"`
+	GateType string         `json:"gate_type"`
+	Reason   string         `json:"reason,omitempty"`
+	Metadata map[string]any `json:"metadata,omitempty"`
+}
+
+// SessionGateResolvedPayload captures the payload for session.gate_resolved events.
+type SessionGateResolvedPayload struct {
+	GateID     string         `json:"gate_id"`
+	Decision   string         `json:"decision,omitempty"`
+	Resolution map[string]any `json:"resolution,omitempty"`
+}
+
+// SessionGateAbandonedPayload captures the payload for session.gate_abandoned events.
+type SessionGateAbandonedPayload struct {
+	GateID string `json:"gate_id"`
+	Reason string `json:"reason,omitempty"`
+}
+
+// SessionSpotlightSetPayload captures the payload for session.spotlight_set events.
+type SessionSpotlightSetPayload struct {
+	SpotlightType string `json:"spotlight_type"`
+	CharacterID   string `json:"character_id,omitempty"`
+}
+
+// SessionSpotlightClearedPayload captures the payload for session.spotlight_cleared events.
+type SessionSpotlightClearedPayload struct {
+	Reason string `json:"reason,omitempty"`
+}
+
 // InviteCreatedPayload captures the payload for invite.created events.
 type InviteCreatedPayload struct {
 	InviteID               string `json:"invite_id"`

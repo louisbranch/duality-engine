@@ -64,6 +64,16 @@ const (
 	TypeSessionStarted Type = "session.started"
 	// TypeSessionEnded records the end of a session.
 	TypeSessionEnded Type = "session.ended"
+	// TypeSessionGateOpened records a session gate opening.
+	TypeSessionGateOpened Type = "session.gate_opened"
+	// TypeSessionGateResolved records a session gate resolution.
+	TypeSessionGateResolved Type = "session.gate_resolved"
+	// TypeSessionGateAbandoned records a session gate abandonment.
+	TypeSessionGateAbandoned Type = "session.gate_abandoned"
+	// TypeSessionSpotlightSet records a spotlight change.
+	TypeSessionSpotlightSet Type = "session.spotlight_set"
+	// TypeSessionSpotlightCleared records a spotlight cleared.
+	TypeSessionSpotlightCleared Type = "session.spotlight_cleared"
 )
 
 // Action events (gameplay actions within sessions).

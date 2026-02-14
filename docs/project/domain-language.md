@@ -23,6 +23,12 @@ Within a campaign, we talk about areas rather than separate buckets:
 - Snapshot: materialized projections derived from the event journal at a specific sequence.
 - Session: the active gameplay view.
 
+### Session Gate
+
+A session gate is a decision checkpoint that temporarily blocks session action
+events. Gates open when the table needs to resolve a spotlight handoff or other
+decision; they are resolved or abandoned before action events can continue.
+
 ### Event Journal (Commit History)
 
 The event journal is the immutable, append-only log of everything that happens

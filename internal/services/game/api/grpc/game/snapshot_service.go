@@ -283,6 +283,11 @@ func (s *SnapshotService) PatchCharacterState(ctx context.Context, in *campaignv
 		if err := adapter.ApplyEvent(ctx, stored); err != nil {
 			return nil, status.Errorf(codes.Internal, "apply event: %v", err)
 		}
+		if !conditionPatch {
+			if err := applyStressVulnerableCondition(ctx, s.stores, campaignID, grpcmeta.SessionIDFromContext(ctx), characterID, dhState.Conditions, stressBefore, stressAfter, stressMax, actorType, actorID); err != nil {
+				return nil, err
+			}
+		}
 
 		dhState, err = s.stores.Daggerheart.GetDaggerheartCharacterState(ctx, campaignID, characterID)
 		if err != nil {
@@ -342,6 +347,113 @@ func (s *SnapshotService) PatchCharacterState(ctx context.Context, in *campaignv
 	return &campaignv1.PatchCharacterStateResponse{
 		State: daggerheartStateToProto(campaignID, characterID, dhState),
 	}, nil
+}
+
+func applyStressVulnerableCondition(
+	ctx context.Context,
+	stores Stores,
+	campaignID string,
+	sessionID string,
+	characterID string,
+	conditions []string,
+	stressBefore int,
+	stressAfter int,
+	stressMax int,
+	actorType event.ActorType,
+	actorID string,
+) error {
+	if stores.Event == nil || stores.Daggerheart == nil {
+		return status.Error(codes.Internal, "event or daggerheart store is not configured")
+	}
+	if stressMax <= 0 {
+		return nil
+	}
+	if stressBefore == stressAfter {
+		return nil
+	}
+	shouldAdd := stressBefore < stressMax && stressAfter == stressMax
+	shouldRemove := stressBefore == stressMax && stressAfter < stressMax
+	if !shouldAdd && !shouldRemove {
+		return nil
+	}
+
+	normalized, err := daggerheart.NormalizeConditions(conditions)
+	if err != nil {
+		return status.Errorf(codes.Internal, "invalid stored conditions: %v", err)
+	}
+	hasVulnerable := false
+	for _, value := range normalized {
+		if value == daggerheart.ConditionVulnerable {
+			hasVulnerable = true
+			break
+		}
+	}
+	if shouldAdd && hasVulnerable {
+		return nil
+	}
+	if shouldRemove && !hasVulnerable {
+		return nil
+	}
+
+	afterSet := make(map[string]struct{}, len(normalized)+1)
+	for _, value := range normalized {
+		afterSet[value] = struct{}{}
+	}
+	if shouldAdd {
+		afterSet[daggerheart.ConditionVulnerable] = struct{}{}
+	}
+	if shouldRemove {
+		delete(afterSet, daggerheart.ConditionVulnerable)
+	}
+	afterList := make([]string, 0, len(afterSet))
+	for value := range afterSet {
+		afterList = append(afterList, value)
+	}
+	after, err := daggerheart.NormalizeConditions(afterList)
+	if err != nil {
+		return status.Errorf(codes.Internal, "invalid condition set: %v", err)
+	}
+	added, removed := daggerheart.DiffConditions(normalized, after)
+	if len(added) == 0 && len(removed) == 0 {
+		return nil
+	}
+
+	payload := daggerheart.ConditionChangedPayload{
+		CharacterID:      characterID,
+		ConditionsBefore: normalized,
+		ConditionsAfter:  after,
+		Added:            added,
+		Removed:          removed,
+	}
+	payloadJSON, err := json.Marshal(payload)
+	if err != nil {
+		return status.Errorf(codes.Internal, "encode condition payload: %v", err)
+	}
+
+	stored, err := stores.Event.AppendEvent(ctx, event.Event{
+		CampaignID:    campaignID,
+		Timestamp:     time.Now().UTC(),
+		Type:          daggerheart.EventTypeConditionChanged,
+		SessionID:     sessionID,
+		RequestID:     grpcmeta.RequestIDFromContext(ctx),
+		InvocationID:  grpcmeta.InvocationIDFromContext(ctx),
+		ActorType:     actorType,
+		ActorID:       actorID,
+		EntityType:    "character",
+		EntityID:      characterID,
+		SystemID:      commonv1.GameSystem_GAME_SYSTEM_DAGGERHEART.String(),
+		SystemVersion: daggerheart.SystemVersion,
+		PayloadJSON:   payloadJSON,
+	})
+	if err != nil {
+		return status.Errorf(codes.Internal, "append condition event: %v", err)
+	}
+	adapter := daggerheart.NewAdapter(stores.Daggerheart)
+	if err := adapter.ApplyEvent(ctx, stored); err != nil {
+		return status.Errorf(codes.Internal, "apply condition event: %v", err)
+	}
+
+	return nil
 }
 
 // UpdateSnapshotState updates the system-specific snapshot projection.

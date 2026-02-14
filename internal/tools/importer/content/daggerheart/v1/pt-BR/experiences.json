@@ -1,0 +1,98 @@
+{
+  "system_id": "daggerheart",
+  "system_version": "v1",
+  "source": "Daggerheart SRD v1 (paraphrased)",
+  "locale": "pt-BR",
+  "items": [
+    {
+      "id": "experience.acrobatics",
+      "name": "Acrobacia",
+      "description": ""
+    },
+    {
+      "id": "experience.hunt-from-above",
+      "name": "Caçar do Alto",
+      "description": ""
+    },
+    {
+      "id": "experience.navigation",
+      "name": "Navegação",
+      "description": ""
+    },
+    {
+      "id": "experience.ambusher",
+      "name": "Emboscador",
+      "description": ""
+    },
+    {
+      "id": "experience.intimidation",
+      "name": "Intimidação",
+      "description": ""
+    },
+    {
+      "id": "experience.nobility",
+      "name": "Nobreza",
+      "description": ""
+    },
+    {
+      "id": "experience.bartering",
+      "name": "Barganha",
+      "description": ""
+    },
+    {
+      "id": "experience.intrusion",
+      "name": "Intrusão",
+      "description": ""
+    },
+    {
+      "id": "experience.quick-reflexes",
+      "name": "Reflexos Rápidos",
+      "description": ""
+    },
+    {
+      "id": "experience.blademaster",
+      "name": "Mestre das Lâminas",
+      "description": ""
+    },
+    {
+      "id": "experience.keen-senses",
+      "name": "Sentidos Aguçados",
+      "description": ""
+    },
+    {
+      "id": "experience.socialite",
+      "name": "Socialite",
+      "description": ""
+    },
+    {
+      "id": "experience.bodyguard",
+      "name": "Guarda-costas",
+      "description": ""
+    },
+    {
+      "id": "experience.magical-knowledge",
+      "name": "Conhecimento Mágico",
+      "description": ""
+    },
+    {
+      "id": "experience.stealth",
+      "name": "Furtividade",
+      "description": ""
+    },
+    {
+      "id": "experience.commander",
+      "name": "Comandante",
+      "description": ""
+    },
+    {
+      "id": "experience.natures-friend",
+      "name": "Aliado Selvagem",
+      "description": ""
+    },
+    {
+      "id": "experience.tracker",
+      "name": "Rastreador",
+      "description": ""
+    }
+  ]
+}

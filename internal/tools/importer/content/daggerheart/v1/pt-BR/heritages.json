@@ -1,0 +1,203 @@
+{
+  "system_id": "daggerheart",
+  "system_version": "v1",
+  "source": "Daggerheart SRD v1 (paraphrased)",
+  "locale": "pt-BR",
+  "items": [
+    {
+      "id": "heritage.human",
+      "name": "Humano",
+      "kind": "ancestry",
+      "features": [
+        {
+          "id": "feature.human-adaptable",
+          "name": "Adaptável",
+          "description": "Você se ajusta rapidamente a novas situações e muda de rumo quando preciso.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.dwarf",
+      "name": "Anão",
+      "kind": "ancestry",
+      "features": [
+        {
+          "id": "feature.dwarf-stoneborn",
+          "name": "Filho da Pedra",
+          "description": "Você aguenta o cansaço; reduza em 1 o estresse de dano físico uma vez por descanso.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.elf",
+      "name": "Elfo",
+      "kind": "ancestry",
+      "features": [
+        {
+          "id": "feature.elf-keen-senses",
+          "name": "Sentidos Aguçados",
+          "description": "Ganhe +1 para perceber detalhes ocultos na natureza.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.orc",
+      "name": "Orc",
+      "kind": "ancestry",
+      "features": [
+        {
+          "id": "feature.orc-relentless",
+          "name": "Implacável",
+          "description": "Uma vez por descanso, quando você cairia, permaneça com 1 PV.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.goblin",
+      "name": "Goblin",
+      "kind": "ancestry",
+      "features": [
+        {
+          "id": "feature.goblin-scrap-savvy",
+          "name": "Gambiarreiro",
+          "description": "Você improvisa ferramentas; ganhe +1 em reparos rápidos.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.faerie",
+      "name": "Fada",
+      "kind": "ancestry",
+      "features": [
+        {
+          "id": "feature.faerie-glimmerwing",
+          "name": "Asa Brilhante",
+          "description": "Você pode flutuar por instantes e emitir uma luz suave.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.highborne",
+      "name": "Nobre",
+      "kind": "community",
+      "features": [
+        {
+          "id": "feature.highborne-noble-bearing",
+          "name": "Postura Nobre",
+          "description": "Em ambientes formais, ganhe +1 em rolagens sociais.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.loreborne",
+      "name": "Erudito",
+      "kind": "community",
+      "features": [
+        {
+          "id": "feature.loreborne-well-read",
+          "name": "Bem Lido",
+          "description": "Ganhe vantagem em rolagens sobre a história, cultura ou política de pessoas ou lugares notáveis.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.orderborne",
+      "name": "Ordeiro",
+      "kind": "community",
+      "features": [
+        {
+          "id": "feature.orderborne-dedicated",
+          "name": "Dedicado",
+          "description": "Anote três ditados ou valores da sua criação. Uma vez por descanso, quando descrever agir por um deles, você pode rolar um d20 como seu Dado de Esperança.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.ridgeborne",
+      "name": "Montanhês",
+      "kind": "community",
+      "features": [
+        {
+          "id": "feature.ridgeborne-steady",
+          "name": "Firme",
+          "description": "Ganhe vantagem em rolagens para atravessar penhascos perigosos, navegar terreno severo ou usar conhecimentos de sobrevivência.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.seaborne",
+      "name": "Marinheiro",
+      "kind": "community",
+      "features": [
+        {
+          "id": "feature.seaborne-saltwise",
+          "name": "Sabedoria do Mar",
+          "description": "Você é do mar; ganhe +1 em rolagens de navegação ou nado.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.slyborne",
+      "name": "Sorrateiro",
+      "kind": "community",
+      "features": [
+        {
+          "id": "feature.slyborne-scoundrel",
+          "name": "Malandro",
+          "description": "Ganhe vantagem em rolagens para lidar com criminosos, perceber mentiras ou achar um lugar seguro para se esconder.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.underborne",
+      "name": "Subterrâneo",
+      "kind": "community",
+      "features": [
+        {
+          "id": "feature.underborne-low-light-living",
+          "name": "Vida na Penumbra",
+          "description": "Em luz baixa ou sombras densas, ganhe vantagem em rolagens para se esconder, investigar ou perceber detalhes ali.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.wanderborne",
+      "name": "Errante",
+      "kind": "community",
+      "features": [
+        {
+          "id": "feature.wanderborne-nomadic-pack",
+          "name": "Mochila Nômade",
+          "description": "Adicione uma Mochila Nômade ao inventário. Uma vez por sessão, gaste uma Esperança para tirar dela um item comum útil; combine com o GM qual é.",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "heritage.wildborne",
+      "name": "Silvestre",
+      "kind": "community",
+      "features": [
+        {
+          "id": "feature.wildborne-trailwise",
+          "name": "Trilheiro",
+          "description": "Você se move em silêncio em terrenos selvagens; ganhe +1 em furtividade ao ar livre.",
+          "level": 1
+        }
+      ]
+    }
+  ]
+}

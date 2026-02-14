@@ -1,0 +1,28 @@
+{
+  "system_id": "daggerheart",
+  "system_version": "v1",
+  "source": "Daggerheart SRD v1 (paraphrased)",
+  "locale": "en-US",
+  "items": [
+    {"id": "companion-experience.bold-distraction", "name": "Bold Distraction", "description": ""},
+    {"id": "companion-experience.expert-climber", "name": "Expert Climber", "description": ""},
+    {"id": "companion-experience.fetch", "name": "Fetch", "description": ""},
+    {"id": "companion-experience.friendly", "name": "Friendly", "description": ""},
+    {"id": "companion-experience.guardian-of-the-forest", "name": "Guardian of the Forest", "description": ""},
+    {"id": "companion-experience.horrifying", "name": "Horrifying", "description": ""},
+    {"id": "companion-experience.intimidating", "name": "Intimidating", "description": ""},
+    {"id": "companion-experience.loyal-until-the-end", "name": "Loyal Until the End", "description": ""},
+    {"id": "companion-experience.navigation", "name": "Navigation", "description": ""},
+    {"id": "companion-experience.nimble", "name": "Nimble", "description": ""},
+    {"id": "companion-experience.nobody-left-behind", "name": "Nobody Left Behind", "description": ""},
+    {"id": "companion-experience.on-high-alert", "name": "On High Alert", "description": ""},
+    {"id": "companion-experience.protective", "name": "Protective", "description": ""},
+    {"id": "companion-experience.royal-companion", "name": "Royal Companion", "description": ""},
+    {"id": "companion-experience.scout", "name": "Scout", "description": ""},
+    {"id": "companion-experience.service-animal", "name": "Service Animal", "description": ""},
+    {"id": "companion-experience.trusted-mount", "name": "Trusted Mount", "description": ""},
+    {"id": "companion-experience.vigilant", "name": "Vigilant", "description": ""},
+    {"id": "companion-experience.we-always-find-them", "name": "We Always Find Them", "description": ""},
+    {"id": "companion-experience.you-cant-hit-what-you-cant-find", "name": "You Can't Hit What You Can't Find", "description": ""}
+  ]
+}

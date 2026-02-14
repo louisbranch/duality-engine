@@ -19,10 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	SessionService_StartSession_FullMethodName = "/game.v1.SessionService/StartSession"
-	SessionService_ListSessions_FullMethodName = "/game.v1.SessionService/ListSessions"
-	SessionService_GetSession_FullMethodName   = "/game.v1.SessionService/GetSession"
-	SessionService_EndSession_FullMethodName   = "/game.v1.SessionService/EndSession"
+	SessionService_StartSession_FullMethodName          = "/game.v1.SessionService/StartSession"
+	SessionService_ListSessions_FullMethodName          = "/game.v1.SessionService/ListSessions"
+	SessionService_GetSession_FullMethodName            = "/game.v1.SessionService/GetSession"
+	SessionService_EndSession_FullMethodName            = "/game.v1.SessionService/EndSession"
+	SessionService_OpenSessionGate_FullMethodName       = "/game.v1.SessionService/OpenSessionGate"
+	SessionService_ResolveSessionGate_FullMethodName    = "/game.v1.SessionService/ResolveSessionGate"
+	SessionService_AbandonSessionGate_FullMethodName    = "/game.v1.SessionService/AbandonSessionGate"
+	SessionService_GetSessionSpotlight_FullMethodName   = "/game.v1.SessionService/GetSessionSpotlight"
+	SessionService_SetSessionSpotlight_FullMethodName   = "/game.v1.SessionService/SetSessionSpotlight"
+	SessionService_ClearSessionSpotlight_FullMethodName = "/game.v1.SessionService/ClearSessionSpotlight"
 )
 
 // SessionServiceClient is the client API for SessionService service.
@@ -40,6 +46,18 @@ type SessionServiceClient interface {
 	GetSession(ctx context.Context, in *GetSessionRequest, opts ...grpc.CallOption) (*GetSessionResponse, error)
 	// End a session by campaign ID and session ID.
 	EndSession(ctx context.Context, in *EndSessionRequest, opts ...grpc.CallOption) (*EndSessionResponse, error)
+	// Open a gate that blocks action events until resolved.
+	OpenSessionGate(ctx context.Context, in *OpenSessionGateRequest, opts ...grpc.CallOption) (*OpenSessionGateResponse, error)
+	// Resolve an open session gate.
+	ResolveSessionGate(ctx context.Context, in *ResolveSessionGateRequest, opts ...grpc.CallOption) (*ResolveSessionGateResponse, error)
+	// Abandon an open session gate.
+	AbandonSessionGate(ctx context.Context, in *AbandonSessionGateRequest, opts ...grpc.CallOption) (*AbandonSessionGateResponse, error)
+	// Get the current session spotlight.
+	GetSessionSpotlight(ctx context.Context, in *GetSessionSpotlightRequest, opts ...grpc.CallOption) (*GetSessionSpotlightResponse, error)
+	// Set the session spotlight.
+	SetSessionSpotlight(ctx context.Context, in *SetSessionSpotlightRequest, opts ...grpc.CallOption) (*SetSessionSpotlightResponse, error)
+	// Clear the session spotlight.
+	ClearSessionSpotlight(ctx context.Context, in *ClearSessionSpotlightRequest, opts ...grpc.CallOption) (*ClearSessionSpotlightResponse, error)
 }
 
 type sessionServiceClient struct {
@@ -90,6 +108,66 @@ func (c *sessionServiceClient) EndSession(ctx context.Context, in *EndSessionReq
 	return out, nil
 }
 
+func (c *sessionServiceClient) OpenSessionGate(ctx context.Context, in *OpenSessionGateRequest, opts ...grpc.CallOption) (*OpenSessionGateResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(OpenSessionGateResponse)
+	err := c.cc.Invoke(ctx, SessionService_OpenSessionGate_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sessionServiceClient) ResolveSessionGate(ctx context.Context, in *ResolveSessionGateRequest, opts ...grpc.CallOption) (*ResolveSessionGateResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ResolveSessionGateResponse)
+	err := c.cc.Invoke(ctx, SessionService_ResolveSessionGate_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sessionServiceClient) AbandonSessionGate(ctx context.Context, in *AbandonSessionGateRequest, opts ...grpc.CallOption) (*AbandonSessionGateResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AbandonSessionGateResponse)
+	err := c.cc.Invoke(ctx, SessionService_AbandonSessionGate_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sessionServiceClient) GetSessionSpotlight(ctx context.Context, in *GetSessionSpotlightRequest, opts ...grpc.CallOption) (*GetSessionSpotlightResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetSessionSpotlightResponse)
+	err := c.cc.Invoke(ctx, SessionService_GetSessionSpotlight_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sessionServiceClient) SetSessionSpotlight(ctx context.Context, in *SetSessionSpotlightRequest, opts ...grpc.CallOption) (*SetSessionSpotlightResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetSessionSpotlightResponse)
+	err := c.cc.Invoke(ctx, SessionService_SetSessionSpotlight_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sessionServiceClient) ClearSessionSpotlight(ctx context.Context, in *ClearSessionSpotlightRequest, opts ...grpc.CallOption) (*ClearSessionSpotlightResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ClearSessionSpotlightResponse)
+	err := c.cc.Invoke(ctx, SessionService_ClearSessionSpotlight_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SessionServiceServer is the server API for SessionService service.
 // All implementations must embed UnimplementedSessionServiceServer
 // for forward compatibility.
@@ -105,6 +183,18 @@ type SessionServiceServer interface {
 	GetSession(context.Context, *GetSessionRequest) (*GetSessionResponse, error)
 	// End a session by campaign ID and session ID.
 	EndSession(context.Context, *EndSessionRequest) (*EndSessionResponse, error)
+	// Open a gate that blocks action events until resolved.
+	OpenSessionGate(context.Context, *OpenSessionGateRequest) (*OpenSessionGateResponse, error)
+	// Resolve an open session gate.
+	ResolveSessionGate(context.Context, *ResolveSessionGateRequest) (*ResolveSessionGateResponse, error)
+	// Abandon an open session gate.
+	AbandonSessionGate(context.Context, *AbandonSessionGateRequest) (*AbandonSessionGateResponse, error)
+	// Get the current session spotlight.
+	GetSessionSpotlight(context.Context, *GetSessionSpotlightRequest) (*GetSessionSpotlightResponse, error)
+	// Set the session spotlight.
+	SetSessionSpotlight(context.Context, *SetSessionSpotlightRequest) (*SetSessionSpotlightResponse, error)
+	// Clear the session spotlight.
+	ClearSessionSpotlight(context.Context, *ClearSessionSpotlightRequest) (*ClearSessionSpotlightResponse, error)
 	mustEmbedUnimplementedSessionServiceServer()
 }
 
@@ -126,6 +216,24 @@ func (UnimplementedSessionServiceServer) GetSession(context.Context, *GetSession
 }
 func (UnimplementedSessionServiceServer) EndSession(context.Context, *EndSessionRequest) (*EndSessionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method EndSession not implemented")
+}
+func (UnimplementedSessionServiceServer) OpenSessionGate(context.Context, *OpenSessionGateRequest) (*OpenSessionGateResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method OpenSessionGate not implemented")
+}
+func (UnimplementedSessionServiceServer) ResolveSessionGate(context.Context, *ResolveSessionGateRequest) (*ResolveSessionGateResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ResolveSessionGate not implemented")
+}
+func (UnimplementedSessionServiceServer) AbandonSessionGate(context.Context, *AbandonSessionGateRequest) (*AbandonSessionGateResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AbandonSessionGate not implemented")
+}
+func (UnimplementedSessionServiceServer) GetSessionSpotlight(context.Context, *GetSessionSpotlightRequest) (*GetSessionSpotlightResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetSessionSpotlight not implemented")
+}
+func (UnimplementedSessionServiceServer) SetSessionSpotlight(context.Context, *SetSessionSpotlightRequest) (*SetSessionSpotlightResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetSessionSpotlight not implemented")
+}
+func (UnimplementedSessionServiceServer) ClearSessionSpotlight(context.Context, *ClearSessionSpotlightRequest) (*ClearSessionSpotlightResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ClearSessionSpotlight not implemented")
 }
 func (UnimplementedSessionServiceServer) mustEmbedUnimplementedSessionServiceServer() {}
 func (UnimplementedSessionServiceServer) testEmbeddedByValue()                        {}
@@ -220,6 +328,114 @@ func _SessionService_EndSession_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SessionService_OpenSessionGate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OpenSessionGateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SessionServiceServer).OpenSessionGate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SessionService_OpenSessionGate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SessionServiceServer).OpenSessionGate(ctx, req.(*OpenSessionGateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SessionService_ResolveSessionGate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResolveSessionGateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SessionServiceServer).ResolveSessionGate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SessionService_ResolveSessionGate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SessionServiceServer).ResolveSessionGate(ctx, req.(*ResolveSessionGateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SessionService_AbandonSessionGate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AbandonSessionGateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SessionServiceServer).AbandonSessionGate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SessionService_AbandonSessionGate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SessionServiceServer).AbandonSessionGate(ctx, req.(*AbandonSessionGateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SessionService_GetSessionSpotlight_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSessionSpotlightRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SessionServiceServer).GetSessionSpotlight(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SessionService_GetSessionSpotlight_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SessionServiceServer).GetSessionSpotlight(ctx, req.(*GetSessionSpotlightRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SessionService_SetSessionSpotlight_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetSessionSpotlightRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SessionServiceServer).SetSessionSpotlight(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SessionService_SetSessionSpotlight_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SessionServiceServer).SetSessionSpotlight(ctx, req.(*SetSessionSpotlightRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SessionService_ClearSessionSpotlight_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ClearSessionSpotlightRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SessionServiceServer).ClearSessionSpotlight(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SessionService_ClearSessionSpotlight_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SessionServiceServer).ClearSessionSpotlight(ctx, req.(*ClearSessionSpotlightRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SessionService_ServiceDesc is the grpc.ServiceDesc for SessionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -242,6 +458,30 @@ var SessionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "EndSession",
 			Handler:    _SessionService_EndSession_Handler,
+		},
+		{
+			MethodName: "OpenSessionGate",
+			Handler:    _SessionService_OpenSessionGate_Handler,
+		},
+		{
+			MethodName: "ResolveSessionGate",
+			Handler:    _SessionService_ResolveSessionGate_Handler,
+		},
+		{
+			MethodName: "AbandonSessionGate",
+			Handler:    _SessionService_AbandonSessionGate_Handler,
+		},
+		{
+			MethodName: "GetSessionSpotlight",
+			Handler:    _SessionService_GetSessionSpotlight_Handler,
+		},
+		{
+			MethodName: "SetSessionSpotlight",
+			Handler:    _SessionService_SetSessionSpotlight_Handler,
+		},
+		{
+			MethodName: "ClearSessionSpotlight",
+			Handler:    _SessionService_ClearSessionSpotlight_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

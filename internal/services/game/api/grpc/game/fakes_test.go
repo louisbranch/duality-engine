@@ -566,6 +566,61 @@ type fakeSessionStore struct {
 	listErr       error
 }
 
+// fakeSessionSpotlightStore is a test double for storage.SessionSpotlightStore.
+type fakeSessionSpotlightStore struct {
+	spotlights map[string]map[string]storage.SessionSpotlight
+	putErr     error
+	getErr     error
+	clearErr   error
+}
+
+func newFakeSessionSpotlightStore() *fakeSessionSpotlightStore {
+	return &fakeSessionSpotlightStore{
+		spotlights: make(map[string]map[string]storage.SessionSpotlight),
+	}
+}
+
+func (s *fakeSessionSpotlightStore) PutSessionSpotlight(_ context.Context, spotlight storage.SessionSpotlight) error {
+	if s.putErr != nil {
+		return s.putErr
+	}
+	if s.spotlights[spotlight.CampaignID] == nil {
+		s.spotlights[spotlight.CampaignID] = make(map[string]storage.SessionSpotlight)
+	}
+	s.spotlights[spotlight.CampaignID][spotlight.SessionID] = spotlight
+	return nil
+}
+
+func (s *fakeSessionSpotlightStore) GetSessionSpotlight(_ context.Context, campaignID, sessionID string) (storage.SessionSpotlight, error) {
+	if s.getErr != nil {
+		return storage.SessionSpotlight{}, s.getErr
+	}
+	bySession, ok := s.spotlights[campaignID]
+	if !ok {
+		return storage.SessionSpotlight{}, storage.ErrNotFound
+	}
+	spotlight, ok := bySession[sessionID]
+	if !ok {
+		return storage.SessionSpotlight{}, storage.ErrNotFound
+	}
+	return spotlight, nil
+}
+
+func (s *fakeSessionSpotlightStore) ClearSessionSpotlight(_ context.Context, campaignID, sessionID string) error {
+	if s.clearErr != nil {
+		return s.clearErr
+	}
+	bySession, ok := s.spotlights[campaignID]
+	if !ok {
+		return storage.ErrNotFound
+	}
+	if _, ok := bySession[sessionID]; !ok {
+		return storage.ErrNotFound
+	}
+	delete(bySession, sessionID)
+	return nil
+}
+
 func newFakeSessionStore() *fakeSessionStore {
 	return &fakeSessionStore{
 		sessions:      make(map[string]map[string]session.Session),

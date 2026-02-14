@@ -1,0 +1,656 @@
+{
+  "system_id": "daggerheart",
+  "system_version": "v1",
+  "source": "Daggerheart SRD v1 (paraphrased)",
+  "locale": "pt-BR",
+  "items": [
+    {
+      "id": "subclass.troubadour",
+      "name": "Trovador",
+      "spellcast_trait": "Presence",
+      "foundation_features": [
+        {
+          "id": "feature.troubadour-gifted-performer",
+          "name": "Artista Talentoso",
+          "description": "Uma vez por descanso longo por canção, escolha uma de três cancoes: Canção Relaxante limpa 1 Ponto de Vida para você e aliados em alcance próximo; Canção Épica deixa um alvo em alcance próximo temporariamente Vulnerável; Canção Dolorida concede uma Esperança para você e aliados em alcance próximo.",
+          "level": 1
+        }
+      ],
+      "specialization_features": [
+        {
+          "id": "feature.troubadour-maestro",
+          "name": "Maestro",
+          "description": "Quando você entrega um Dado de Rali a um aliado, ele pode ganhar uma Esperança ou limpar um Estresse.",
+          "level": 2
+        }
+      ],
+      "mastery_features": [
+        {
+          "id": "feature.troubadour-virtuoso",
+          "name": "Virtuoso",
+          "description": "Você pode executar cada canção de Artista Talentoso duas vezes por descanso longo.",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "subclass.wordsmith",
+      "name": "Forjador de Palavras",
+      "spellcast_trait": "Presence",
+      "foundation_features": [
+        {
+          "id": "feature.wordsmith-rousing-speech",
+          "name": "Discurso Inspirador",
+          "description": "Uma vez por descanso longo, faça um discurso inspirador. Todos os aliados em alcance longo limpam 2 Estresse.",
+          "level": 1
+        },
+        {
+          "id": "feature.wordsmith-heart-of-poet",
+          "name": "Coracao de Poeta",
+          "description": "Depois de fazer uma rolagem de ação para impressionar, persuadir ou ofender alguem, você pode gastar uma Esperança para adicionar um d4 à rolagem.",
+          "level": 1
+        }
+      ],
+      "specialization_features": [
+        {
+          "id": "feature.wordsmith-eloquent",
+          "name": "Eloquente",
+          "description": "Uma vez por sessão, quando você encoraja um aliado, escolha um: ele encontra um objeto ou ferramenta mundana de que precisa; você Ajudar um Aliado sem gastar Esperança; ou ele ganha um movimento de descanso adicional no próximo descanso.",
+          "level": 2
+        }
+      ],
+      "mastery_features": [
+        {
+          "id": "feature.wordsmith-epic-poetry",
+          "name": "Poesia Epica",
+          "description": "Seu Dado de Rali aumenta para d10. Quando você Ajuda um Aliado, pode narrar o momento como um conto heroico e rolar um d10 como seu dado de vantagem.",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "subclass.warden-elements",
+      "name": "Guardiao dos Elementos",
+      "spellcast_trait": "Instinct",
+      "foundation_features": [
+        {
+          "id": "feature.warden-elements-elemental-incarnation",
+          "name": "Encarnacao Elemental",
+          "description": "Marque um Estresse para Canalizar fogo, terra, agua ou ar ate sofrer dano severo ou ate o proximo descanso. Fogo: quando um adversario em alcance corpo a corpo causa dano a você, ele sofre 1d10 de dano magico. Terra: ganhe um bonus nos limiares de dano igual a sua Proficiência. Agua: quando você causa dano a um adversario em alcance corpo a corpo, todos os outros adversarios em alcance muito proximo marcam um Estresse. Ar: você pode pairar, ganhando vantagem em rolagens de Agility.",
+          "level": 1
+        }
+      ],
+      "specialization_features": [
+        {
+          "id": "feature.warden-elements-elemental-aura",
+          "name": "Aura Elemental",
+          "description": "Uma vez por descanso enquanto Canaliza, assuma uma aura do seu elemento que afeta alvos em alcance proximo ate o Canalizar terminar. Fogo: quando um adversario marca 1 ou mais Pontos de Vida, ele tambem marca um Estresse. Terra: aliados ganham +1 em Strength. Agua: quando um adversario causa dano a você, marque um Estresse para movê-lo para qualquer lugar em alcance muito proximo de onde ele esta. Ar: quando você ou um aliado sofre dano de um ataque além de alcance corpo a corpo, reduza o dano em 1d8.",
+          "level": 2
+        }
+      ],
+      "mastery_features": [
+        {
+          "id": "feature.warden-elements-elemental-dominion",
+          "name": "Dominio Elemental",
+          "description": "Enquanto Canaliza, ganhe um beneficio conforme o elemento. Fogo: +1 de Proficiência em ataques e feitiços que causem dano. Terra: quando você marcaria Pontos de Vida, role um d6 por Ponto de Vida; cada 6 reduz em 1 o total marcado. Agua: quando um ataque contra você acerta, pode marcar um Estresse para deixar o atacante temporariamente Vulnerável. Ar: ganhe +1 de Evasão e você pode voar.",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "subclass.warden-renewal",
+      "name": "Guardiao da Renovacao",
+      "spellcast_trait": "Instinct",
+      "foundation_features": [
+        {
+          "id": "feature.warden-renewal-clarity-of-nature",
+          "name": "Clareza da Natureza",
+          "description": "Uma vez por descanso longo, crie um espaço de serenidade natural em alcance proximo. Depois de alguns minutos descansando ali, limpe Estresse igual ao seu Instinct, distribuindo entre você e aliados como quiser.",
+          "level": 1
+        },
+        {
+          "id": "feature.warden-renewal-regeneration",
+          "name": "Regeneracao",
+          "description": "Toque uma criatura e gaste 3 Esperança; ela limpa 1d4 Pontos de Vida.",
+          "level": 1
+        }
+      ],
+      "specialization_features": [
+        {
+          "id": "feature.warden-renewal-regenerative-reach",
+          "name": "Alcance Regenerativo",
+          "description": "Você pode atingir criaturas em alcance muito proximo com Regeneracao.",
+          "level": 2
+        },
+        {
+          "id": "feature.warden-renewal-wardens-protection",
+          "name": "Guarda Renovadora",
+          "description": "Uma vez por descanso longo, gaste 2 Esperança para limpar 2 Pontos de Vida de 1d4 aliados em alcance proximo.",
+          "level": 2
+        }
+      ],
+      "mastery_features": [
+        {
+          "id": "feature.warden-renewal-defender",
+          "name": "Defensor",
+          "description": "Enquanto estiver em Forma de Besta, quando um aliado em alcance proximo marcar 2 ou mais Pontos de Vida, você pode marcar um Estresse para reduzir em 1 o numero de Pontos de Vida marcados.",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "subclass.stalwart",
+      "name": "Baluarte",
+      "spellcast_trait": "Strength",
+      "foundation_features": [
+        {
+          "id": "feature.stalwart-unwavering",
+          "name": "Inabalavel",
+          "description": "Ganhe um bonus permanente de +1 nos seus limiares de dano.",
+          "level": 1
+        },
+        {
+          "id": "feature.stalwart-iron-will",
+          "name": "Vontade de Ferro",
+          "description": "Quando você sofre dano fisico, pode marcar um espaco de Armadura adicional para reduzir a severidade.",
+          "level": 1
+        }
+      ],
+      "specialization_features": [
+        {
+          "id": "feature.stalwart-unrelenting",
+          "name": "Implacavel",
+          "description": "Ganhe um bonus permanente de +2 nos seus limiares de dano.",
+          "level": 2
+        },
+        {
+          "id": "feature.stalwart-partners-in-arms",
+          "name": "Parceiros de Armas",
+          "description": "Quando um aliado em alcance muito proximo sofre dano, você pode marcar um espaco de Armadura para reduzir a severidade em um passo.",
+          "level": 2
+        }
+      ],
+      "mastery_features": [
+        {
+          "id": "feature.stalwart-undaunted",
+          "name": "Indomavel",
+          "description": "Ganhe um bonus permanente de +3 nos seus limiares de dano.",
+          "level": 3
+        },
+        {
+          "id": "feature.stalwart-loyal-protector",
+          "name": "Protetor Leal",
+          "description": "Quando um aliado em alcance proximo tem 2 ou menos Pontos de Vida e sofreria dano, você pode marcar um Estresse para correr ao lado dele e sofrer o dano no lugar.",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "subclass.vengeance",
+      "name": "Vinganca",
+      "spellcast_trait": "Strength",
+      "foundation_features": [
+        {
+          "id": "feature.vengeance-at-ease",
+          "name": "A Vontade",
+          "description": "Ganhe um espaco de Estresse adicional.",
+          "level": 1
+        },
+        {
+          "id": "feature.vengeance-revenge",
+          "name": "Revanche",
+          "description": "Quando um adversario em alcance corpo a corpo acerta um ataque contra você, pode marcar 2 Estresse para forcar o atacante a marcar 1 Ponto de Vida.",
+          "level": 1
+        }
+      ],
+      "specialization_features": [
+        {
+          "id": "feature.vengeance-act-of-reprisal",
+          "name": "Represália Vingativa",
+          "description": "Quando um adversario causa dano a um aliado em alcance corpo a corpo, ganhe +1 de Proficiência no proximo ataque bem-sucedido contra esse adversario.",
+          "level": 2
+        }
+      ],
+      "mastery_features": [
+        {
+          "id": "feature.vengeance-nemesis",
+          "name": "Nemesis",
+          "description": "Gaste 2 Esperança para Priorizar um adversario ate o proximo descanso. Quando você ataca seu adversario Prioritario, pode trocar os resultados dos seus Dados de Esperança e Medo. Você so pode Priorizar um adversario por vez.",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "subclass.beastbound",
+      "name": "Vinculo Bestial",
+      "spellcast_trait": "Agility",
+      "foundation_features": [
+        {
+          "id": "feature.beastbound-companion",
+          "name": "Companheiro",
+          "description": "Você tem um companheiro animal da sua escolha. Ele fica ao seu lado, a menos que você diga o contrario. Pegue a ficha de Companheiro do Patrulheiro e escolha uma opcao de aprimoramento sempre que subir de nivel.",
+          "level": 1
+        }
+      ],
+      "specialization_features": [
+        {
+          "id": "feature.beastbound-expert-training",
+          "name": "Treino Especialista",
+          "description": "Escolha uma opcao adicional de aprimoramento para seu companheiro.",
+          "level": 2
+        },
+        {
+          "id": "feature.beastbound-battle-bonded",
+          "name": "Laço de Batalha",
+          "description": "Quando um adversario ataca você enquanto esta em alcance corpo a corpo do seu companheiro, ganhe +2 de Evasao contra o ataque.",
+          "level": 2
+        }
+      ],
+      "mastery_features": [
+        {
+          "id": "feature.beastbound-advanced-training",
+          "name": "Treino Avancado",
+          "description": "Escolha duas opcoes adicionais de aprimoramento para seu companheiro.",
+          "level": 3
+        },
+        {
+          "id": "feature.beastbound-loyal-friend",
+          "name": "Amigo Leal",
+          "description": "Uma vez por descanso longo, quando o dano marcaria o ultimo Estresse do seu companheiro ou seu ultimo Ponto de Vida e vocês estao em alcance proximo, você ou o companheiro pode correr para o outro e sofrer o dano no lugar.",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "subclass.wayfinder",
+      "name": "Desbravador",
+      "spellcast_trait": "Agility",
+      "foundation_features": [
+        {
+          "id": "feature.wayfinder-ruthless-predator",
+          "name": "Predador Implacavel",
+          "description": "Quando você fizer uma rolagem de dano, pode marcar um Estresse para ganhar +1 de Proficiência. Além disso, quando causar dano severo, o alvo deve marcar um Estresse.",
+          "level": 1
+        },
+        {
+          "id": "feature.wayfinder-path-forward",
+          "name": "Caminho a Frente",
+          "description": "Quando estiver viajando para um lugar que ja visitou ou carregando um objeto que ja esteve la, você pode identificar o caminho mais curto e direto.",
+          "level": 1
+        }
+      ],
+      "specialization_features": [
+        {
+          "id": "feature.wayfinder-elusive-predator",
+          "name": "Predador Elusivo",
+          "description": "Quando seu Foco atacar você, ganhe +2 de Evasao contra esse ataque.",
+          "level": 2
+        }
+      ],
+      "mastery_features": [
+        {
+          "id": "feature.wayfinder-apex-predator",
+          "name": "Predador Alfa",
+          "description": "Antes de fazer uma rolagem de ataque contra seu Foco, você pode gastar uma Esperança. Em um ataque bem-sucedido, remova um Medo do estoque do GM.",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "subclass.nightwalker",
+      "name": "Caminhante da Noite",
+      "spellcast_trait": "Finesse",
+      "foundation_features": [
+        {
+          "id": "feature.nightwalker-shadow-stepper",
+          "name": "Passo das Sombras",
+          "description": "Mova-se de sombra a sombra. Quando entrar em uma area escura ou na sombra de uma criatura ou objeto, você pode marcar um Estresse para desaparecer e reaparecer dentro de outra sombra em alcance longo. Ao reaparecer, você fica Encoberto.",
+          "level": 1
+        }
+      ],
+      "specialization_features": [
+        {
+          "id": "feature.nightwalker-dark-cloud",
+          "name": "Nuvem Escura",
+          "description": "Faça uma rolagem de Conjuracao (15). Em sucesso, crie uma nuvem escura temporaria em uma area em alcance proximo. Quem esta dentro nao ve para fora e quem esta fora nao ve para dentro. Você fica Encoberto para adversarios cujo campo de visao for bloqueado pela nuvem.",
+          "level": 2
+        },
+        {
+          "id": "feature.nightwalker-adrenaline",
+          "name": "Adrenalina",
+          "description": "Enquanto estiver Vulnerável, adicione seu nivel as rolagens de dano.",
+          "level": 2
+        }
+      ],
+      "mastery_features": [
+        {
+          "id": "feature.nightwalker-fleeting-shadow",
+          "name": "Sombra Furtiva",
+          "description": "Ganhe um bonus permanente de +1 na Evasao. Passo das Sombras pode mover você em alcance muito longo.",
+          "level": 3
+        },
+        {
+          "id": "feature.nightwalker-vanishing-act",
+          "name": "Ato de Desaparecer",
+          "description": "Marque um Estresse para ficar Encoberto a qualquer momento. Você limpa automaticamente Restringido enquanto Encoberto por esta habilidade. Você permanece Encoberto ate rolar com Medo ou ate o proximo descanso.",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "subclass.syndicate",
+      "name": "Sindicato",
+      "spellcast_trait": "Finesse",
+      "foundation_features": [
+        {
+          "id": "feature.syndicate-well-connected",
+          "name": "Bem Conectado",
+          "description": "Quando chegar a uma cidade ou ambiente importante, você conhece alguem de la. De um nome, descreva como pode ajudar, e escolha um fato: deve um favor mas e dificil de encontrar; vai pedir algo em troca; esta sempre em apuros; vocês ja foram um casal; ou não se separaram em bons termos.",
+          "level": 1
+        }
+      ],
+      "specialization_features": [
+        {
+          "id": "feature.syndicate-contacts-everywhere",
+          "name": "Contatos em Todo Lugar",
+          "description": "Uma vez por sessão, chame um contato duvidoso. Escolha um: ele fornece 1 punhado de ouro, uma ferramenta unica ou um objeto mundano necessario; sua proxima rolagem de ação ganha +3 no resultado do Dado de Esperança ou Medo; ou na proxima vez que você causar dano, ele atira das sombras e adiciona 2d8 ao dano.",
+          "level": 2
+        }
+      ],
+      "mastery_features": [
+        {
+          "id": "feature.syndicate-reliable-backup",
+          "name": "Apoio Confiavel",
+          "description": "Você pode usar Contatos em Todo Lugar tres vezes por sessão. Opcoes adicionais: quando você marcar 1 ou mais Pontos de Vida, ele reduz em 1 o numero marcado; ou quando você fizer uma rolagem de Presence, ele te apoia e você pode rolar um d20 como seu Dado de Esperança.",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "subclass.divine-wielder",
+      "name": "Portador Divino",
+      "spellcast_trait": "Strength",
+      "foundation_features": [
+        {
+          "id": "feature.divine-wielder-spirit-weapon",
+          "name": "Arma Espiritual",
+          "description": "Quando você tem uma arma equipada com alcance corpo a corpo ou muito proximo, ela pode voar para atacar um adversario em alcance proximo e retornar. Você pode marcar um Estresse para atingir um adversario adicional no alcance com a mesma rolagem de ataque.",
+          "level": 1
+        },
+        {
+          "id": "feature.divine-wielder-sparing-touch",
+          "name": "Toque Poupador",
+          "description": "Uma vez por descanso longo, toque uma criatura para limpar 2 Pontos de Vida ou 2 Estresse.",
+          "level": 1
+        }
+      ],
+      "specialization_features": [
+        {
+          "id": "feature.divine-wielder-devout",
+          "name": "Devoto",
+          "description": "Quando rolar seus Dados de Oração, role um dado adicional e descarte o menor. Você pode usar Toque Poupador duas vezes por descanso longo.",
+          "level": 2
+        }
+      ],
+      "mastery_features": [
+        {
+          "id": "feature.divine-wielder-sacred-resonance",
+          "name": "Ressonancia Sagrada",
+          "description": "Quando rolar dano da Arma Espiritual, se algum resultado se repetir, dobre o valor de cada dado repetido.",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "subclass.winged-sentinel",
+      "name": "Sentinela Alada",
+      "spellcast_trait": "Strength",
+      "foundation_features": [
+        {
+          "id": "feature.winged-sentinel-wings-of-light",
+          "name": "Asas de Luz",
+          "description": "Você pode voar. Enquanto voa, pode marcar um Estresse para carregar uma criatura disposta de tamanho semelhante ou menor, ou gastar uma Esperança para causar 1d8 de dano extra em um ataque bem-sucedido.",
+          "level": 1
+        }
+      ],
+      "specialization_features": [
+        {
+          "id": "feature.winged-sentinel-ethereal-visage",
+          "name": "Visagem Eterea",
+          "description": "Enquanto voa, você tem vantagem em rolagens de Presence. Quando você tem sucesso com Esperança em uma rolagem de Presence, pode remover um Medo do estoque do GM em vez de ganhar Esperança.",
+          "level": 2
+        }
+      ],
+      "mastery_features": [
+        {
+          "id": "feature.winged-sentinel-ascendant",
+          "name": "Ascendente",
+          "description": "Ganhe um bonus permanente de +4 no limiar de dano severo.",
+          "level": 3
+        },
+        {
+          "id": "feature.winged-sentinel-power-of-the-gods",
+          "name": "Poder dos Deuses",
+          "description": "Enquanto voa, o dano extra de Asas de Luz passa a ser 1d12 em vez de 1d8.",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "subclass.elemental-origin",
+      "name": "Origem Elemental",
+      "spellcast_trait": "Instinct",
+      "foundation_features": [
+        {
+          "id": "feature.elemental-origin-elementalist",
+          "name": "Elementalista",
+          "description": "Escolha ar, terra, fogo, relampago ou agua na criacao do personagem. Você pode moldar efeitos inofensivos desse elemento. Gaste uma Esperança e descreva como ele ajuda uma rolagem de ação para ganhar +2 na rolagem ou +3 no dano da rolagem.",
+          "level": 1
+        }
+      ],
+      "specialization_features": [
+        {
+          "id": "feature.elemental-origin-natural-evasion",
+          "name": "Evasao Natural",
+          "description": "Quando um ataque contra você acerta, pode marcar um Estresse e descrever como seu elemento o defende. Role um d6 e some o resultado a sua Evasao contra o ataque.",
+          "level": 2
+        }
+      ],
+      "mastery_features": [
+        {
+          "id": "feature.elemental-origin-transcendence",
+          "name": "Transcendencia",
+          "description": "Uma vez por descanso longo, transforme-se em uma manifestacao fisica do seu elemento. Escolha dois beneficios ate o proximo descanso: +4 no limiar severo, +1 em um traço, +1 de Proficiência, ou +2 de Evasao.",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "subclass.primal-origin",
+      "name": "Origem Primal",
+      "spellcast_trait": "Instinct",
+      "foundation_features": [
+        {
+          "id": "feature.primal-origin-manipulate-magic",
+          "name": "Manipular Magia",
+          "description": "Depois de conjurar um feitiço ou fazer um ataque com arma de dano magico, você pode marcar um Estresse para fazer um: aumentar o alcance em um passo; ganhar +2 no resultado da rolagem de ação; dobrar um dado de dano a sua escolha; ou atingir um alvo adicional dentro do alcance.",
+          "level": 1
+        }
+      ],
+      "specialization_features": [
+        {
+          "id": "feature.primal-origin-enchanted-aid",
+          "name": "Ajuda Encantada",
+          "description": "Quando você Ajuda um Aliado com uma rolagem de Conjuracao, role um d8 como dado de vantagem. Uma vez por descanso longo, depois que um aliado fizer uma rolagem de Conjuracao com sua ajuda, você pode trocar os resultados dos Dados de Dualidade dele.",
+          "level": 2
+        }
+      ],
+      "mastery_features": [
+        {
+          "id": "feature.primal-origin-arcane-charge",
+          "name": "Carga Arcana",
+          "description": "Quando você sofre dano magico, fica Carregado; ou gaste 2 Esperança para ficar Carregado. Ao acertar dano magico enquanto Carregado, limpe a Carga para ganhar +10 de dano ou +3 na Dificuldade de uma rolagem de reacao causada pelo feitiço. Você deixa de ficar Carregado no proximo descanso longo.",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "subclass.call-brave",
+      "name": "Chamado dos Valentes",
+      "spellcast_trait": "Strength",
+      "foundation_features": [
+        {
+          "id": "feature.call-brave-courage",
+          "name": "Coragem",
+          "description": "Quando você falha em uma rolagem com Medo, você ganha uma Esperança.",
+          "level": 1
+        },
+        {
+          "id": "feature.call-brave-battle-ritual",
+          "name": "Ritual de Batalha",
+          "description": "Uma vez por descanso longo, antes de tentar algo muito perigoso ou enfrentar um inimigo que claramente o supera, descreva seu ritual ou preparacao. Limpe 2 Estresse e ganhe 2 Esperança.",
+          "level": 1
+        }
+      ],
+      "specialization_features": [
+        {
+          "id": "feature.call-brave-rise-to-the-challenge",
+          "name": "Erguer-se ao Desafio",
+          "description": "Enquanto você tiver 2 ou menos Pontos de Vida desmarcados, pode rolar um d20 como seu Dado de Esperança.",
+          "level": 2
+        }
+      ],
+      "mastery_features": [
+        {
+          "id": "feature.call-brave-camaraderie",
+          "name": "Camaradagem",
+          "description": "Você pode iniciar uma Rolagem de Tag Team uma vez adicional por sessão. Quando um aliado inicia uma Rolagem de Tag Team com você, ele so precisa gastar 2 Esperança.",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "subclass.call-slayer",
+      "name": "Chamado do Matador",
+      "spellcast_trait": "Strength",
+      "foundation_features": [
+        {
+          "id": "feature.call-slayer-slayer",
+          "name": "Matador",
+          "description": "Você ganha um conjunto de Dados de Matador. Em uma rolagem com Esperança, você pode colocar um d6 no conjunto em vez de ganhar Esperança. Você pode guardar uma quantidade igual à sua Proficiência. Ao fazer uma rolagem de ataque ou dano, pode gastar quantos quiser, rolando e somando o total. No fim da sessão, limpe os Dados de Matador nao usados e ganhe uma Esperança por dado limpo.",
+          "level": 1
+        }
+      ],
+      "specialization_features": [
+        {
+          "id": "feature.call-slayer-weapon-specialist",
+          "name": "Especialista em Armas",
+          "description": "Quando você acerta um ataque, pode gastar uma Esperança para adicionar um dado de dano da sua arma secundaria ao dano. Uma vez por descanso longo, ao rolar seus Dados de Matador, rerrole quaisquer 1s.",
+          "level": 2
+        }
+      ],
+      "mastery_features": [
+        {
+          "id": "feature.call-slayer-martial-preparation",
+          "name": "Preparacao Marcial",
+          "description": "Seu grupo ganha o movimento de descanso Preparacao Marcial. Durante um descanso, descreva o treinamento; você e cada aliado que escolher o movimento ganham um Dado de Matador d6. Um PC pode gastar o dado para somá-lo a uma rolagem de ataque ou dano.",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "subclass.school-knowledge",
+      "name": "Escola do Conhecimento",
+      "spellcast_trait": "Knowledge",
+      "foundation_features": [
+        {
+          "id": "feature.school-knowledge-prepared",
+          "name": "Preparado",
+          "description": "Pegue uma carta de dominio adicional do seu nivel ou menor de um dominio ao qual você tem acesso.",
+          "level": 1
+        },
+        {
+          "id": "feature.school-knowledge-adept",
+          "name": "Adepto",
+          "description": "Quando você Utiliza uma Experiencia, pode marcar um Estresse em vez de gastar Esperança. Se fizer isso, dobre seu modificador de Experiencia para essa rolagem.",
+          "level": 1
+        }
+      ],
+      "specialization_features": [
+        {
+          "id": "feature.school-knowledge-accomplished",
+          "name": "Realizado",
+          "description": "Pegue uma carta de dominio adicional do seu nivel ou menor de um dominio ao qual você tem acesso.",
+          "level": 2
+        },
+        {
+          "id": "feature.school-knowledge-perfect-recall",
+          "name": "Memoria Perfeita",
+          "description": "Uma vez por descanso, ao recordar uma carta de dominio no seu cofre, reduza o Custo de Recordacao dela em 1.",
+          "level": 2
+        }
+      ],
+      "mastery_features": [
+        {
+          "id": "feature.school-knowledge-brilliant",
+          "name": "Brilhante",
+          "description": "Pegue uma carta de dominio adicional do seu nivel ou menor de um dominio ao qual você tem acesso.",
+          "level": 3
+        },
+        {
+          "id": "feature.school-knowledge-honed-expertise",
+          "name": "Especializacao Lapidada",
+          "description": "Quando você usa uma Experiencia, role um d6. Com 5 ou mais, você pode usa-la sem gastar Esperança.",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "id": "subclass.school-war",
+      "name": "Escola da Guerra",
+      "spellcast_trait": "Knowledge",
+      "foundation_features": [
+        {
+          "id": "feature.school-war-battlemage",
+          "name": "Mago de Batalha",
+          "description": "Ganhe um espaco adicional de Ponto de Vida.",
+          "level": 1
+        },
+        {
+          "id": "feature.school-war-face-your-fear",
+          "name": "Enfrente Seu Medo",
+          "description": "Quando você tem sucesso com Medo em uma rolagem de ataque, causa 1d10 de dano magico extra.",
+          "level": 1
+        }
+      ],
+      "specialization_features": [
+        {
+          "id": "feature.school-war-conjure-shield",
+          "name": "Conjurar Escudo",
+          "description": "Enquanto você tiver pelo menos 2 Esperança, some sua Proficiência a sua Evasao.",
+          "level": 2
+        },
+        {
+          "id": "feature.school-war-fueled-by-fear",
+          "name": "Movido pelo Medo",
+          "description": "O dano magico extra de Enfrente Seu Medo aumenta para 2d10.",
+          "level": 2
+        }
+      ],
+      "mastery_features": [
+        {
+          "id": "feature.school-war-thrive-in-chaos",
+          "name": "Prosperar no Caos",
+          "description": "Quando você acerta um ataque, pode marcar um Estresse apos rolar o dano para forcar o alvo a marcar um Ponto de Vida adicional.",
+          "level": 3
+        },
+        {
+          "id": "feature.school-war-have-no-fear",
+          "name": "Sem Medo",
+          "description": "O dano magico extra de Enfrente Seu Medo aumenta para 3d10.",
+          "level": 3
+        }
+      ]
+    }
+  ]
+}

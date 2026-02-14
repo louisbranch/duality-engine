@@ -147,6 +147,7 @@ message DaggerheartRestRequest {
   bool interrupted = 2;
   int32 party_size = 3;
   common.v1.RngRequest rng = 4;
+  string long_term_countdown_id = 5;
 }
 
 message DaggerheartDowntimeRequest {

@@ -1,0 +1,158 @@
+{
+  "system_id": "daggerheart",
+  "system_version": "v1",
+  "source": "Daggerheart SRD v1 (paraphrased)",
+  "locale": "pt-BR",
+  "items": [
+    {
+      "id": "beastform.agile-scout",
+      "name": "Batedor Ágil",
+      "tier": 1,
+      "examples": "Raposa, rato, doninha",
+      "trait": "agility",
+      "trait_bonus": 1,
+      "evasion_bonus": 2,
+      "attack": {
+        "range": "melee",
+        "trait": "agility",
+        "damage_dice": [{"sides": 4, "count": 1}],
+        "damage_bonus": 0,
+        "damage_type": "physical"
+      },
+      "advantages": ["enganar", "localizar", "esgueirar"],
+      "features": [
+        {
+          "id": "beastform-feature.agile-scout-agile",
+          "name": "Ágil",
+          "description": "Seu movimento é silencioso. Gaste uma Esperança para mover até alcance longo sem rolar."
+        },
+        {
+          "id": "beastform-feature.agile-scout-fragile",
+          "name": "Frágil",
+          "description": "Ao sofrer dano Maior ou pior, você sai da Forma Bestial."
+        }
+      ]
+    },
+    {
+      "id": "beastform.pack-predator",
+      "name": "Predador de Matilha",
+      "tier": 1,
+      "examples": "Coiote, hiena, lobo",
+      "trait": "strength",
+      "trait_bonus": 2,
+      "evasion_bonus": 1,
+      "attack": {
+        "range": "melee",
+        "trait": "strength",
+        "damage_dice": [{"sides": 8, "count": 1}],
+        "damage_bonus": 2,
+        "damage_type": "physical"
+      },
+      "advantages": ["atacar", "correr", "rastrear"],
+      "features": [
+        {
+          "id": "beastform-feature.pack-predator-hobbling-strike",
+          "name": "Golpe Mancante",
+          "description": "Quando acerta um alvo em corpo a corpo, marque um Estresse para deixá-lo Vulnerável temporariamente."
+        },
+        {
+          "id": "beastform-feature.pack-predator-pack-hunting",
+          "name": "Caça em Matilha",
+          "description": "Quando acerta um alvo atingido por um aliado imediatamente antes de você, adicione 1d8 ao dano."
+        }
+      ]
+    },
+    {
+      "id": "beastform.armored-sentry",
+      "name": "Sentinela Blindado",
+      "tier": 2,
+      "examples": "Tatu, pangolim, tartaruga",
+      "trait": "strength",
+      "trait_bonus": 1,
+      "evasion_bonus": 1,
+      "attack": {
+        "range": "melee",
+        "trait": "strength",
+        "damage_dice": [{"sides": 8, "count": 1}],
+        "damage_bonus": 2,
+        "damage_type": "physical"
+      },
+      "advantages": ["cavar", "localizar", "proteger"],
+      "features": [
+        {
+          "id": "beastform-feature.armored-sentry-armored-shell",
+          "name": "Casco Blindado",
+          "description": "Você resiste a dano físico. Marque um espaço de Armadura para se retrair na carapaça; enquanto fechado, dano físico é reduzido pelo seu Valor de Armadura após resistência, e você não pode agir até sair."
+        },
+        {
+          "id": "beastform-feature.armored-sentry-cannonball",
+          "name": "Bola de Canhão",
+          "description": "Marque um Estresse para um aliado arremessá-lo. Ele faz um ataque de Agilidade ou Força contra um alvo em alcance próximo; em sucesso, o alvo sofre d12+2 de dano físico usando a Proficiência do lançador. Gaste uma Esperança para atingir um segundo alvo em alcance muito próximo do primeiro por metade do dano."
+        }
+      ]
+    },
+    {
+      "id": "beastform.great-predator",
+      "name": "Grande Predador",
+      "tier": 3,
+      "examples": "Lobo terrível, velociraptor, tigre-dentes-de-sabre",
+      "trait": "strength",
+      "trait_bonus": 2,
+      "evasion_bonus": 2,
+      "attack": {
+        "range": "melee",
+        "trait": "strength",
+        "damage_dice": [{"sides": 12, "count": 1}],
+        "damage_bonus": 8,
+        "damage_type": "physical"
+      },
+      "advantages": ["atacar", "esgueirar", "correr"],
+      "features": [
+        {
+          "id": "beastform-feature.great-predator-carrier",
+          "name": "Transportador",
+          "description": "Você pode carregar até dois aliados dispostos ao se mover."
+        },
+        {
+          "id": "beastform-feature.great-predator-vicious-maul",
+          "name": "Mordida Viciosa",
+          "description": "Ao acertar, gaste uma Esperança para deixar o alvo Vulnerável temporariamente e ganhar +1 de Proficiência nesse ataque."
+        }
+      ]
+    },
+    {
+      "id": "beastform.massive-behemoth",
+      "name": "Beemote Massivo",
+      "tier": 4,
+      "examples": "Elefante, mamute, rinoceronte",
+      "trait": "strength",
+      "trait_bonus": 3,
+      "evasion_bonus": 1,
+      "attack": {
+        "range": "melee",
+        "trait": "strength",
+        "damage_dice": [{"sides": 12, "count": 1}],
+        "damage_bonus": 12,
+        "damage_type": "physical"
+      },
+      "advantages": ["localizar", "proteger", "assustar", "correr"],
+      "features": [
+        {
+          "id": "beastform-feature.massive-behemoth-carrier",
+          "name": "Transportador",
+          "description": "Você pode carregar até quatro aliados dispostos ao se mover."
+        },
+        {
+          "id": "beastform-feature.massive-behemoth-demolish",
+          "name": "Demolir",
+          "description": "Gaste uma Esperança para mover até alcance longo em linha reta e atacar todos os alvos em alcance corpo a corpo ao longo do caminho. Em sucesso, cause d8+10 de dano físico usando sua Proficiência e deixe-os Vulneráveis temporariamente."
+        },
+        {
+          "id": "beastform-feature.massive-behemoth-undaunted",
+          "name": "Inabalável",
+          "description": "Ganhe +2 em todos os limiares de dano."
+        }
+      ]
+    }
+  ]
+}

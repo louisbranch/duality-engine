@@ -25,6 +25,33 @@ func (q *Queries) DeleteDaggerheartAdversary(ctx context.Context, arg DeleteDagg
 	return err
 }
 
+const deleteDaggerheartAdversaryEntry = `-- name: DeleteDaggerheartAdversaryEntry :exec
+DELETE FROM daggerheart_adversary_entries WHERE id = ?
+`
+
+func (q *Queries) DeleteDaggerheartAdversaryEntry(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteDaggerheartAdversaryEntry, id)
+	return err
+}
+
+const deleteDaggerheartArmor = `-- name: DeleteDaggerheartArmor :exec
+DELETE FROM daggerheart_armor WHERE id = ?
+`
+
+func (q *Queries) DeleteDaggerheartArmor(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteDaggerheartArmor, id)
+	return err
+}
+
+const deleteDaggerheartBeastform = `-- name: DeleteDaggerheartBeastform :exec
+DELETE FROM daggerheart_beastforms WHERE id = ?
+`
+
+func (q *Queries) DeleteDaggerheartBeastform(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteDaggerheartBeastform, id)
+	return err
+}
+
 const deleteDaggerheartCharacterProfile = `-- name: DeleteDaggerheartCharacterProfile :exec
 DELETE FROM daggerheart_character_profiles
 WHERE campaign_id = ? AND character_id = ?
@@ -55,6 +82,24 @@ func (q *Queries) DeleteDaggerheartCharacterState(ctx context.Context, arg Delet
 	return err
 }
 
+const deleteDaggerheartClass = `-- name: DeleteDaggerheartClass :exec
+DELETE FROM daggerheart_classes WHERE id = ?
+`
+
+func (q *Queries) DeleteDaggerheartClass(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteDaggerheartClass, id)
+	return err
+}
+
+const deleteDaggerheartCompanionExperience = `-- name: DeleteDaggerheartCompanionExperience :exec
+DELETE FROM daggerheart_companion_experiences WHERE id = ?
+`
+
+func (q *Queries) DeleteDaggerheartCompanionExperience(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteDaggerheartCompanionExperience, id)
+	return err
+}
+
 const deleteDaggerheartCountdown = `-- name: DeleteDaggerheartCountdown :exec
 DELETE FROM daggerheart_countdowns
 WHERE campaign_id = ? AND countdown_id = ?
@@ -70,12 +115,102 @@ func (q *Queries) DeleteDaggerheartCountdown(ctx context.Context, arg DeleteDagg
 	return err
 }
 
+const deleteDaggerheartDamageType = `-- name: DeleteDaggerheartDamageType :exec
+DELETE FROM daggerheart_damage_types WHERE id = ?
+`
+
+func (q *Queries) DeleteDaggerheartDamageType(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteDaggerheartDamageType, id)
+	return err
+}
+
+const deleteDaggerheartDomain = `-- name: DeleteDaggerheartDomain :exec
+DELETE FROM daggerheart_domains WHERE id = ?
+`
+
+func (q *Queries) DeleteDaggerheartDomain(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteDaggerheartDomain, id)
+	return err
+}
+
+const deleteDaggerheartDomainCard = `-- name: DeleteDaggerheartDomainCard :exec
+DELETE FROM daggerheart_domain_cards WHERE id = ?
+`
+
+func (q *Queries) DeleteDaggerheartDomainCard(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteDaggerheartDomainCard, id)
+	return err
+}
+
+const deleteDaggerheartEnvironment = `-- name: DeleteDaggerheartEnvironment :exec
+DELETE FROM daggerheart_environments WHERE id = ?
+`
+
+func (q *Queries) DeleteDaggerheartEnvironment(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteDaggerheartEnvironment, id)
+	return err
+}
+
+const deleteDaggerheartExperience = `-- name: DeleteDaggerheartExperience :exec
+DELETE FROM daggerheart_experiences WHERE id = ?
+`
+
+func (q *Queries) DeleteDaggerheartExperience(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteDaggerheartExperience, id)
+	return err
+}
+
+const deleteDaggerheartHeritage = `-- name: DeleteDaggerheartHeritage :exec
+DELETE FROM daggerheart_heritages WHERE id = ?
+`
+
+func (q *Queries) DeleteDaggerheartHeritage(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteDaggerheartHeritage, id)
+	return err
+}
+
+const deleteDaggerheartItem = `-- name: DeleteDaggerheartItem :exec
+DELETE FROM daggerheart_items WHERE id = ?
+`
+
+func (q *Queries) DeleteDaggerheartItem(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteDaggerheartItem, id)
+	return err
+}
+
+const deleteDaggerheartLootEntry = `-- name: DeleteDaggerheartLootEntry :exec
+DELETE FROM daggerheart_loot_entries WHERE id = ?
+`
+
+func (q *Queries) DeleteDaggerheartLootEntry(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteDaggerheartLootEntry, id)
+	return err
+}
+
 const deleteDaggerheartSnapshot = `-- name: DeleteDaggerheartSnapshot :exec
 DELETE FROM daggerheart_snapshots WHERE campaign_id = ?
 `
 
 func (q *Queries) DeleteDaggerheartSnapshot(ctx context.Context, campaignID string) error {
 	_, err := q.db.ExecContext(ctx, deleteDaggerheartSnapshot, campaignID)
+	return err
+}
+
+const deleteDaggerheartSubclass = `-- name: DeleteDaggerheartSubclass :exec
+DELETE FROM daggerheart_subclasses WHERE id = ?
+`
+
+func (q *Queries) DeleteDaggerheartSubclass(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteDaggerheartSubclass, id)
+	return err
+}
+
+const deleteDaggerheartWeapon = `-- name: DeleteDaggerheartWeapon :exec
+DELETE FROM daggerheart_weapons WHERE id = ?
+`
+
+func (q *Queries) DeleteDaggerheartWeapon(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteDaggerheartWeapon, id)
 	return err
 }
 
@@ -109,6 +244,81 @@ func (q *Queries) GetDaggerheartAdversary(ctx context.Context, arg GetDaggerhear
 		&i.MajorThreshold,
 		&i.SevereThreshold,
 		&i.Armor,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getDaggerheartAdversaryEntry = `-- name: GetDaggerheartAdversaryEntry :one
+SELECT id, name, tier, role, description, motives, difficulty, major_threshold, severe_threshold, hp, stress, armor, attack_modifier, standard_attack_json, experiences_json, features_json, created_at, updated_at FROM daggerheart_adversary_entries WHERE id = ?
+`
+
+func (q *Queries) GetDaggerheartAdversaryEntry(ctx context.Context, id string) (DaggerheartAdversaryEntry, error) {
+	row := q.db.QueryRowContext(ctx, getDaggerheartAdversaryEntry, id)
+	var i DaggerheartAdversaryEntry
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Tier,
+		&i.Role,
+		&i.Description,
+		&i.Motives,
+		&i.Difficulty,
+		&i.MajorThreshold,
+		&i.SevereThreshold,
+		&i.Hp,
+		&i.Stress,
+		&i.Armor,
+		&i.AttackModifier,
+		&i.StandardAttackJson,
+		&i.ExperiencesJson,
+		&i.FeaturesJson,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getDaggerheartArmor = `-- name: GetDaggerheartArmor :one
+SELECT id, name, tier, base_major_threshold, base_severe_threshold, armor_score, feature, created_at, updated_at FROM daggerheart_armor WHERE id = ?
+`
+
+func (q *Queries) GetDaggerheartArmor(ctx context.Context, id string) (DaggerheartArmor, error) {
+	row := q.db.QueryRowContext(ctx, getDaggerheartArmor, id)
+	var i DaggerheartArmor
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Tier,
+		&i.BaseMajorThreshold,
+		&i.BaseSevereThreshold,
+		&i.ArmorScore,
+		&i.Feature,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getDaggerheartBeastform = `-- name: GetDaggerheartBeastform :one
+SELECT id, name, tier, examples, trait, trait_bonus, evasion_bonus, attack_json, advantages_json, features_json, created_at, updated_at FROM daggerheart_beastforms WHERE id = ?
+`
+
+func (q *Queries) GetDaggerheartBeastform(ctx context.Context, id string) (DaggerheartBeastform, error) {
+	row := q.db.QueryRowContext(ctx, getDaggerheartBeastform, id)
+	var i DaggerheartBeastform
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Tier,
+		&i.Examples,
+		&i.Trait,
+		&i.TraitBonus,
+		&i.EvasionBonus,
+		&i.AttackJson,
+		&i.AdvantagesJson,
+		&i.FeaturesJson,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -300,6 +510,47 @@ func (q *Queries) GetDaggerheartCharacterState(ctx context.Context, arg GetDagge
 	return i, err
 }
 
+const getDaggerheartClass = `-- name: GetDaggerheartClass :one
+
+SELECT id, name, starting_evasion, starting_hp, starting_items_json, features_json, hope_feature_json, domain_ids_json, created_at, updated_at FROM daggerheart_classes WHERE id = ?
+`
+
+// Content Catalog
+func (q *Queries) GetDaggerheartClass(ctx context.Context, id string) (DaggerheartClass, error) {
+	row := q.db.QueryRowContext(ctx, getDaggerheartClass, id)
+	var i DaggerheartClass
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.StartingEvasion,
+		&i.StartingHp,
+		&i.StartingItemsJson,
+		&i.FeaturesJson,
+		&i.HopeFeatureJson,
+		&i.DomainIdsJson,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getDaggerheartCompanionExperience = `-- name: GetDaggerheartCompanionExperience :one
+SELECT id, name, description, created_at, updated_at FROM daggerheart_companion_experiences WHERE id = ?
+`
+
+func (q *Queries) GetDaggerheartCompanionExperience(ctx context.Context, id string) (DaggerheartCompanionExperience, error) {
+	row := q.db.QueryRowContext(ctx, getDaggerheartCompanionExperience, id)
+	var i DaggerheartCompanionExperience
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getDaggerheartCountdown = `-- name: GetDaggerheartCountdown :one
 
 SELECT campaign_id, countdown_id, name, kind, "current", max, direction, looping FROM daggerheart_countdowns
@@ -328,6 +579,159 @@ func (q *Queries) GetDaggerheartCountdown(ctx context.Context, arg GetDaggerhear
 	return i, err
 }
 
+const getDaggerheartDamageType = `-- name: GetDaggerheartDamageType :one
+SELECT id, name, description, created_at, updated_at FROM daggerheart_damage_types WHERE id = ?
+`
+
+func (q *Queries) GetDaggerheartDamageType(ctx context.Context, id string) (DaggerheartDamageType, error) {
+	row := q.db.QueryRowContext(ctx, getDaggerheartDamageType, id)
+	var i DaggerheartDamageType
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getDaggerheartDomain = `-- name: GetDaggerheartDomain :one
+SELECT id, name, description, created_at, updated_at FROM daggerheart_domains WHERE id = ?
+`
+
+func (q *Queries) GetDaggerheartDomain(ctx context.Context, id string) (DaggerheartDomain, error) {
+	row := q.db.QueryRowContext(ctx, getDaggerheartDomain, id)
+	var i DaggerheartDomain
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getDaggerheartDomainCard = `-- name: GetDaggerheartDomainCard :one
+SELECT id, name, domain_id, level, type, recall_cost, usage_limit, feature_text, created_at, updated_at FROM daggerheart_domain_cards WHERE id = ?
+`
+
+func (q *Queries) GetDaggerheartDomainCard(ctx context.Context, id string) (DaggerheartDomainCard, error) {
+	row := q.db.QueryRowContext(ctx, getDaggerheartDomainCard, id)
+	var i DaggerheartDomainCard
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.DomainID,
+		&i.Level,
+		&i.Type,
+		&i.RecallCost,
+		&i.UsageLimit,
+		&i.FeatureText,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getDaggerheartEnvironment = `-- name: GetDaggerheartEnvironment :one
+SELECT id, name, tier, type, difficulty, impulses_json, potential_adversary_ids_json, features_json, prompts_json, created_at, updated_at FROM daggerheart_environments WHERE id = ?
+`
+
+func (q *Queries) GetDaggerheartEnvironment(ctx context.Context, id string) (DaggerheartEnvironment, error) {
+	row := q.db.QueryRowContext(ctx, getDaggerheartEnvironment, id)
+	var i DaggerheartEnvironment
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Tier,
+		&i.Type,
+		&i.Difficulty,
+		&i.ImpulsesJson,
+		&i.PotentialAdversaryIdsJson,
+		&i.FeaturesJson,
+		&i.PromptsJson,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getDaggerheartExperience = `-- name: GetDaggerheartExperience :one
+SELECT id, name, description, created_at, updated_at FROM daggerheart_experiences WHERE id = ?
+`
+
+func (q *Queries) GetDaggerheartExperience(ctx context.Context, id string) (DaggerheartExperience, error) {
+	row := q.db.QueryRowContext(ctx, getDaggerheartExperience, id)
+	var i DaggerheartExperience
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getDaggerheartHeritage = `-- name: GetDaggerheartHeritage :one
+SELECT id, name, kind, features_json, created_at, updated_at FROM daggerheart_heritages WHERE id = ?
+`
+
+func (q *Queries) GetDaggerheartHeritage(ctx context.Context, id string) (DaggerheartHeritage, error) {
+	row := q.db.QueryRowContext(ctx, getDaggerheartHeritage, id)
+	var i DaggerheartHeritage
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Kind,
+		&i.FeaturesJson,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getDaggerheartItem = `-- name: GetDaggerheartItem :one
+SELECT id, name, rarity, kind, stack_max, description, effect_text, created_at, updated_at FROM daggerheart_items WHERE id = ?
+`
+
+func (q *Queries) GetDaggerheartItem(ctx context.Context, id string) (DaggerheartItem, error) {
+	row := q.db.QueryRowContext(ctx, getDaggerheartItem, id)
+	var i DaggerheartItem
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Rarity,
+		&i.Kind,
+		&i.StackMax,
+		&i.Description,
+		&i.EffectText,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getDaggerheartLootEntry = `-- name: GetDaggerheartLootEntry :one
+SELECT id, name, roll, description, created_at, updated_at FROM daggerheart_loot_entries WHERE id = ?
+`
+
+func (q *Queries) GetDaggerheartLootEntry(ctx context.Context, id string) (DaggerheartLootEntry, error) {
+	row := q.db.QueryRowContext(ctx, getDaggerheartLootEntry, id)
+	var i DaggerheartLootEntry
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Roll,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getDaggerheartSnapshot = `-- name: GetDaggerheartSnapshot :one
 
 SELECT campaign_id, gm_fear, consecutive_short_rests FROM daggerheart_snapshots WHERE campaign_id = ?
@@ -338,6 +742,50 @@ func (q *Queries) GetDaggerheartSnapshot(ctx context.Context, campaignID string)
 	row := q.db.QueryRowContext(ctx, getDaggerheartSnapshot, campaignID)
 	var i DaggerheartSnapshot
 	err := row.Scan(&i.CampaignID, &i.GmFear, &i.ConsecutiveShortRests)
+	return i, err
+}
+
+const getDaggerheartSubclass = `-- name: GetDaggerheartSubclass :one
+SELECT id, name, spellcast_trait, foundation_features_json, specialization_features_json, mastery_features_json, created_at, updated_at FROM daggerheart_subclasses WHERE id = ?
+`
+
+func (q *Queries) GetDaggerheartSubclass(ctx context.Context, id string) (DaggerheartSubclass, error) {
+	row := q.db.QueryRowContext(ctx, getDaggerheartSubclass, id)
+	var i DaggerheartSubclass
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.SpellcastTrait,
+		&i.FoundationFeaturesJson,
+		&i.SpecializationFeaturesJson,
+		&i.MasteryFeaturesJson,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getDaggerheartWeapon = `-- name: GetDaggerheartWeapon :one
+SELECT id, name, category, tier, trait, "range", damage_dice_json, damage_type, burden, feature, created_at, updated_at FROM daggerheart_weapons WHERE id = ?
+`
+
+func (q *Queries) GetDaggerheartWeapon(ctx context.Context, id string) (DaggerheartWeapon, error) {
+	row := q.db.QueryRowContext(ctx, getDaggerheartWeapon, id)
+	var i DaggerheartWeapon
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Category,
+		&i.Tier,
+		&i.Trait,
+		&i.Range,
+		&i.DamageDiceJson,
+		&i.DamageType,
+		&i.Burden,
+		&i.Feature,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
 	return i, err
 }
 
@@ -438,6 +886,129 @@ func (q *Queries) ListDaggerheartAdversariesBySession(ctx context.Context, arg L
 	return items, nil
 }
 
+const listDaggerheartAdversaryEntries = `-- name: ListDaggerheartAdversaryEntries :many
+SELECT id, name, tier, role, description, motives, difficulty, major_threshold, severe_threshold, hp, stress, armor, attack_modifier, standard_attack_json, experiences_json, features_json, created_at, updated_at FROM daggerheart_adversary_entries ORDER BY name ASC, id ASC
+`
+
+func (q *Queries) ListDaggerheartAdversaryEntries(ctx context.Context) ([]DaggerheartAdversaryEntry, error) {
+	rows, err := q.db.QueryContext(ctx, listDaggerheartAdversaryEntries)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []DaggerheartAdversaryEntry{}
+	for rows.Next() {
+		var i DaggerheartAdversaryEntry
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Tier,
+			&i.Role,
+			&i.Description,
+			&i.Motives,
+			&i.Difficulty,
+			&i.MajorThreshold,
+			&i.SevereThreshold,
+			&i.Hp,
+			&i.Stress,
+			&i.Armor,
+			&i.AttackModifier,
+			&i.StandardAttackJson,
+			&i.ExperiencesJson,
+			&i.FeaturesJson,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDaggerheartArmor = `-- name: ListDaggerheartArmor :many
+SELECT id, name, tier, base_major_threshold, base_severe_threshold, armor_score, feature, created_at, updated_at FROM daggerheart_armor ORDER BY name ASC, id ASC
+`
+
+func (q *Queries) ListDaggerheartArmor(ctx context.Context) ([]DaggerheartArmor, error) {
+	rows, err := q.db.QueryContext(ctx, listDaggerheartArmor)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []DaggerheartArmor{}
+	for rows.Next() {
+		var i DaggerheartArmor
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Tier,
+			&i.BaseMajorThreshold,
+			&i.BaseSevereThreshold,
+			&i.ArmorScore,
+			&i.Feature,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDaggerheartBeastforms = `-- name: ListDaggerheartBeastforms :many
+SELECT id, name, tier, examples, trait, trait_bonus, evasion_bonus, attack_json, advantages_json, features_json, created_at, updated_at FROM daggerheart_beastforms ORDER BY name ASC, id ASC
+`
+
+func (q *Queries) ListDaggerheartBeastforms(ctx context.Context) ([]DaggerheartBeastform, error) {
+	rows, err := q.db.QueryContext(ctx, listDaggerheartBeastforms)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []DaggerheartBeastform{}
+	for rows.Next() {
+		var i DaggerheartBeastform
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Tier,
+			&i.Examples,
+			&i.Trait,
+			&i.TraitBonus,
+			&i.EvasionBonus,
+			&i.AttackJson,
+			&i.AdvantagesJson,
+			&i.FeaturesJson,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listDaggerheartCharacterStates = `-- name: ListDaggerheartCharacterStates :many
 SELECT
     campaign_id,
@@ -486,6 +1057,77 @@ func (q *Queries) ListDaggerheartCharacterStates(ctx context.Context, campaignID
 	return items, nil
 }
 
+const listDaggerheartClasses = `-- name: ListDaggerheartClasses :many
+SELECT id, name, starting_evasion, starting_hp, starting_items_json, features_json, hope_feature_json, domain_ids_json, created_at, updated_at FROM daggerheart_classes ORDER BY name ASC, id ASC
+`
+
+func (q *Queries) ListDaggerheartClasses(ctx context.Context) ([]DaggerheartClass, error) {
+	rows, err := q.db.QueryContext(ctx, listDaggerheartClasses)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []DaggerheartClass{}
+	for rows.Next() {
+		var i DaggerheartClass
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.StartingEvasion,
+			&i.StartingHp,
+			&i.StartingItemsJson,
+			&i.FeaturesJson,
+			&i.HopeFeatureJson,
+			&i.DomainIdsJson,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDaggerheartCompanionExperiences = `-- name: ListDaggerheartCompanionExperiences :many
+SELECT id, name, description, created_at, updated_at FROM daggerheart_companion_experiences ORDER BY name ASC, id ASC
+`
+
+func (q *Queries) ListDaggerheartCompanionExperiences(ctx context.Context) ([]DaggerheartCompanionExperience, error) {
+	rows, err := q.db.QueryContext(ctx, listDaggerheartCompanionExperiences)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []DaggerheartCompanionExperience{}
+	for rows.Next() {
+		var i DaggerheartCompanionExperience
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listDaggerheartCountdowns = `-- name: ListDaggerheartCountdowns :many
 SELECT campaign_id, countdown_id, name, kind, "current", max, direction, looping FROM daggerheart_countdowns
 WHERE campaign_id = ?
@@ -509,6 +1151,401 @@ func (q *Queries) ListDaggerheartCountdowns(ctx context.Context, campaignID stri
 			&i.Max,
 			&i.Direction,
 			&i.Looping,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDaggerheartDamageTypes = `-- name: ListDaggerheartDamageTypes :many
+SELECT id, name, description, created_at, updated_at FROM daggerheart_damage_types ORDER BY name ASC, id ASC
+`
+
+func (q *Queries) ListDaggerheartDamageTypes(ctx context.Context) ([]DaggerheartDamageType, error) {
+	rows, err := q.db.QueryContext(ctx, listDaggerheartDamageTypes)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []DaggerheartDamageType{}
+	for rows.Next() {
+		var i DaggerheartDamageType
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDaggerheartDomainCards = `-- name: ListDaggerheartDomainCards :many
+SELECT id, name, domain_id, level, type, recall_cost, usage_limit, feature_text, created_at, updated_at FROM daggerheart_domain_cards ORDER BY name ASC, id ASC
+`
+
+func (q *Queries) ListDaggerheartDomainCards(ctx context.Context) ([]DaggerheartDomainCard, error) {
+	rows, err := q.db.QueryContext(ctx, listDaggerheartDomainCards)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []DaggerheartDomainCard{}
+	for rows.Next() {
+		var i DaggerheartDomainCard
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.DomainID,
+			&i.Level,
+			&i.Type,
+			&i.RecallCost,
+			&i.UsageLimit,
+			&i.FeatureText,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDaggerheartDomainCardsByDomain = `-- name: ListDaggerheartDomainCardsByDomain :many
+SELECT id, name, domain_id, level, type, recall_cost, usage_limit, feature_text, created_at, updated_at FROM daggerheart_domain_cards WHERE domain_id = ? ORDER BY level ASC, name ASC, id ASC
+`
+
+func (q *Queries) ListDaggerheartDomainCardsByDomain(ctx context.Context, domainID string) ([]DaggerheartDomainCard, error) {
+	rows, err := q.db.QueryContext(ctx, listDaggerheartDomainCardsByDomain, domainID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []DaggerheartDomainCard{}
+	for rows.Next() {
+		var i DaggerheartDomainCard
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.DomainID,
+			&i.Level,
+			&i.Type,
+			&i.RecallCost,
+			&i.UsageLimit,
+			&i.FeatureText,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDaggerheartDomains = `-- name: ListDaggerheartDomains :many
+SELECT id, name, description, created_at, updated_at FROM daggerheart_domains ORDER BY name ASC, id ASC
+`
+
+func (q *Queries) ListDaggerheartDomains(ctx context.Context) ([]DaggerheartDomain, error) {
+	rows, err := q.db.QueryContext(ctx, listDaggerheartDomains)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []DaggerheartDomain{}
+	for rows.Next() {
+		var i DaggerheartDomain
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDaggerheartEnvironments = `-- name: ListDaggerheartEnvironments :many
+SELECT id, name, tier, type, difficulty, impulses_json, potential_adversary_ids_json, features_json, prompts_json, created_at, updated_at FROM daggerheart_environments ORDER BY name ASC, id ASC
+`
+
+func (q *Queries) ListDaggerheartEnvironments(ctx context.Context) ([]DaggerheartEnvironment, error) {
+	rows, err := q.db.QueryContext(ctx, listDaggerheartEnvironments)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []DaggerheartEnvironment{}
+	for rows.Next() {
+		var i DaggerheartEnvironment
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Tier,
+			&i.Type,
+			&i.Difficulty,
+			&i.ImpulsesJson,
+			&i.PotentialAdversaryIdsJson,
+			&i.FeaturesJson,
+			&i.PromptsJson,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDaggerheartExperiences = `-- name: ListDaggerheartExperiences :many
+SELECT id, name, description, created_at, updated_at FROM daggerheart_experiences ORDER BY name ASC, id ASC
+`
+
+func (q *Queries) ListDaggerheartExperiences(ctx context.Context) ([]DaggerheartExperience, error) {
+	rows, err := q.db.QueryContext(ctx, listDaggerheartExperiences)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []DaggerheartExperience{}
+	for rows.Next() {
+		var i DaggerheartExperience
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDaggerheartHeritages = `-- name: ListDaggerheartHeritages :many
+SELECT id, name, kind, features_json, created_at, updated_at FROM daggerheart_heritages ORDER BY name ASC, id ASC
+`
+
+func (q *Queries) ListDaggerheartHeritages(ctx context.Context) ([]DaggerheartHeritage, error) {
+	rows, err := q.db.QueryContext(ctx, listDaggerheartHeritages)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []DaggerheartHeritage{}
+	for rows.Next() {
+		var i DaggerheartHeritage
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Kind,
+			&i.FeaturesJson,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDaggerheartItems = `-- name: ListDaggerheartItems :many
+SELECT id, name, rarity, kind, stack_max, description, effect_text, created_at, updated_at FROM daggerheart_items ORDER BY name ASC, id ASC
+`
+
+func (q *Queries) ListDaggerheartItems(ctx context.Context) ([]DaggerheartItem, error) {
+	rows, err := q.db.QueryContext(ctx, listDaggerheartItems)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []DaggerheartItem{}
+	for rows.Next() {
+		var i DaggerheartItem
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Rarity,
+			&i.Kind,
+			&i.StackMax,
+			&i.Description,
+			&i.EffectText,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDaggerheartLootEntries = `-- name: ListDaggerheartLootEntries :many
+SELECT id, name, roll, description, created_at, updated_at FROM daggerheart_loot_entries ORDER BY roll ASC, id ASC
+`
+
+func (q *Queries) ListDaggerheartLootEntries(ctx context.Context) ([]DaggerheartLootEntry, error) {
+	rows, err := q.db.QueryContext(ctx, listDaggerheartLootEntries)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []DaggerheartLootEntry{}
+	for rows.Next() {
+		var i DaggerheartLootEntry
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Roll,
+			&i.Description,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDaggerheartSubclasses = `-- name: ListDaggerheartSubclasses :many
+SELECT id, name, spellcast_trait, foundation_features_json, specialization_features_json, mastery_features_json, created_at, updated_at FROM daggerheart_subclasses ORDER BY name ASC, id ASC
+`
+
+func (q *Queries) ListDaggerheartSubclasses(ctx context.Context) ([]DaggerheartSubclass, error) {
+	rows, err := q.db.QueryContext(ctx, listDaggerheartSubclasses)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []DaggerheartSubclass{}
+	for rows.Next() {
+		var i DaggerheartSubclass
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.SpellcastTrait,
+			&i.FoundationFeaturesJson,
+			&i.SpecializationFeaturesJson,
+			&i.MasteryFeaturesJson,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDaggerheartWeapons = `-- name: ListDaggerheartWeapons :many
+SELECT id, name, category, tier, trait, "range", damage_dice_json, damage_type, burden, feature, created_at, updated_at FROM daggerheart_weapons ORDER BY name ASC, id ASC
+`
+
+func (q *Queries) ListDaggerheartWeapons(ctx context.Context) ([]DaggerheartWeapon, error) {
+	rows, err := q.db.QueryContext(ctx, listDaggerheartWeapons)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []DaggerheartWeapon{}
+	for rows.Next() {
+		var i DaggerheartWeapon
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Category,
+			&i.Tier,
+			&i.Trait,
+			&i.Range,
+			&i.DamageDiceJson,
+			&i.DamageType,
+			&i.Burden,
+			&i.Feature,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -580,6 +1617,170 @@ func (q *Queries) PutDaggerheartAdversary(ctx context.Context, arg PutDaggerhear
 		arg.MajorThreshold,
 		arg.SevereThreshold,
 		arg.Armor,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
+const putDaggerheartAdversaryEntry = `-- name: PutDaggerheartAdversaryEntry :exec
+INSERT INTO daggerheart_adversary_entries (
+    id, name, tier, role, description, motives, difficulty, major_threshold, severe_threshold, hp, stress, armor,
+    attack_modifier, standard_attack_json, experiences_json, features_json, created_at, updated_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+    name = excluded.name,
+    tier = excluded.tier,
+    role = excluded.role,
+    description = excluded.description,
+    motives = excluded.motives,
+    difficulty = excluded.difficulty,
+    major_threshold = excluded.major_threshold,
+    severe_threshold = excluded.severe_threshold,
+    hp = excluded.hp,
+    stress = excluded.stress,
+    armor = excluded.armor,
+    attack_modifier = excluded.attack_modifier,
+    standard_attack_json = excluded.standard_attack_json,
+    experiences_json = excluded.experiences_json,
+    features_json = excluded.features_json,
+    created_at = excluded.created_at,
+    updated_at = excluded.updated_at
+`
+
+type PutDaggerheartAdversaryEntryParams struct {
+	ID                 string `json:"id"`
+	Name               string `json:"name"`
+	Tier               int64  `json:"tier"`
+	Role               string `json:"role"`
+	Description        string `json:"description"`
+	Motives            string `json:"motives"`
+	Difficulty         int64  `json:"difficulty"`
+	MajorThreshold     int64  `json:"major_threshold"`
+	SevereThreshold    int64  `json:"severe_threshold"`
+	Hp                 int64  `json:"hp"`
+	Stress             int64  `json:"stress"`
+	Armor              int64  `json:"armor"`
+	AttackModifier     int64  `json:"attack_modifier"`
+	StandardAttackJson string `json:"standard_attack_json"`
+	ExperiencesJson    string `json:"experiences_json"`
+	FeaturesJson       string `json:"features_json"`
+	CreatedAt          int64  `json:"created_at"`
+	UpdatedAt          int64  `json:"updated_at"`
+}
+
+func (q *Queries) PutDaggerheartAdversaryEntry(ctx context.Context, arg PutDaggerheartAdversaryEntryParams) error {
+	_, err := q.db.ExecContext(ctx, putDaggerheartAdversaryEntry,
+		arg.ID,
+		arg.Name,
+		arg.Tier,
+		arg.Role,
+		arg.Description,
+		arg.Motives,
+		arg.Difficulty,
+		arg.MajorThreshold,
+		arg.SevereThreshold,
+		arg.Hp,
+		arg.Stress,
+		arg.Armor,
+		arg.AttackModifier,
+		arg.StandardAttackJson,
+		arg.ExperiencesJson,
+		arg.FeaturesJson,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
+const putDaggerheartArmor = `-- name: PutDaggerheartArmor :exec
+INSERT INTO daggerheart_armor (
+    id, name, tier, base_major_threshold, base_severe_threshold, armor_score, feature, created_at, updated_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+    name = excluded.name,
+    tier = excluded.tier,
+    base_major_threshold = excluded.base_major_threshold,
+    base_severe_threshold = excluded.base_severe_threshold,
+    armor_score = excluded.armor_score,
+    feature = excluded.feature,
+    created_at = excluded.created_at,
+    updated_at = excluded.updated_at
+`
+
+type PutDaggerheartArmorParams struct {
+	ID                  string `json:"id"`
+	Name                string `json:"name"`
+	Tier                int64  `json:"tier"`
+	BaseMajorThreshold  int64  `json:"base_major_threshold"`
+	BaseSevereThreshold int64  `json:"base_severe_threshold"`
+	ArmorScore          int64  `json:"armor_score"`
+	Feature             string `json:"feature"`
+	CreatedAt           int64  `json:"created_at"`
+	UpdatedAt           int64  `json:"updated_at"`
+}
+
+func (q *Queries) PutDaggerheartArmor(ctx context.Context, arg PutDaggerheartArmorParams) error {
+	_, err := q.db.ExecContext(ctx, putDaggerheartArmor,
+		arg.ID,
+		arg.Name,
+		arg.Tier,
+		arg.BaseMajorThreshold,
+		arg.BaseSevereThreshold,
+		arg.ArmorScore,
+		arg.Feature,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
+const putDaggerheartBeastform = `-- name: PutDaggerheartBeastform :exec
+INSERT INTO daggerheart_beastforms (
+    id, name, tier, examples, trait, trait_bonus, evasion_bonus, attack_json, advantages_json, features_json,
+    created_at, updated_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+    name = excluded.name,
+    tier = excluded.tier,
+    examples = excluded.examples,
+    trait = excluded.trait,
+    trait_bonus = excluded.trait_bonus,
+    evasion_bonus = excluded.evasion_bonus,
+    attack_json = excluded.attack_json,
+    advantages_json = excluded.advantages_json,
+    features_json = excluded.features_json,
+    created_at = excluded.created_at,
+    updated_at = excluded.updated_at
+`
+
+type PutDaggerheartBeastformParams struct {
+	ID             string `json:"id"`
+	Name           string `json:"name"`
+	Tier           int64  `json:"tier"`
+	Examples       string `json:"examples"`
+	Trait          string `json:"trait"`
+	TraitBonus     int64  `json:"trait_bonus"`
+	EvasionBonus   int64  `json:"evasion_bonus"`
+	AttackJson     string `json:"attack_json"`
+	AdvantagesJson string `json:"advantages_json"`
+	FeaturesJson   string `json:"features_json"`
+	CreatedAt      int64  `json:"created_at"`
+	UpdatedAt      int64  `json:"updated_at"`
+}
+
+func (q *Queries) PutDaggerheartBeastform(ctx context.Context, arg PutDaggerheartBeastformParams) error {
+	_, err := q.db.ExecContext(ctx, putDaggerheartBeastform,
+		arg.ID,
+		arg.Name,
+		arg.Tier,
+		arg.Examples,
+		arg.Trait,
+		arg.TraitBonus,
+		arg.EvasionBonus,
+		arg.AttackJson,
+		arg.AdvantagesJson,
+		arg.FeaturesJson,
 		arg.CreatedAt,
 		arg.UpdatedAt,
 	)
@@ -697,6 +1898,118 @@ func (q *Queries) PutDaggerheartCharacterState(ctx context.Context, arg PutDagge
 	return err
 }
 
+const putDaggerheartClass = `-- name: PutDaggerheartClass :exec
+INSERT INTO daggerheart_classes (
+    id, name, starting_evasion, starting_hp, starting_items_json, features_json, hope_feature_json, domain_ids_json,
+    created_at, updated_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+    name = excluded.name,
+    starting_evasion = excluded.starting_evasion,
+    starting_hp = excluded.starting_hp,
+    starting_items_json = excluded.starting_items_json,
+    features_json = excluded.features_json,
+    hope_feature_json = excluded.hope_feature_json,
+    domain_ids_json = excluded.domain_ids_json,
+    created_at = excluded.created_at,
+    updated_at = excluded.updated_at
+`
+
+type PutDaggerheartClassParams struct {
+	ID                string `json:"id"`
+	Name              string `json:"name"`
+	StartingEvasion   int64  `json:"starting_evasion"`
+	StartingHp        int64  `json:"starting_hp"`
+	StartingItemsJson string `json:"starting_items_json"`
+	FeaturesJson      string `json:"features_json"`
+	HopeFeatureJson   string `json:"hope_feature_json"`
+	DomainIdsJson     string `json:"domain_ids_json"`
+	CreatedAt         int64  `json:"created_at"`
+	UpdatedAt         int64  `json:"updated_at"`
+}
+
+func (q *Queries) PutDaggerheartClass(ctx context.Context, arg PutDaggerheartClassParams) error {
+	_, err := q.db.ExecContext(ctx, putDaggerheartClass,
+		arg.ID,
+		arg.Name,
+		arg.StartingEvasion,
+		arg.StartingHp,
+		arg.StartingItemsJson,
+		arg.FeaturesJson,
+		arg.HopeFeatureJson,
+		arg.DomainIdsJson,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
+const putDaggerheartCompanionExperience = `-- name: PutDaggerheartCompanionExperience :exec
+INSERT INTO daggerheart_companion_experiences (
+    id, name, description, created_at, updated_at
+) VALUES (?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+    name = excluded.name,
+    description = excluded.description,
+    created_at = excluded.created_at,
+    updated_at = excluded.updated_at
+`
+
+type PutDaggerheartCompanionExperienceParams struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
+}
+
+func (q *Queries) PutDaggerheartCompanionExperience(ctx context.Context, arg PutDaggerheartCompanionExperienceParams) error {
+	_, err := q.db.ExecContext(ctx, putDaggerheartCompanionExperience,
+		arg.ID,
+		arg.Name,
+		arg.Description,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
+const putDaggerheartContentString = `-- name: PutDaggerheartContentString :exec
+
+INSERT INTO daggerheart_content_strings (
+    content_id, content_type, field, locale, text, created_at, updated_at
+) VALUES (?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(content_id, field, locale) DO UPDATE SET
+    content_type = excluded.content_type,
+    text = excluded.text,
+    created_at = excluded.created_at,
+    updated_at = excluded.updated_at
+`
+
+type PutDaggerheartContentStringParams struct {
+	ContentID   string `json:"content_id"`
+	ContentType string `json:"content_type"`
+	Field       string `json:"field"`
+	Locale      string `json:"locale"`
+	Text        string `json:"text"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
+}
+
+// Content Strings
+func (q *Queries) PutDaggerheartContentString(ctx context.Context, arg PutDaggerheartContentStringParams) error {
+	_, err := q.db.ExecContext(ctx, putDaggerheartContentString,
+		arg.ContentID,
+		arg.ContentType,
+		arg.Field,
+		arg.Locale,
+		arg.Text,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
 const putDaggerheartCountdown = `-- name: PutDaggerheartCountdown :exec
 INSERT INTO daggerheart_countdowns (
     campaign_id, countdown_id, name, kind, current, max, direction, looping
@@ -735,6 +2048,298 @@ func (q *Queries) PutDaggerheartCountdown(ctx context.Context, arg PutDaggerhear
 	return err
 }
 
+const putDaggerheartDamageType = `-- name: PutDaggerheartDamageType :exec
+INSERT INTO daggerheart_damage_types (
+    id, name, description, created_at, updated_at
+) VALUES (?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+    name = excluded.name,
+    description = excluded.description,
+    created_at = excluded.created_at,
+    updated_at = excluded.updated_at
+`
+
+type PutDaggerheartDamageTypeParams struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
+}
+
+func (q *Queries) PutDaggerheartDamageType(ctx context.Context, arg PutDaggerheartDamageTypeParams) error {
+	_, err := q.db.ExecContext(ctx, putDaggerheartDamageType,
+		arg.ID,
+		arg.Name,
+		arg.Description,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
+const putDaggerheartDomain = `-- name: PutDaggerheartDomain :exec
+INSERT INTO daggerheart_domains (
+    id, name, description, created_at, updated_at
+) VALUES (?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+    name = excluded.name,
+    description = excluded.description,
+    created_at = excluded.created_at,
+    updated_at = excluded.updated_at
+`
+
+type PutDaggerheartDomainParams struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
+}
+
+func (q *Queries) PutDaggerheartDomain(ctx context.Context, arg PutDaggerheartDomainParams) error {
+	_, err := q.db.ExecContext(ctx, putDaggerheartDomain,
+		arg.ID,
+		arg.Name,
+		arg.Description,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
+const putDaggerheartDomainCard = `-- name: PutDaggerheartDomainCard :exec
+INSERT INTO daggerheart_domain_cards (
+    id, name, domain_id, level, type, recall_cost, usage_limit, feature_text, created_at, updated_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+    name = excluded.name,
+    domain_id = excluded.domain_id,
+    level = excluded.level,
+    type = excluded.type,
+    recall_cost = excluded.recall_cost,
+    usage_limit = excluded.usage_limit,
+    feature_text = excluded.feature_text,
+    created_at = excluded.created_at,
+    updated_at = excluded.updated_at
+`
+
+type PutDaggerheartDomainCardParams struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	DomainID    string `json:"domain_id"`
+	Level       int64  `json:"level"`
+	Type        string `json:"type"`
+	RecallCost  int64  `json:"recall_cost"`
+	UsageLimit  string `json:"usage_limit"`
+	FeatureText string `json:"feature_text"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
+}
+
+func (q *Queries) PutDaggerheartDomainCard(ctx context.Context, arg PutDaggerheartDomainCardParams) error {
+	_, err := q.db.ExecContext(ctx, putDaggerheartDomainCard,
+		arg.ID,
+		arg.Name,
+		arg.DomainID,
+		arg.Level,
+		arg.Type,
+		arg.RecallCost,
+		arg.UsageLimit,
+		arg.FeatureText,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
+const putDaggerheartEnvironment = `-- name: PutDaggerheartEnvironment :exec
+INSERT INTO daggerheart_environments (
+    id, name, tier, type, difficulty, impulses_json, potential_adversary_ids_json, features_json, prompts_json,
+    created_at, updated_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+    name = excluded.name,
+    tier = excluded.tier,
+    type = excluded.type,
+    difficulty = excluded.difficulty,
+    impulses_json = excluded.impulses_json,
+    potential_adversary_ids_json = excluded.potential_adversary_ids_json,
+    features_json = excluded.features_json,
+    prompts_json = excluded.prompts_json,
+    created_at = excluded.created_at,
+    updated_at = excluded.updated_at
+`
+
+type PutDaggerheartEnvironmentParams struct {
+	ID                        string `json:"id"`
+	Name                      string `json:"name"`
+	Tier                      int64  `json:"tier"`
+	Type                      string `json:"type"`
+	Difficulty                int64  `json:"difficulty"`
+	ImpulsesJson              string `json:"impulses_json"`
+	PotentialAdversaryIdsJson string `json:"potential_adversary_ids_json"`
+	FeaturesJson              string `json:"features_json"`
+	PromptsJson               string `json:"prompts_json"`
+	CreatedAt                 int64  `json:"created_at"`
+	UpdatedAt                 int64  `json:"updated_at"`
+}
+
+func (q *Queries) PutDaggerheartEnvironment(ctx context.Context, arg PutDaggerheartEnvironmentParams) error {
+	_, err := q.db.ExecContext(ctx, putDaggerheartEnvironment,
+		arg.ID,
+		arg.Name,
+		arg.Tier,
+		arg.Type,
+		arg.Difficulty,
+		arg.ImpulsesJson,
+		arg.PotentialAdversaryIdsJson,
+		arg.FeaturesJson,
+		arg.PromptsJson,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
+const putDaggerheartExperience = `-- name: PutDaggerheartExperience :exec
+INSERT INTO daggerheart_experiences (
+    id, name, description, created_at, updated_at
+) VALUES (?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+    name = excluded.name,
+    description = excluded.description,
+    created_at = excluded.created_at,
+    updated_at = excluded.updated_at
+`
+
+type PutDaggerheartExperienceParams struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
+}
+
+func (q *Queries) PutDaggerheartExperience(ctx context.Context, arg PutDaggerheartExperienceParams) error {
+	_, err := q.db.ExecContext(ctx, putDaggerheartExperience,
+		arg.ID,
+		arg.Name,
+		arg.Description,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
+const putDaggerheartHeritage = `-- name: PutDaggerheartHeritage :exec
+INSERT INTO daggerheart_heritages (
+    id, name, kind, features_json, created_at, updated_at
+) VALUES (?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+    name = excluded.name,
+    kind = excluded.kind,
+    features_json = excluded.features_json,
+    created_at = excluded.created_at,
+    updated_at = excluded.updated_at
+`
+
+type PutDaggerheartHeritageParams struct {
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	Kind         string `json:"kind"`
+	FeaturesJson string `json:"features_json"`
+	CreatedAt    int64  `json:"created_at"`
+	UpdatedAt    int64  `json:"updated_at"`
+}
+
+func (q *Queries) PutDaggerheartHeritage(ctx context.Context, arg PutDaggerheartHeritageParams) error {
+	_, err := q.db.ExecContext(ctx, putDaggerheartHeritage,
+		arg.ID,
+		arg.Name,
+		arg.Kind,
+		arg.FeaturesJson,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
+const putDaggerheartItem = `-- name: PutDaggerheartItem :exec
+INSERT INTO daggerheart_items (
+    id, name, rarity, kind, stack_max, description, effect_text, created_at, updated_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+    name = excluded.name,
+    rarity = excluded.rarity,
+    kind = excluded.kind,
+    stack_max = excluded.stack_max,
+    description = excluded.description,
+    effect_text = excluded.effect_text,
+    created_at = excluded.created_at,
+    updated_at = excluded.updated_at
+`
+
+type PutDaggerheartItemParams struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Rarity      string `json:"rarity"`
+	Kind        string `json:"kind"`
+	StackMax    int64  `json:"stack_max"`
+	Description string `json:"description"`
+	EffectText  string `json:"effect_text"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
+}
+
+func (q *Queries) PutDaggerheartItem(ctx context.Context, arg PutDaggerheartItemParams) error {
+	_, err := q.db.ExecContext(ctx, putDaggerheartItem,
+		arg.ID,
+		arg.Name,
+		arg.Rarity,
+		arg.Kind,
+		arg.StackMax,
+		arg.Description,
+		arg.EffectText,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
+const putDaggerheartLootEntry = `-- name: PutDaggerheartLootEntry :exec
+INSERT INTO daggerheart_loot_entries (
+    id, name, roll, description, created_at, updated_at
+) VALUES (?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+    name = excluded.name,
+    roll = excluded.roll,
+    description = excluded.description,
+    created_at = excluded.created_at,
+    updated_at = excluded.updated_at
+`
+
+type PutDaggerheartLootEntryParams struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Roll        int64  `json:"roll"`
+	Description string `json:"description"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
+}
+
+func (q *Queries) PutDaggerheartLootEntry(ctx context.Context, arg PutDaggerheartLootEntryParams) error {
+	_, err := q.db.ExecContext(ctx, putDaggerheartLootEntry,
+		arg.ID,
+		arg.Name,
+		arg.Roll,
+		arg.Description,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
 const putDaggerheartSnapshot = `-- name: PutDaggerheartSnapshot :exec
 INSERT INTO daggerheart_snapshots (campaign_id, gm_fear, consecutive_short_rests)
 VALUES (?, ?, ?)
@@ -751,6 +2356,97 @@ type PutDaggerheartSnapshotParams struct {
 
 func (q *Queries) PutDaggerheartSnapshot(ctx context.Context, arg PutDaggerheartSnapshotParams) error {
 	_, err := q.db.ExecContext(ctx, putDaggerheartSnapshot, arg.CampaignID, arg.GmFear, arg.ConsecutiveShortRests)
+	return err
+}
+
+const putDaggerheartSubclass = `-- name: PutDaggerheartSubclass :exec
+INSERT INTO daggerheart_subclasses (
+    id, name, spellcast_trait, foundation_features_json, specialization_features_json, mastery_features_json,
+    created_at, updated_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+    name = excluded.name,
+    spellcast_trait = excluded.spellcast_trait,
+    foundation_features_json = excluded.foundation_features_json,
+    specialization_features_json = excluded.specialization_features_json,
+    mastery_features_json = excluded.mastery_features_json,
+    created_at = excluded.created_at,
+    updated_at = excluded.updated_at
+`
+
+type PutDaggerheartSubclassParams struct {
+	ID                         string `json:"id"`
+	Name                       string `json:"name"`
+	SpellcastTrait             string `json:"spellcast_trait"`
+	FoundationFeaturesJson     string `json:"foundation_features_json"`
+	SpecializationFeaturesJson string `json:"specialization_features_json"`
+	MasteryFeaturesJson        string `json:"mastery_features_json"`
+	CreatedAt                  int64  `json:"created_at"`
+	UpdatedAt                  int64  `json:"updated_at"`
+}
+
+func (q *Queries) PutDaggerheartSubclass(ctx context.Context, arg PutDaggerheartSubclassParams) error {
+	_, err := q.db.ExecContext(ctx, putDaggerheartSubclass,
+		arg.ID,
+		arg.Name,
+		arg.SpellcastTrait,
+		arg.FoundationFeaturesJson,
+		arg.SpecializationFeaturesJson,
+		arg.MasteryFeaturesJson,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
+const putDaggerheartWeapon = `-- name: PutDaggerheartWeapon :exec
+INSERT INTO daggerheart_weapons (
+    id, name, category, tier, trait, range, damage_dice_json, damage_type, burden, feature, created_at, updated_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+    name = excluded.name,
+    category = excluded.category,
+    tier = excluded.tier,
+    trait = excluded.trait,
+    range = excluded.range,
+    damage_dice_json = excluded.damage_dice_json,
+    damage_type = excluded.damage_type,
+    burden = excluded.burden,
+    feature = excluded.feature,
+    created_at = excluded.created_at,
+    updated_at = excluded.updated_at
+`
+
+type PutDaggerheartWeaponParams struct {
+	ID             string `json:"id"`
+	Name           string `json:"name"`
+	Category       string `json:"category"`
+	Tier           int64  `json:"tier"`
+	Trait          string `json:"trait"`
+	Range          string `json:"range"`
+	DamageDiceJson string `json:"damage_dice_json"`
+	DamageType     string `json:"damage_type"`
+	Burden         int64  `json:"burden"`
+	Feature        string `json:"feature"`
+	CreatedAt      int64  `json:"created_at"`
+	UpdatedAt      int64  `json:"updated_at"`
+}
+
+func (q *Queries) PutDaggerheartWeapon(ctx context.Context, arg PutDaggerheartWeaponParams) error {
+	_, err := q.db.ExecContext(ctx, putDaggerheartWeapon,
+		arg.ID,
+		arg.Name,
+		arg.Category,
+		arg.Tier,
+		arg.Trait,
+		arg.Range,
+		arg.DamageDiceJson,
+		arg.DamageType,
+		arg.Burden,
+		arg.Feature,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
 	return err
 }
 
