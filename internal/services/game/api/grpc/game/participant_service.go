@@ -148,7 +148,7 @@ func (s *ParticipantService) CreateParticipant(ctx context.Context, in *campaign
 		return nil, status.Errorf(codes.Internal, "append event: %v", err)
 	}
 
-	applier := projection.Applier{Campaign: s.stores.Campaign, Participant: s.stores.Participant}
+	applier := projection.Applier{Campaign: s.stores.Campaign, Participant: s.stores.Participant, ClaimIndex: s.stores.ClaimIndex}
 	if err := applier.Apply(ctx, stored); err != nil {
 		if apperrors.GetCode(err) != apperrors.CodeUnknown {
 			return nil, handleDomainError(err)
@@ -281,7 +281,7 @@ func (s *ParticipantService) UpdateParticipant(ctx context.Context, in *campaign
 		return nil, status.Errorf(codes.Internal, "append event: %v", err)
 	}
 
-	applier := projection.Applier{Campaign: s.stores.Campaign, Participant: s.stores.Participant}
+	applier := projection.Applier{Campaign: s.stores.Campaign, Participant: s.stores.Participant, ClaimIndex: s.stores.ClaimIndex}
 	if err := applier.Apply(ctx, stored); err != nil {
 		if apperrors.GetCode(err) != apperrors.CodeUnknown {
 			return nil, handleDomainError(err)
@@ -367,7 +367,7 @@ func (s *ParticipantService) DeleteParticipant(ctx context.Context, in *campaign
 		return nil, status.Errorf(codes.Internal, "append event: %v", err)
 	}
 
-	applier := projection.Applier{Campaign: s.stores.Campaign, Participant: s.stores.Participant}
+	applier := projection.Applier{Campaign: s.stores.Campaign, Participant: s.stores.Participant, ClaimIndex: s.stores.ClaimIndex}
 	if err := applier.Apply(ctx, stored); err != nil {
 		if apperrors.GetCode(err) != apperrors.CodeUnknown {
 			return nil, handleDomainError(err)

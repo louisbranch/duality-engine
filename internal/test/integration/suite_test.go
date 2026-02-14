@@ -48,6 +48,6 @@ func TestMCPStdioEndToEnd(t *testing.T) {
 	})
 
 	t.Run("mutation event guardrails", func(t *testing.T) {
-		runMutationEventGuardrailTests(t, suite, grpcAddr)
+		runMutationEventGuardrailTests(t, suite, grpcAddr, authAddr)
 	})
 }

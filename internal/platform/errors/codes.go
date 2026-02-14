@@ -30,6 +30,10 @@ const (
 	// Invite errors
 	CodeInviteEmptyCampaignID    Code = "INVITE_EMPTY_CAMPAIGN_ID"
 	CodeInviteEmptyParticipantID Code = "INVITE_EMPTY_PARTICIPANT_ID"
+	CodeInviteJoinGrantInvalid   Code = "INVITE_JOIN_GRANT_INVALID"
+	CodeInviteJoinGrantExpired   Code = "INVITE_JOIN_GRANT_EXPIRED"
+	CodeInviteJoinGrantMismatch  Code = "INVITE_JOIN_GRANT_MISMATCH"
+	CodeInviteJoinGrantUsed      Code = "INVITE_JOIN_GRANT_USED"
 
 	// Session errors
 	CodeSessionEmptyCampaignID Code = "SESSION_EMPTY_CAMPAIGN_ID"
@@ -95,6 +99,8 @@ func (c Code) GRPCCode() codes.Code {
 		CodeUserEmptyDisplayName,
 		CodeInviteEmptyCampaignID,
 		CodeInviteEmptyParticipantID,
+		CodeInviteJoinGrantInvalid,
+		CodeInviteJoinGrantMismatch,
 		CodeSessionEmptyCampaignID,
 		CodeCharacterEmptyCampaignID,
 		CodeCharacterEmptyName,
@@ -128,6 +134,8 @@ func (c Code) GRPCCode() codes.Code {
 		CodeSnapshotGMFearExceedsCap,
 		CodeDaggerheartInsufficientResource,
 		CodeDaggerheartResourceAtCap,
+		CodeInviteJoinGrantExpired,
+		CodeInviteJoinGrantUsed,
 		CodeForkPointInFuture:
 		return codes.FailedPrecondition
 

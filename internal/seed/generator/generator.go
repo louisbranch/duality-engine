@@ -49,6 +49,7 @@ type Generator struct {
 	// gRPC service clients (game/v1)
 	campaigns    statev1.CampaignServiceClient
 	participants statev1.ParticipantServiceClient
+	invites      statev1.InviteServiceClient
 	characters   statev1.CharacterServiceClient
 	sessions     statev1.SessionServiceClient
 	events       statev1.EventServiceClient
@@ -99,6 +100,7 @@ func New(ctx context.Context, cfg Config) (*Generator, error) {
 		authConn:     authConn,
 		campaigns:    statev1.NewCampaignServiceClient(conn),
 		participants: statev1.NewParticipantServiceClient(conn),
+		invites:      statev1.NewInviteServiceClient(conn),
 		characters:   statev1.NewCharacterServiceClient(conn),
 		sessions:     statev1.NewSessionServiceClient(conn),
 		events:       statev1.NewEventServiceClient(conn),

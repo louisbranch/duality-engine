@@ -70,6 +70,12 @@ Projections are derived, queryable views built from events. They are not the
 source of truth. Examples include campaign metadata, participant lists,
 character state, and session summaries.
 
+### Join Grant JTI Index
+
+The join grant JTI index is a projection that maps a join grant id (JTI) to the
+claim outcome so the game service can validate single-use grants without
+scanning the event journal. It enforces idempotency for claim operations.
+
 ### Snapshot
 
 Snapshots are materialized projections derived from the event journal at a

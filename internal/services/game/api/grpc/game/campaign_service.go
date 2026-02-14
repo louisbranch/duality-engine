@@ -121,7 +121,7 @@ func (s *CampaignService) CreateCampaign(ctx context.Context, in *campaignv1.Cre
 		return nil, status.Errorf(codes.Internal, "append event: %v", err)
 	}
 
-	applier := projection.Applier{Campaign: s.stores.Campaign, Participant: s.stores.Participant}
+	applier := projection.Applier{Campaign: s.stores.Campaign, Participant: s.stores.Participant, ClaimIndex: s.stores.ClaimIndex}
 	if err := applier.Apply(ctx, stored); err != nil {
 		return nil, status.Errorf(codes.Internal, "apply event: %v", err)
 	}
@@ -343,7 +343,7 @@ func (s *CampaignService) EndCampaign(ctx context.Context, in *campaignv1.EndCam
 		return nil, status.Errorf(codes.Internal, "append event: %v", err)
 	}
 
-	applier := projection.Applier{Campaign: s.stores.Campaign, Participant: s.stores.Participant, Character: s.stores.Character}
+	applier := projection.Applier{Campaign: s.stores.Campaign, Participant: s.stores.Participant, Character: s.stores.Character, ClaimIndex: s.stores.ClaimIndex}
 	if err := applier.Apply(ctx, stored); err != nil {
 		return nil, status.Errorf(codes.Internal, "apply event: %v", err)
 	}
@@ -420,7 +420,7 @@ func (s *CampaignService) ArchiveCampaign(ctx context.Context, in *campaignv1.Ar
 		return nil, status.Errorf(codes.Internal, "append event: %v", err)
 	}
 
-	applier := projection.Applier{Campaign: s.stores.Campaign, Participant: s.stores.Participant, Character: s.stores.Character}
+	applier := projection.Applier{Campaign: s.stores.Campaign, Participant: s.stores.Participant, Character: s.stores.Character, ClaimIndex: s.stores.ClaimIndex}
 	if err := applier.Apply(ctx, stored); err != nil {
 		return nil, status.Errorf(codes.Internal, "apply event: %v", err)
 	}
@@ -490,7 +490,7 @@ func (s *CampaignService) RestoreCampaign(ctx context.Context, in *campaignv1.Re
 		return nil, status.Errorf(codes.Internal, "append event: %v", err)
 	}
 
-	applier := projection.Applier{Campaign: s.stores.Campaign, Participant: s.stores.Participant, Character: s.stores.Character}
+	applier := projection.Applier{Campaign: s.stores.Campaign, Participant: s.stores.Participant, Character: s.stores.Character, ClaimIndex: s.stores.ClaimIndex}
 	if err := applier.Apply(ctx, stored); err != nil {
 		return nil, status.Errorf(codes.Internal, "apply event: %v", err)
 	}

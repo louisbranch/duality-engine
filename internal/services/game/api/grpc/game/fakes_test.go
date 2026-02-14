@@ -2,8 +2,16 @@ package game
 
 import (
 	"context"
+	"crypto/ed25519"
+	"crypto/rand"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"strings"
+	"testing"
 	"time"
 
+	apperrors "github.com/louisbranch/fracturing.space/internal/platform/errors"
 	grpcmeta "github.com/louisbranch/fracturing.space/internal/services/game/api/grpc/metadata"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/character"
@@ -142,6 +150,23 @@ func (s *fakeParticipantStore) PutParticipant(_ context.Context, p participant.P
 	}
 	if s.participants[p.CampaignID] == nil {
 		s.participants[p.CampaignID] = make(map[string]participant.Participant)
+	}
+	if strings.TrimSpace(p.UserID) != "" {
+		for id, existing := range s.participants[p.CampaignID] {
+			if id == p.ID {
+				continue
+			}
+			if strings.TrimSpace(existing.UserID) == p.UserID {
+				return apperrors.WithMetadata(
+					apperrors.CodeParticipantUserAlreadyClaimed,
+					"participant user already claimed",
+					map[string]string{
+						"CampaignID": p.CampaignID,
+						"UserID":     p.UserID,
+					},
+				)
+			}
+		}
 	}
 	s.participants[p.CampaignID][p.ID] = p
 	return nil
@@ -725,4 +750,75 @@ func contextWithParticipantID(participantID string) context.Context {
 	}
 	md := metadata.Pairs(grpcmeta.ParticipantIDHeader, participantID)
 	return metadata.NewIncomingContext(context.Background(), md)
+}
+
+func contextWithUserID(userID string) context.Context {
+	if userID == "" {
+		return context.Background()
+	}
+	md := metadata.Pairs(grpcmeta.UserIDHeader, userID)
+	return metadata.NewIncomingContext(context.Background(), md)
+}
+
+type joinGrantSigner struct {
+	issuer   string
+	audience string
+	key      ed25519.PrivateKey
+}
+
+func newJoinGrantSigner(t *testing.T) joinGrantSigner {
+	t.Helper()
+	publicKey, privateKey, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatalf("generate join grant key: %v", err)
+	}
+	issuer := "test-issuer"
+	audience := "game-service"
+	t.Setenv(invite.EnvJoinGrantIssuer, issuer)
+	t.Setenv(invite.EnvJoinGrantAudience, audience)
+	t.Setenv(invite.EnvJoinGrantPublicKey, base64.RawStdEncoding.EncodeToString(publicKey))
+	return joinGrantSigner{
+		issuer:   issuer,
+		audience: audience,
+		key:      privateKey,
+	}
+}
+
+func (s joinGrantSigner) Token(t *testing.T, campaignID, inviteID, userID, jti string, now time.Time) string {
+	t.Helper()
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
+	if s.key == nil {
+		t.Fatal("join grant signer key is required")
+	}
+	if strings.TrimSpace(jti) == "" {
+		jti = fmt.Sprintf("jti-%d", now.UnixNano())
+	}
+	headerJSON, err := json.Marshal(map[string]string{
+		"alg": "EdDSA",
+		"typ": "JWT",
+	})
+	if err != nil {
+		t.Fatalf("encode join grant header: %v", err)
+	}
+	payloadJSON, err := json.Marshal(map[string]any{
+		"iss":         s.issuer,
+		"aud":         s.audience,
+		"exp":         now.Add(5 * time.Minute).Unix(),
+		"iat":         now.Unix(),
+		"jti":         jti,
+		"campaign_id": strings.TrimSpace(campaignID),
+		"invite_id":   strings.TrimSpace(inviteID),
+		"user_id":     strings.TrimSpace(userID),
+	})
+	if err != nil {
+		t.Fatalf("encode join grant payload: %v", err)
+	}
+	encodedHeader := base64.RawURLEncoding.EncodeToString(headerJSON)
+	encodedPayload := base64.RawURLEncoding.EncodeToString(payloadJSON)
+	signingInput := encodedHeader + "." + encodedPayload
+	signature := ed25519.Sign(s.key, []byte(signingInput))
+	encodedSig := base64.RawURLEncoding.EncodeToString(signature)
+	return signingInput + "." + encodedSig
 }

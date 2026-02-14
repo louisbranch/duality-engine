@@ -370,6 +370,10 @@ func (f *fakeAuthClient) CreateUser(ctx context.Context, req *authv1.CreateUserR
 	return nil, status.Error(codes.Unimplemented, "not implemented in fake auth client")
 }
 
+func (f *fakeAuthClient) IssueJoinGrant(ctx context.Context, req *authv1.IssueJoinGrantRequest, opts ...grpc.CallOption) (*authv1.IssueJoinGrantResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "not implemented in fake auth client")
+}
+
 func (f *fakeAuthClient) GetUser(ctx context.Context, req *authv1.GetUserRequest, opts ...grpc.CallOption) (*authv1.GetUserResponse, error) {
 	f.lastGetUserRequest = req
 	if f.getUserErr != nil {

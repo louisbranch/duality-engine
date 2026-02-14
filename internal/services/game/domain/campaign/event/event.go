@@ -28,6 +28,22 @@ const (
 	TypeParticipantLeft Type = "participant.left"
 	// TypeParticipantUpdated records updates to a participant.
 	TypeParticipantUpdated Type = "participant.updated"
+	// TypeParticipantBound records binding a user to a participant seat.
+	TypeParticipantBound Type = "participant.bound"
+	// TypeParticipantUnbound records unbinding a user from a participant seat.
+	TypeParticipantUnbound Type = "participant.unbound"
+	// TypeSeatReassigned records moving a seat between users.
+	TypeSeatReassigned Type = "seat.reassigned"
+)
+
+// Invite events.
+const (
+	// TypeInviteCreated records the creation of an invite.
+	TypeInviteCreated Type = "invite.created"
+	// TypeInviteClaimed records an invite being claimed.
+	TypeInviteClaimed Type = "invite.claimed"
+	// TypeInviteRevoked records an invite being revoked.
+	TypeInviteRevoked Type = "invite.revoked"
 )
 
 // Character events.

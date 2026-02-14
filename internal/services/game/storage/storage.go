@@ -252,6 +252,24 @@ type SnapshotStore interface {
 	ListSnapshots(ctx context.Context, campaignID string, limit int) ([]Snapshot, error)
 }
 
+// ParticipantClaim describes a user-to-participant binding in a campaign.
+type ParticipantClaim struct {
+	CampaignID    string
+	UserID        string
+	ParticipantID string
+	ClaimedAt     time.Time
+}
+
+// ClaimIndexStore enforces uniqueness on claimed participants.
+type ClaimIndexStore interface {
+	// PutParticipantClaim stores a user claim for a participant seat.
+	PutParticipantClaim(ctx context.Context, campaignID, userID, participantID string, claimedAt time.Time) error
+	// GetParticipantClaim returns the claim for a user in a campaign.
+	GetParticipantClaim(ctx context.Context, campaignID, userID string) (ParticipantClaim, error)
+	// DeleteParticipantClaim removes a claim by user.
+	DeleteParticipantClaim(ctx context.Context, campaignID, userID string) error
+}
+
 // ForkMetadata contains fork-related campaign information.
 type ForkMetadata struct {
 	ParentCampaignID string
@@ -271,6 +289,7 @@ type CampaignForkStore interface {
 type ProjectionStore interface {
 	CampaignStore
 	ParticipantStore
+	ClaimIndexStore
 	InviteStore
 	CharacterStore
 	DaggerheartStore
@@ -285,6 +304,7 @@ type ProjectionStore interface {
 type Store interface {
 	CampaignStore
 	ParticipantStore
+	ClaimIndexStore
 	CharacterStore
 	InviteStore
 	DaggerheartStore

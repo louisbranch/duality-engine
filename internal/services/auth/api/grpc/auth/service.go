@@ -58,6 +58,72 @@ func (s *AuthService) CreateUser(ctx context.Context, in *authv1.CreateUserReque
 	return &authv1.CreateUserResponse{User: userToProto(created)}, nil
 }
 
+// IssueJoinGrant issues a join grant for a campaign invite.
+func (s *AuthService) IssueJoinGrant(ctx context.Context, in *authv1.IssueJoinGrantRequest) (*authv1.IssueJoinGrantResponse, error) {
+	if in == nil {
+		return nil, status.Error(codes.InvalidArgument, "issue join grant request is required")
+	}
+	if s.store == nil {
+		return nil, status.Error(codes.Internal, "user store is not configured")
+	}
+
+	userID := strings.TrimSpace(in.GetUserId())
+	if userID == "" {
+		return nil, status.Error(codes.InvalidArgument, "user id is required")
+	}
+	campaignID := strings.TrimSpace(in.GetCampaignId())
+	if campaignID == "" {
+		return nil, status.Error(codes.InvalidArgument, "campaign id is required")
+	}
+	inviteID := strings.TrimSpace(in.GetInviteId())
+	if inviteID == "" {
+		return nil, status.Error(codes.InvalidArgument, "invite id is required")
+	}
+	participantID := strings.TrimSpace(in.GetParticipantId())
+
+	if _, err := s.store.GetUser(ctx, userID); err != nil {
+		return nil, handleDomainError(err)
+	}
+
+	config, err := loadJoinGrantConfigFromEnv()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "join grant config: %v", err)
+	}
+
+	issuedAt := s.clock().UTC()
+	expiresAt := issuedAt.Add(config.ttl)
+	jti, err := id.NewID()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "generate join grant id: %v", err)
+	}
+
+	payload := map[string]any{
+		"iss":         config.issuer,
+		"aud":         config.audience,
+		"sub":         userID,
+		"exp":         expiresAt.Unix(),
+		"iat":         issuedAt.Unix(),
+		"jti":         jti,
+		"campaign_id": campaignID,
+		"invite_id":   inviteID,
+		"user_id":     userID,
+	}
+	if participantID != "" {
+		payload["participant_id"] = participantID
+	}
+
+	grant, err := encodeJoinGrant(config, payload)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "sign join grant: %v", err)
+	}
+
+	return &authv1.IssueJoinGrantResponse{
+		JoinGrant: grant,
+		Jti:       jti,
+		ExpiresAt: timestamppb.New(expiresAt),
+	}, nil
+}
+
 // GetUser returns a user record by ID.
 func (s *AuthService) GetUser(ctx context.Context, in *authv1.GetUserRequest) (*authv1.GetUserResponse, error) {
 	if in == nil {

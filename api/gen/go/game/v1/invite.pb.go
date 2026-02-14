@@ -265,6 +265,121 @@ func (x *CreateInviteResponse) GetInvite() *Invite {
 	return nil
 }
 
+type ClaimInviteRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The campaign ID to claim the invite for.
+	CampaignId string `protobuf:"bytes,1,opt,name=campaign_id,json=campaignId,proto3" json:"campaign_id,omitempty"`
+	// The invite ID to claim.
+	InviteId string `protobuf:"bytes,2,opt,name=invite_id,json=inviteId,proto3" json:"invite_id,omitempty"`
+	// A signed join grant from auth.
+	JoinGrant     string `protobuf:"bytes,3,opt,name=join_grant,json=joinGrant,proto3" json:"join_grant,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClaimInviteRequest) Reset() {
+	*x = ClaimInviteRequest{}
+	mi := &file_game_v1_invite_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClaimInviteRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClaimInviteRequest) ProtoMessage() {}
+
+func (x *ClaimInviteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_invite_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClaimInviteRequest.ProtoReflect.Descriptor instead.
+func (*ClaimInviteRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_invite_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ClaimInviteRequest) GetCampaignId() string {
+	if x != nil {
+		return x.CampaignId
+	}
+	return ""
+}
+
+func (x *ClaimInviteRequest) GetInviteId() string {
+	if x != nil {
+		return x.InviteId
+	}
+	return ""
+}
+
+func (x *ClaimInviteRequest) GetJoinGrant() string {
+	if x != nil {
+		return x.JoinGrant
+	}
+	return ""
+}
+
+type ClaimInviteResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Invite        *Invite                `protobuf:"bytes,1,opt,name=invite,proto3" json:"invite,omitempty"`
+	Participant   *Participant           `protobuf:"bytes,2,opt,name=participant,proto3" json:"participant,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClaimInviteResponse) Reset() {
+	*x = ClaimInviteResponse{}
+	mi := &file_game_v1_invite_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClaimInviteResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClaimInviteResponse) ProtoMessage() {}
+
+func (x *ClaimInviteResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_invite_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClaimInviteResponse.ProtoReflect.Descriptor instead.
+func (*ClaimInviteResponse) Descriptor() ([]byte, []int) {
+	return file_game_v1_invite_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ClaimInviteResponse) GetInvite() *Invite {
+	if x != nil {
+		return x.Invite
+	}
+	return nil
+}
+
+func (x *ClaimInviteResponse) GetParticipant() *Participant {
+	if x != nil {
+		return x.Participant
+	}
+	return nil
+}
+
 type GetInviteRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	InviteId      string                 `protobuf:"bytes,1,opt,name=invite_id,json=inviteId,proto3" json:"invite_id,omitempty"`
@@ -274,7 +389,7 @@ type GetInviteRequest struct {
 
 func (x *GetInviteRequest) Reset() {
 	*x = GetInviteRequest{}
-	mi := &file_game_v1_invite_proto_msgTypes[3]
+	mi := &file_game_v1_invite_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -286,7 +401,7 @@ func (x *GetInviteRequest) String() string {
 func (*GetInviteRequest) ProtoMessage() {}
 
 func (x *GetInviteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_invite_proto_msgTypes[3]
+	mi := &file_game_v1_invite_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -299,7 +414,7 @@ func (x *GetInviteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetInviteRequest.ProtoReflect.Descriptor instead.
 func (*GetInviteRequest) Descriptor() ([]byte, []int) {
-	return file_game_v1_invite_proto_rawDescGZIP(), []int{3}
+	return file_game_v1_invite_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *GetInviteRequest) GetInviteId() string {
@@ -318,7 +433,7 @@ type GetInviteResponse struct {
 
 func (x *GetInviteResponse) Reset() {
 	*x = GetInviteResponse{}
-	mi := &file_game_v1_invite_proto_msgTypes[4]
+	mi := &file_game_v1_invite_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -330,7 +445,7 @@ func (x *GetInviteResponse) String() string {
 func (*GetInviteResponse) ProtoMessage() {}
 
 func (x *GetInviteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_invite_proto_msgTypes[4]
+	mi := &file_game_v1_invite_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -343,7 +458,7 @@ func (x *GetInviteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetInviteResponse.ProtoReflect.Descriptor instead.
 func (*GetInviteResponse) Descriptor() ([]byte, []int) {
-	return file_game_v1_invite_proto_rawDescGZIP(), []int{4}
+	return file_game_v1_invite_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetInviteResponse) GetInvite() *Invite {
@@ -368,7 +483,7 @@ type ListInvitesRequest struct {
 
 func (x *ListInvitesRequest) Reset() {
 	*x = ListInvitesRequest{}
-	mi := &file_game_v1_invite_proto_msgTypes[5]
+	mi := &file_game_v1_invite_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -380,7 +495,7 @@ func (x *ListInvitesRequest) String() string {
 func (*ListInvitesRequest) ProtoMessage() {}
 
 func (x *ListInvitesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_invite_proto_msgTypes[5]
+	mi := &file_game_v1_invite_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -393,7 +508,7 @@ func (x *ListInvitesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListInvitesRequest.ProtoReflect.Descriptor instead.
 func (*ListInvitesRequest) Descriptor() ([]byte, []int) {
-	return file_game_v1_invite_proto_rawDescGZIP(), []int{5}
+	return file_game_v1_invite_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ListInvitesRequest) GetCampaignId() string {
@@ -427,7 +542,7 @@ type ListInvitesResponse struct {
 
 func (x *ListInvitesResponse) Reset() {
 	*x = ListInvitesResponse{}
-	mi := &file_game_v1_invite_proto_msgTypes[6]
+	mi := &file_game_v1_invite_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -439,7 +554,7 @@ func (x *ListInvitesResponse) String() string {
 func (*ListInvitesResponse) ProtoMessage() {}
 
 func (x *ListInvitesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_invite_proto_msgTypes[6]
+	mi := &file_game_v1_invite_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -452,7 +567,7 @@ func (x *ListInvitesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListInvitesResponse.ProtoReflect.Descriptor instead.
 func (*ListInvitesResponse) Descriptor() ([]byte, []int) {
-	return file_game_v1_invite_proto_rawDescGZIP(), []int{6}
+	return file_game_v1_invite_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ListInvitesResponse) GetInvites() []*Invite {
@@ -478,7 +593,7 @@ type RevokeInviteRequest struct {
 
 func (x *RevokeInviteRequest) Reset() {
 	*x = RevokeInviteRequest{}
-	mi := &file_game_v1_invite_proto_msgTypes[7]
+	mi := &file_game_v1_invite_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -490,7 +605,7 @@ func (x *RevokeInviteRequest) String() string {
 func (*RevokeInviteRequest) ProtoMessage() {}
 
 func (x *RevokeInviteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_invite_proto_msgTypes[7]
+	mi := &file_game_v1_invite_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -503,7 +618,7 @@ func (x *RevokeInviteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeInviteRequest.ProtoReflect.Descriptor instead.
 func (*RevokeInviteRequest) Descriptor() ([]byte, []int) {
-	return file_game_v1_invite_proto_rawDescGZIP(), []int{7}
+	return file_game_v1_invite_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *RevokeInviteRequest) GetInviteId() string {
@@ -522,7 +637,7 @@ type RevokeInviteResponse struct {
 
 func (x *RevokeInviteResponse) Reset() {
 	*x = RevokeInviteResponse{}
-	mi := &file_game_v1_invite_proto_msgTypes[8]
+	mi := &file_game_v1_invite_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -534,7 +649,7 @@ func (x *RevokeInviteResponse) String() string {
 func (*RevokeInviteResponse) ProtoMessage() {}
 
 func (x *RevokeInviteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_invite_proto_msgTypes[8]
+	mi := &file_game_v1_invite_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -547,7 +662,7 @@ func (x *RevokeInviteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeInviteResponse.ProtoReflect.Descriptor instead.
 func (*RevokeInviteResponse) Descriptor() ([]byte, []int) {
-	return file_game_v1_invite_proto_rawDescGZIP(), []int{8}
+	return file_game_v1_invite_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *RevokeInviteResponse) GetInvite() *Invite {
@@ -561,7 +676,7 @@ var File_game_v1_invite_proto protoreflect.FileDescriptor
 
 const file_game_v1_invite_proto_rawDesc = "" +
 	"\n" +
-	"\x14game/v1/invite.proto\x12\agame.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc0\x02\n" +
+	"\x14game/v1/invite.proto\x12\agame.v1\x1a\x19game/v1/participant.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc0\x02\n" +
 	"\x06Invite\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1f\n" +
 	"\vcampaign_id\x18\x02 \x01(\tR\n" +
@@ -578,7 +693,16 @@ const file_game_v1_invite_proto_rawDesc = "" +
 	"campaignId\x12%\n" +
 	"\x0eparticipant_id\x18\x02 \x01(\tR\rparticipantId\"?\n" +
 	"\x14CreateInviteResponse\x12'\n" +
-	"\x06invite\x18\x01 \x01(\v2\x0f.game.v1.InviteR\x06invite\"/\n" +
+	"\x06invite\x18\x01 \x01(\v2\x0f.game.v1.InviteR\x06invite\"q\n" +
+	"\x12ClaimInviteRequest\x12\x1f\n" +
+	"\vcampaign_id\x18\x01 \x01(\tR\n" +
+	"campaignId\x12\x1b\n" +
+	"\tinvite_id\x18\x02 \x01(\tR\binviteId\x12\x1d\n" +
+	"\n" +
+	"join_grant\x18\x03 \x01(\tR\tjoinGrant\"v\n" +
+	"\x13ClaimInviteResponse\x12'\n" +
+	"\x06invite\x18\x01 \x01(\v2\x0f.game.v1.InviteR\x06invite\x126\n" +
+	"\vparticipant\x18\x02 \x01(\v2\x14.game.v1.ParticipantR\vparticipant\"/\n" +
 	"\x10GetInviteRequest\x12\x1b\n" +
 	"\tinvite_id\x18\x01 \x01(\tR\binviteId\"<\n" +
 	"\x11GetInviteResponse\x12'\n" +
@@ -600,9 +724,10 @@ const file_game_v1_invite_proto_rawDesc = "" +
 	"\x19INVITE_STATUS_UNSPECIFIED\x10\x00\x12\v\n" +
 	"\aPENDING\x10\x01\x12\v\n" +
 	"\aCLAIMED\x10\x02\x12\v\n" +
-	"\aREVOKED\x10\x032\xb7\x02\n" +
+	"\aREVOKED\x10\x032\x81\x03\n" +
 	"\rInviteService\x12K\n" +
-	"\fCreateInvite\x12\x1c.game.v1.CreateInviteRequest\x1a\x1d.game.v1.CreateInviteResponse\x12B\n" +
+	"\fCreateInvite\x12\x1c.game.v1.CreateInviteRequest\x1a\x1d.game.v1.CreateInviteResponse\x12H\n" +
+	"\vClaimInvite\x12\x1b.game.v1.ClaimInviteRequest\x1a\x1c.game.v1.ClaimInviteResponse\x12B\n" +
 	"\tGetInvite\x12\x19.game.v1.GetInviteRequest\x1a\x1a.game.v1.GetInviteResponse\x12H\n" +
 	"\vListInvites\x12\x1b.game.v1.ListInvitesRequest\x1a\x1c.game.v1.ListInvitesResponse\x12K\n" +
 	"\fRevokeInvite\x12\x1c.game.v1.RevokeInviteRequest\x1a\x1d.game.v1.RevokeInviteResponseBCZAgithub.com/louisbranch/fracturing.space/api/gen/go/game/v1;gamev1b\x06proto3"
@@ -620,41 +745,48 @@ func file_game_v1_invite_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_invite_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_game_v1_invite_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_game_v1_invite_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_game_v1_invite_proto_goTypes = []any{
 	(InviteStatus)(0),             // 0: game.v1.InviteStatus
 	(*Invite)(nil),                // 1: game.v1.Invite
 	(*CreateInviteRequest)(nil),   // 2: game.v1.CreateInviteRequest
 	(*CreateInviteResponse)(nil),  // 3: game.v1.CreateInviteResponse
-	(*GetInviteRequest)(nil),      // 4: game.v1.GetInviteRequest
-	(*GetInviteResponse)(nil),     // 5: game.v1.GetInviteResponse
-	(*ListInvitesRequest)(nil),    // 6: game.v1.ListInvitesRequest
-	(*ListInvitesResponse)(nil),   // 7: game.v1.ListInvitesResponse
-	(*RevokeInviteRequest)(nil),   // 8: game.v1.RevokeInviteRequest
-	(*RevokeInviteResponse)(nil),  // 9: game.v1.RevokeInviteResponse
-	(*timestamppb.Timestamp)(nil), // 10: google.protobuf.Timestamp
+	(*ClaimInviteRequest)(nil),    // 4: game.v1.ClaimInviteRequest
+	(*ClaimInviteResponse)(nil),   // 5: game.v1.ClaimInviteResponse
+	(*GetInviteRequest)(nil),      // 6: game.v1.GetInviteRequest
+	(*GetInviteResponse)(nil),     // 7: game.v1.GetInviteResponse
+	(*ListInvitesRequest)(nil),    // 8: game.v1.ListInvitesRequest
+	(*ListInvitesResponse)(nil),   // 9: game.v1.ListInvitesResponse
+	(*RevokeInviteRequest)(nil),   // 10: game.v1.RevokeInviteRequest
+	(*RevokeInviteResponse)(nil),  // 11: game.v1.RevokeInviteResponse
+	(*timestamppb.Timestamp)(nil), // 12: google.protobuf.Timestamp
+	(*Participant)(nil),           // 13: game.v1.Participant
 }
 var file_game_v1_invite_proto_depIdxs = []int32{
 	0,  // 0: game.v1.Invite.status:type_name -> game.v1.InviteStatus
-	10, // 1: game.v1.Invite.created_at:type_name -> google.protobuf.Timestamp
-	10, // 2: game.v1.Invite.updated_at:type_name -> google.protobuf.Timestamp
+	12, // 1: game.v1.Invite.created_at:type_name -> google.protobuf.Timestamp
+	12, // 2: game.v1.Invite.updated_at:type_name -> google.protobuf.Timestamp
 	1,  // 3: game.v1.CreateInviteResponse.invite:type_name -> game.v1.Invite
-	1,  // 4: game.v1.GetInviteResponse.invite:type_name -> game.v1.Invite
-	1,  // 5: game.v1.ListInvitesResponse.invites:type_name -> game.v1.Invite
-	1,  // 6: game.v1.RevokeInviteResponse.invite:type_name -> game.v1.Invite
-	2,  // 7: game.v1.InviteService.CreateInvite:input_type -> game.v1.CreateInviteRequest
-	4,  // 8: game.v1.InviteService.GetInvite:input_type -> game.v1.GetInviteRequest
-	6,  // 9: game.v1.InviteService.ListInvites:input_type -> game.v1.ListInvitesRequest
-	8,  // 10: game.v1.InviteService.RevokeInvite:input_type -> game.v1.RevokeInviteRequest
-	3,  // 11: game.v1.InviteService.CreateInvite:output_type -> game.v1.CreateInviteResponse
-	5,  // 12: game.v1.InviteService.GetInvite:output_type -> game.v1.GetInviteResponse
-	7,  // 13: game.v1.InviteService.ListInvites:output_type -> game.v1.ListInvitesResponse
-	9,  // 14: game.v1.InviteService.RevokeInvite:output_type -> game.v1.RevokeInviteResponse
-	11, // [11:15] is the sub-list for method output_type
-	7,  // [7:11] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	1,  // 4: game.v1.ClaimInviteResponse.invite:type_name -> game.v1.Invite
+	13, // 5: game.v1.ClaimInviteResponse.participant:type_name -> game.v1.Participant
+	1,  // 6: game.v1.GetInviteResponse.invite:type_name -> game.v1.Invite
+	1,  // 7: game.v1.ListInvitesResponse.invites:type_name -> game.v1.Invite
+	1,  // 8: game.v1.RevokeInviteResponse.invite:type_name -> game.v1.Invite
+	2,  // 9: game.v1.InviteService.CreateInvite:input_type -> game.v1.CreateInviteRequest
+	4,  // 10: game.v1.InviteService.ClaimInvite:input_type -> game.v1.ClaimInviteRequest
+	6,  // 11: game.v1.InviteService.GetInvite:input_type -> game.v1.GetInviteRequest
+	8,  // 12: game.v1.InviteService.ListInvites:input_type -> game.v1.ListInvitesRequest
+	10, // 13: game.v1.InviteService.RevokeInvite:input_type -> game.v1.RevokeInviteRequest
+	3,  // 14: game.v1.InviteService.CreateInvite:output_type -> game.v1.CreateInviteResponse
+	5,  // 15: game.v1.InviteService.ClaimInvite:output_type -> game.v1.ClaimInviteResponse
+	7,  // 16: game.v1.InviteService.GetInvite:output_type -> game.v1.GetInviteResponse
+	9,  // 17: game.v1.InviteService.ListInvites:output_type -> game.v1.ListInvitesResponse
+	11, // 18: game.v1.InviteService.RevokeInvite:output_type -> game.v1.RevokeInviteResponse
+	14, // [14:19] is the sub-list for method output_type
+	9,  // [9:14] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_invite_proto_init() }
@@ -662,13 +794,14 @@ func file_game_v1_invite_proto_init() {
 	if File_game_v1_invite_proto != nil {
 		return
 	}
+	file_game_v1_participant_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_invite_proto_rawDesc), len(file_game_v1_invite_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   9,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

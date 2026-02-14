@@ -125,7 +125,7 @@ func (s *CharacterService) CreateCharacter(ctx context.Context, in *campaignv1.C
 		return nil, status.Errorf(codes.Internal, "append event: %v", err)
 	}
 
-	applier := projection.Applier{Campaign: s.stores.Campaign, Participant: s.stores.Participant, Character: s.stores.Character}
+	applier := projection.Applier{Campaign: s.stores.Campaign, Participant: s.stores.Participant, Character: s.stores.Character, ClaimIndex: s.stores.ClaimIndex}
 	if err := applier.Apply(ctx, stored); err != nil {
 		return nil, status.Errorf(codes.Internal, "apply event: %v", err)
 	}
@@ -336,6 +336,7 @@ func (s *CharacterService) UpdateCharacter(ctx context.Context, in *campaignv1.U
 		Character:   s.stores.Character,
 		Daggerheart: s.stores.Daggerheart,
 		Participant: s.stores.Participant,
+		ClaimIndex:  s.stores.ClaimIndex,
 	}
 	if err := applier.Apply(ctx, stored); err != nil {
 		return nil, status.Errorf(codes.Internal, "apply event: %v", err)
@@ -424,6 +425,7 @@ func (s *CharacterService) DeleteCharacter(ctx context.Context, in *campaignv1.D
 		Character:   s.stores.Character,
 		Daggerheart: s.stores.Daggerheart,
 		Participant: s.stores.Participant,
+		ClaimIndex:  s.stores.ClaimIndex,
 	}
 	if err := applier.Apply(ctx, stored); err != nil {
 		return nil, status.Errorf(codes.Internal, "apply event: %v", err)
@@ -569,6 +571,7 @@ func (s *CharacterService) SetDefaultControl(ctx context.Context, in *campaignv1
 		Character:   s.stores.Character,
 		Daggerheart: s.stores.Daggerheart,
 		Participant: s.stores.Participant,
+		ClaimIndex:  s.stores.ClaimIndex,
 	}
 	if err := applier.Apply(ctx, stored); err != nil {
 		return nil, status.Errorf(codes.Internal, "apply event: %v", err)
@@ -802,6 +805,7 @@ func (s *CharacterService) PatchCharacterProfile(ctx context.Context, in *campai
 		Character:   s.stores.Character,
 		Daggerheart: s.stores.Daggerheart,
 		Participant: s.stores.Participant,
+		ClaimIndex:  s.stores.ClaimIndex,
 	}
 	if err := applier.Apply(ctx, stored); err != nil {
 		return nil, status.Errorf(codes.Internal, "apply event: %v", err)
