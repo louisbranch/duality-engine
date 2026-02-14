@@ -25,6 +25,36 @@ jobs:
         run: git diff --exit-code docs/events/event-catalog.md
       - name: Run tests and generate coverage report
         run: make cover
+      - name: Check coverage regression against baseline
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          CURRENT=$(go tool cover -func=coverage.out | awk '/total/ {print substr($3, 1, length($3)-1)}')
+          if [ -z "$CURRENT" ] || ! printf '%s\n' "$CURRENT" | grep -Eq '^[0-9]+(\.[0-9]+)?$'; then
+            echo "Failed to extract valid coverage percentage for PR."
+            exit 1
+          fi
+          if ! git ls-remote --exit-code --heads origin badges; then
+            echo "No badges branch found; skipping coverage regression check."
+            exit 0
+          fi
+          git fetch origin badges:refs/remotes/origin/badges
+          if ! git show origin/badges:coverage-baseline.txt > /tmp/coverage-baseline.txt; then
+            echo "No coverage-baseline.txt found; skipping coverage regression check."
+            exit 0
+          fi
+          BASELINE=$(cat /tmp/coverage-baseline.txt)
+          if [ -z "$BASELINE" ] || ! printf '%s\n' "$BASELINE" | grep -Eq '^[0-9]+(\.[0-9]+)?$'; then
+            echo "Invalid coverage baseline value: $BASELINE"
+            exit 1
+          fi
+          ALLOW_DROP=0.1
+          if awk "BEGIN {exit !($CURRENT + 0 >= $BASELINE - $ALLOW_DROP)}"; then
+            echo "Coverage OK: current $CURRENT% vs baseline $BASELINE% (allow drop $ALLOW_DROP%)"
+            exit 0
+          fi
+          echo "Coverage regression: current $CURRENT% vs baseline $BASELINE% (allow drop $ALLOW_DROP%). Please add tests to restore coverage or update the baseline if this is intentional."
+          exit 1
       - name: Upload coverage logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -89,7 +119,8 @@ jobs:
           mv "$TMP_DIR/coverage.out" ./coverage.out
           go run github.com/nikolaydubina/go-cover-treemap -coverprofile=coverage.out -percent > coverage-treemap.svg
           curl -f -o coverage.svg "https://img.shields.io/badge/coverage-${COVERAGE_PERCENT}%25-${COLOR}"
-          git add -f coverage.svg coverage-treemap.svg
+          echo "$COVERAGE_PERCENT" > coverage-baseline.txt
+          git add -f coverage.svg coverage-treemap.svg coverage-baseline.txt
           if git diff --cached --quiet; then
             echo "No changes to coverage badge."
             exit 0
