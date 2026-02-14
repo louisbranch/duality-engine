@@ -7,6 +7,38 @@ templ UsersFullPage(view UsersPageView, page PageContext) {
 	}
 }
 
+// UserDetailFullPage renders the user detail page in the base layout.
+templ UserDetailFullPage(view UserDetailPageView, page PageContext) {
+	@Layout(T(page.Loc, "title.user", AppName()), "Users", page) {
+		@UserDetailPage(view, page.Loc)
+	}
+}
+
+// UserDetailPage renders a single user detail page.
+templ UserDetailPage(view UserDetailPageView, loc Localizer) {
+	if view.Message != "" {
+		if view.Detail == nil {
+			<h2>{T(loc, "users.detail.heading")}</h2>
+		}
+		<p class="muted">{view.Message}</p>
+	}
+	if view.Detail != nil {
+		if view.Detail.DisplayName != "" {
+			<h2>{view.Detail.DisplayName}</h2>
+		} else {
+			<h2>{view.Detail.ID}</h2>
+		}
+		if view.Impersonation != nil {
+			<p class="muted">{T(loc, "users.impersonation.active", ImpersonationLabel(view.Impersonation))}</p>
+			<form method="post" action="/users/logout">
+				<input type="hidden" name="user_id" value={view.Detail.ID}>
+				<button class="paper-btn btn-small" type="submit">{T(loc, "users.logout.submit")}</button>
+			</form>
+		}
+		@UserDetailCard(*view.Detail, view.Impersonation, loc)
+	}
+}
+
 // UsersPage renders the users page content.
 templ UsersPage(view UsersPageView, loc Localizer) {
 	<h2>{T(loc, "users.heading")}</h2>
@@ -23,7 +55,7 @@ templ UsersPage(view UsersPageView, loc Localizer) {
 		</div>
 		<div class="sm-12 md-6 col">
 			<h3>{T(loc, "users.get.heading")}</h3>
-			<form method="get" action="/users">
+			<form method="get" action="/users/lookup">
 				<label>
 					{T(loc, "users.get.user_id")}
 					<input type="text" name="user_id" placeholder="user-123">
@@ -40,9 +72,6 @@ templ UsersPage(view UsersPageView, loc Localizer) {
 		<form method="post" action="/users/logout">
 			<button class="paper-btn btn-small" type="submit">{T(loc, "users.logout.submit")}</button>
 		</form>
-	}
-	if view.Detail != nil {
-		@UserDetailCard(*view.Detail, view.Impersonation, loc)
 	}
 	<h3>{T(loc, "users.list.heading")}</h3>
 	@UsersLoading(loc)
@@ -72,8 +101,24 @@ templ UsersTable(rows []UserRow, message string, loc Localizer) {
 			<tbody>
 				for _, row := range rows {
 					<tr>
-						<td><code>{row.ID}</code></td>
-						<td>{row.DisplayName}</td>
+						<td>
+							<a
+								href={"/users/" + row.ID}
+								hx-get={"/users/" + row.ID}
+								hx-target="#main"
+								hx-swap="innerHTML"
+								hx-push-url="true"
+							><code>{row.ID}</code></a>
+						</td>
+						<td>
+							<a
+								href={"/users/" + row.ID}
+								hx-get={"/users/" + row.ID}
+								hx-target="#main"
+								hx-swap="innerHTML"
+								hx-push-url="true"
+							>{row.DisplayName}</a>
+						</td>
 						<td>{row.CreatedAt}</td>
 						<td>{row.UpdatedAt}</td>
 					</tr>

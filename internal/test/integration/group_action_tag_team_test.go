@@ -37,7 +37,7 @@ type tagTeamResolvedPayload struct {
 }
 
 func TestDaggerheartGroupActionFlow(t *testing.T) {
-	grpcAddr, _, stopServer := startGRPCServer(t)
+	grpcAddr, authAddr, stopServer := startGRPCServer(t)
 	defer stopServer()
 
 	conn, err := grpc.NewClient(
@@ -58,6 +58,8 @@ func TestDaggerheartGroupActionFlow(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), integrationTimeout())
 	defer cancel()
+	userID := createAuthUser(t, authAddr, "Group Action GM")
+	ctx = withUserID(ctx, userID)
 
 	createCampaign, err := campaignClient.CreateCampaign(ctx, &gamev1.CreateCampaignRequest{
 		Name:               "Group Action Campaign",
@@ -139,7 +141,7 @@ func TestDaggerheartGroupActionFlow(t *testing.T) {
 }
 
 func TestDaggerheartTagTeamFlow(t *testing.T) {
-	grpcAddr, _, stopServer := startGRPCServer(t)
+	grpcAddr, authAddr, stopServer := startGRPCServer(t)
 	defer stopServer()
 
 	conn, err := grpc.NewClient(
@@ -160,6 +162,8 @@ func TestDaggerheartTagTeamFlow(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), integrationTimeout())
 	defer cancel()
+	userID := createAuthUser(t, authAddr, "Tag Team GM")
+	ctx = withUserID(ctx, userID)
 
 	createCampaign, err := campaignClient.CreateCampaign(ctx, &gamev1.CreateCampaignRequest{
 		Name:               "Tag Team Campaign",

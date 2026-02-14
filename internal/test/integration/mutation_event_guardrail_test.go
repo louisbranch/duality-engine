@@ -266,8 +266,17 @@ func runMutationEventGuardrailTests(t *testing.T, suite *integrationSuite, grpcA
 		}
 		lastSeq = requireEventTypesAfterSeq(t, ctx, eventClient, campaignOutput.ID, lastSeq, "invite.created")
 
+		userResp, err := authClient.CreateUser(ctx, &authv1.CreateUserRequest{DisplayName: "Invite Claimer"})
+		if err != nil {
+			t.Fatalf("create invite claimer: %v", err)
+		}
+		claimerID := userResp.GetUser().GetId()
+		if claimerID == "" {
+			t.Fatal("create invite claimer: missing user id")
+		}
+
 		grantResp, err := authClient.IssueJoinGrant(ctx, &authv1.IssueJoinGrantRequest{
-			UserId:        suite.userID,
+			UserId:        claimerID,
 			CampaignId:    campaignOutput.ID,
 			InviteId:      inviteResp.Invite.Id,
 			ParticipantId: participantOutput.ID,
@@ -279,7 +288,7 @@ func runMutationEventGuardrailTests(t *testing.T, suite *integrationSuite, grpcA
 			t.Fatal("issue join grant returned empty grant")
 		}
 
-		claimCtx := withUserID(ctx, suite.userID)
+		claimCtx := withUserID(ctx, claimerID)
 		_, err = inviteClient.ClaimInvite(claimCtx, &statev1.ClaimInviteRequest{
 			CampaignId: campaignOutput.ID,
 			InviteId:   inviteResp.Invite.Id,

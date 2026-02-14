@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -166,9 +167,11 @@ func (h *Handler) routes() http.Handler {
 	mux.Handle("/campaigns/", http.HandlerFunc(h.handleCampaignRoutes))
 	mux.Handle("/users", http.HandlerFunc(h.handleUsersPage))
 	mux.Handle("/users/table", http.HandlerFunc(h.handleUsersTable))
+	mux.Handle("/users/lookup", http.HandlerFunc(h.handleUserLookup))
 	mux.Handle("/users/create", http.HandlerFunc(h.handleCreateUser))
 	mux.Handle("/users/impersonate", http.HandlerFunc(h.handleImpersonateUser))
 	mux.Handle("/users/logout", http.HandlerFunc(h.handleLogout))
+	mux.Handle("/users/", http.HandlerFunc(h.handleUserRoutes))
 	return h.withImpersonation(mux)
 }
 
@@ -291,24 +294,9 @@ func (h *Handler) handleUsersPage(w http.ResponseWriter, r *http.Request) {
 		view.Message = message
 	}
 
-	userID := strings.TrimSpace(r.URL.Query().Get("user_id"))
-	if userID != "" {
-		client := h.authClient()
-		if client == nil {
-			view.Message = loc.Sprintf("error.user_service_unavailable")
-		} else {
-			ctx, cancel := context.WithTimeout(r.Context(), campaignsRequestTimeout)
-			defer cancel()
-
-			response, err := client.GetUser(ctx, &authv1.GetUserRequest{UserId: userID})
-			if err != nil || response.GetUser() == nil {
-				log.Printf("get user: %v", err)
-				view.Message = loc.Sprintf("error.user_not_found")
-			} else {
-				view.Detail = buildUserDetail(response.GetUser())
-				h.populateUserInvites(ctx, view.Detail, loc)
-			}
-		}
+	if userID := strings.TrimSpace(r.URL.Query().Get("user_id")); userID != "" {
+		h.redirectToUserDetail(w, r, userID)
+		return
 	}
 
 	if isHTMXRequest(r) {
@@ -317,6 +305,74 @@ func (h *Handler) handleUsersPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	templ.Handler(templates.UsersFullPage(view, pageCtx)).ServeHTTP(w, r)
+}
+
+// handleUserLookup redirects the get-user form to the detail page.
+func (h *Handler) handleUserLookup(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.Header().Set("Allow", http.MethodGet)
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	loc, lang := h.localizer(w, r)
+	pageCtx := h.pageContext(lang, loc, r)
+	view := templates.UsersPageView{Impersonation: pageCtx.Impersonation}
+
+	userID := strings.TrimSpace(r.URL.Query().Get("user_id"))
+	if userID == "" {
+		view.Message = loc.Sprintf("error.user_id_required")
+		if isHTMXRequest(r) {
+			templ.Handler(templates.UsersPage(view, loc)).ServeHTTP(w, r)
+			return
+		}
+		templ.Handler(templates.UsersFullPage(view, pageCtx)).ServeHTTP(w, r)
+		return
+	}
+
+	h.redirectToUserDetail(w, r, userID)
+}
+
+// handleUserRoutes dispatches the user detail route.
+func (h *Handler) handleUserRoutes(w http.ResponseWriter, r *http.Request) {
+	if strings.HasSuffix(r.URL.Path, "/") {
+		canonical := strings.TrimRight(r.URL.Path, "/")
+		if canonical == "" {
+			canonical = "/"
+		}
+		http.Redirect(w, r, canonical, http.StatusMovedPermanently)
+		return
+	}
+	userPath := strings.TrimPrefix(r.URL.Path, "/users/")
+	parts := splitPathParts(userPath)
+	if len(parts) == 1 && strings.TrimSpace(parts[0]) != "" {
+		h.handleUserDetail(w, r, parts[0])
+		return
+	}
+	http.NotFound(w, r)
+}
+
+// handleUserDetail renders the single-user detail page.
+func (h *Handler) handleUserDetail(w http.ResponseWriter, r *http.Request, userID string) {
+	loc, lang := h.localizer(w, r)
+	pageCtx := h.pageContext(lang, loc, r)
+	view := templates.UserDetailPageView{Impersonation: pageCtx.Impersonation}
+
+	if message := strings.TrimSpace(r.URL.Query().Get("message")); message != "" {
+		view.Message = message
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), campaignsRequestTimeout)
+	defer cancel()
+
+	detail, message := h.loadUserDetail(ctx, userID, loc)
+	view.Detail = detail
+	if message != "" && view.Message == "" {
+		view.Message = message
+	}
+	h.populateUserInvitesIfImpersonating(ctx, view.Detail, view.Impersonation, loc)
+
+	h.renderUserDetail(w, r, view, pageCtx, loc)
 }
 
 // handleCreateUser creates a user from a form submission.
@@ -363,13 +419,16 @@ func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	created := response.GetUser()
-	view.Detail = buildUserDetail(created)
-	view.Message = loc.Sprintf("users.create.success")
-	invitesCtx, invitesCancel := context.WithTimeout(r.Context(), campaignsRequestTimeout)
-	defer invitesCancel()
-	h.populateUserInvites(invitesCtx, view.Detail, loc)
-
-	templ.Handler(templates.UsersFullPage(view, pageCtx)).ServeHTTP(w, r)
+	redirectURL := "/users/" + created.GetId()
+	message := loc.Sprintf("users.create.success")
+	redirectURL = redirectURL + "?message=" + url.QueryEscape(message)
+	if isHTMXRequest(r) {
+		w.Header().Set("Location", redirectURL)
+		w.Header().Set("HX-Redirect", redirectURL)
+		w.WriteHeader(http.StatusSeeOther)
+		return
+	}
+	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 }
 
 // handleImpersonateUser creates an impersonation session for a user.
@@ -382,28 +441,28 @@ func (h *Handler) handleImpersonateUser(w http.ResponseWriter, r *http.Request) 
 
 	loc, lang := h.localizer(w, r)
 	pageCtx := h.pageContext(lang, loc, r)
-	view := templates.UsersPageView{Impersonation: pageCtx.Impersonation}
+	view := templates.UserDetailPageView{Impersonation: pageCtx.Impersonation}
 	if !requireSameOrigin(w, r, loc) {
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
 		view.Message = loc.Sprintf("error.user_impersonate_invalid")
-		templ.Handler(templates.UsersFullPage(view, pageCtx)).ServeHTTP(w, r)
+		h.renderUserDetail(w, r, view, pageCtx, loc)
 		return
 	}
 
 	userID := strings.TrimSpace(r.FormValue("user_id"))
 	if userID == "" {
 		view.Message = loc.Sprintf("error.user_id_required")
-		templ.Handler(templates.UsersFullPage(view, pageCtx)).ServeHTTP(w, r)
+		h.renderUserDetail(w, r, view, pageCtx, loc)
 		return
 	}
 
 	client := h.authClient()
 	if client == nil {
 		view.Message = loc.Sprintf("error.user_service_unavailable")
-		templ.Handler(templates.UsersFullPage(view, pageCtx)).ServeHTTP(w, r)
+		h.renderUserDetail(w, r, view, pageCtx, loc)
 		return
 	}
 
@@ -414,7 +473,7 @@ func (h *Handler) handleImpersonateUser(w http.ResponseWriter, r *http.Request) 
 	if err != nil || response.GetUser() == nil {
 		log.Printf("get user for impersonation: %v", err)
 		view.Message = loc.Sprintf("error.user_not_found")
-		templ.Handler(templates.UsersFullPage(view, pageCtx)).ServeHTTP(w, r)
+		h.renderUserDetail(w, r, view, pageCtx, loc)
 		return
 	}
 
@@ -428,7 +487,7 @@ func (h *Handler) handleImpersonateUser(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		log.Printf("impersonation session id: %v", err)
 		view.Message = loc.Sprintf("error.user_impersonate_failed")
-		templ.Handler(templates.UsersFullPage(view, pageCtx)).ServeHTTP(w, r)
+		h.renderUserDetail(w, r, view, pageCtx, loc)
 		return
 	}
 
@@ -455,7 +514,7 @@ func (h *Handler) handleImpersonateUser(w http.ResponseWriter, r *http.Request) 
 	}
 	invitesCtx, invitesCancel := context.WithTimeout(r.Context(), campaignsRequestTimeout)
 	defer invitesCancel()
-	h.populateUserInvites(invitesCtx, view.Detail, loc)
+	h.populateUserInvitesIfImpersonating(invitesCtx, view.Detail, view.Impersonation, loc)
 	pageCtx.Impersonation = view.Impersonation
 	label := strings.TrimSpace(user.GetDisplayName())
 	if label == "" {
@@ -463,7 +522,7 @@ func (h *Handler) handleImpersonateUser(w http.ResponseWriter, r *http.Request) 
 	}
 	view.Message = loc.Sprintf("users.impersonate.success", label)
 
-	templ.Handler(templates.UsersFullPage(view, pageCtx)).ServeHTTP(w, r)
+	h.renderUserDetail(w, r, view, pageCtx, loc)
 }
 
 // handleLogout clears the current impersonation session.
@@ -476,7 +535,7 @@ func (h *Handler) handleLogout(w http.ResponseWriter, r *http.Request) {
 
 	loc, lang := h.localizer(w, r)
 	pageCtx := h.pageContext(lang, loc, r)
-	view := templates.UsersPageView{}
+	view := templates.UserDetailPageView{}
 	if !requireSameOrigin(w, r, loc) {
 		return
 	}
@@ -500,7 +559,23 @@ func (h *Handler) handleLogout(w http.ResponseWriter, r *http.Request) {
 
 	view.Message = loc.Sprintf("users.logout.success")
 	pageCtx.Impersonation = nil
-	templ.Handler(templates.UsersFullPage(view, pageCtx)).ServeHTTP(w, r)
+
+	if err := r.ParseForm(); err == nil {
+		if userID := strings.TrimSpace(r.FormValue("user_id")); userID != "" {
+			ctx, cancel := context.WithTimeout(r.Context(), campaignsRequestTimeout)
+			defer cancel()
+			detail, message := h.loadUserDetail(ctx, userID, loc)
+			view.Detail = detail
+			if message != "" && view.Message == "" {
+				view.Message = message
+			}
+			h.populateUserInvitesIfImpersonating(ctx, view.Detail, view.Impersonation, loc)
+			h.renderUserDetail(w, r, view, pageCtx, loc)
+			return
+		}
+	}
+
+	templ.Handler(templates.UsersFullPage(templates.UsersPageView{Message: view.Message}, pageCtx)).ServeHTTP(w, r)
 }
 
 // handleUsersTable renders the users table via HTMX.
@@ -889,6 +964,49 @@ func (h *Handler) renderUsersTable(w http.ResponseWriter, r *http.Request, rows 
 	templ.Handler(templates.UsersTable(rows, message, loc)).ServeHTTP(w, r)
 }
 
+func (h *Handler) renderUserDetail(w http.ResponseWriter, r *http.Request, view templates.UserDetailPageView, pageCtx templates.PageContext, loc *message.Printer) {
+	if isHTMXRequest(r) {
+		templ.Handler(templates.UserDetailPage(view, loc)).ServeHTTP(w, r)
+		return
+	}
+
+	templ.Handler(templates.UserDetailFullPage(view, pageCtx)).ServeHTTP(w, r)
+}
+
+func (h *Handler) redirectToUserDetail(w http.ResponseWriter, r *http.Request, userID string) {
+	userID = strings.TrimSpace(userID)
+	if userID == "" {
+		http.NotFound(w, r)
+		return
+	}
+	redirectURL := "/users/" + userID
+	if isHTMXRequest(r) {
+		w.Header().Set("Location", redirectURL)
+		w.Header().Set("HX-Redirect", redirectURL)
+		w.WriteHeader(http.StatusSeeOther)
+		return
+	}
+	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
+}
+
+func (h *Handler) loadUserDetail(ctx context.Context, userID string, loc *message.Printer) (*templates.UserDetail, string) {
+	userID = strings.TrimSpace(userID)
+	if userID == "" {
+		return nil, loc.Sprintf("error.user_id_required")
+	}
+	client := h.authClient()
+	if client == nil {
+		return nil, loc.Sprintf("error.user_service_unavailable")
+	}
+	response, err := client.GetUser(ctx, &authv1.GetUserRequest{UserId: userID})
+	if err != nil || response.GetUser() == nil {
+		log.Printf("get user: %v", err)
+		return nil, loc.Sprintf("error.user_not_found")
+	}
+	detail := buildUserDetail(response.GetUser())
+	return detail, ""
+}
+
 // authClient returns the currently configured auth client.
 func (h *Handler) authClient() authv1.AuthServiceClient {
 	if h == nil || h.clientProvider == nil {
@@ -1088,102 +1206,92 @@ func (h *Handler) populateUserInvites(ctx context.Context, detail *templates.Use
 	detail.PendingInvitesMessage = message
 }
 
+func (h *Handler) populateUserInvitesIfImpersonating(ctx context.Context, detail *templates.UserDetail, impersonation *templates.ImpersonationView, loc *message.Printer) {
+	if detail == nil {
+		return
+	}
+	if impersonation == nil || strings.TrimSpace(impersonation.UserID) == "" || impersonation.UserID != detail.ID {
+		detail.PendingInvites = nil
+		detail.PendingInvitesMessage = loc.Sprintf("users.invites.require_impersonation")
+		return
+	}
+	md, _ := metadata.FromOutgoingContext(ctx)
+	md = md.Copy()
+	md.Set(grpcmeta.UserIDHeader, impersonation.UserID)
+	ctx = metadata.NewOutgoingContext(ctx, md)
+	h.populateUserInvites(ctx, detail, loc)
+}
+
 func (h *Handler) listPendingInvitesForUser(ctx context.Context, userID string, loc *message.Printer) ([]templates.InviteRow, string) {
 	userID = strings.TrimSpace(userID)
 	if userID == "" {
 		return nil, loc.Sprintf("users.invites.empty")
 	}
 	inviteClient := h.inviteClient()
-	campaignClient := h.campaignClient()
-	if inviteClient == nil || campaignClient == nil {
+	if inviteClient == nil {
 		return nil, loc.Sprintf("error.pending_invites_unavailable")
 	}
 
 	rows := make([]templates.InviteRow, 0)
-	campaigns := make(map[string]string)
 	pageToken := ""
 	for {
-		resp, err := campaignClient.ListCampaigns(ctx, &statev1.ListCampaignsRequest{PageToken: pageToken})
+		resp, err := inviteClient.ListPendingInvitesForUser(ctx, &statev1.ListPendingInvitesForUserRequest{
+			PageSize:  inviteListPageSize,
+			PageToken: pageToken,
+		})
 		if err != nil {
-			log.Printf("list campaigns for pending invites: %v", err)
+			log.Printf("list pending invites for user: %v", err)
 			return nil, loc.Sprintf("error.pending_invites_unavailable")
 		}
-		for _, campaign := range resp.GetCampaigns() {
-			if campaign == nil {
+		for _, pending := range resp.GetInvites() {
+			if pending == nil {
 				continue
 			}
-			name := strings.TrimSpace(campaign.GetName())
-			if name == "" {
-				name = campaign.GetId()
+			inv := pending.GetInvite()
+			campaign := pending.GetCampaign()
+			participant := pending.GetParticipant()
+
+			campaignID := strings.TrimSpace(campaign.GetId())
+			if campaignID == "" && inv != nil {
+				campaignID = strings.TrimSpace(inv.GetCampaignId())
 			}
-			campaigns[campaign.GetId()] = name
+			campaignName := strings.TrimSpace(campaign.GetName())
+			if campaignName == "" {
+				if campaignID != "" {
+					campaignName = campaignID
+				} else {
+					campaignName = loc.Sprintf("label.unknown")
+				}
+			}
+
+			participantLabel := strings.TrimSpace(participant.GetDisplayName())
+			if participantLabel == "" {
+				participantLabel = loc.Sprintf("label.unknown")
+			}
+
+			inviteID := ""
+			status := statev1.InviteStatus_INVITE_STATUS_UNSPECIFIED
+			createdAt := ""
+			if inv != nil {
+				inviteID = inv.GetId()
+				status = inv.GetStatus()
+				createdAt = formatTimestamp(inv.GetCreatedAt())
+			}
+			statusLabel, statusVariant := formatInviteStatus(status, loc)
+
+			rows = append(rows, templates.InviteRow{
+				ID:            inviteID,
+				CampaignID:    campaignID,
+				CampaignName:  campaignName,
+				Participant:   participantLabel,
+				Status:        statusLabel,
+				StatusVariant: statusVariant,
+				CreatedAt:     createdAt,
+			})
 		}
 		pageToken = strings.TrimSpace(resp.GetNextPageToken())
 		if pageToken == "" {
 			break
-		}
-	}
-
-	participantCache := make(map[string]map[string]string)
-	statusLabel, statusVariant := formatInviteStatus(statev1.InviteStatus_PENDING, loc)
-	for campaignID, campaignName := range campaigns {
-		inviteToken := ""
-		for {
-			resp, err := inviteClient.ListInvites(ctx, &statev1.ListInvitesRequest{
-				CampaignId:      campaignID,
-				RecipientUserId: userID,
-				Status:          statev1.InviteStatus_PENDING,
-				PageSize:        inviteListPageSize,
-				PageToken:       inviteToken,
-			})
-			if err != nil {
-				log.Printf("list pending invites: %v", err)
-				break
-			}
-			invites := resp.GetInvites()
-			if len(invites) > 0 {
-				participantNames, ok := participantCache[campaignID]
-				if !ok {
-					participantNames = map[string]string{}
-					if participantClient := h.participantClient(); participantClient != nil {
-						participantsResp, err := participantClient.ListParticipants(ctx, &statev1.ListParticipantsRequest{
-							CampaignId: campaignID,
-						})
-						if err != nil {
-							log.Printf("list participants for pending invites: %v", err)
-						} else {
-							for _, participant := range participantsResp.GetParticipants() {
-								if participant != nil {
-									participantNames[participant.GetId()] = participant.GetDisplayName()
-								}
-							}
-						}
-					}
-					participantCache[campaignID] = participantNames
-				}
-				for _, inv := range invites {
-					if inv == nil {
-						continue
-					}
-					participantLabel := participantCache[campaignID][inv.GetParticipantId()]
-					if participantLabel == "" {
-						participantLabel = loc.Sprintf("label.unknown")
-					}
-					rows = append(rows, templates.InviteRow{
-						ID:            inv.GetId(),
-						CampaignID:    campaignID,
-						CampaignName:  campaignName,
-						Participant:   participantLabel,
-						Status:        statusLabel,
-						StatusVariant: statusVariant,
-						CreatedAt:     formatTimestamp(inv.GetCreatedAt()),
-					})
-				}
-			}
-			inviteToken = strings.TrimSpace(resp.GetNextPageToken())
-			if inviteToken == "" {
-				break
-			}
 		}
 	}
 
@@ -1827,6 +1935,19 @@ func (h *Handler) handleInvitesTable(w http.ResponseWriter, r *http.Request, cam
 	ctx, cancel := context.WithTimeout(r.Context(), campaignsRequestTimeout)
 	defer cancel()
 
+	if impersonation := h.currentImpersonation(r); impersonation != nil {
+		participantID, err := h.resolveParticipantIDForUser(ctx, campaignID, impersonation.userID)
+		if err != nil {
+			log.Printf("resolve participant for invites: %v", err)
+		}
+		if participantID != "" {
+			md, _ := metadata.FromOutgoingContext(ctx)
+			md = md.Copy()
+			md.Set(grpcmeta.ParticipantIDHeader, participantID)
+			ctx = metadata.NewOutgoingContext(ctx, md)
+		}
+	}
+
 	response, err := inviteClient.ListInvites(ctx, &statev1.ListInvitesRequest{
 		CampaignId: campaignID,
 		PageSize:   inviteListPageSize,
@@ -1886,6 +2007,41 @@ func (h *Handler) handleInvitesTable(w http.ResponseWriter, r *http.Request, cam
 
 	rows := buildInviteRows(invites, participantNames, recipientNames, loc)
 	h.renderInvitesTable(w, r, rows, "", loc)
+}
+
+func (h *Handler) resolveParticipantIDForUser(ctx context.Context, campaignID, userID string) (string, error) {
+	userID = strings.TrimSpace(userID)
+	if userID == "" {
+		return "", nil
+	}
+	participantClient := h.participantClient()
+	if participantClient == nil {
+		return "", fmt.Errorf("participant client unavailable")
+	}
+	pageToken := ""
+	for {
+		resp, err := participantClient.ListParticipants(ctx, &statev1.ListParticipantsRequest{
+			CampaignId: campaignID,
+			PageSize:   100,
+			PageToken:  pageToken,
+		})
+		if err != nil {
+			return "", err
+		}
+		for _, participant := range resp.GetParticipants() {
+			if participant == nil {
+				continue
+			}
+			if strings.TrimSpace(participant.GetUserId()) == userID {
+				return participant.GetId(), nil
+			}
+		}
+		pageToken = strings.TrimSpace(resp.GetNextPageToken())
+		if pageToken == "" {
+			break
+		}
+	}
+	return "", nil
 }
 
 // renderInvitesTable renders the invites table component.
