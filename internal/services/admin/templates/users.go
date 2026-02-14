@@ -3,6 +3,12 @@ package templates
 // UsersPageView provides data for the users page.
 type UsersPageView struct {
 	Message       string
+	Impersonation *ImpersonationView
+}
+
+// UserDetailPageView provides data for the single user detail page.
+type UserDetailPageView struct {
+	Message       string
 	Detail        *UserDetail
 	Impersonation *ImpersonationView
 }

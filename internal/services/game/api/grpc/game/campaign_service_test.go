@@ -101,9 +101,10 @@ func TestCreateCampaign_MissingCreatorUserID(t *testing.T) {
 	participantStore := newFakeParticipantStore()
 	svc := NewCampaignServiceWithAuth(Stores{Campaign: campaignStore, Event: eventStore, Participant: participantStore}, &fakeAuthClient{})
 	_, err := svc.CreateCampaign(context.Background(), &statev1.CreateCampaignRequest{
-		Name:   "Test Campaign",
-		System: commonv1.GameSystem_GAME_SYSTEM_DAGGERHEART,
-		GmMode: statev1.GmMode_HUMAN,
+		Name:               "Test Campaign",
+		System:             commonv1.GameSystem_GAME_SYSTEM_DAGGERHEART,
+		GmMode:             statev1.GmMode_HUMAN,
+		CreatorDisplayName: "Owner",
 	})
 	assertStatusCode(t, err, codes.InvalidArgument)
 }
@@ -152,6 +153,12 @@ func TestCreateCampaign_Success(t *testing.T) {
 	}
 	if resp.Campaign.ThemePrompt != "A dark fantasy adventure" {
 		t.Errorf("Campaign ThemePrompt = %q, want %q", resp.Campaign.ThemePrompt, "A dark fantasy adventure")
+	}
+	if resp.OwnerParticipant == nil {
+		t.Fatal("CreateCampaign response has nil owner participant")
+	}
+	if resp.OwnerParticipant.UserId != "user-123" {
+		t.Errorf("OwnerParticipant UserId = %q, want %q", resp.OwnerParticipant.UserId, "user-123")
 	}
 	if got := len(eventStore.events["campaign-123"]); got != 2 {
 		t.Fatalf("expected 2 events, got %d", got)

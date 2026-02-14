@@ -161,9 +161,10 @@ func TestCampaignSessionsRoute(t *testing.T) {
 }
 
 type testClientProvider struct {
-	auth     authv1.AuthServiceClient
-	campaign statev1.CampaignServiceClient
-	invite   statev1.InviteServiceClient
+	auth        authv1.AuthServiceClient
+	campaign    statev1.CampaignServiceClient
+	invite      statev1.InviteServiceClient
+	participant statev1.ParticipantServiceClient
 }
 
 func (p testClientProvider) CampaignClient() statev1.CampaignServiceClient {
@@ -179,7 +180,7 @@ func (p testClientProvider) CharacterClient() statev1.CharacterServiceClient {
 }
 
 func (p testClientProvider) ParticipantClient() statev1.ParticipantServiceClient {
-	return nil
+	return p.participant
 }
 
 func (p testClientProvider) InviteClient() statev1.InviteServiceClient {
@@ -261,6 +262,73 @@ func (c *testCampaignClient) ArchiveCampaign(ctx context.Context, in *statev1.Ar
 
 func (c *testCampaignClient) RestoreCampaign(ctx context.Context, in *statev1.RestoreCampaignRequest, opts ...grpc.CallOption) (*statev1.RestoreCampaignResponse, error) {
 	return &statev1.RestoreCampaignResponse{}, nil
+}
+
+type testParticipantClient struct {
+	participants []*statev1.Participant
+}
+
+func (c *testParticipantClient) CreateParticipant(ctx context.Context, in *statev1.CreateParticipantRequest, opts ...grpc.CallOption) (*statev1.CreateParticipantResponse, error) {
+	return &statev1.CreateParticipantResponse{}, nil
+}
+
+func (c *testParticipantClient) UpdateParticipant(ctx context.Context, in *statev1.UpdateParticipantRequest, opts ...grpc.CallOption) (*statev1.UpdateParticipantResponse, error) {
+	return &statev1.UpdateParticipantResponse{}, nil
+}
+
+func (c *testParticipantClient) DeleteParticipant(ctx context.Context, in *statev1.DeleteParticipantRequest, opts ...grpc.CallOption) (*statev1.DeleteParticipantResponse, error) {
+	return &statev1.DeleteParticipantResponse{}, nil
+}
+
+func (c *testParticipantClient) GetParticipant(ctx context.Context, in *statev1.GetParticipantRequest, opts ...grpc.CallOption) (*statev1.GetParticipantResponse, error) {
+	return &statev1.GetParticipantResponse{}, nil
+}
+
+func (c *testParticipantClient) ListParticipants(ctx context.Context, in *statev1.ListParticipantsRequest, opts ...grpc.CallOption) (*statev1.ListParticipantsResponse, error) {
+	return &statev1.ListParticipantsResponse{Participants: c.participants}, nil
+}
+
+type testInviteClient struct {
+	lastMetadata        metadata.MD
+	lastListMetadata    metadata.MD
+	lastPendingUserReq  *statev1.ListPendingInvitesForUserRequest
+	pendingUserResponse *statev1.ListPendingInvitesForUserResponse
+}
+
+func (c *testInviteClient) CreateInvite(ctx context.Context, in *statev1.CreateInviteRequest, opts ...grpc.CallOption) (*statev1.CreateInviteResponse, error) {
+	return &statev1.CreateInviteResponse{}, nil
+}
+
+func (c *testInviteClient) ClaimInvite(ctx context.Context, in *statev1.ClaimInviteRequest, opts ...grpc.CallOption) (*statev1.ClaimInviteResponse, error) {
+	return &statev1.ClaimInviteResponse{}, nil
+}
+
+func (c *testInviteClient) GetInvite(ctx context.Context, in *statev1.GetInviteRequest, opts ...grpc.CallOption) (*statev1.GetInviteResponse, error) {
+	return &statev1.GetInviteResponse{}, nil
+}
+
+func (c *testInviteClient) ListInvites(ctx context.Context, in *statev1.ListInvitesRequest, opts ...grpc.CallOption) (*statev1.ListInvitesResponse, error) {
+	md, _ := metadata.FromOutgoingContext(ctx)
+	c.lastListMetadata = md
+	return &statev1.ListInvitesResponse{}, nil
+}
+
+func (c *testInviteClient) ListPendingInvites(ctx context.Context, in *statev1.ListPendingInvitesRequest, opts ...grpc.CallOption) (*statev1.ListPendingInvitesResponse, error) {
+	return &statev1.ListPendingInvitesResponse{}, nil
+}
+
+func (c *testInviteClient) ListPendingInvitesForUser(ctx context.Context, in *statev1.ListPendingInvitesForUserRequest, opts ...grpc.CallOption) (*statev1.ListPendingInvitesForUserResponse, error) {
+	c.lastPendingUserReq = in
+	md, _ := metadata.FromOutgoingContext(ctx)
+	c.lastMetadata = md
+	if c.pendingUserResponse != nil {
+		return c.pendingUserResponse, nil
+	}
+	return &statev1.ListPendingInvitesForUserResponse{}, nil
+}
+
+func (c *testInviteClient) RevokeInvite(ctx context.Context, in *statev1.RevokeInviteRequest, opts ...grpc.CallOption) (*statev1.RevokeInviteResponse, error) {
+	return &statev1.RevokeInviteResponse{}, nil
 }
 
 func TestCampaignCreateFlow(t *testing.T) {
@@ -541,7 +609,7 @@ func TestImpersonationMetadataInjection(t *testing.T) {
 	sessionID := "session-meta"
 	webHandler.impersonation.Set(sessionID, impersonationSession{userID: "user-impersonated"})
 
-	req := httptest.NewRequest(http.MethodGet, "http://example.com/users?user_id=user-lookup", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://example.com/users/user-lookup", nil)
 	req.AddCookie(&http.Cookie{Name: impersonationCookieName, Value: sessionID})
 	recorder := httptest.NewRecorder()
 	handler.ServeHTTP(recorder, req)
@@ -549,6 +617,55 @@ func TestImpersonationMetadataInjection(t *testing.T) {
 	values := authClient.lastMetadata.Get(grpcmeta.UserIDHeader)
 	if len(values) != 1 || values[0] != "user-impersonated" {
 		t.Fatalf("expected metadata %s to be set, got %v", grpcmeta.UserIDHeader, values)
+	}
+}
+
+func TestUserDetailPendingInvitesUsesImpersonationMetadata(t *testing.T) {
+	user := &authv1.User{Id: "user-lookup", DisplayName: "Lookup"}
+	authClient := &testAuthClient{user: user}
+	inviteClient := &testInviteClient{}
+	provider := testClientProvider{auth: authClient, invite: inviteClient}
+	webHandler := &Handler{clientProvider: provider, impersonation: newImpersonationStore()}
+	handler := webHandler.routes()
+
+	sessionID := "session-invites"
+	webHandler.impersonation.Set(sessionID, impersonationSession{userID: "user-lookup"})
+
+	req := httptest.NewRequest(http.MethodGet, "http://example.com/users/user-lookup", nil)
+	req.AddCookie(&http.Cookie{Name: impersonationCookieName, Value: sessionID})
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, req)
+
+	values := inviteClient.lastMetadata.Get(grpcmeta.UserIDHeader)
+	if len(values) != 1 || values[0] != "user-lookup" {
+		t.Fatalf("expected metadata %s to be set, got %v", grpcmeta.UserIDHeader, values)
+	}
+	if inviteClient.lastPendingUserReq == nil {
+		t.Fatalf("expected pending invites request to be captured")
+	}
+}
+
+func TestInvitesTableUsesParticipantMetadataForImpersonation(t *testing.T) {
+	participantClient := &testParticipantClient{participants: []*statev1.Participant{
+		{Id: "participant-1", CampaignId: "camp-123", UserId: "user-imp"},
+	}}
+	inviteClient := &testInviteClient{}
+	provider := testClientProvider{participant: participantClient, invite: inviteClient}
+	webHandler := &Handler{clientProvider: provider, impersonation: newImpersonationStore()}
+	handler := webHandler.routes()
+
+	sessionID := "session-invites"
+	webHandler.impersonation.Set(sessionID, impersonationSession{userID: "user-imp"})
+
+	req := httptest.NewRequest(http.MethodGet, "http://example.com/campaigns/camp-123/invites/table", nil)
+	req.Header.Set("HX-Request", "true")
+	req.AddCookie(&http.Cookie{Name: impersonationCookieName, Value: sessionID})
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, req)
+
+	values := inviteClient.lastListMetadata.Get(grpcmeta.ParticipantIDHeader)
+	if len(values) != 1 || values[0] != "participant-1" {
+		t.Fatalf("expected metadata %s to be set, got %v", grpcmeta.ParticipantIDHeader, values)
 	}
 }
 

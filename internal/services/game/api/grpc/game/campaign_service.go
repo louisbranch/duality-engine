@@ -83,6 +83,14 @@ func (s *CampaignService) CreateCampaign(ctx context.Context, in *campaignv1.Cre
 		return nil, handleDomainError(err)
 	}
 
+	userID := strings.TrimSpace(grpcmeta.UserIDFromContext(ctx))
+	if userID == "" {
+		return nil, handleDomainError(apperrors.New(
+			apperrors.CodeCampaignCreatorUserMissing,
+			"creator user id is required",
+		))
+	}
+
 	campaignID, err := s.idGenerator()
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "generate campaign id: %v", err)
@@ -133,13 +141,6 @@ func (s *CampaignService) CreateCampaign(ctx context.Context, in *campaignv1.Cre
 
 	creatorDisplayName := strings.TrimSpace(in.GetCreatorDisplayName())
 	if creatorDisplayName == "" {
-		userID := grpcmeta.UserIDFromContext(ctx)
-		if userID == "" {
-			return nil, handleDomainError(apperrors.New(
-				apperrors.CodeCampaignCreatorUserMissing,
-				"creator user id is required",
-			))
-		}
 		if s.authClient == nil {
 			return nil, status.Error(codes.Internal, "auth client is not configured")
 		}
@@ -167,6 +168,7 @@ func (s *CampaignService) CreateCampaign(ctx context.Context, in *campaignv1.Cre
 
 	participantPayload := event.ParticipantJoinedPayload{
 		ParticipantID:  creatorID,
+		UserID:         userID,
 		DisplayName:    creatorDisplayName,
 		Role:           "GM",
 		Controller:     "HUMAN",

@@ -46,7 +46,7 @@ type adversaryRollPayload struct {
 }
 
 func TestDaggerheartGmMoveSpendFear(t *testing.T) {
-	grpcAddr, _, stopServer := startGRPCServer(t)
+	grpcAddr, authAddr, stopServer := startGRPCServer(t)
 	defer stopServer()
 
 	conn, err := grpc.NewClient(
@@ -67,6 +67,8 @@ func TestDaggerheartGmMoveSpendFear(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), integrationTimeout())
 	defer cancel()
+	userID := createAuthUser(t, authAddr, "GM")
+	ctx = withUserID(ctx, userID)
 
 	createCampaign, err := campaignClient.CreateCampaign(ctx, &gamev1.CreateCampaignRequest{
 		Name:               "GM Move Campaign",
@@ -143,7 +145,7 @@ func TestDaggerheartGmMoveSpendFear(t *testing.T) {
 }
 
 func TestDaggerheartCountdownLifecycle(t *testing.T) {
-	grpcAddr, _, stopServer := startGRPCServer(t)
+	grpcAddr, authAddr, stopServer := startGRPCServer(t)
 	defer stopServer()
 
 	conn, err := grpc.NewClient(
@@ -163,6 +165,8 @@ func TestDaggerheartCountdownLifecycle(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), integrationTimeout())
 	defer cancel()
+	userID := createAuthUser(t, authAddr, "Countdown GM")
+	ctx = withUserID(ctx, userID)
 
 	createCampaign, err := campaignClient.CreateCampaign(ctx, &gamev1.CreateCampaignRequest{
 		Name:               "Countdown Campaign",
@@ -248,7 +252,7 @@ func TestDaggerheartCountdownLifecycle(t *testing.T) {
 }
 
 func TestDaggerheartAdversaryAttackRoll(t *testing.T) {
-	grpcAddr, _, stopServer := startGRPCServer(t)
+	grpcAddr, authAddr, stopServer := startGRPCServer(t)
 	defer stopServer()
 
 	conn, err := grpc.NewClient(
@@ -268,6 +272,8 @@ func TestDaggerheartAdversaryAttackRoll(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), integrationTimeout())
 	defer cancel()
+	userID := createAuthUser(t, authAddr, "Adversary GM")
+	ctx = withUserID(ctx, userID)
 
 	createCampaign, err := campaignClient.CreateCampaign(ctx, &gamev1.CreateCampaignRequest{
 		Name:               "Adversary Roll Campaign",

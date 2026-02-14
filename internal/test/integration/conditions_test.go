@@ -23,7 +23,7 @@ type conditionChangedPayload struct {
 }
 
 func TestDaggerheartApplyConditions(t *testing.T) {
-	grpcAddr, _, stopServer := startGRPCServer(t)
+	grpcAddr, authAddr, stopServer := startGRPCServer(t)
 	defer stopServer()
 
 	conn, err := grpc.NewClient(
@@ -43,6 +43,8 @@ func TestDaggerheartApplyConditions(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), integrationTimeout())
 	defer cancel()
+	userID := createAuthUser(t, authAddr, "Conditions GM")
+	ctx = withUserID(ctx, userID)
 
 	createCampaign, err := campaignClient.CreateCampaign(ctx, &gamev1.CreateCampaignRequest{
 		Name:               "Conditions Campaign",

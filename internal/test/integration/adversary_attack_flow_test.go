@@ -23,7 +23,7 @@ type adversaryAttackResolvedPayload struct {
 }
 
 func TestDaggerheartAdversaryAttackFlow(t *testing.T) {
-	grpcAddr, _, stopServer := startGRPCServer(t)
+	grpcAddr, authAddr, stopServer := startGRPCServer(t)
 	defer stopServer()
 
 	conn, err := grpc.NewClient(
@@ -44,6 +44,8 @@ func TestDaggerheartAdversaryAttackFlow(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), integrationTimeout())
 	defer cancel()
+	userID := createAuthUser(t, authAddr, "Adversary GM")
+	ctx = withUserID(ctx, userID)
 
 	createCampaign, err := campaignClient.CreateCampaign(ctx, &gamev1.CreateCampaignRequest{
 		Name:               "Adversary Attack Flow Campaign",
