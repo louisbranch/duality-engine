@@ -9,11 +9,11 @@ import (
 
 	campaignv1 "github.com/louisbranch/fracturing.space/api/gen/go/game/v1"
 	daggerheartv1 "github.com/louisbranch/fracturing.space/api/gen/go/systems/daggerheart/v1"
+	apperrors "github.com/louisbranch/fracturing.space/internal/platform/errors"
 	"github.com/louisbranch/fracturing.space/internal/platform/grpc/pagination"
 	"github.com/louisbranch/fracturing.space/internal/platform/id"
 	grpcmeta "github.com/louisbranch/fracturing.space/internal/services/game/api/grpc/metadata"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign"
-	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/character"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/event"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/systems/daggerheart"
 	"github.com/louisbranch/fracturing.space/internal/services/game/storage"
@@ -55,188 +55,15 @@ func (s *CharacterService) CreateCharacter(ctx context.Context, in *campaignv1.C
 		return nil, status.Error(codes.InvalidArgument, "campaign id is required")
 	}
 
-	c, err := s.stores.Campaign.Get(ctx, campaignID)
+	created, err := newCharacterCreator(s).create(ctx, campaignID, in)
 	if err != nil {
-		return nil, handleDomainError(err)
-	}
-	if err := campaign.ValidateCampaignOperation(c.Status, campaign.CampaignOpRead); err != nil {
-		return nil, handleDomainError(err)
-	}
-
-	input := character.CreateCharacterInput{
-		CampaignID: campaignID,
-		Name:       in.GetName(),
-		Kind:       characterKindFromProto(in.GetKind()),
-		Notes:      in.GetNotes(),
-	}
-	normalized, err := character.NormalizeCreateCharacterInput(input)
-	if err != nil {
-		return nil, handleDomainError(err)
+		if apperrors.GetCode(err) != apperrors.CodeUnknown {
+			return nil, handleDomainError(err)
+		}
+		return nil, err
 	}
 
-	characterID, err := s.idGenerator()
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "generate character id: %v", err)
-	}
-
-	payload := event.CharacterCreatedPayload{
-		CharacterID: characterID,
-		Name:        normalized.Name,
-		Kind:        in.GetKind().String(),
-		Notes:       normalized.Notes,
-	}
-	payloadJSON, err := json.Marshal(payload)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "encode payload: %v", err)
-	}
-
-	actorID := grpcmeta.ParticipantIDFromContext(ctx)
-	actorType := event.ActorTypeSystem
-	if actorID != "" {
-		actorType = event.ActorTypeParticipant
-	}
-
-	stored, err := s.stores.Event.AppendEvent(ctx, event.Event{
-		CampaignID:   campaignID,
-		Timestamp:    s.clock().UTC(),
-		Type:         event.TypeCharacterCreated,
-		RequestID:    grpcmeta.RequestIDFromContext(ctx),
-		InvocationID: grpcmeta.InvocationIDFromContext(ctx),
-		ActorType:    actorType,
-		ActorID:      actorID,
-		EntityType:   "character",
-		EntityID:     characterID,
-		PayloadJSON:  payloadJSON,
-	})
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "append event: %v", err)
-	}
-
-	applier := s.stores.Applier()
-	if err := applier.Apply(ctx, stored); err != nil {
-		return nil, status.Errorf(codes.Internal, "apply event: %v", err)
-	}
-
-	created, err := s.stores.Character.GetCharacter(ctx, campaignID, characterID)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "load character: %v", err)
-	}
-
-	// Get Daggerheart defaults for the character kind
-	kindStr := "PC"
-	if created.Kind == character.CharacterKindNPC {
-		kindStr = "NPC"
-	}
-	dhDefaults := daggerheart.GetProfileDefaults(kindStr)
-
-	reqID := grpcmeta.RequestIDFromContext(ctx)
-	invocationID := grpcmeta.InvocationIDFromContext(ctx)
-	profileActorType := event.ActorTypeSystem
-	if actorID != "" {
-		profileActorType = event.ActorTypeGM
-	}
-
-	experiencesPayload := make([]map[string]any, 0, len(dhDefaults.Experiences))
-	for _, experience := range dhDefaults.Experiences {
-		experiencesPayload = append(experiencesPayload, map[string]any{
-			"name":     experience.Name,
-			"modifier": experience.Modifier,
-		})
-	}
-
-	profilePayload := event.ProfileUpdatedPayload{
-		CharacterID: created.ID,
-		SystemProfile: map[string]any{
-			"daggerheart": map[string]any{
-				"level":            dhDefaults.Level,
-				"hp_max":           dhDefaults.HpMax,
-				"stress_max":       dhDefaults.StressMax,
-				"evasion":          dhDefaults.Evasion,
-				"major_threshold":  dhDefaults.MajorThreshold,
-				"severe_threshold": dhDefaults.SevereThreshold,
-				"proficiency":      dhDefaults.Proficiency,
-				"armor_score":      dhDefaults.ArmorScore,
-				"armor_max":        dhDefaults.ArmorMax,
-				"agility":          dhDefaults.Traits.Agility,
-				"strength":         dhDefaults.Traits.Strength,
-				"finesse":          dhDefaults.Traits.Finesse,
-				"instinct":         dhDefaults.Traits.Instinct,
-				"presence":         dhDefaults.Traits.Presence,
-				"knowledge":        dhDefaults.Traits.Knowledge,
-				"experiences":      experiencesPayload,
-			},
-		},
-	}
-	profileJSON, err := json.Marshal(profilePayload)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "encode profile payload: %v", err)
-	}
-	profileEvent, err := s.stores.Event.AppendEvent(ctx, event.Event{
-		CampaignID:   campaignID,
-		Timestamp:    s.clock().UTC(),
-		Type:         event.TypeProfileUpdated,
-		RequestID:    reqID,
-		InvocationID: invocationID,
-		ActorType:    profileActorType,
-		ActorID:      actorID,
-		EntityType:   "character",
-		EntityID:     created.ID,
-		PayloadJSON:  profileJSON,
-	})
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "append profile event: %v", err)
-	}
-
-	hpAfter := dhDefaults.HpMax
-	hopeAfter := daggerheart.HopeDefault
-	hopeMaxAfter := daggerheart.HopeMax
-	stressAfter := daggerheart.StressDefault
-	armorAfter := 0
-	lifeStateAfter := daggerheart.LifeStateAlive
-	statePayload := daggerheart.CharacterStatePatchedPayload{
-		CharacterID:    created.ID,
-		HpAfter:        &hpAfter,
-		HopeAfter:      &hopeAfter,
-		HopeMaxAfter:   &hopeMaxAfter,
-		StressAfter:    &stressAfter,
-		ArmorAfter:     &armorAfter,
-		LifeStateAfter: &lifeStateAfter,
-	}
-	stateJSON, err := json.Marshal(statePayload)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "encode state payload: %v", err)
-	}
-	stateEvent, err := s.stores.Event.AppendEvent(ctx, event.Event{
-		CampaignID:    campaignID,
-		Timestamp:     s.clock().UTC(),
-		Type:          daggerheart.EventTypeCharacterStatePatched,
-		SessionID:     grpcmeta.SessionIDFromContext(ctx),
-		RequestID:     reqID,
-		InvocationID:  invocationID,
-		ActorType:     profileActorType,
-		ActorID:       actorID,
-		EntityType:    "character",
-		EntityID:      created.ID,
-		SystemID:      c.System.String(),
-		SystemVersion: daggerheart.SystemVersion,
-		PayloadJSON:   stateJSON,
-	})
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "append state event: %v", err)
-	}
-
-	projectionApplier := s.stores.Applier()
-	if err := projectionApplier.Apply(ctx, profileEvent); err != nil {
-		return nil, status.Errorf(codes.Internal, "apply profile event: %v", err)
-	}
-	adapter := daggerheart.NewAdapter(s.stores.Daggerheart)
-	if err := adapter.ApplyEvent(ctx, stateEvent); err != nil {
-		return nil, status.Errorf(codes.Internal, "apply state event: %v", err)
-	}
-
-	return &campaignv1.CreateCharacterResponse{
-		Character: characterToProto(created),
-	}, nil
+	return &campaignv1.CreateCharacterResponse{Character: characterToProto(created)}, nil
 }
 
 // UpdateCharacter updates a character's metadata.
@@ -250,88 +77,12 @@ func (s *CharacterService) UpdateCharacter(ctx context.Context, in *campaignv1.U
 		return nil, status.Error(codes.InvalidArgument, "campaign id is required")
 	}
 
-	c, err := s.stores.Campaign.Get(ctx, campaignID)
+	updated, err := newCharacterUpdater(s).update(ctx, campaignID, in)
 	if err != nil {
-		return nil, handleDomainError(err)
-	}
-	if err := campaign.ValidateCampaignOperation(c.Status, campaign.CampaignOpCampaignMutate); err != nil {
-		return nil, handleDomainError(err)
-	}
-
-	characterID := strings.TrimSpace(in.GetCharacterId())
-	if characterID == "" {
-		return nil, status.Error(codes.InvalidArgument, "character id is required")
-	}
-
-	ch, err := s.stores.Character.GetCharacter(ctx, campaignID, characterID)
-	if err != nil {
-		return nil, handleDomainError(err)
-	}
-
-	fields := make(map[string]any)
-	if name := in.GetName(); name != nil {
-		trimmed := strings.TrimSpace(name.GetValue())
-		if trimmed == "" {
-			return nil, status.Error(codes.InvalidArgument, "name must not be empty")
+		if apperrors.GetCode(err) != apperrors.CodeUnknown {
+			return nil, handleDomainError(err)
 		}
-		ch.Name = trimmed
-		fields["name"] = trimmed
-	}
-	if in.GetKind() != campaignv1.CharacterKind_CHARACTER_KIND_UNSPECIFIED {
-		kind := characterKindFromProto(in.GetKind())
-		if kind == character.CharacterKindUnspecified {
-			return nil, status.Error(codes.InvalidArgument, "character kind is invalid")
-		}
-		ch.Kind = kind
-		fields["kind"] = in.GetKind().String()
-	}
-	if notes := in.GetNotes(); notes != nil {
-		ch.Notes = strings.TrimSpace(notes.GetValue())
-		fields["notes"] = ch.Notes
-	}
-	if len(fields) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "at least one field must be provided")
-	}
-
-	payload := event.CharacterUpdatedPayload{
-		CharacterID: characterID,
-		Fields:      fields,
-	}
-	payloadJSON, err := json.Marshal(payload)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "encode payload: %v", err)
-	}
-
-	actorID := grpcmeta.ParticipantIDFromContext(ctx)
-	actorType := event.ActorTypeSystem
-	if actorID != "" {
-		actorType = event.ActorTypeParticipant
-	}
-
-	stored, err := s.stores.Event.AppendEvent(ctx, event.Event{
-		CampaignID:   campaignID,
-		Timestamp:    s.clock().UTC(),
-		Type:         event.TypeCharacterUpdated,
-		RequestID:    grpcmeta.RequestIDFromContext(ctx),
-		InvocationID: grpcmeta.InvocationIDFromContext(ctx),
-		ActorType:    actorType,
-		ActorID:      actorID,
-		EntityType:   "character",
-		EntityID:     characterID,
-		PayloadJSON:  payloadJSON,
-	})
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "append event: %v", err)
-	}
-
-	applier := s.stores.Applier()
-	if err := applier.Apply(ctx, stored); err != nil {
-		return nil, status.Errorf(codes.Internal, "apply event: %v", err)
-	}
-
-	updated, err := s.stores.Character.GetCharacter(ctx, campaignID, characterID)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "load character: %v", err)
+		return nil, err
 	}
 
 	return &campaignv1.UpdateCharacterResponse{Character: characterToProto(updated)}, nil

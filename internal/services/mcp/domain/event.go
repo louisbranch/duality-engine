@@ -69,24 +69,22 @@ Use page_token from response to paginate through results.`,
 // EventListHandler executes an event list request.
 func EventListHandler(client statev1.EventServiceClient, getContext func() Context) mcp.ToolHandlerFor[EventListInput, EventListResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input EventListInput) (*mcp.CallToolResult, EventListResult, error) {
-		invocationID, err := NewInvocationID()
+		callContext, err := newToolInvocationContextWithTimeout(ctx, getContext, grpcLongCallTimeout)
 		if err != nil {
 			return nil, EventListResult{}, fmt.Errorf("generate invocation id: %w", err)
 		}
-
-		runCtx, cancel := context.WithTimeout(ctx, grpcLongCallTimeout)
-		defer cancel()
+		defer callContext.Cancel()
 
 		// Use context campaign_id if not provided
 		campaignID := input.CampaignID
-		if campaignID == "" && getContext != nil {
-			campaignID = getContext().CampaignID
+		if campaignID == "" {
+			campaignID = callContext.MCPContext.CampaignID
 		}
 		if campaignID == "" {
 			return nil, EventListResult{}, fmt.Errorf("campaign_id is required")
 		}
 
-		callCtx, callMeta, err := NewOutgoingContext(runCtx, invocationID)
+		callCtx, callMeta, err := NewOutgoingContext(callContext.RunCtx, callContext.InvocationID)
 		if err != nil {
 			return nil, EventListResult{}, fmt.Errorf("create request metadata: %w", err)
 		}

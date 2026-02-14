@@ -65,15 +65,13 @@ func CampaignLineageTool() *mcp.Tool {
 // CampaignForkHandler executes a campaign fork request.
 func CampaignForkHandler(client statev1.ForkServiceClient, notify ResourceUpdateNotifier) mcp.ToolHandlerFor[CampaignForkInput, CampaignForkResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input CampaignForkInput) (*mcp.CallToolResult, CampaignForkResult, error) {
-		invocationID, err := NewInvocationID()
+		callContext, err := newToolInvocationContextWithTimeout(ctx, nil, grpcLongCallTimeout)
 		if err != nil {
 			return nil, CampaignForkResult{}, fmt.Errorf("generate invocation id: %w", err)
 		}
+		defer callContext.Cancel()
 
-		runCtx, cancel := context.WithTimeout(ctx, grpcLongCallTimeout)
-		defer cancel()
-
-		callCtx, callMeta, err := NewOutgoingContext(runCtx, invocationID)
+		callCtx, callMeta, err := NewOutgoingContext(callContext.RunCtx, callContext.InvocationID)
 		if err != nil {
 			return nil, CampaignForkResult{}, fmt.Errorf("create request metadata: %w", err)
 		}
@@ -132,15 +130,13 @@ func CampaignForkHandler(client statev1.ForkServiceClient, notify ResourceUpdate
 // CampaignLineageHandler executes a campaign lineage request.
 func CampaignLineageHandler(client statev1.ForkServiceClient) mcp.ToolHandlerFor[CampaignLineageInput, CampaignLineageResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input CampaignLineageInput) (*mcp.CallToolResult, CampaignLineageResult, error) {
-		invocationID, err := NewInvocationID()
+		callContext, err := newToolInvocationContext(ctx, nil)
 		if err != nil {
 			return nil, CampaignLineageResult{}, fmt.Errorf("generate invocation id: %w", err)
 		}
+		defer callContext.Cancel()
 
-		runCtx, cancel := context.WithTimeout(ctx, grpcCallTimeout)
-		defer cancel()
-
-		callCtx, callMeta, err := NewOutgoingContext(runCtx, invocationID)
+		callCtx, callMeta, err := NewOutgoingContext(callContext.RunCtx, callContext.InvocationID)
 		if err != nil {
 			return nil, CampaignLineageResult{}, fmt.Errorf("create request metadata: %w", err)
 		}

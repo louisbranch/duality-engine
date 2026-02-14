@@ -239,12 +239,8 @@ func (h *Handler) handleScenarios(w http.ResponseWriter, r *http.Request) {
 	if shouldPrefillScenarioScript(r) {
 		view.Script = defaultScenarioScript()
 	}
-	if isHTMXRequest(r) {
-		templ.Handler(templates.ScenariosPage(view, loc)).ServeHTTP(w, r)
-		return
-	}
 	pageCtx := h.pageContext(lang, loc, r)
-	templ.Handler(templates.ScenariosFullPage(view, pageCtx)).ServeHTTP(w, r)
+	renderPage(w, r, templates.ScenariosPage(view, loc), templates.ScenariosFullPage(view, pageCtx))
 }
 
 func defaultScenarioScript() string {
@@ -267,12 +263,7 @@ func shouldPrefillScenarioScript(r *http.Request) bool {
 
 // handleScenarioRoutes dispatches scenario subroutes.
 func (h *Handler) handleScenarioRoutes(w http.ResponseWriter, r *http.Request) {
-	if strings.HasSuffix(r.URL.Path, "/") {
-		canonical := strings.TrimRight(r.URL.Path, "/")
-		if canonical == "" {
-			canonical = "/"
-		}
-		http.Redirect(w, r, canonical, http.StatusMovedPermanently)
+	if redirectTrailingSlash(w, r) {
 		return
 	}
 	scenarioPath := strings.TrimPrefix(r.URL.Path, "/scenarios/")
@@ -349,12 +340,8 @@ func (h *Handler) handleScenarioRun(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) renderScenarioResponse(w http.ResponseWriter, r *http.Request, view templates.ScenarioPageView, loc *message.Printer, lang string) {
-	if isHTMXRequest(r) {
-		templ.Handler(templates.ScenarioScriptPanel(view, loc)).ServeHTTP(w, r)
-		return
-	}
 	pageCtx := h.pageContext(lang, loc, r)
-	templ.Handler(templates.ScenariosFullPage(view, pageCtx)).ServeHTTP(w, r)
+	renderPage(w, r, templates.ScenarioScriptPanel(view, loc), templates.ScenariosFullPage(view, pageCtx))
 }
 
 func (h *Handler) handleScenarioEvents(w http.ResponseWriter, r *http.Request, campaignID string) {
@@ -403,12 +390,8 @@ func (h *Handler) handleScenarioEvents(w http.ResponseWriter, r *http.Request, c
 		Message:      message,
 	}
 
-	if isHTMXRequest(r) {
-		templ.Handler(templates.ScenarioEventsPage(view, loc)).ServeHTTP(w, r)
-		return
-	}
 	pageCtx := h.pageContext(lang, loc, r)
-	templ.Handler(templates.ScenarioEventsFullPage(view, pageCtx)).ServeHTTP(w, r)
+	renderPage(w, r, templates.ScenarioEventsPage(view, loc), templates.ScenarioEventsFullPage(view, pageCtx))
 }
 
 func (h *Handler) handleScenarioEventsTable(w http.ResponseWriter, r *http.Request, campaignID string) {
@@ -641,12 +624,7 @@ func (h *Handler) handleUsersPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if isHTMXRequest(r) {
-		templ.Handler(templates.UsersPage(view, loc)).ServeHTTP(w, r)
-		return
-	}
-
-	templ.Handler(templates.UsersFullPage(view, pageCtx)).ServeHTTP(w, r)
+	renderPage(w, r, templates.UsersPage(view, loc), templates.UsersFullPage(view, pageCtx))
 }
 
 // handleUserLookup redirects the get-user form to the detail page.
@@ -664,11 +642,7 @@ func (h *Handler) handleUserLookup(w http.ResponseWriter, r *http.Request) {
 	userID := strings.TrimSpace(r.URL.Query().Get("user_id"))
 	if userID == "" {
 		view.Message = loc.Sprintf("error.user_id_required")
-		if isHTMXRequest(r) {
-			templ.Handler(templates.UsersPage(view, loc)).ServeHTTP(w, r)
-			return
-		}
-		templ.Handler(templates.UsersFullPage(view, pageCtx)).ServeHTTP(w, r)
+		renderPage(w, r, templates.UsersPage(view, loc), templates.UsersFullPage(view, pageCtx))
 		return
 	}
 
@@ -677,12 +651,7 @@ func (h *Handler) handleUserLookup(w http.ResponseWriter, r *http.Request) {
 
 // handleUserRoutes dispatches the user detail route.
 func (h *Handler) handleUserRoutes(w http.ResponseWriter, r *http.Request) {
-	if strings.HasSuffix(r.URL.Path, "/") {
-		canonical := strings.TrimRight(r.URL.Path, "/")
-		if canonical == "" {
-			canonical = "/"
-		}
-		http.Redirect(w, r, canonical, http.StatusMovedPermanently)
+	if redirectTrailingSlash(w, r) {
 		return
 	}
 	userPath := strings.TrimPrefix(r.URL.Path, "/users/")
@@ -700,29 +669,15 @@ func (h *Handler) handleUserRoutes(w http.ResponseWriter, r *http.Request) {
 
 // handleUserDetail renders the single-user detail page.
 func (h *Handler) handleUserDetail(w http.ResponseWriter, r *http.Request, userID string) {
-	loc, lang := h.localizer(w, r)
-	pageCtx := h.pageContext(lang, loc, r)
-	view := templates.UserDetailPageView{Impersonation: pageCtx.Impersonation}
-
-	if message := strings.TrimSpace(r.URL.Query().Get("message")); message != "" {
-		view.Message = message
-	}
-
-	ctx, cancel := context.WithTimeout(r.Context(), grpcRequestTimeout)
-	defer cancel()
-
-	detail, message := h.loadUserDetail(ctx, userID, loc)
-	view.Detail = detail
-	if message != "" && view.Message == "" {
-		view.Message = message
-	}
-	h.populateUserInvitesIfImpersonating(ctx, view.Detail, view.Impersonation, loc)
-
-	h.renderUserDetail(w, r, view, pageCtx, loc, "details")
+	h.handleUserDetailTab(w, r, userID, "details")
 }
 
 // handleUserInvites renders the user pending invites tab.
 func (h *Handler) handleUserInvites(w http.ResponseWriter, r *http.Request, userID string) {
+	h.handleUserDetailTab(w, r, userID, "invites")
+}
+
+func (h *Handler) handleUserDetailTab(w http.ResponseWriter, r *http.Request, userID, tab string) {
 	loc, lang := h.localizer(w, r)
 	pageCtx := h.pageContext(lang, loc, r)
 	view := templates.UserDetailPageView{Impersonation: pageCtx.Impersonation}
@@ -742,7 +697,7 @@ func (h *Handler) handleUserInvites(w http.ResponseWriter, r *http.Request, user
 
 	h.populateUserInvitesIfImpersonating(ctx, view.Detail, view.Impersonation, loc)
 
-	h.renderUserDetail(w, r, view, pageCtx, loc, "invites")
+	h.renderUserDetail(w, r, view, pageCtx, loc, tab)
 }
 
 // handleCreateUser creates a user from a form submission.
@@ -1079,24 +1034,14 @@ func (h *Handler) handleCampaignsTable(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) handleCampaignsPage(w http.ResponseWriter, r *http.Request) {
 	loc, lang := h.localizer(w, r)
 	pageCtx := h.pageContext(lang, loc, r)
-	if isHTMXRequest(r) {
-		templ.Handler(templates.CampaignsPage(loc)).ServeHTTP(w, r)
-		return
-	}
-
-	templ.Handler(templates.CampaignsFullPage(pageCtx)).ServeHTTP(w, r)
+	renderPage(w, r, templates.CampaignsPage(loc), templates.CampaignsFullPage(pageCtx))
 }
 
 // handleSystemsPage renders the systems page fragment or full layout.
 func (h *Handler) handleSystemsPage(w http.ResponseWriter, r *http.Request) {
 	loc, lang := h.localizer(w, r)
 	pageCtx := h.pageContext(lang, loc, r)
-	if isHTMXRequest(r) {
-		templ.Handler(templates.SystemsPage(loc)).ServeHTTP(w, r)
-		return
-	}
-
-	templ.Handler(templates.SystemsFullPage(pageCtx)).ServeHTTP(w, r)
+	renderPage(w, r, templates.SystemsPage(loc), templates.SystemsFullPage(pageCtx))
 }
 
 // handleSystemsTable renders the systems table via HTMX.
@@ -1130,12 +1075,7 @@ func (h *Handler) handleSystemsTable(w http.ResponseWriter, r *http.Request) {
 
 // handleSystemRoutes dispatches the system detail route.
 func (h *Handler) handleSystemRoutes(w http.ResponseWriter, r *http.Request) {
-	if strings.HasSuffix(r.URL.Path, "/") {
-		canonical := strings.TrimRight(r.URL.Path, "/")
-		if canonical == "" {
-			canonical = "/"
-		}
-		http.Redirect(w, r, canonical, http.StatusMovedPermanently)
+	if redirectTrailingSlash(w, r) {
 		return
 	}
 	systemPath := strings.TrimPrefix(r.URL.Path, "/systems/")
@@ -1200,11 +1140,7 @@ func (h *Handler) handleCampaignCreate(w http.ResponseWriter, r *http.Request) {
 		view.CreatorDisplayName = pageCtx.Impersonation.DisplayName
 	}
 	renderCreate := func() {
-		if isHTMXRequest(r) {
-			templ.Handler(templates.CampaignCreatePage(view, loc)).ServeHTTP(w, r)
-			return
-		}
-		templ.Handler(templates.CampaignCreateFullPage(view, pageCtx)).ServeHTTP(w, r)
+		renderPage(w, r, templates.CampaignCreatePage(view, loc), templates.CampaignCreateFullPage(view, pageCtx))
 	}
 
 	switch r.Method {
@@ -1321,12 +1257,7 @@ func (h *Handler) handleCampaignCreate(w http.ResponseWriter, r *http.Request) {
 
 // handleCampaignRoutes dispatches detail and session subroutes.
 func (h *Handler) handleCampaignRoutes(w http.ResponseWriter, r *http.Request) {
-	if strings.HasSuffix(r.URL.Path, "/") {
-		canonical := strings.TrimRight(r.URL.Path, "/")
-		if canonical == "" {
-			canonical = "/"
-		}
-		http.Redirect(w, r, canonical, http.StatusMovedPermanently)
+	if redirectTrailingSlash(w, r) {
 		return
 	}
 	campaignPath := strings.TrimPrefix(r.URL.Path, "/campaigns/")
@@ -1443,13 +1374,8 @@ func (h *Handler) handleCampaignDetail(w http.ResponseWriter, r *http.Request, c
 func (h *Handler) handleSessionsList(w http.ResponseWriter, r *http.Request, campaignID string) {
 	loc, lang := h.localizer(w, r)
 	campaignName := getCampaignName(h, r, campaignID, loc)
-
-	if isHTMXRequest(r) {
-		templ.Handler(templates.SessionsListPage(campaignID, campaignName, loc)).ServeHTTP(w, r)
-		return
-	}
 	pageCtx := h.pageContext(lang, loc, r)
-	templ.Handler(templates.SessionsListFullPage(campaignID, campaignName, pageCtx)).ServeHTTP(w, r)
+	renderPage(w, r, templates.SessionsListPage(campaignID, campaignName, loc), templates.SessionsListFullPage(campaignID, campaignName, pageCtx))
 }
 
 // handleSessionsTable renders the sessions table via HTMX.
@@ -1491,13 +1417,8 @@ func (h *Handler) renderCampaignTable(w http.ResponseWriter, r *http.Request, ro
 
 // renderCampaignDetail renders the campaign detail fragment or full layout.
 func (h *Handler) renderCampaignDetail(w http.ResponseWriter, r *http.Request, detail templates.CampaignDetail, message string, lang string, loc *message.Printer) {
-	if isHTMXRequest(r) {
-		templ.Handler(templates.CampaignDetailPage(detail, message, loc)).ServeHTTP(w, r)
-		return
-	}
-
 	pageCtx := h.pageContext(lang, loc, r)
-	templ.Handler(templates.CampaignDetailFullPage(detail, message, pageCtx)).ServeHTTP(w, r)
+	renderPage(w, r, templates.CampaignDetailPage(detail, message, loc), templates.CampaignDetailFullPage(detail, message, pageCtx))
 }
 
 // renderSystemsTable renders a systems table with optional rows and message.
@@ -1507,13 +1428,8 @@ func (h *Handler) renderSystemsTable(w http.ResponseWriter, r *http.Request, row
 
 // renderSystemDetail renders the system detail fragment or full layout.
 func (h *Handler) renderSystemDetail(w http.ResponseWriter, r *http.Request, detail templates.SystemDetail, message string, lang string, loc *message.Printer) {
-	if isHTMXRequest(r) {
-		templ.Handler(templates.SystemDetailPage(detail, message, loc)).ServeHTTP(w, r)
-		return
-	}
-
 	pageCtx := h.pageContext(lang, loc, r)
-	templ.Handler(templates.SystemDetailFullPage(detail, message, pageCtx)).ServeHTTP(w, r)
+	renderPage(w, r, templates.SystemDetailPage(detail, message, loc), templates.SystemDetailFullPage(detail, message, pageCtx))
 }
 
 // renderCampaignSessions renders the session list fragment.
@@ -1527,12 +1443,7 @@ func (h *Handler) renderUsersTable(w http.ResponseWriter, r *http.Request, rows 
 }
 
 func (h *Handler) renderUserDetail(w http.ResponseWriter, r *http.Request, view templates.UserDetailPageView, pageCtx templates.PageContext, loc *message.Printer, activePage string) {
-	if isHTMXRequest(r) {
-		templ.Handler(templates.UserDetailPage(view, activePage, loc)).ServeHTTP(w, r)
-		return
-	}
-
-	templ.Handler(templates.UserDetailFullPage(view, activePage, pageCtx)).ServeHTTP(w, r)
+	renderPage(w, r, templates.UserDetailPage(view, activePage, loc), templates.UserDetailFullPage(view, activePage, pageCtx))
 }
 
 func (h *Handler) redirectToUserDetail(w http.ResponseWriter, r *http.Request, userID string) {
@@ -1677,6 +1588,31 @@ func splitPathParts(path string) []string {
 		parts = append(parts, trimmed)
 	}
 	return parts
+}
+
+// redirectTrailingSlash keeps admin subroutes on canonical paths for consistent matching.
+func redirectTrailingSlash(w http.ResponseWriter, r *http.Request) bool {
+	if r == nil || r.URL == nil {
+		return false
+	}
+	if !strings.HasSuffix(r.URL.Path, "/") {
+		return false
+	}
+	canonical := strings.TrimRight(r.URL.Path, "/")
+	if canonical == "" {
+		canonical = "/"
+	}
+	http.Redirect(w, r, canonical, http.StatusMovedPermanently)
+	return true
+}
+
+// renderPage picks the HTMX fragment or full layout without duplicating handler flow.
+func renderPage(w http.ResponseWriter, r *http.Request, fragment templ.Component, full templ.Component) {
+	if isHTMXRequest(r) {
+		templ.Handler(fragment).ServeHTTP(w, r)
+		return
+	}
+	templ.Handler(full).ServeHTTP(w, r)
 }
 
 // buildCampaignRows formats campaign rows for the table.
@@ -2108,11 +2044,7 @@ func (h *Handler) handleDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 	loc, lang := h.localizer(w, r)
 	pageCtx := h.pageContext(lang, loc, r)
-	if isHTMXRequest(r) {
-		templ.Handler(templates.DashboardPage(loc)).ServeHTTP(w, r)
-		return
-	}
-	templ.Handler(templates.DashboardFullPage(pageCtx)).ServeHTTP(w, r)
+	renderPage(w, r, templates.DashboardPage(loc), templates.DashboardFullPage(pageCtx))
 }
 
 // handleDashboardContent loads and renders the dashboard statistics and recent activity.
@@ -2361,13 +2293,8 @@ func localeFromTag(tag string) commonv1.Locale {
 func (h *Handler) handleCharactersList(w http.ResponseWriter, r *http.Request, campaignID string) {
 	loc, lang := h.localizer(w, r)
 	campaignName := getCampaignName(h, r, campaignID, loc)
-
-	if isHTMXRequest(r) {
-		templ.Handler(templates.CharactersListPage(campaignID, campaignName, loc)).ServeHTTP(w, r)
-		return
-	}
 	pageCtx := h.pageContext(lang, loc, r)
-	templ.Handler(templates.CharactersListFullPage(campaignID, campaignName, pageCtx)).ServeHTTP(w, r)
+	renderPage(w, r, templates.CharactersListPage(campaignID, campaignName, loc), templates.CharactersListFullPage(campaignID, campaignName, pageCtx))
 }
 
 // handleCharactersTable renders the characters table.
@@ -2505,13 +2432,8 @@ func (h *Handler) renderCharacterSheet(w http.ResponseWriter, r *http.Request, c
 	}
 
 	sheet := buildCharacterSheet(campaignID, campaignName, character, recentEvents, controller, loc)
-
-	if isHTMXRequest(r) {
-		templ.Handler(templates.CharacterSheetPage(sheet, activePage, loc)).ServeHTTP(w, r)
-		return
-	}
 	pageCtx := h.pageContext(lang, loc, r)
-	templ.Handler(templates.CharacterSheetFullPage(sheet, activePage, pageCtx)).ServeHTTP(w, r)
+	renderPage(w, r, templates.CharacterSheetPage(sheet, activePage, loc), templates.CharacterSheetFullPage(sheet, activePage, pageCtx))
 }
 
 // renderCharactersTable renders the characters table component.
@@ -2604,13 +2526,8 @@ func getCampaignName(h *Handler, r *http.Request, campaignID string, loc *messag
 func (h *Handler) handleParticipantsList(w http.ResponseWriter, r *http.Request, campaignID string) {
 	loc, lang := h.localizer(w, r)
 	campaignName := getCampaignName(h, r, campaignID, loc)
-
-	if isHTMXRequest(r) {
-		templ.Handler(templates.ParticipantsListPage(campaignID, campaignName, loc)).ServeHTTP(w, r)
-		return
-	}
 	pageCtx := h.pageContext(lang, loc, r)
-	templ.Handler(templates.ParticipantsListFullPage(campaignID, campaignName, pageCtx)).ServeHTTP(w, r)
+	renderPage(w, r, templates.ParticipantsListPage(campaignID, campaignName, loc), templates.ParticipantsListFullPage(campaignID, campaignName, pageCtx))
 }
 
 // handleParticipantsTable renders the participants table.
@@ -2648,13 +2565,8 @@ func (h *Handler) handleParticipantsTable(w http.ResponseWriter, r *http.Request
 func (h *Handler) handleInvitesList(w http.ResponseWriter, r *http.Request, campaignID string) {
 	loc, lang := h.localizer(w, r)
 	campaignName := getCampaignName(h, r, campaignID, loc)
-
-	if isHTMXRequest(r) {
-		templ.Handler(templates.InvitesListPage(campaignID, campaignName, loc)).ServeHTTP(w, r)
-		return
-	}
 	pageCtx := h.pageContext(lang, loc, r)
-	templ.Handler(templates.InvitesListFullPage(campaignID, campaignName, pageCtx)).ServeHTTP(w, r)
+	renderPage(w, r, templates.InvitesListPage(campaignID, campaignName, loc), templates.InvitesListFullPage(campaignID, campaignName, pageCtx))
 }
 
 // handleInvitesTable renders the invites table.
@@ -2936,13 +2848,8 @@ func (h *Handler) handleSessionDetail(w http.ResponseWriter, r *http.Request, ca
 	}
 
 	detail := buildSessionDetail(campaignID, campaignName, session, eventCount, loc)
-
-	if isHTMXRequest(r) {
-		templ.Handler(templates.SessionDetailPage(detail, loc)).ServeHTTP(w, r)
-		return
-	}
 	pageCtx := h.pageContext(lang, loc, r)
-	templ.Handler(templates.SessionDetailFullPage(detail, pageCtx)).ServeHTTP(w, r)
+	renderPage(w, r, templates.SessionDetailPage(detail, loc), templates.SessionDetailFullPage(detail, pageCtx))
 }
 
 // handleSessionEvents renders the session events via HTMX.
@@ -3031,14 +2938,8 @@ func (h *Handler) handleEventLog(w http.ResponseWriter, r *http.Request, campaig
 		NextToken:    nextToken,
 		PrevToken:    prevToken,
 	}
-
-	if isHTMXRequest(r) {
-		templ.Handler(templates.EventLogPage(view, loc)).ServeHTTP(w, r)
-		return
-	}
-
 	pageCtx := h.pageContext(lang, loc, r)
-	templ.Handler(templates.EventLogFullPage(view, pageCtx)).ServeHTTP(w, r)
+	renderPage(w, r, templates.EventLogPage(view, loc), templates.EventLogFullPage(view, pageCtx))
 }
 
 // handleEventLogTable renders the event log table via HTMX.

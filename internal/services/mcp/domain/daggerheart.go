@@ -235,10 +235,11 @@ func RulesVersionTool() *mcp.Tool {
 // ActionRollHandler executes a duality action roll.
 func ActionRollHandler(client pb.DaggerheartServiceClient) mcp.ToolHandlerFor[ActionRollInput, ActionRollResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input ActionRollInput) (*mcp.CallToolResult, ActionRollResult, error) {
-		invocationID, err := NewInvocationID()
+		callContext, err := newToolInvocationContext(ctx, nil)
 		if err != nil {
 			return nil, ActionRollResult{}, fmt.Errorf("generate invocation id: %w", err)
 		}
+		defer callContext.Cancel()
 
 		modifier := input.Modifier
 
@@ -248,10 +249,7 @@ func ActionRollHandler(client pb.DaggerheartServiceClient) mcp.ToolHandlerFor[Ac
 			difficulty = &value
 		}
 
-		runCtx, cancel := context.WithTimeout(ctx, grpcCallTimeout)
-		defer cancel()
-
-		callCtx, callMeta, err := NewOutgoingContext(runCtx, invocationID)
+		callCtx, callMeta, err := NewOutgoingContext(callContext.RunCtx, callContext.InvocationID)
 		if err != nil {
 			return nil, ActionRollResult{}, fmt.Errorf("create request metadata: %w", err)
 		}
@@ -308,10 +306,11 @@ func ActionRollHandler(client pb.DaggerheartServiceClient) mcp.ToolHandlerFor[Ac
 // DualityOutcomeHandler executes a deterministic outcome evaluation.
 func DualityOutcomeHandler(client pb.DaggerheartServiceClient) mcp.ToolHandlerFor[DualityOutcomeInput, DualityOutcomeResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input DualityOutcomeInput) (*mcp.CallToolResult, DualityOutcomeResult, error) {
-		invocationID, err := NewInvocationID()
+		callContext, err := newToolInvocationContext(ctx, nil)
 		if err != nil {
 			return nil, DualityOutcomeResult{}, fmt.Errorf("generate invocation id: %w", err)
 		}
+		defer callContext.Cancel()
 
 		var difficulty *int32
 		if input.Difficulty != nil {
@@ -319,10 +318,7 @@ func DualityOutcomeHandler(client pb.DaggerheartServiceClient) mcp.ToolHandlerFo
 			difficulty = &value
 		}
 
-		runCtx, cancel := context.WithTimeout(ctx, grpcCallTimeout)
-		defer cancel()
-
-		callCtx, callMeta, err := NewOutgoingContext(runCtx, invocationID)
+		callCtx, callMeta, err := NewOutgoingContext(callContext.RunCtx, callContext.InvocationID)
 		if err != nil {
 			return nil, DualityOutcomeResult{}, fmt.Errorf("create request metadata: %w", err)
 		}
@@ -361,10 +357,11 @@ func DualityOutcomeHandler(client pb.DaggerheartServiceClient) mcp.ToolHandlerFo
 // DualityExplainHandler executes a deterministic explanation request.
 func DualityExplainHandler(client pb.DaggerheartServiceClient) mcp.ToolHandlerFor[DualityExplainInput, DualityExplainResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input DualityExplainInput) (*mcp.CallToolResult, DualityExplainResult, error) {
-		invocationID, err := NewInvocationID()
+		callContext, err := newToolInvocationContext(ctx, nil)
 		if err != nil {
 			return nil, DualityExplainResult{}, fmt.Errorf("generate invocation id: %w", err)
 		}
+		defer callContext.Cancel()
 
 		modifier := input.Modifier
 
@@ -379,10 +376,7 @@ func DualityExplainHandler(client pb.DaggerheartServiceClient) mcp.ToolHandlerFo
 			requestID = input.RequestID
 		}
 
-		runCtx, cancel := context.WithTimeout(ctx, grpcCallTimeout)
-		defer cancel()
-
-		callCtx, callMeta, err := NewOutgoingContext(runCtx, invocationID)
+		callCtx, callMeta, err := NewOutgoingContext(callContext.RunCtx, callContext.InvocationID)
 		if err != nil {
 			return nil, DualityExplainResult{}, fmt.Errorf("create request metadata: %w", err)
 		}
@@ -450,15 +444,13 @@ func DualityExplainHandler(client pb.DaggerheartServiceClient) mcp.ToolHandlerFo
 // DualityProbabilityHandler executes the deterministic probability evaluation.
 func DualityProbabilityHandler(client pb.DaggerheartServiceClient) mcp.ToolHandlerFor[DualityProbabilityInput, DualityProbabilityResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input DualityProbabilityInput) (*mcp.CallToolResult, DualityProbabilityResult, error) {
-		invocationID, err := NewInvocationID()
+		callContext, err := newToolInvocationContext(ctx, nil)
 		if err != nil {
 			return nil, DualityProbabilityResult{}, fmt.Errorf("generate invocation id: %w", err)
 		}
+		defer callContext.Cancel()
 
-		runCtx, cancel := context.WithTimeout(ctx, grpcCallTimeout)
-		defer cancel()
-
-		callCtx, callMeta, err := NewOutgoingContext(runCtx, invocationID)
+		callCtx, callMeta, err := NewOutgoingContext(callContext.RunCtx, callContext.InvocationID)
 		if err != nil {
 			return nil, DualityProbabilityResult{}, fmt.Errorf("create request metadata: %w", err)
 		}
@@ -500,15 +492,13 @@ func DualityProbabilityHandler(client pb.DaggerheartServiceClient) mcp.ToolHandl
 // RulesVersionHandler returns static ruleset metadata from the gRPC service.
 func RulesVersionHandler(client pb.DaggerheartServiceClient) mcp.ToolHandlerFor[RulesVersionInput, RulesVersionResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, _ RulesVersionInput) (*mcp.CallToolResult, RulesVersionResult, error) {
-		invocationID, err := NewInvocationID()
+		callContext, err := newToolInvocationContext(ctx, nil)
 		if err != nil {
 			return nil, RulesVersionResult{}, fmt.Errorf("generate invocation id: %w", err)
 		}
+		defer callContext.Cancel()
 
-		runCtx, cancel := context.WithTimeout(ctx, grpcCallTimeout)
-		defer cancel()
-
-		callCtx, callMeta, err := NewOutgoingContext(runCtx, invocationID)
+		callCtx, callMeta, err := NewOutgoingContext(callContext.RunCtx, callContext.InvocationID)
 		if err != nil {
 			return nil, RulesVersionResult{}, fmt.Errorf("create request metadata: %w", err)
 		}
@@ -545,10 +535,11 @@ func RulesVersionHandler(client pb.DaggerheartServiceClient) mcp.ToolHandlerFor[
 // RollDiceHandler executes a generic dice roll.
 func RollDiceHandler(client pb.DaggerheartServiceClient) mcp.ToolHandlerFor[RollDiceInput, RollDiceResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input RollDiceInput) (*mcp.CallToolResult, RollDiceResult, error) {
-		invocationID, err := NewInvocationID()
+		callContext, err := newToolInvocationContext(ctx, nil)
 		if err != nil {
 			return nil, RollDiceResult{}, fmt.Errorf("generate invocation id: %w", err)
 		}
+		defer callContext.Cancel()
 
 		diceSpecs := make([]*pb.DiceSpec, 0, len(input.Dice))
 		for _, spec := range input.Dice {
@@ -558,10 +549,7 @@ func RollDiceHandler(client pb.DaggerheartServiceClient) mcp.ToolHandlerFor[Roll
 			})
 		}
 
-		runCtx, cancel := context.WithTimeout(ctx, grpcCallTimeout)
-		defer cancel()
-
-		callCtx, callMeta, err := NewOutgoingContext(runCtx, invocationID)
+		callCtx, callMeta, err := NewOutgoingContext(callContext.RunCtx, callContext.InvocationID)
 		if err != nil {
 			return nil, RollDiceResult{}, fmt.Errorf("create request metadata: %w", err)
 		}

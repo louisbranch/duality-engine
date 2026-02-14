@@ -5,10 +5,9 @@ import (
 	"context"
 	"flag"
 	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/louisbranch/fracturing.space/internal/platform/config"
+	"github.com/louisbranch/fracturing.space/internal/tools/cli"
 
 	scenariocmd "github.com/louisbranch/fracturing.space/internal/cmd/scenario"
 )
@@ -19,7 +18,7 @@ func main() {
 		config.Exitf("Error: %v", err)
 	}
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	ctx, stop := cli.WithSignalContext(context.Background())
 	defer stop()
 
 	if err := scenariocmd.Run(ctx, cfg, os.Stdout, os.Stderr); err != nil {
