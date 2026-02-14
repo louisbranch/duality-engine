@@ -2,7 +2,7 @@ local scene = Scenario.new("adversary_spotlight")
 
 -- Frame a battlefield with Frodo and a looming Nazgul.
 scene:campaign{
-  name = "Shepherd Scene",
+  name = "Frodo Scene",
   system = "DAGGERHEART",
   gm_mode = "HUMAN",
   theme = "spotlight"
