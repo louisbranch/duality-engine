@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package common.v1;
+
+option go_package = "github.com/louisbranch/fracturing.space/api/gen/go/common/v1;commonv1";
+
+// Locale identifies a supported localization for the platform.
+enum Locale {
+  LOCALE_UNSPECIFIED = 0;
+  LOCALE_EN_US = 1;
+  LOCALE_PT_BR = 2;
+}

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	commonv1 "github.com/louisbranch/fracturing.space/api/gen/go/common/v1"
+	platformi18n "github.com/louisbranch/fracturing.space/internal/platform/i18n"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/character"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/invite"
@@ -24,6 +25,7 @@ func TestCampaignPutGet(t *testing.T) {
 	expected := campaign.Campaign{
 		ID:               "camp-crud",
 		Name:             "Shimmering Fields",
+		Locale:           commonv1.Locale_LOCALE_PT_BR,
 		System:           commonv1.GameSystem_GAME_SYSTEM_DAGGERHEART,
 		Status:           campaign.CampaignStatusCompleted,
 		GmMode:           campaign.GmModeHybrid,
@@ -72,6 +74,9 @@ func TestCampaignPutGet(t *testing.T) {
 	}
 	if got.System != expected.System || got.Status != expected.Status || got.GmMode != expected.GmMode {
 		t.Fatalf("expected campaign metadata to match")
+	}
+	if got.Locale != expected.Locale {
+		t.Fatalf("expected campaign locale to match")
 	}
 	if got.ParticipantCount != expected.ParticipantCount || got.CharacterCount != expected.CharacterCount {
 		t.Fatalf("expected campaign counts to match")
@@ -339,6 +344,7 @@ func seedCampaign(t *testing.T, store *Store, id string, now time.Time) campaign
 	c := campaign.Campaign{
 		ID:        id,
 		Name:      "Campaign",
+		Locale:    platformi18n.DefaultLocale(),
 		System:    commonv1.GameSystem_GAME_SYSTEM_DAGGERHEART,
 		Status:    campaign.CampaignStatusActive,
 		GmMode:    campaign.GmModeHuman,

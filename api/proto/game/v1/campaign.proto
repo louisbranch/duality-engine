@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package game.v1;
 
+import "common/v1/locale.proto";
 import "google/protobuf/timestamp.proto";
 import "common/v1/game_system.proto";
 import "game/v1/participant.proto";
@@ -13,21 +14,22 @@ option go_package = "github.com/louisbranch/fracturing.space/api/gen/go/game/v1;
 message Campaign {
   string id = 1;
   string name = 2;
+  common.v1.Locale locale = 3;
   // The game system this campaign uses. Required at creation, immutable.
-  common.v1.GameSystem system = 3;
-  CampaignStatus status = 4;
-  GmMode gm_mode = 5;
+  common.v1.GameSystem system = 4;
+  CampaignStatus status = 5;
+  GmMode gm_mode = 6;
   // Number of all participants (GM + PLAYER + future roles) for this campaign.
-  int32 participant_count = 6;
+  int32 participant_count = 7;
   // Number of all characters (PC + NPC + future kinds) for this campaign.
-  int32 character_count = 7;
-  string theme_prompt = 8;
-  google.protobuf.Timestamp created_at = 9;
-  google.protobuf.Timestamp updated_at = 10;
+  int32 character_count = 8;
+  string theme_prompt = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
   // Timestamp when the campaign was completed.
-  google.protobuf.Timestamp completed_at = 11;
+  google.protobuf.Timestamp completed_at = 12;
   // Timestamp when the campaign was archived.
-  google.protobuf.Timestamp archived_at = 12;
+  google.protobuf.Timestamp archived_at = 13;
 }
 
 enum CampaignStatus {
@@ -70,17 +72,20 @@ message CreateCampaignRequest {
   // Display name for the campaign.
   string name = 1;
 
+  // Preferred locale for the campaign.
+  common.v1.Locale locale = 2;
+
   // The game system for this campaign. Required.
-  common.v1.GameSystem system = 2;
+  common.v1.GameSystem system = 3;
 
   // The mode of GM participation.
-  GmMode gm_mode = 3;
+  GmMode gm_mode = 4;
 
   // Optional free-form theme prompt for assistants.
-  string theme_prompt = 4;
+  string theme_prompt = 5;
 
   // Optional display name for the creator's participant seat.
-  string creator_display_name = 5;
+  string creator_display_name = 6;
 }
 
 message CreateCampaignResponse {

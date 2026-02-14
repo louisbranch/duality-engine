@@ -6,7 +6,9 @@ import (
 	"strings"
 	"time"
 
+	commonv1 "github.com/louisbranch/fracturing.space/api/gen/go/common/v1"
 	apperrors "github.com/louisbranch/fracturing.space/internal/platform/errors"
+	platformi18n "github.com/louisbranch/fracturing.space/internal/platform/i18n"
 	"github.com/louisbranch/fracturing.space/internal/platform/id"
 )
 
@@ -19,6 +21,7 @@ var (
 type User struct {
 	ID          string
 	DisplayName string
+	Locale      commonv1.Locale
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
@@ -26,6 +29,7 @@ type User struct {
 // CreateUserInput describes the metadata needed to create a user.
 type CreateUserInput struct {
 	DisplayName string
+	Locale      commonv1.Locale
 }
 
 // CreateUser creates a new user with a generated ID and timestamps.
@@ -51,6 +55,7 @@ func CreateUser(input CreateUserInput, now func() time.Time, idGenerator func() 
 	return User{
 		ID:          userID,
 		DisplayName: normalized.DisplayName,
+		Locale:      normalized.Locale,
 		CreatedAt:   createdAt,
 		UpdatedAt:   createdAt,
 	}, nil
@@ -62,5 +67,6 @@ func NormalizeCreateUserInput(input CreateUserInput) (CreateUserInput, error) {
 	if input.DisplayName == "" {
 		return CreateUserInput{}, ErrEmptyDisplayName
 	}
+	input.Locale = platformi18n.NormalizeLocale(input.Locale)
 	return input, nil
 }

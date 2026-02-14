@@ -4,6 +4,9 @@ import (
 	"errors"
 	"testing"
 	"time"
+
+	commonv1 "github.com/louisbranch/fracturing.space/api/gen/go/common/v1"
+	platformi18n "github.com/louisbranch/fracturing.space/internal/platform/i18n"
 )
 
 func TestCreateUserDefaults(t *testing.T) {
@@ -11,6 +14,14 @@ func TestCreateUserDefaults(t *testing.T) {
 	_, err := CreateUser(input, nil, nil)
 	if err != nil {
 		t.Fatalf("create user: %v", err)
+	}
+
+	created, err := CreateUser(input, nil, func() (string, error) { return "user-1", nil })
+	if err != nil {
+		t.Fatalf("create user: %v", err)
+	}
+	if created.Locale != platformi18n.DefaultLocale() {
+		t.Fatalf("expected default locale %v, got %v", platformi18n.DefaultLocale(), created.Locale)
 	}
 
 	_, err = CreateUser(input, nil, func() (string, error) { return "", errors.New("id generator error") })
@@ -21,7 +32,7 @@ func TestCreateUserDefaults(t *testing.T) {
 
 func TestCreateUserNormalizesInput(t *testing.T) {
 	fixedTime := time.Date(2026, 1, 23, 10, 0, 0, 0, time.UTC)
-	input := CreateUserInput{DisplayName: "  Alice  "}
+	input := CreateUserInput{DisplayName: "  Alice  ", Locale: commonv1.Locale_LOCALE_PT_BR}
 
 	created, err := CreateUser(input, func() time.Time { return fixedTime }, func() (string, error) {
 		return "user-123", nil
@@ -35,6 +46,9 @@ func TestCreateUserNormalizesInput(t *testing.T) {
 	}
 	if created.DisplayName != "Alice" {
 		t.Fatalf("expected trimmed display name, got %q", created.DisplayName)
+	}
+	if created.Locale != commonv1.Locale_LOCALE_PT_BR {
+		t.Fatalf("expected locale %v, got %v", commonv1.Locale_LOCALE_PT_BR, created.Locale)
 	}
 	if !created.CreatedAt.Equal(fixedTime) || !created.UpdatedAt.Equal(fixedTime) {
 		t.Fatalf("expected timestamps to match fixed time")

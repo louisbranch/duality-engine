@@ -8,6 +8,7 @@ import (
 
 	commonv1 "github.com/louisbranch/fracturing.space/api/gen/go/common/v1"
 	campaignv1 "github.com/louisbranch/fracturing.space/api/gen/go/game/v1"
+	platformi18n "github.com/louisbranch/fracturing.space/internal/platform/i18n"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/character"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/invite"
@@ -25,6 +26,7 @@ func campaignToProto(c campaign.Campaign) *campaignv1.Campaign {
 	return &campaignv1.Campaign{
 		Id:               c.ID,
 		Name:             c.Name,
+		Locale:           platformi18n.NormalizeLocale(c.Locale),
 		System:           gameSystemToProto(c.System),
 		Status:           campaignStatusToProto(c.Status),
 		GmMode:           gmModeToProto(c.GmMode),

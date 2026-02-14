@@ -133,24 +133,25 @@ func (GmMode) EnumDescriptor() ([]byte, []int) {
 // Campaign represents a game campaign's configuration.
 // This is the "config layer" - settings that rarely change after setup.
 type Campaign struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	Id    string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name  string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	Id     string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name   string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Locale v1.Locale              `protobuf:"varint,3,opt,name=locale,proto3,enum=common.v1.Locale" json:"locale,omitempty"`
 	// The game system this campaign uses. Required at creation, immutable.
-	System v1.GameSystem  `protobuf:"varint,3,opt,name=system,proto3,enum=common.v1.GameSystem" json:"system,omitempty"`
-	Status CampaignStatus `protobuf:"varint,4,opt,name=status,proto3,enum=game.v1.CampaignStatus" json:"status,omitempty"`
-	GmMode GmMode         `protobuf:"varint,5,opt,name=gm_mode,json=gmMode,proto3,enum=game.v1.GmMode" json:"gm_mode,omitempty"`
+	System v1.GameSystem  `protobuf:"varint,4,opt,name=system,proto3,enum=common.v1.GameSystem" json:"system,omitempty"`
+	Status CampaignStatus `protobuf:"varint,5,opt,name=status,proto3,enum=game.v1.CampaignStatus" json:"status,omitempty"`
+	GmMode GmMode         `protobuf:"varint,6,opt,name=gm_mode,json=gmMode,proto3,enum=game.v1.GmMode" json:"gm_mode,omitempty"`
 	// Number of all participants (GM + PLAYER + future roles) for this campaign.
-	ParticipantCount int32 `protobuf:"varint,6,opt,name=participant_count,json=participantCount,proto3" json:"participant_count,omitempty"`
+	ParticipantCount int32 `protobuf:"varint,7,opt,name=participant_count,json=participantCount,proto3" json:"participant_count,omitempty"`
 	// Number of all characters (PC + NPC + future kinds) for this campaign.
-	CharacterCount int32                  `protobuf:"varint,7,opt,name=character_count,json=characterCount,proto3" json:"character_count,omitempty"`
-	ThemePrompt    string                 `protobuf:"bytes,8,opt,name=theme_prompt,json=themePrompt,proto3" json:"theme_prompt,omitempty"`
-	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt      *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	CharacterCount int32                  `protobuf:"varint,8,opt,name=character_count,json=characterCount,proto3" json:"character_count,omitempty"`
+	ThemePrompt    string                 `protobuf:"bytes,9,opt,name=theme_prompt,json=themePrompt,proto3" json:"theme_prompt,omitempty"`
+	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt      *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	// Timestamp when the campaign was completed.
-	CompletedAt *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
+	CompletedAt *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
 	// Timestamp when the campaign was archived.
-	ArchivedAt    *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=archived_at,json=archivedAt,proto3" json:"archived_at,omitempty"`
+	ArchivedAt    *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=archived_at,json=archivedAt,proto3" json:"archived_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -197,6 +198,13 @@ func (x *Campaign) GetName() string {
 		return x.Name
 	}
 	return ""
+}
+
+func (x *Campaign) GetLocale() v1.Locale {
+	if x != nil {
+		return x.Locale
+	}
+	return v1.Locale(0)
 }
 
 func (x *Campaign) GetSystem() v1.GameSystem {
@@ -273,14 +281,16 @@ type CreateCampaignRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Display name for the campaign.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Preferred locale for the campaign.
+	Locale v1.Locale `protobuf:"varint,2,opt,name=locale,proto3,enum=common.v1.Locale" json:"locale,omitempty"`
 	// The game system for this campaign. Required.
-	System v1.GameSystem `protobuf:"varint,2,opt,name=system,proto3,enum=common.v1.GameSystem" json:"system,omitempty"`
+	System v1.GameSystem `protobuf:"varint,3,opt,name=system,proto3,enum=common.v1.GameSystem" json:"system,omitempty"`
 	// The mode of GM participation.
-	GmMode GmMode `protobuf:"varint,3,opt,name=gm_mode,json=gmMode,proto3,enum=game.v1.GmMode" json:"gm_mode,omitempty"`
+	GmMode GmMode `protobuf:"varint,4,opt,name=gm_mode,json=gmMode,proto3,enum=game.v1.GmMode" json:"gm_mode,omitempty"`
 	// Optional free-form theme prompt for assistants.
-	ThemePrompt string `protobuf:"bytes,4,opt,name=theme_prompt,json=themePrompt,proto3" json:"theme_prompt,omitempty"`
+	ThemePrompt string `protobuf:"bytes,5,opt,name=theme_prompt,json=themePrompt,proto3" json:"theme_prompt,omitempty"`
 	// Optional display name for the creator's participant seat.
-	CreatorDisplayName string `protobuf:"bytes,5,opt,name=creator_display_name,json=creatorDisplayName,proto3" json:"creator_display_name,omitempty"`
+	CreatorDisplayName string `protobuf:"bytes,6,opt,name=creator_display_name,json=creatorDisplayName,proto3" json:"creator_display_name,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -320,6 +330,13 @@ func (x *CreateCampaignRequest) GetName() string {
 		return x.Name
 	}
 	return ""
+}
+
+func (x *CreateCampaignRequest) GetLocale() v1.Locale {
+	if x != nil {
+		return x.Locale
+	}
+	return v1.Locale(0)
 }
 
 func (x *CreateCampaignRequest) GetSystem() v1.GameSystem {
@@ -877,30 +894,32 @@ var File_game_v1_campaign_proto protoreflect.FileDescriptor
 
 const file_game_v1_campaign_proto_rawDesc = "" +
 	"\n" +
-	"\x16game/v1/campaign.proto\x12\agame.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bcommon/v1/game_system.proto\x1a\x19game/v1/participant.proto\"\xa3\x04\n" +
+	"\x16game/v1/campaign.proto\x12\agame.v1\x1a\x16common/v1/locale.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bcommon/v1/game_system.proto\x1a\x19game/v1/participant.proto\"\xce\x04\n" +
 	"\bCampaign\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12-\n" +
-	"\x06system\x18\x03 \x01(\x0e2\x15.common.v1.GameSystemR\x06system\x12/\n" +
-	"\x06status\x18\x04 \x01(\x0e2\x17.game.v1.CampaignStatusR\x06status\x12(\n" +
-	"\agm_mode\x18\x05 \x01(\x0e2\x0f.game.v1.GmModeR\x06gmMode\x12+\n" +
-	"\x11participant_count\x18\x06 \x01(\x05R\x10participantCount\x12'\n" +
-	"\x0fcharacter_count\x18\a \x01(\x05R\x0echaracterCount\x12!\n" +
-	"\ftheme_prompt\x18\b \x01(\tR\vthemePrompt\x129\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12)\n" +
+	"\x06locale\x18\x03 \x01(\x0e2\x11.common.v1.LocaleR\x06locale\x12-\n" +
+	"\x06system\x18\x04 \x01(\x0e2\x15.common.v1.GameSystemR\x06system\x12/\n" +
+	"\x06status\x18\x05 \x01(\x0e2\x17.game.v1.CampaignStatusR\x06status\x12(\n" +
+	"\agm_mode\x18\x06 \x01(\x0e2\x0f.game.v1.GmModeR\x06gmMode\x12+\n" +
+	"\x11participant_count\x18\a \x01(\x05R\x10participantCount\x12'\n" +
+	"\x0fcharacter_count\x18\b \x01(\x05R\x0echaracterCount\x12!\n" +
+	"\ftheme_prompt\x18\t \x01(\tR\vthemePrompt\x129\n" +
 	"\n" +
-	"created_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12=\n" +
-	"\fcompleted_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\vcompletedAt\x12;\n" +
-	"\varchived_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"archivedAt\"\xd9\x01\n" +
+	"updated_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12=\n" +
+	"\fcompleted_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\vcompletedAt\x12;\n" +
+	"\varchived_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"archivedAt\"\x84\x02\n" +
 	"\x15CreateCampaignRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12-\n" +
-	"\x06system\x18\x02 \x01(\x0e2\x15.common.v1.GameSystemR\x06system\x12(\n" +
-	"\agm_mode\x18\x03 \x01(\x0e2\x0f.game.v1.GmModeR\x06gmMode\x12!\n" +
-	"\ftheme_prompt\x18\x04 \x01(\tR\vthemePrompt\x120\n" +
-	"\x14creator_display_name\x18\x05 \x01(\tR\x12creatorDisplayName\"\xa6\x01\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12)\n" +
+	"\x06locale\x18\x02 \x01(\x0e2\x11.common.v1.LocaleR\x06locale\x12-\n" +
+	"\x06system\x18\x03 \x01(\x0e2\x15.common.v1.GameSystemR\x06system\x12(\n" +
+	"\agm_mode\x18\x04 \x01(\x0e2\x0f.game.v1.GmModeR\x06gmMode\x12!\n" +
+	"\ftheme_prompt\x18\x05 \x01(\tR\vthemePrompt\x120\n" +
+	"\x14creator_display_name\x18\x06 \x01(\tR\x12creatorDisplayName\"\xa6\x01\n" +
 	"\x16CreateCampaignResponse\x12-\n" +
 	"\bcampaign\x18\x01 \x01(\v2\x11.game.v1.CampaignR\bcampaign\x12A\n" +
 	"\x11owner_participant\x18\x02 \x01(\v2\x14.game.v1.ParticipantR\x10ownerParticipant\x12\x1a\n" +
@@ -983,44 +1002,47 @@ var file_game_v1_campaign_proto_goTypes = []any{
 	(*ArchiveCampaignResponse)(nil), // 12: game.v1.ArchiveCampaignResponse
 	(*RestoreCampaignRequest)(nil),  // 13: game.v1.RestoreCampaignRequest
 	(*RestoreCampaignResponse)(nil), // 14: game.v1.RestoreCampaignResponse
-	(v1.GameSystem)(0),              // 15: common.v1.GameSystem
-	(*timestamppb.Timestamp)(nil),   // 16: google.protobuf.Timestamp
-	(*Participant)(nil),             // 17: game.v1.Participant
+	(v1.Locale)(0),                  // 15: common.v1.Locale
+	(v1.GameSystem)(0),              // 16: common.v1.GameSystem
+	(*timestamppb.Timestamp)(nil),   // 17: google.protobuf.Timestamp
+	(*Participant)(nil),             // 18: game.v1.Participant
 }
 var file_game_v1_campaign_proto_depIdxs = []int32{
-	15, // 0: game.v1.Campaign.system:type_name -> common.v1.GameSystem
-	0,  // 1: game.v1.Campaign.status:type_name -> game.v1.CampaignStatus
-	1,  // 2: game.v1.Campaign.gm_mode:type_name -> game.v1.GmMode
-	16, // 3: game.v1.Campaign.created_at:type_name -> google.protobuf.Timestamp
-	16, // 4: game.v1.Campaign.updated_at:type_name -> google.protobuf.Timestamp
-	16, // 5: game.v1.Campaign.completed_at:type_name -> google.protobuf.Timestamp
-	16, // 6: game.v1.Campaign.archived_at:type_name -> google.protobuf.Timestamp
-	15, // 7: game.v1.CreateCampaignRequest.system:type_name -> common.v1.GameSystem
-	1,  // 8: game.v1.CreateCampaignRequest.gm_mode:type_name -> game.v1.GmMode
-	2,  // 9: game.v1.CreateCampaignResponse.campaign:type_name -> game.v1.Campaign
-	17, // 10: game.v1.CreateCampaignResponse.owner_participant:type_name -> game.v1.Participant
-	2,  // 11: game.v1.ListCampaignsResponse.campaigns:type_name -> game.v1.Campaign
-	2,  // 12: game.v1.GetCampaignResponse.campaign:type_name -> game.v1.Campaign
-	2,  // 13: game.v1.EndCampaignResponse.campaign:type_name -> game.v1.Campaign
-	2,  // 14: game.v1.ArchiveCampaignResponse.campaign:type_name -> game.v1.Campaign
-	2,  // 15: game.v1.RestoreCampaignResponse.campaign:type_name -> game.v1.Campaign
-	3,  // 16: game.v1.CampaignService.CreateCampaign:input_type -> game.v1.CreateCampaignRequest
-	5,  // 17: game.v1.CampaignService.ListCampaigns:input_type -> game.v1.ListCampaignsRequest
-	7,  // 18: game.v1.CampaignService.GetCampaign:input_type -> game.v1.GetCampaignRequest
-	9,  // 19: game.v1.CampaignService.EndCampaign:input_type -> game.v1.EndCampaignRequest
-	11, // 20: game.v1.CampaignService.ArchiveCampaign:input_type -> game.v1.ArchiveCampaignRequest
-	13, // 21: game.v1.CampaignService.RestoreCampaign:input_type -> game.v1.RestoreCampaignRequest
-	4,  // 22: game.v1.CampaignService.CreateCampaign:output_type -> game.v1.CreateCampaignResponse
-	6,  // 23: game.v1.CampaignService.ListCampaigns:output_type -> game.v1.ListCampaignsResponse
-	8,  // 24: game.v1.CampaignService.GetCampaign:output_type -> game.v1.GetCampaignResponse
-	10, // 25: game.v1.CampaignService.EndCampaign:output_type -> game.v1.EndCampaignResponse
-	12, // 26: game.v1.CampaignService.ArchiveCampaign:output_type -> game.v1.ArchiveCampaignResponse
-	14, // 27: game.v1.CampaignService.RestoreCampaign:output_type -> game.v1.RestoreCampaignResponse
-	22, // [22:28] is the sub-list for method output_type
-	16, // [16:22] is the sub-list for method input_type
-	16, // [16:16] is the sub-list for extension type_name
-	16, // [16:16] is the sub-list for extension extendee
-	0,  // [0:16] is the sub-list for field type_name
+	15, // 0: game.v1.Campaign.locale:type_name -> common.v1.Locale
+	16, // 1: game.v1.Campaign.system:type_name -> common.v1.GameSystem
+	0,  // 2: game.v1.Campaign.status:type_name -> game.v1.CampaignStatus
+	1,  // 3: game.v1.Campaign.gm_mode:type_name -> game.v1.GmMode
+	17, // 4: game.v1.Campaign.created_at:type_name -> google.protobuf.Timestamp
+	17, // 5: game.v1.Campaign.updated_at:type_name -> google.protobuf.Timestamp
+	17, // 6: game.v1.Campaign.completed_at:type_name -> google.protobuf.Timestamp
+	17, // 7: game.v1.Campaign.archived_at:type_name -> google.protobuf.Timestamp
+	15, // 8: game.v1.CreateCampaignRequest.locale:type_name -> common.v1.Locale
+	16, // 9: game.v1.CreateCampaignRequest.system:type_name -> common.v1.GameSystem
+	1,  // 10: game.v1.CreateCampaignRequest.gm_mode:type_name -> game.v1.GmMode
+	2,  // 11: game.v1.CreateCampaignResponse.campaign:type_name -> game.v1.Campaign
+	18, // 12: game.v1.CreateCampaignResponse.owner_participant:type_name -> game.v1.Participant
+	2,  // 13: game.v1.ListCampaignsResponse.campaigns:type_name -> game.v1.Campaign
+	2,  // 14: game.v1.GetCampaignResponse.campaign:type_name -> game.v1.Campaign
+	2,  // 15: game.v1.EndCampaignResponse.campaign:type_name -> game.v1.Campaign
+	2,  // 16: game.v1.ArchiveCampaignResponse.campaign:type_name -> game.v1.Campaign
+	2,  // 17: game.v1.RestoreCampaignResponse.campaign:type_name -> game.v1.Campaign
+	3,  // 18: game.v1.CampaignService.CreateCampaign:input_type -> game.v1.CreateCampaignRequest
+	5,  // 19: game.v1.CampaignService.ListCampaigns:input_type -> game.v1.ListCampaignsRequest
+	7,  // 20: game.v1.CampaignService.GetCampaign:input_type -> game.v1.GetCampaignRequest
+	9,  // 21: game.v1.CampaignService.EndCampaign:input_type -> game.v1.EndCampaignRequest
+	11, // 22: game.v1.CampaignService.ArchiveCampaign:input_type -> game.v1.ArchiveCampaignRequest
+	13, // 23: game.v1.CampaignService.RestoreCampaign:input_type -> game.v1.RestoreCampaignRequest
+	4,  // 24: game.v1.CampaignService.CreateCampaign:output_type -> game.v1.CreateCampaignResponse
+	6,  // 25: game.v1.CampaignService.ListCampaigns:output_type -> game.v1.ListCampaignsResponse
+	8,  // 26: game.v1.CampaignService.GetCampaign:output_type -> game.v1.GetCampaignResponse
+	10, // 27: game.v1.CampaignService.EndCampaign:output_type -> game.v1.EndCampaignResponse
+	12, // 28: game.v1.CampaignService.ArchiveCampaign:output_type -> game.v1.ArchiveCampaignResponse
+	14, // 29: game.v1.CampaignService.RestoreCampaign:output_type -> game.v1.RestoreCampaignResponse
+	24, // [24:30] is the sub-list for method output_type
+	18, // [18:24] is the sub-list for method input_type
+	18, // [18:18] is the sub-list for extension type_name
+	18, // [18:18] is the sub-list for extension extendee
+	0,  // [0:18] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_campaign_proto_init() }

@@ -24,6 +24,7 @@ func TestCampaignToProto(t *testing.T) {
 	proto := campaignToProto(campaign.Campaign{
 		ID:               "camp-1",
 		Name:             "Campaign",
+		Locale:           commonv1.Locale_LOCALE_PT_BR,
 		System:           commonv1.GameSystem_GAME_SYSTEM_DAGGERHEART,
 		Status:           campaign.CampaignStatusActive,
 		GmMode:           campaign.GmModeHybrid,
@@ -44,6 +45,9 @@ func TestCampaignToProto(t *testing.T) {
 	}
 	if proto.GetGmMode() != campaignv1.GmMode_HYBRID {
 		t.Fatalf("expected hybrid gm mode, got %v", proto.GetGmMode())
+	}
+	if proto.GetLocale() != commonv1.Locale_LOCALE_PT_BR {
+		t.Fatalf("expected locale %v, got %v", commonv1.Locale_LOCALE_PT_BR, proto.GetLocale())
 	}
 	if proto.GetParticipantCount() != 2 || proto.GetCharacterCount() != 3 {
 		t.Fatal("expected participant/character counts to map")

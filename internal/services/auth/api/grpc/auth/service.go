@@ -46,7 +46,10 @@ func (s *AuthService) CreateUser(ctx context.Context, in *authv1.CreateUserReque
 		return nil, status.Error(codes.Internal, "user store is not configured")
 	}
 
-	created, err := user.CreateUser(user.CreateUserInput{DisplayName: in.GetDisplayName()}, s.clock, s.idGenerator)
+	created, err := user.CreateUser(user.CreateUserInput{
+		DisplayName: in.GetDisplayName(),
+		Locale:      in.GetLocale(),
+	}, s.clock, s.idGenerator)
 	if err != nil {
 		return nil, handleDomainError(err)
 	}
@@ -185,6 +188,7 @@ func userToProto(u user.User) *authv1.User {
 	return &authv1.User{
 		Id:          u.ID,
 		DisplayName: u.DisplayName,
+		Locale:      u.Locale,
 		CreatedAt:   timestamppb.New(u.CreatedAt),
 		UpdatedAt:   timestamppb.New(u.UpdatedAt),
 	}
