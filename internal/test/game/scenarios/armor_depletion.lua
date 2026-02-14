@@ -1,0 +1,45 @@
+local scene = Scenario.new("armor_depletion")
+
+scene:campaign{
+  name = "Armor Depletion",
+  system = "DAGGERHEART",
+  gm_mode = "HUMAN",
+  theme = "armor"
+}
+
+scene:pc("Frodo", { armor = 2, hp = 6 })
+scene:adversary("Saruman")
+
+-- A relentless foe keeps swinging until armor gives out.
+scene:start_session("Armor Depletion")
+
+-- First hit starts chipping away at Frodo's armor.
+-- Missing DSL: specify damage totals and assert armor slot spend.
+scene:adversary_attack{
+  actor = "Saruman",
+  target = "Frodo",
+  difficulty = 0,
+  damage_type = "physical"
+}
+
+-- Second hit should push armor closer to depletion.
+-- Missing DSL: assert armor at 0 after repeated hits.
+scene:adversary_attack{
+  actor = "Saruman",
+  target = "Frodo",
+  difficulty = 0,
+  damage_type = "physical"
+}
+
+-- Third hit should start eating into HP once armor is gone.
+-- Missing DSL: assert HP loss after armor depletion.
+scene:adversary_attack{
+  actor = "Saruman",
+  target = "Frodo",
+  difficulty = 0,
+  damage_type = "physical"
+}
+
+scene:end_session()
+
+return scene

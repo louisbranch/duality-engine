@@ -4,4 +4,4 @@ coverage.raw
 coverage.log
 data/
 
-.ai/plans/*.md
+.ai/plans/
