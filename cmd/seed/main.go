@@ -7,10 +7,9 @@ import (
 	"context"
 	"flag"
 	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/louisbranch/fracturing.space/internal/platform/config"
+	"github.com/louisbranch/fracturing.space/internal/tools/cli"
 
 	seedcmd "github.com/louisbranch/fracturing.space/internal/cmd/seed"
 )
@@ -21,11 +20,8 @@ func main() {
 		config.Exitf("Error: %v", err)
 	}
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	ctx, stop := cli.WithSignalTimeout(context.Background(), cfg.Timeout)
 	defer stop()
-
-	ctx, cancel := context.WithTimeout(ctx, cfg.Timeout)
-	defer cancel()
 
 	if err := seedcmd.Run(ctx, cfg, os.Stdout, os.Stderr); err != nil {
 		config.Exitf("Error: %v", err)

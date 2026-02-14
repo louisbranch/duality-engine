@@ -1,0 +1,46 @@
+package auth
+
+import (
+	"context"
+	"time"
+
+	authv1 "github.com/louisbranch/fracturing.space/api/gen/go/auth/v1"
+	"github.com/louisbranch/fracturing.space/internal/services/auth/storage"
+	"github.com/louisbranch/fracturing.space/internal/services/auth/user"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
+
+type userCreator struct {
+	store       storage.UserStore
+	clock       func() time.Time
+	idGenerator func() (string, error)
+}
+
+func newUserCreator(service *AuthService) userCreator {
+	creator := userCreator{store: service.store, clock: service.clock, idGenerator: service.idGenerator}
+	if creator.clock == nil {
+		creator.clock = time.Now
+	}
+	return creator
+}
+
+func (c userCreator) create(ctx context.Context, in *authv1.CreateUserRequest) (user.User, error) {
+	if c.store == nil {
+		return user.User{}, status.Error(codes.Internal, "user store is not configured")
+	}
+
+	created, err := user.CreateUser(user.CreateUserInput{
+		DisplayName: in.GetDisplayName(),
+		Locale:      in.GetLocale(),
+	}, c.clock, c.idGenerator)
+	if err != nil {
+		return user.User{}, err
+	}
+
+	if err := c.store.PutUser(ctx, created); err != nil {
+		return user.User{}, status.Errorf(codes.Internal, "put user: %v", err)
+	}
+
+	return created, nil
+}

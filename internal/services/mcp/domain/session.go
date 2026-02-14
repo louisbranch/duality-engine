@@ -39,15 +39,13 @@ func SessionStartTool() *mcp.Tool {
 // SessionStartHandler executes a session start request.
 func SessionStartHandler(client statev1.SessionServiceClient, notify ResourceUpdateNotifier) mcp.ToolHandlerFor[SessionStartInput, SessionStartResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input SessionStartInput) (*mcp.CallToolResult, SessionStartResult, error) {
-		invocationID, err := NewInvocationID()
+		callContext, err := newToolInvocationContext(ctx, nil)
 		if err != nil {
 			return nil, SessionStartResult{}, fmt.Errorf("generate invocation id: %w", err)
 		}
+		defer callContext.Cancel()
 
-		runCtx, cancel := context.WithTimeout(ctx, grpcCallTimeout)
-		defer cancel()
-
-		callCtx, callMeta, err := NewOutgoingContext(runCtx, invocationID)
+		callCtx, callMeta, err := NewOutgoingContext(callContext.RunCtx, callContext.InvocationID)
 		if err != nil {
 			return nil, SessionStartResult{}, fmt.Errorf("create request metadata: %w", err)
 		}
@@ -117,26 +115,19 @@ func SessionEndTool() *mcp.Tool {
 // SessionEndHandler executes a session end request.
 func SessionEndHandler(client statev1.SessionServiceClient, getContext func() Context, notify ResourceUpdateNotifier) mcp.ToolHandlerFor[SessionEndInput, SessionEndResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input SessionEndInput) (*mcp.CallToolResult, SessionEndResult, error) {
-		invocationID, err := NewInvocationID()
+		callContext, err := newToolInvocationContext(ctx, getContext)
 		if err != nil {
 			return nil, SessionEndResult{}, fmt.Errorf("generate invocation id: %w", err)
 		}
-
-		runCtx, cancel := context.WithTimeout(ctx, grpcCallTimeout)
-		defer cancel()
-
-		mcpCtx := Context{}
-		if getContext != nil {
-			mcpCtx = getContext()
-		}
+		defer callContext.Cancel()
 
 		campaignID := input.CampaignID
 		if campaignID == "" {
-			campaignID = mcpCtx.CampaignID
+			campaignID = callContext.MCPContext.CampaignID
 		}
 		sessionID := input.SessionID
 		if sessionID == "" {
-			sessionID = mcpCtx.SessionID
+			sessionID = callContext.MCPContext.SessionID
 		}
 		if campaignID == "" {
 			return nil, SessionEndResult{}, fmt.Errorf("campaign_id is required")
@@ -145,7 +136,7 @@ func SessionEndHandler(client statev1.SessionServiceClient, getContext func() Co
 			return nil, SessionEndResult{}, fmt.Errorf("session_id is required")
 		}
 
-		callCtx, callMeta, err := NewOutgoingContext(runCtx, invocationID)
+		callCtx, callMeta, err := NewOutgoingContext(callContext.RunCtx, callContext.InvocationID)
 		if err != nil {
 			return nil, SessionEndResult{}, fmt.Errorf("create request metadata: %w", err)
 		}

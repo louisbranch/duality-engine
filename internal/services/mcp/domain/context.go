@@ -50,13 +50,11 @@ func SetContextHandler(
 	notify ResourceUpdateNotifier,
 ) mcp.ToolHandlerFor[SetContextInput, SetContextResult] {
 	return func(ctx context.Context, _ *mcp.CallToolRequest, input SetContextInput) (*mcp.CallToolResult, SetContextResult, error) {
-		invocationID, err := NewInvocationID()
+		callContext, err := newToolInvocationContext(ctx, nil)
 		if err != nil {
 			return nil, SetContextResult{}, fmt.Errorf("generate invocation id: %w", err)
 		}
-
-		runCtx, cancel := context.WithTimeout(ctx, grpcCallTimeout)
-		defer cancel()
+		defer callContext.Cancel()
 
 		// Validate campaign_id is not empty
 		campaignID := strings.TrimSpace(input.CampaignID)
@@ -65,7 +63,7 @@ func SetContextHandler(
 		}
 
 		// Validate campaign exists
-		responseMeta, err := validateCampaignExists(runCtx, campaignClient, campaignID, invocationID)
+		responseMeta, err := validateCampaignExists(callContext.RunCtx, campaignClient, campaignID, callContext.InvocationID)
 		if err != nil {
 			return nil, SetContextResult{}, fmt.Errorf("validate campaign: %w", err)
 		}
@@ -80,7 +78,7 @@ func SetContextHandler(
 		if input.SessionID != "" {
 			sessionID := strings.TrimSpace(input.SessionID)
 			if sessionID != "" {
-				responseMeta, err := validateSessionExists(runCtx, sessionClient, campaignID, sessionID, invocationID)
+				responseMeta, err := validateSessionExists(callContext.RunCtx, sessionClient, campaignID, sessionID, callContext.InvocationID)
 				if err != nil {
 					return nil, SetContextResult{}, fmt.Errorf("validate session: %w", err)
 				}
@@ -93,7 +91,7 @@ func SetContextHandler(
 		if input.ParticipantID != "" {
 			participantID := strings.TrimSpace(input.ParticipantID)
 			if participantID != "" {
-				responseMeta, err := validateParticipantExists(runCtx, participantClient, campaignID, participantID, invocationID)
+				responseMeta, err := validateParticipantExists(callContext.RunCtx, participantClient, campaignID, participantID, callContext.InvocationID)
 				if err != nil {
 					return nil, SetContextResult{}, fmt.Errorf("validate participant: %w", err)
 				}

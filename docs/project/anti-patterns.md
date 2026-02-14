@@ -120,3 +120,16 @@ group to catch mismatches at compile time.
 Most domain types (Campaign, Participant, Character, Session) are pure data
 with logic in package-level functions. Acceptable for now, but if behavior
 grows, attach methods to the types.
+
+### 16. Fat transport handlers
+
+gRPC handlers orchestrate validation, event construction, persistence, and
+external service calls in a single method (for example
+`internal/services/game/api/grpc/game/campaign_service.go`). Extract an
+application-layer command handler to keep transport thin and testable.
+
+### 17. Stringly-typed event payload mapping in transport
+
+Transport code builds event payloads directly from enum `.String()` values,
+which hides validation and makes payload evolution harder. Prefer domain or
+application-layer factories that validate and centralize payload mapping.

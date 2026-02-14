@@ -8,11 +8,9 @@ import (
 	"time"
 
 	authv1 "github.com/louisbranch/fracturing.space/api/gen/go/auth/v1"
-	commonv1 "github.com/louisbranch/fracturing.space/api/gen/go/common/v1"
 	campaignv1 "github.com/louisbranch/fracturing.space/api/gen/go/game/v1"
 	apperrors "github.com/louisbranch/fracturing.space/internal/platform/errors"
 	"github.com/louisbranch/fracturing.space/internal/platform/grpc/pagination"
-	platformi18n "github.com/louisbranch/fracturing.space/internal/platform/i18n"
 	"github.com/louisbranch/fracturing.space/internal/platform/id"
 	grpcmeta "github.com/louisbranch/fracturing.space/internal/services/game/api/grpc/metadata"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign"
@@ -58,157 +56,17 @@ func (s *CampaignService) CreateCampaign(ctx context.Context, in *campaignv1.Cre
 		return nil, status.Error(codes.InvalidArgument, "create campaign request is required")
 	}
 
-	system := in.GetSystem()
-	if system == commonv1.GameSystem_GAME_SYSTEM_UNSPECIFIED {
-		return nil, status.Error(codes.InvalidArgument, "game system is required")
-	}
-
-	input := campaign.CreateCampaignInput{
-		Name:         in.GetName(),
-		Locale:       in.GetLocale(),
-		System:       system,
-		GmMode:       gmModeFromProto(in.GetGmMode()),
-		Intent:       campaignIntentFromProto(in.GetIntent()),
-		AccessPolicy: campaignAccessPolicyFromProto(in.GetAccessPolicy()),
-		ThemePrompt:  in.GetThemePrompt(),
-	}
-	normalized, err := campaign.NormalizeCreateCampaignInput(input)
+	created, owner, err := newCampaignCreator(s).create(ctx, in)
 	if err != nil {
-		return nil, handleDomainError(err)
-	}
-
-	userID := strings.TrimSpace(grpcmeta.UserIDFromContext(ctx))
-	if userID == "" {
-		return nil, handleDomainError(apperrors.New(
-			apperrors.CodeCampaignCreatorUserMissing,
-			"creator user id is required",
-		))
-	}
-
-	campaignID, err := s.idGenerator()
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "generate campaign id: %v", err)
-	}
-
-	payload := event.CampaignCreatedPayload{
-		Name:         normalized.Name,
-		Locale:       platformi18n.LocaleString(normalized.Locale),
-		GameSystem:   normalized.System.String(),
-		GmMode:       gmModeToProto(normalized.GmMode).String(),
-		Intent:       campaignIntentToProto(normalized.Intent).String(),
-		AccessPolicy: campaignAccessPolicyToProto(normalized.AccessPolicy).String(),
-		ThemePrompt:  normalized.ThemePrompt,
-	}
-	payloadJSON, err := json.Marshal(payload)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "encode payload: %v", err)
-	}
-
-	actorID := grpcmeta.ParticipantIDFromContext(ctx)
-	actorType := event.ActorTypeSystem
-	if actorID != "" {
-		actorType = event.ActorTypeParticipant
-	}
-
-	stored, err := s.stores.Event.AppendEvent(ctx, event.Event{
-		CampaignID:   campaignID,
-		Timestamp:    s.clock().UTC(),
-		Type:         event.TypeCampaignCreated,
-		RequestID:    grpcmeta.RequestIDFromContext(ctx),
-		InvocationID: grpcmeta.InvocationIDFromContext(ctx),
-		ActorType:    actorType,
-		ActorID:      actorID,
-		EntityType:   "campaign",
-		EntityID:     campaignID,
-		PayloadJSON:  payloadJSON,
-	})
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "append event: %v", err)
-	}
-
-	applier := s.stores.Applier()
-	if err := applier.Apply(ctx, stored); err != nil {
-		return nil, status.Errorf(codes.Internal, "apply event: %v", err)
-	}
-
-	creatorID, err := s.idGenerator()
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "generate participant id: %v", err)
-	}
-
-	creatorDisplayName := strings.TrimSpace(in.GetCreatorDisplayName())
-	if creatorDisplayName == "" {
-		if s.authClient == nil {
-			return nil, status.Error(codes.Internal, "auth client is not configured")
+		if apperrors.GetCode(err) != apperrors.CodeUnknown {
+			return nil, handleDomainError(err)
 		}
-		userResponse, err := s.authClient.GetUser(ctx, &authv1.GetUserRequest{UserId: userID})
-		if err != nil {
-			if statusErr, ok := status.FromError(err); ok && statusErr.Code() == codes.NotFound {
-				return nil, handleDomainError(apperrors.New(
-					apperrors.CodeCampaignCreatorUserMissing,
-					"creator user not found",
-				))
-			}
-			return nil, status.Errorf(codes.Internal, "get auth user: %v", err)
-		}
-		if userResponse == nil || userResponse.GetUser() == nil {
-			return nil, status.Error(codes.Internal, "auth user response is missing")
-		}
-		creatorDisplayName = strings.TrimSpace(userResponse.GetUser().GetDisplayName())
-		if creatorDisplayName == "" {
-			return nil, handleDomainError(apperrors.New(
-				apperrors.CodeCampaignCreatorUserMissing,
-				"creator user display name is required",
-			))
-		}
-	}
-
-	participantPayload := event.ParticipantJoinedPayload{
-		ParticipantID:  creatorID,
-		UserID:         userID,
-		DisplayName:    creatorDisplayName,
-		Role:           "GM",
-		Controller:     "HUMAN",
-		CampaignAccess: "OWNER",
-	}
-	participantPayloadJSON, err := json.Marshal(participantPayload)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "encode participant payload: %v", err)
-	}
-
-	participantEvent, err := s.stores.Event.AppendEvent(ctx, event.Event{
-		CampaignID:   campaignID,
-		Timestamp:    s.clock().UTC(),
-		Type:         event.TypeParticipantJoined,
-		RequestID:    grpcmeta.RequestIDFromContext(ctx),
-		InvocationID: grpcmeta.InvocationIDFromContext(ctx),
-		ActorType:    event.ActorTypeSystem,
-		ActorID:      "",
-		EntityType:   "participant",
-		EntityID:     creatorID,
-		PayloadJSON:  participantPayloadJSON,
-	})
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "append participant event: %v", err)
-	}
-
-	if err := applier.Apply(ctx, participantEvent); err != nil {
-		return nil, status.Errorf(codes.Internal, "apply participant event: %v", err)
-	}
-
-	ownerParticipant, err := s.stores.Participant.GetParticipant(ctx, campaignID, creatorID)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "load owner participant: %v", err)
-	}
-
-	created, err := s.stores.Campaign.Get(ctx, campaignID)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "load campaign: %v", err)
+		return nil, err
 	}
 
 	return &campaignv1.CreateCampaignResponse{
 		Campaign:         campaignToProto(created),
-		OwnerParticipant: participantToProto(ownerParticipant),
+		OwnerParticipant: participantToProto(owner),
 	}, nil
 }
 
