@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package game.v1;
 
+import "game/v1/participant.proto";
 import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/louisbranch/fracturing.space/api/gen/go/game/v1;gamev1";
@@ -29,6 +30,9 @@ service InviteService {
   // Create a seat-targeted invite.
   rpc CreateInvite(CreateInviteRequest) returns (CreateInviteResponse);
 
+  // Claim a seat-targeted invite.
+  rpc ClaimInvite(ClaimInviteRequest) returns (ClaimInviteResponse);
+
   // Get an invite by ID.
   rpc GetInvite(GetInviteRequest) returns (GetInviteResponse);
 
@@ -49,6 +53,22 @@ message CreateInviteRequest {
 
 message CreateInviteResponse {
   Invite invite = 1;
+}
+
+message ClaimInviteRequest {
+  // The campaign ID to claim the invite for.
+  string campaign_id = 1;
+
+  // The invite ID to claim.
+  string invite_id = 2;
+
+  // A signed join grant from auth.
+  string join_grant = 3;
+}
+
+message ClaimInviteResponse {
+  Invite invite = 1;
+  Participant participant = 2;
 }
 
 message GetInviteRequest {

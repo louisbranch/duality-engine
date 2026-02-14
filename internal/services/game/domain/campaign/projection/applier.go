@@ -13,6 +13,7 @@ import (
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/character"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/event"
+	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/invite"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/participant"
 	"github.com/louisbranch/fracturing.space/internal/services/game/storage"
 )
@@ -22,6 +23,8 @@ type Applier struct {
 	Campaign    storage.CampaignStore
 	Character   storage.CharacterStore
 	Daggerheart storage.DaggerheartStore
+	ClaimIndex  storage.ClaimIndexStore
+	Invite      storage.InviteStore
 	Participant storage.ParticipantStore
 }
 
@@ -38,6 +41,18 @@ func (a Applier) Apply(ctx context.Context, evt event.Event) error {
 		return a.applyParticipantUpdated(ctx, evt)
 	case event.TypeParticipantLeft:
 		return a.applyParticipantLeft(ctx, evt)
+	case event.TypeParticipantBound:
+		return a.applyParticipantBound(ctx, evt)
+	case event.TypeParticipantUnbound:
+		return a.applyParticipantUnbound(ctx, evt)
+	case event.TypeSeatReassigned:
+		return a.applySeatReassigned(ctx, evt)
+	case event.TypeInviteCreated:
+		return a.applyInviteCreated(ctx, evt)
+	case event.TypeInviteClaimed:
+		return a.applyInviteClaimed(ctx, evt)
+	case event.TypeInviteRevoked:
+		return a.applyInviteRevoked(ctx, evt)
 	case event.TypeCharacterCreated:
 		return a.applyCharacterCreated(ctx, evt)
 	case event.TypeCharacterUpdated:
@@ -337,6 +352,302 @@ func (a Applier) applyParticipantLeft(ctx context.Context, evt event.Event) erro
 		campaignRecord.ParticipantCount--
 	}
 	updatedAt := ensureTimestamp(evt.Timestamp)
+	campaignRecord.LastActivityAt = updatedAt
+	campaignRecord.UpdatedAt = updatedAt
+
+	return a.Campaign.Put(ctx, campaignRecord)
+}
+
+func (a Applier) applyParticipantBound(ctx context.Context, evt event.Event) error {
+	if a.Participant == nil {
+		return fmt.Errorf("participant store is not configured")
+	}
+	if a.Campaign == nil {
+		return fmt.Errorf("campaign store is not configured")
+	}
+	if strings.TrimSpace(evt.CampaignID) == "" {
+		return fmt.Errorf("campaign id is required")
+	}
+	participantID := strings.TrimSpace(evt.EntityID)
+	if participantID == "" {
+		return fmt.Errorf("participant id is required")
+	}
+
+	var payload event.ParticipantBoundPayload
+	if err := json.Unmarshal(evt.PayloadJSON, &payload); err != nil {
+		return fmt.Errorf("decode participant.bound payload: %w", err)
+	}
+	userID := strings.TrimSpace(payload.UserID)
+	if userID == "" {
+		return fmt.Errorf("participant.bound user_id is required")
+	}
+
+	current, err := a.Participant.GetParticipant(ctx, evt.CampaignID, participantID)
+	if err != nil {
+		return err
+	}
+
+	updated := current
+	updated.UserID = userID
+	updatedAt := ensureTimestamp(evt.Timestamp)
+	updated.UpdatedAt = updatedAt
+
+	if a.ClaimIndex != nil {
+		if err := a.ClaimIndex.PutParticipantClaim(ctx, evt.CampaignID, userID, participantID, updatedAt); err != nil {
+			return err
+		}
+	}
+
+	if err := a.Participant.PutParticipant(ctx, updated); err != nil {
+		return err
+	}
+
+	campaignRecord, err := a.Campaign.Get(ctx, evt.CampaignID)
+	if err != nil {
+		return err
+	}
+	campaignRecord.LastActivityAt = updatedAt
+	campaignRecord.UpdatedAt = updatedAt
+
+	return a.Campaign.Put(ctx, campaignRecord)
+}
+
+func (a Applier) applyParticipantUnbound(ctx context.Context, evt event.Event) error {
+	if a.Participant == nil {
+		return fmt.Errorf("participant store is not configured")
+	}
+	if a.Campaign == nil {
+		return fmt.Errorf("campaign store is not configured")
+	}
+	if strings.TrimSpace(evt.CampaignID) == "" {
+		return fmt.Errorf("campaign id is required")
+	}
+	participantID := strings.TrimSpace(evt.EntityID)
+	if participantID == "" {
+		return fmt.Errorf("participant id is required")
+	}
+
+	var payload event.ParticipantUnboundPayload
+	if err := json.Unmarshal(evt.PayloadJSON, &payload); err != nil {
+		return fmt.Errorf("decode participant.unbound payload: %w", err)
+	}
+	requestedUserID := strings.TrimSpace(payload.UserID)
+
+	current, err := a.Participant.GetParticipant(ctx, evt.CampaignID, participantID)
+	if err != nil {
+		return err
+	}
+	currentUserID := strings.TrimSpace(current.UserID)
+	if requestedUserID != "" && requestedUserID != currentUserID {
+		return fmt.Errorf("participant.unbound user_id mismatch")
+	}
+
+	if a.ClaimIndex != nil && currentUserID != "" {
+		if err := a.ClaimIndex.DeleteParticipantClaim(ctx, evt.CampaignID, currentUserID); err != nil {
+			return err
+		}
+	}
+
+	updated := current
+	updated.UserID = ""
+	updatedAt := ensureTimestamp(evt.Timestamp)
+	updated.UpdatedAt = updatedAt
+
+	if err := a.Participant.PutParticipant(ctx, updated); err != nil {
+		return err
+	}
+
+	campaignRecord, err := a.Campaign.Get(ctx, evt.CampaignID)
+	if err != nil {
+		return err
+	}
+	campaignRecord.LastActivityAt = updatedAt
+	campaignRecord.UpdatedAt = updatedAt
+
+	return a.Campaign.Put(ctx, campaignRecord)
+}
+
+func (a Applier) applySeatReassigned(ctx context.Context, evt event.Event) error {
+	if a.Participant == nil {
+		return fmt.Errorf("participant store is not configured")
+	}
+	if a.Campaign == nil {
+		return fmt.Errorf("campaign store is not configured")
+	}
+	if strings.TrimSpace(evt.CampaignID) == "" {
+		return fmt.Errorf("campaign id is required")
+	}
+	participantID := strings.TrimSpace(evt.EntityID)
+	if participantID == "" {
+		return fmt.Errorf("participant id is required")
+	}
+
+	var payload event.SeatReassignedPayload
+	if err := json.Unmarshal(evt.PayloadJSON, &payload); err != nil {
+		return fmt.Errorf("decode seat.reassigned payload: %w", err)
+	}
+	newUserID := strings.TrimSpace(payload.UserID)
+	if newUserID == "" {
+		return fmt.Errorf("seat.reassigned user_id is required")
+	}
+	priorUserID := strings.TrimSpace(payload.PriorUserID)
+
+	current, err := a.Participant.GetParticipant(ctx, evt.CampaignID, participantID)
+	if err != nil {
+		return err
+	}
+	currentUserID := strings.TrimSpace(current.UserID)
+	if priorUserID != "" && priorUserID != currentUserID {
+		return fmt.Errorf("seat.reassigned prior_user_id mismatch")
+	}
+
+	if a.ClaimIndex != nil {
+		if currentUserID != "" {
+			if err := a.ClaimIndex.DeleteParticipantClaim(ctx, evt.CampaignID, currentUserID); err != nil {
+				return err
+			}
+		}
+		if err := a.ClaimIndex.PutParticipantClaim(ctx, evt.CampaignID, newUserID, participantID, ensureTimestamp(evt.Timestamp)); err != nil {
+			return err
+		}
+	}
+
+	updated := current
+	updated.UserID = newUserID
+	updatedAt := ensureTimestamp(evt.Timestamp)
+	updated.UpdatedAt = updatedAt
+
+	if err := a.Participant.PutParticipant(ctx, updated); err != nil {
+		return err
+	}
+
+	campaignRecord, err := a.Campaign.Get(ctx, evt.CampaignID)
+	if err != nil {
+		return err
+	}
+	campaignRecord.LastActivityAt = updatedAt
+	campaignRecord.UpdatedAt = updatedAt
+
+	return a.Campaign.Put(ctx, campaignRecord)
+}
+
+func (a Applier) applyInviteCreated(ctx context.Context, evt event.Event) error {
+	if a.Invite == nil {
+		return fmt.Errorf("invite store is not configured")
+	}
+	if a.Campaign == nil {
+		return fmt.Errorf("campaign store is not configured")
+	}
+	if strings.TrimSpace(evt.CampaignID) == "" {
+		return fmt.Errorf("campaign id is required")
+	}
+	inviteID := strings.TrimSpace(evt.EntityID)
+	if inviteID == "" {
+		return fmt.Errorf("invite id is required")
+	}
+
+	var payload event.InviteCreatedPayload
+	if err := json.Unmarshal(evt.PayloadJSON, &payload); err != nil {
+		return fmt.Errorf("decode invite.created payload: %w", err)
+	}
+	participantID := strings.TrimSpace(payload.ParticipantID)
+	if participantID == "" {
+		return fmt.Errorf("invite.created participant_id is required")
+	}
+	status := invite.StatusFromLabel(payload.Status)
+	if status == invite.StatusUnspecified {
+		return fmt.Errorf("invite.created status is required")
+	}
+
+	createdAt := ensureTimestamp(evt.Timestamp)
+	inv := invite.Invite{
+		ID:                     inviteID,
+		CampaignID:             evt.CampaignID,
+		ParticipantID:          participantID,
+		Status:                 status,
+		CreatedByParticipantID: strings.TrimSpace(payload.CreatedByParticipantID),
+		CreatedAt:              createdAt,
+		UpdatedAt:              createdAt,
+	}
+
+	if err := a.Invite.PutInvite(ctx, inv); err != nil {
+		return err
+	}
+
+	campaignRecord, err := a.Campaign.Get(ctx, evt.CampaignID)
+	if err != nil {
+		return err
+	}
+	campaignRecord.LastActivityAt = createdAt
+	campaignRecord.UpdatedAt = createdAt
+
+	return a.Campaign.Put(ctx, campaignRecord)
+}
+
+func (a Applier) applyInviteClaimed(ctx context.Context, evt event.Event) error {
+	if a.Invite == nil {
+		return fmt.Errorf("invite store is not configured")
+	}
+	if a.Campaign == nil {
+		return fmt.Errorf("campaign store is not configured")
+	}
+	inviteID := strings.TrimSpace(evt.EntityID)
+	if inviteID == "" {
+		return fmt.Errorf("invite id is required")
+	}
+
+	var payload event.InviteClaimedPayload
+	if err := json.Unmarshal(evt.PayloadJSON, &payload); err != nil {
+		return fmt.Errorf("decode invite.claimed payload: %w", err)
+	}
+	if payload.InviteID != "" && strings.TrimSpace(payload.InviteID) != inviteID {
+		return fmt.Errorf("invite.claimed invite_id mismatch")
+	}
+
+	updatedAt := ensureTimestamp(evt.Timestamp)
+	if err := a.Invite.UpdateInviteStatus(ctx, inviteID, invite.StatusClaimed, updatedAt); err != nil {
+		return err
+	}
+
+	campaignRecord, err := a.Campaign.Get(ctx, evt.CampaignID)
+	if err != nil {
+		return err
+	}
+	campaignRecord.LastActivityAt = updatedAt
+	campaignRecord.UpdatedAt = updatedAt
+
+	return a.Campaign.Put(ctx, campaignRecord)
+}
+
+func (a Applier) applyInviteRevoked(ctx context.Context, evt event.Event) error {
+	if a.Invite == nil {
+		return fmt.Errorf("invite store is not configured")
+	}
+	if a.Campaign == nil {
+		return fmt.Errorf("campaign store is not configured")
+	}
+	inviteID := strings.TrimSpace(evt.EntityID)
+	if inviteID == "" {
+		return fmt.Errorf("invite id is required")
+	}
+
+	var payload event.InviteRevokedPayload
+	if err := json.Unmarshal(evt.PayloadJSON, &payload); err != nil {
+		return fmt.Errorf("decode invite.revoked payload: %w", err)
+	}
+	if payload.InviteID != "" && strings.TrimSpace(payload.InviteID) != inviteID {
+		return fmt.Errorf("invite.revoked invite_id mismatch")
+	}
+
+	updatedAt := ensureTimestamp(evt.Timestamp)
+	if err := a.Invite.UpdateInviteStatus(ctx, inviteID, invite.StatusRevoked, updatedAt); err != nil {
+		return err
+	}
+
+	campaignRecord, err := a.Campaign.Get(ctx, evt.CampaignID)
+	if err != nil {
+		return err
+	}
 	campaignRecord.LastActivityAt = updatedAt
 	campaignRecord.UpdatedAt = updatedAt
 

@@ -63,6 +63,7 @@ func NewWithAddr(addr string) (*Server, error) {
 	stores := gamegrpc.Stores{
 		Campaign:     projStore,
 		Participant:  projStore,
+		ClaimIndex:   projStore,
 		Invite:       projStore,
 		Character:    projStore,
 		Daggerheart:  projStore,

@@ -49,6 +49,27 @@ type ParticipantUpdatedPayload struct {
 	Fields        map[string]any `json:"fields"`
 }
 
+// ParticipantBoundPayload captures the payload for participant.bound events.
+type ParticipantBoundPayload struct {
+	ParticipantID string `json:"participant_id"`
+	UserID        string `json:"user_id"`
+}
+
+// ParticipantUnboundPayload captures the payload for participant.unbound events.
+type ParticipantUnboundPayload struct {
+	ParticipantID string `json:"participant_id"`
+	UserID        string `json:"user_id"`
+	Reason        string `json:"reason,omitempty"`
+}
+
+// SeatReassignedPayload captures the payload for seat.reassigned events.
+type SeatReassignedPayload struct {
+	ParticipantID string `json:"participant_id"`
+	PriorUserID   string `json:"prior_user_id"`
+	UserID        string `json:"user_id"`
+	Reason        string `json:"reason,omitempty"`
+}
+
 // CharacterCreatedPayload captures the payload for character.created events.
 type CharacterCreatedPayload struct {
 	CharacterID string `json:"character_id"`
@@ -155,4 +176,25 @@ type OutcomeRejectedPayload struct {
 type NoteAddedPayload struct {
 	Content     string `json:"content"`
 	CharacterID string `json:"character_id,omitempty"`
+}
+
+// InviteCreatedPayload captures the payload for invite.created events.
+type InviteCreatedPayload struct {
+	InviteID               string `json:"invite_id"`
+	ParticipantID          string `json:"participant_id"`
+	Status                 string `json:"status"`
+	CreatedByParticipantID string `json:"created_by_participant_id,omitempty"`
+}
+
+// InviteClaimedPayload captures the payload for invite.claimed events.
+type InviteClaimedPayload struct {
+	InviteID      string `json:"invite_id"`
+	ParticipantID string `json:"participant_id"`
+	UserID        string `json:"user_id"`
+	JWTID         string `json:"jti"`
+}
+
+// InviteRevokedPayload captures the payload for invite.revoked events.
+type InviteRevokedPayload struct {
+	InviteID string `json:"invite_id"`
 }

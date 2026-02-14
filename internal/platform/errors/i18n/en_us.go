@@ -16,6 +16,10 @@ const (
 	CodeUserEmptyDisplayName            = "USER_EMPTY_DISPLAY_NAME"
 	CodeInviteEmptyCampaignID           = "INVITE_EMPTY_CAMPAIGN_ID"
 	CodeInviteEmptyParticipantID        = "INVITE_EMPTY_PARTICIPANT_ID"
+	CodeInviteJoinGrantInvalid          = "INVITE_JOIN_GRANT_INVALID"
+	CodeInviteJoinGrantExpired          = "INVITE_JOIN_GRANT_EXPIRED"
+	CodeInviteJoinGrantMismatch         = "INVITE_JOIN_GRANT_MISMATCH"
+	CodeInviteJoinGrantUsed             = "INVITE_JOIN_GRANT_USED"
 	CodeSessionEmptyCampaignID          = "SESSION_EMPTY_CAMPAIGN_ID"
 	CodeCharacterEmptyCampaignID        = "CHARACTER_EMPTY_CAMPAIGN_ID"
 	CodeCharacterEmptyName              = "CHARACTER_EMPTY_NAME"
@@ -72,6 +76,10 @@ var enUSCatalog = &Catalog{
 		// Invite errors
 		CodeInviteEmptyCampaignID:    "Campaign ID is required for invite",
 		CodeInviteEmptyParticipantID: "Participant ID is required for invite",
+		CodeInviteJoinGrantInvalid:   "Join grant is invalid",
+		CodeInviteJoinGrantExpired:   "Join grant has expired",
+		CodeInviteJoinGrantMismatch:  "Join grant {{.Field}} does not match",
+		CodeInviteJoinGrantUsed:      "Join grant has already been used",
 
 		// Session errors
 		CodeSessionEmptyCampaignID: "Campaign ID is required for session",

@@ -30,6 +30,27 @@ Concerns and Unknowns
 - Fork policy for clearing or preserving user assignments on participants.
 - Seat limit enforcement under concurrency.
 - Auditing requirements for join, leave, and reassignment events.
+- Event store vs projection enforcement for uniqueness and idempotency.
+- Projection apply behavior when multiple events are emitted in one command (atomicity or replay recovery).
+
+Event-Driven Storage Notes
+- The game domain is event-driven; writes emit domain events and projections provide queryable state.
+- Claim path is a command handler: validate join grant, emit events, update projections.
+- Event log is append-only; projections can live in a separate query store.
+- Enforce uniqueness (campaign_id, user_id) and idempotency (jti) in a projection index.
+- Provide indexed lookup for join-grant jti to avoid event-log scans during claim.
+
+Claim Event Model (Phase 1)
+- InviteClaimed: invite_id, campaign_id, participant_id, user_id, jti, claimed_at.
+- ParticipantBound: participant_id, campaign_id, user_id, bound_at.
+- ParticipantUnbound (or SeatReassigned): participant_id, campaign_id, prior_user_id, reason, at.
+- JoinGrantRejected (optional): invite_id, campaign_id, user_id, jti, reason, at.
+
+Projection Updates (Phase 1)
+- Invite projection: mark invite CLAIMED and attach claimed_by_user_id, claimed_at.
+- Participant projection: set user_id on participant and update access role.
+- Campaign access projection: map user_id to participant_id and access role.
+- Claim index projection: enforce uniqueness on (campaign_id, user_id) and dedupe on jti.
 
 Phases
 
@@ -57,6 +78,8 @@ Paths Forward (Recommendations)
 Join Grant Schema (Phase 1)
 - Use a standard format: JWT (JWS, signed) or PASETO (v4 public) to avoid custom crypto.
 - Recommended: JWT with EdDSA (Ed25519) and short TTL; keep it stateless.
+- Rotation: maintain overlapping signing keys (current + previous) and rotate on a fixed cadence.
+- Policy: default TTL 5 minutes; accept up to 2 rotations of overlap to allow in-flight claims.
 
 Required Claims
 - iss: auth service issuer.
@@ -92,12 +115,17 @@ Claim Changes Needed (from current implementation)
 - Add a claim path in game service (InviteService.ClaimInvite or ParticipantService.ClaimSeat) that:
   - Validates a join grant from auth service (aud/iss/exp/jti/campaign_id/invite_id/user_id).
   - Verifies the invite is pending and targets the participant seat.
-  - Binds user_id to the participant and marks invite as CLAIMED in one transaction.
+  - Emits events to bind user_id and mark invite as CLAIMED; projections update atomically or async.
 - Auth service issues join grants for seat-targeted invites (signed token, short TTL).
 - MCP/web tooling needs a claim operation that accepts the join grant and target invite.
+
+Auth Join Grant API
+- AuthService.IssueJoinGrant issues a signed join grant for a user + invite.
+- Env: FRACTURING_SPACE_JOIN_GRANT_ISSUER, FRACTURING_SPACE_JOIN_GRANT_AUDIENCE, FRACTURING_SPACE_JOIN_GRANT_PRIVATE_KEY, FRACTURING_SPACE_JOIN_GRANT_TTL.
 
 Future Cases (Documented, Not Implemented)
 - Open invites (anyone with link) and reusable tokens.
 - Invites that create a new seat on claim.
 - Seat limit checks at invite creation time.
 - Ownership transfer and multi-owner capability rules.
+- Seat reassignment as an owner/admin action (event defined, not emitted yet).

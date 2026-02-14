@@ -146,6 +146,7 @@ func (s *ForkService) ForkCampaign(ctx context.Context, in *campaignv1.ForkCampa
 		Participant: s.stores.Participant,
 		Character:   s.stores.Character,
 		Daggerheart: s.stores.Daggerheart,
+		ClaimIndex:  s.stores.ClaimIndex,
 	}
 	if err := applier.Apply(ctx, createdEvent); err != nil {
 		return nil, status.Errorf(codes.Internal, "apply campaign.created: %v", err)

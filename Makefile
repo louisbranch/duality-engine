@@ -41,6 +41,12 @@ run:
 	    done; \
 	    wait || true; \
 	  }; \
+	  if [ -z "$${FRACTURING_SPACE_JOIN_GRANT_PRIVATE_KEY:-}" ] || [ -z "$${FRACTURING_SPACE_JOIN_GRANT_PUBLIC_KEY:-}" ]; then \
+	    eval "$$(go run ./cmd/join-grant-key)"; \
+	  fi; \
+	  export FRACTURING_SPACE_JOIN_GRANT_ISSUER="$${FRACTURING_SPACE_JOIN_GRANT_ISSUER:-fracturing.space/auth}"; \
+	  export FRACTURING_SPACE_JOIN_GRANT_AUDIENCE="$${FRACTURING_SPACE_JOIN_GRANT_AUDIENCE:-fracturing.space/game}"; \
+	  export FRACTURING_SPACE_JOIN_GRANT_TTL="$${FRACTURING_SPACE_JOIN_GRANT_TTL:-5m}"; \
 	  FRACTURING_SPACE_GAME_EVENT_HMAC_KEY=dev-secret go run ./cmd/game 2>&1 & pids+=($$!); \
 	  go run ./cmd/auth 2>&1 & pids+=($$!); \
 	  go run ./cmd/mcp 2>&1 & pids+=($$!); \

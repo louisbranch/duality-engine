@@ -2,12 +2,16 @@ package auth
 
 import (
 	"context"
+	"crypto/ed25519"
+	"crypto/rand"
+	"encoding/base64"
 	"testing"
 	"time"
 
 	authv1 "github.com/louisbranch/fracturing.space/api/gen/go/auth/v1"
 	"github.com/louisbranch/fracturing.space/internal/services/auth/storage"
 	"github.com/louisbranch/fracturing.space/internal/services/auth/user"
+	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/invite"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -152,6 +156,62 @@ func TestListUsers_Success(t *testing.T) {
 	}
 	if len(resp.GetUsers()) != 2 {
 		t.Fatalf("expected 2 users, got %d", len(resp.GetUsers()))
+	}
+}
+
+func TestIssueJoinGrant_Success(t *testing.T) {
+	store := newFakeUserStore()
+	store.users["user-1"] = user.User{ID: "user-1", DisplayName: "Alpha", CreatedAt: time.Now(), UpdatedAt: time.Now()}
+
+	publicKey, privateKey, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatalf("generate join grant key: %v", err)
+	}
+	issuer := "test-issuer"
+	audience := "game-service"
+	t.Setenv(envJoinGrantIssuer, issuer)
+	t.Setenv(envJoinGrantAudience, audience)
+	t.Setenv(envJoinGrantPrivateKey, base64.RawStdEncoding.EncodeToString(privateKey))
+	t.Setenv(envJoinGrantTTL, "5m")
+
+	svc := NewAuthService(store)
+	fixedTime := time.Date(2026, 1, 23, 10, 0, 0, 0, time.UTC)
+	svc.clock = func() time.Time { return fixedTime }
+
+	resp, err := svc.IssueJoinGrant(context.Background(), &authv1.IssueJoinGrantRequest{
+		UserId:        "user-1",
+		CampaignId:    "campaign-1",
+		InviteId:      "invite-1",
+		ParticipantId: "participant-1",
+	})
+	if err != nil {
+		t.Fatalf("issue join grant: %v", err)
+	}
+	if resp.GetJoinGrant() == "" {
+		t.Fatal("expected join grant")
+	}
+	if resp.GetJti() == "" {
+		t.Fatal("expected jti")
+	}
+	if resp.GetExpiresAt() == nil {
+		t.Fatal("expected expires_at")
+	}
+
+	claims, err := invite.ValidateJoinGrant(resp.GetJoinGrant(), invite.JoinGrantExpectation{
+		CampaignID: "campaign-1",
+		InviteID:   "invite-1",
+		UserID:     "user-1",
+	}, invite.JoinGrantConfig{
+		Issuer:   issuer,
+		Audience: audience,
+		Key:      publicKey,
+		Now:      func() time.Time { return fixedTime },
+	})
+	if err != nil {
+		t.Fatalf("validate join grant: %v", err)
+	}
+	if claims.JWTID != resp.GetJti() {
+		t.Fatalf("jti = %s, want %s", claims.JWTID, resp.GetJti())
 	}
 }
 

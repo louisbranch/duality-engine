@@ -6,14 +6,18 @@ import (
 	"context"
 	"testing"
 
+	authv1 "github.com/louisbranch/fracturing.space/api/gen/go/auth/v1"
 	statev1 "github.com/louisbranch/fracturing.space/api/gen/go/game/v1"
 	"github.com/louisbranch/fracturing.space/internal/services/mcp/domain"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
+
+	grpcmeta "github.com/louisbranch/fracturing.space/internal/services/game/api/grpc/metadata"
 )
 
-func runMutationEventGuardrailTests(t *testing.T, suite *integrationSuite, grpcAddr string) {
+func runMutationEventGuardrailTests(t *testing.T, suite *integrationSuite, grpcAddr string, authAddr string) {
 	t.Helper()
 
 	conn, err := grpc.NewClient(
@@ -27,6 +31,19 @@ func runMutationEventGuardrailTests(t *testing.T, suite *integrationSuite, grpcA
 	defer conn.Close()
 
 	eventClient := statev1.NewEventServiceClient(conn)
+	inviteClient := statev1.NewInviteServiceClient(conn)
+
+	authConn, err := grpc.NewClient(
+		authAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(grpc.WaitForReady(true)),
+	)
+	if err != nil {
+		t.Fatalf("dial auth gRPC: %v", err)
+	}
+	defer authConn.Close()
+
+	authClient := authv1.NewAuthServiceClient(authConn)
 
 	t.Run("campaign mutations emit events", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), integrationTimeout())
@@ -183,6 +200,95 @@ func runMutationEventGuardrailTests(t *testing.T, suite *integrationSuite, grpcA
 			t.Fatalf("campaign_restore failed: %+v", restoreResult)
 		}
 		_ = requireEventTypesAfterSeq(t, ctx, eventClient, campaignOutput.ID, lastSeq, "campaign.status_changed")
+	})
+
+	t.Run("invite claim emits events", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), integrationTimeout())
+		defer cancel()
+
+		campaignResult, err := suite.client.CallTool(ctx, &mcp.CallToolParams{
+			Name: "campaign_create",
+			Arguments: map[string]any{
+				"name":         "Invite Guardrail Campaign",
+				"system":       "DAGGERHEART",
+				"gm_mode":      "HUMAN",
+				"theme_prompt": "",
+				"user_id":      suite.userID,
+			},
+		})
+		if err != nil {
+			t.Fatalf("call campaign_create: %v", err)
+		}
+		if campaignResult == nil || campaignResult.IsError {
+			t.Fatalf("campaign_create failed: %+v", campaignResult)
+		}
+		campaignOutput := decodeStructuredContent[domain.CampaignCreateResult](t, campaignResult.StructuredContent)
+		if campaignOutput.ID == "" {
+			t.Fatal("campaign_create returned empty id")
+		}
+		participants := readParticipantList(t, suite.client, campaignOutput.ID)
+		if len(participants.Participants) == 0 {
+			t.Fatal("expected owner participant")
+		}
+		ownerID := participants.Participants[0].ID
+		setContext(t, suite.client, campaignOutput.ID, ownerID)
+
+		lastSeq := requireEventTypesAfterSeq(t, ctx, eventClient, campaignOutput.ID, 0, "campaign.created")
+
+		participantResult, err := suite.client.CallTool(ctx, &mcp.CallToolParams{
+			Name: "participant_create",
+			Arguments: map[string]any{
+				"campaign_id":  campaignOutput.ID,
+				"display_name": "Invite Guardrail Player",
+				"role":         "PLAYER",
+				"controller":   "HUMAN",
+			},
+		})
+		if err != nil {
+			t.Fatalf("call participant_create: %v", err)
+		}
+		if participantResult == nil || participantResult.IsError {
+			t.Fatalf("participant_create failed: %+v", participantResult)
+		}
+		participantOutput := decodeStructuredContent[domain.ParticipantCreateResult](t, participantResult.StructuredContent)
+		lastSeq = requireEventTypesAfterSeq(t, ctx, eventClient, campaignOutput.ID, lastSeq, "participant.joined")
+
+		ownerCtx := metadata.NewOutgoingContext(ctx, metadata.Pairs(grpcmeta.ParticipantIDHeader, ownerID))
+		inviteResp, err := inviteClient.CreateInvite(ownerCtx, &statev1.CreateInviteRequest{
+			CampaignId:    campaignOutput.ID,
+			ParticipantId: participantOutput.ID,
+		})
+		if err != nil {
+			t.Fatalf("create invite: %v", err)
+		}
+		if inviteResp == nil || inviteResp.Invite == nil {
+			t.Fatal("create invite returned nil invite")
+		}
+		lastSeq = requireEventTypesAfterSeq(t, ctx, eventClient, campaignOutput.ID, lastSeq, "invite.created")
+
+		grantResp, err := authClient.IssueJoinGrant(ctx, &authv1.IssueJoinGrantRequest{
+			UserId:        suite.userID,
+			CampaignId:    campaignOutput.ID,
+			InviteId:      inviteResp.Invite.Id,
+			ParticipantId: participantOutput.ID,
+		})
+		if err != nil {
+			t.Fatalf("issue join grant: %v", err)
+		}
+		if grantResp == nil || grantResp.JoinGrant == "" {
+			t.Fatal("issue join grant returned empty grant")
+		}
+
+		claimCtx := withUserID(ctx, suite.userID)
+		_, err = inviteClient.ClaimInvite(claimCtx, &statev1.ClaimInviteRequest{
+			CampaignId: campaignOutput.ID,
+			InviteId:   inviteResp.Invite.Id,
+			JoinGrant:  grantResp.JoinGrant,
+		})
+		if err != nil {
+			t.Fatalf("claim invite: %v", err)
+		}
+		requireEventTypesAfterSeq(t, ctx, eventClient, campaignOutput.ID, lastSeq, "participant.bound", "invite.claimed")
 	})
 
 	t.Run("campaign fork emits event", func(t *testing.T) {

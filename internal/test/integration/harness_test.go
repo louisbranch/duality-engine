@@ -4,12 +4,16 @@ package integration
 
 import (
 	"context"
+	"crypto/ed25519"
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sync"
 	"testing"
 	"time"
 
@@ -18,6 +22,7 @@ import (
 	authserver "github.com/louisbranch/fracturing.space/internal/services/auth/app"
 	grpcmeta "github.com/louisbranch/fracturing.space/internal/services/game/api/grpc/metadata"
 	"github.com/louisbranch/fracturing.space/internal/services/game/app"
+	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/invite"
 	"github.com/louisbranch/fracturing.space/internal/services/mcp/domain"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/grpc"
@@ -32,6 +37,14 @@ type integrationSuite struct {
 	userID string
 }
 
+var (
+	joinGrantIssuer     = "test-issuer"
+	joinGrantAudience   = "game-service"
+	joinGrantKeyOnce    sync.Once
+	joinGrantPrivateKey ed25519.PrivateKey
+	joinGrantPublicKey  ed25519.PublicKey
+)
+
 // integrationTimeout returns the default timeout for integration calls.
 func integrationTimeout() time.Duration {
 	return 10 * time.Second
@@ -43,6 +56,7 @@ func startGRPCServer(t *testing.T) (string, string, func()) {
 
 	setTempDBPath(t)
 	setTempAuthDBPath(t)
+	setJoinGrantEnv(t)
 	authAddr, stopAuth := startAuthServer(t)
 	t.Setenv("FRACTURING_SPACE_AUTH_ADDR", authAddr)
 
@@ -75,6 +89,24 @@ func startGRPCServer(t *testing.T) (string, string, func()) {
 	}
 
 	return addr, authAddr, stop
+}
+
+func setJoinGrantEnv(t *testing.T) {
+	t.Helper()
+
+	joinGrantKeyOnce.Do(func() {
+		publicKey, privateKey, err := ed25519.GenerateKey(rand.Reader)
+		if err != nil {
+			t.Fatalf("generate join grant key: %v", err)
+		}
+		joinGrantPublicKey = publicKey
+		joinGrantPrivateKey = privateKey
+	})
+
+	t.Setenv(invite.EnvJoinGrantIssuer, joinGrantIssuer)
+	t.Setenv(invite.EnvJoinGrantAudience, joinGrantAudience)
+	t.Setenv(invite.EnvJoinGrantPublicKey, base64.RawStdEncoding.EncodeToString(joinGrantPublicKey))
+	t.Setenv("FRACTURING_SPACE_JOIN_GRANT_PRIVATE_KEY", base64.RawStdEncoding.EncodeToString(joinGrantPrivateKey))
 }
 
 func startAuthServer(t *testing.T) (string, func()) {
@@ -171,6 +203,42 @@ func withUserID(ctx context.Context, userID string) context.Context {
 		ctx = context.Background()
 	}
 	return metadata.NewOutgoingContext(ctx, metadata.Pairs(grpcmeta.UserIDHeader, userID))
+}
+
+func joinGrantToken(t *testing.T, campaignID, inviteID, userID string, now time.Time) string {
+	t.Helper()
+	if joinGrantPrivateKey == nil {
+		t.Fatal("join grant key is not configured")
+	}
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
+	headerJSON, err := json.Marshal(map[string]string{
+		"alg": "EdDSA",
+		"typ": "JWT",
+	})
+	if err != nil {
+		t.Fatalf("encode join grant header: %v", err)
+	}
+	payloadJSON, err := json.Marshal(map[string]any{
+		"iss":         joinGrantIssuer,
+		"aud":         joinGrantAudience,
+		"exp":         now.Add(5 * time.Minute).Unix(),
+		"iat":         now.Unix(),
+		"jti":         fmt.Sprintf("jti-%d", now.UnixNano()),
+		"campaign_id": campaignID,
+		"invite_id":   inviteID,
+		"user_id":     userID,
+	})
+	if err != nil {
+		t.Fatalf("encode join grant payload: %v", err)
+	}
+	encodedHeader := base64.RawURLEncoding.EncodeToString(headerJSON)
+	encodedPayload := base64.RawURLEncoding.EncodeToString(payloadJSON)
+	signingInput := encodedHeader + "." + encodedPayload
+	signature := ed25519.Sign(joinGrantPrivateKey, []byte(signingInput))
+	encodedSig := base64.RawURLEncoding.EncodeToString(signature)
+	return signingInput + "." + encodedSig
 }
 
 func injectCampaignCreatorUserID(request map[string]any, userID string) {

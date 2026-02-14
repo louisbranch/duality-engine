@@ -179,6 +179,134 @@ func (x *CreateUserResponse) GetUser() *User {
 	return nil
 }
 
+type IssueJoinGrantRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	CampaignId    string                 `protobuf:"bytes,2,opt,name=campaign_id,json=campaignId,proto3" json:"campaign_id,omitempty"`
+	InviteId      string                 `protobuf:"bytes,3,opt,name=invite_id,json=inviteId,proto3" json:"invite_id,omitempty"`
+	ParticipantId string                 `protobuf:"bytes,4,opt,name=participant_id,json=participantId,proto3" json:"participant_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IssueJoinGrantRequest) Reset() {
+	*x = IssueJoinGrantRequest{}
+	mi := &file_auth_v1_user_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IssueJoinGrantRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IssueJoinGrantRequest) ProtoMessage() {}
+
+func (x *IssueJoinGrantRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_v1_user_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IssueJoinGrantRequest.ProtoReflect.Descriptor instead.
+func (*IssueJoinGrantRequest) Descriptor() ([]byte, []int) {
+	return file_auth_v1_user_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *IssueJoinGrantRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *IssueJoinGrantRequest) GetCampaignId() string {
+	if x != nil {
+		return x.CampaignId
+	}
+	return ""
+}
+
+func (x *IssueJoinGrantRequest) GetInviteId() string {
+	if x != nil {
+		return x.InviteId
+	}
+	return ""
+}
+
+func (x *IssueJoinGrantRequest) GetParticipantId() string {
+	if x != nil {
+		return x.ParticipantId
+	}
+	return ""
+}
+
+type IssueJoinGrantResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	JoinGrant     string                 `protobuf:"bytes,1,opt,name=join_grant,json=joinGrant,proto3" json:"join_grant,omitempty"`
+	Jti           string                 `protobuf:"bytes,2,opt,name=jti,proto3" json:"jti,omitempty"`
+	ExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IssueJoinGrantResponse) Reset() {
+	*x = IssueJoinGrantResponse{}
+	mi := &file_auth_v1_user_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IssueJoinGrantResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IssueJoinGrantResponse) ProtoMessage() {}
+
+func (x *IssueJoinGrantResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_v1_user_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IssueJoinGrantResponse.ProtoReflect.Descriptor instead.
+func (*IssueJoinGrantResponse) Descriptor() ([]byte, []int) {
+	return file_auth_v1_user_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *IssueJoinGrantResponse) GetJoinGrant() string {
+	if x != nil {
+		return x.JoinGrant
+	}
+	return ""
+}
+
+func (x *IssueJoinGrantResponse) GetJti() string {
+	if x != nil {
+		return x.Jti
+	}
+	return ""
+}
+
+func (x *IssueJoinGrantResponse) GetExpiresAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ExpiresAt
+	}
+	return nil
+}
+
 type GetUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -188,7 +316,7 @@ type GetUserRequest struct {
 
 func (x *GetUserRequest) Reset() {
 	*x = GetUserRequest{}
-	mi := &file_auth_v1_user_proto_msgTypes[3]
+	mi := &file_auth_v1_user_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -200,7 +328,7 @@ func (x *GetUserRequest) String() string {
 func (*GetUserRequest) ProtoMessage() {}
 
 func (x *GetUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_auth_v1_user_proto_msgTypes[3]
+	mi := &file_auth_v1_user_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -213,7 +341,7 @@ func (x *GetUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserRequest.ProtoReflect.Descriptor instead.
 func (*GetUserRequest) Descriptor() ([]byte, []int) {
-	return file_auth_v1_user_proto_rawDescGZIP(), []int{3}
+	return file_auth_v1_user_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *GetUserRequest) GetUserId() string {
@@ -232,7 +360,7 @@ type GetUserResponse struct {
 
 func (x *GetUserResponse) Reset() {
 	*x = GetUserResponse{}
-	mi := &file_auth_v1_user_proto_msgTypes[4]
+	mi := &file_auth_v1_user_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -244,7 +372,7 @@ func (x *GetUserResponse) String() string {
 func (*GetUserResponse) ProtoMessage() {}
 
 func (x *GetUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_auth_v1_user_proto_msgTypes[4]
+	mi := &file_auth_v1_user_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -257,7 +385,7 @@ func (x *GetUserResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserResponse.ProtoReflect.Descriptor instead.
 func (*GetUserResponse) Descriptor() ([]byte, []int) {
-	return file_auth_v1_user_proto_rawDescGZIP(), []int{4}
+	return file_auth_v1_user_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetUserResponse) GetUser() *User {
@@ -280,7 +408,7 @@ type ListUsersRequest struct {
 
 func (x *ListUsersRequest) Reset() {
 	*x = ListUsersRequest{}
-	mi := &file_auth_v1_user_proto_msgTypes[5]
+	mi := &file_auth_v1_user_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -292,7 +420,7 @@ func (x *ListUsersRequest) String() string {
 func (*ListUsersRequest) ProtoMessage() {}
 
 func (x *ListUsersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_auth_v1_user_proto_msgTypes[5]
+	mi := &file_auth_v1_user_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -305,7 +433,7 @@ func (x *ListUsersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListUsersRequest.ProtoReflect.Descriptor instead.
 func (*ListUsersRequest) Descriptor() ([]byte, []int) {
-	return file_auth_v1_user_proto_rawDescGZIP(), []int{5}
+	return file_auth_v1_user_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ListUsersRequest) GetPageSize() int32 {
@@ -332,7 +460,7 @@ type ListUsersResponse struct {
 
 func (x *ListUsersResponse) Reset() {
 	*x = ListUsersResponse{}
-	mi := &file_auth_v1_user_proto_msgTypes[6]
+	mi := &file_auth_v1_user_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -344,7 +472,7 @@ func (x *ListUsersResponse) String() string {
 func (*ListUsersResponse) ProtoMessage() {}
 
 func (x *ListUsersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_auth_v1_user_proto_msgTypes[6]
+	mi := &file_auth_v1_user_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -357,7 +485,7 @@ func (x *ListUsersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListUsersResponse.ProtoReflect.Descriptor instead.
 func (*ListUsersResponse) Descriptor() ([]byte, []int) {
-	return file_auth_v1_user_proto_rawDescGZIP(), []int{6}
+	return file_auth_v1_user_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ListUsersResponse) GetUsers() []*User {
@@ -389,7 +517,19 @@ const file_auth_v1_user_proto_rawDesc = "" +
 	"\x11CreateUserRequest\x12!\n" +
 	"\fdisplay_name\x18\x01 \x01(\tR\vdisplayName\"7\n" +
 	"\x12CreateUserResponse\x12!\n" +
-	"\x04user\x18\x01 \x01(\v2\r.auth.v1.UserR\x04user\")\n" +
+	"\x04user\x18\x01 \x01(\v2\r.auth.v1.UserR\x04user\"\x95\x01\n" +
+	"\x15IssueJoinGrantRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1f\n" +
+	"\vcampaign_id\x18\x02 \x01(\tR\n" +
+	"campaignId\x12\x1b\n" +
+	"\tinvite_id\x18\x03 \x01(\tR\binviteId\x12%\n" +
+	"\x0eparticipant_id\x18\x04 \x01(\tR\rparticipantId\"\x84\x01\n" +
+	"\x16IssueJoinGrantResponse\x12\x1d\n" +
+	"\n" +
+	"join_grant\x18\x01 \x01(\tR\tjoinGrant\x12\x10\n" +
+	"\x03jti\x18\x02 \x01(\tR\x03jti\x129\n" +
+	"\n" +
+	"expires_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\")\n" +
 	"\x0eGetUserRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\"4\n" +
 	"\x0fGetUserResponse\x12!\n" +
@@ -400,10 +540,11 @@ const file_auth_v1_user_proto_rawDesc = "" +
 	"page_token\x18\x02 \x01(\tR\tpageToken\"`\n" +
 	"\x11ListUsersResponse\x12#\n" +
 	"\x05users\x18\x01 \x03(\v2\r.auth.v1.UserR\x05users\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken2\xd6\x01\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken2\xa9\x02\n" +
 	"\vAuthService\x12E\n" +
 	"\n" +
-	"CreateUser\x12\x1a.auth.v1.CreateUserRequest\x1a\x1b.auth.v1.CreateUserResponse\x12<\n" +
+	"CreateUser\x12\x1a.auth.v1.CreateUserRequest\x1a\x1b.auth.v1.CreateUserResponse\x12Q\n" +
+	"\x0eIssueJoinGrant\x12\x1e.auth.v1.IssueJoinGrantRequest\x1a\x1f.auth.v1.IssueJoinGrantResponse\x12<\n" +
 	"\aGetUser\x12\x17.auth.v1.GetUserRequest\x1a\x18.auth.v1.GetUserResponse\x12B\n" +
 	"\tListUsers\x12\x19.auth.v1.ListUsersRequest\x1a\x1a.auth.v1.ListUsersResponseBCZAgithub.com/louisbranch/fracturing.space/api/gen/go/auth/v1;authv1b\x06proto3"
 
@@ -419,34 +560,39 @@ func file_auth_v1_user_proto_rawDescGZIP() []byte {
 	return file_auth_v1_user_proto_rawDescData
 }
 
-var file_auth_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_auth_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_auth_v1_user_proto_goTypes = []any{
-	(*User)(nil),                  // 0: auth.v1.User
-	(*CreateUserRequest)(nil),     // 1: auth.v1.CreateUserRequest
-	(*CreateUserResponse)(nil),    // 2: auth.v1.CreateUserResponse
-	(*GetUserRequest)(nil),        // 3: auth.v1.GetUserRequest
-	(*GetUserResponse)(nil),       // 4: auth.v1.GetUserResponse
-	(*ListUsersRequest)(nil),      // 5: auth.v1.ListUsersRequest
-	(*ListUsersResponse)(nil),     // 6: auth.v1.ListUsersResponse
-	(*timestamppb.Timestamp)(nil), // 7: google.protobuf.Timestamp
+	(*User)(nil),                   // 0: auth.v1.User
+	(*CreateUserRequest)(nil),      // 1: auth.v1.CreateUserRequest
+	(*CreateUserResponse)(nil),     // 2: auth.v1.CreateUserResponse
+	(*IssueJoinGrantRequest)(nil),  // 3: auth.v1.IssueJoinGrantRequest
+	(*IssueJoinGrantResponse)(nil), // 4: auth.v1.IssueJoinGrantResponse
+	(*GetUserRequest)(nil),         // 5: auth.v1.GetUserRequest
+	(*GetUserResponse)(nil),        // 6: auth.v1.GetUserResponse
+	(*ListUsersRequest)(nil),       // 7: auth.v1.ListUsersRequest
+	(*ListUsersResponse)(nil),      // 8: auth.v1.ListUsersResponse
+	(*timestamppb.Timestamp)(nil),  // 9: google.protobuf.Timestamp
 }
 var file_auth_v1_user_proto_depIdxs = []int32{
-	7, // 0: auth.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	7, // 1: auth.v1.User.updated_at:type_name -> google.protobuf.Timestamp
-	0, // 2: auth.v1.CreateUserResponse.user:type_name -> auth.v1.User
-	0, // 3: auth.v1.GetUserResponse.user:type_name -> auth.v1.User
-	0, // 4: auth.v1.ListUsersResponse.users:type_name -> auth.v1.User
-	1, // 5: auth.v1.AuthService.CreateUser:input_type -> auth.v1.CreateUserRequest
-	3, // 6: auth.v1.AuthService.GetUser:input_type -> auth.v1.GetUserRequest
-	5, // 7: auth.v1.AuthService.ListUsers:input_type -> auth.v1.ListUsersRequest
-	2, // 8: auth.v1.AuthService.CreateUser:output_type -> auth.v1.CreateUserResponse
-	4, // 9: auth.v1.AuthService.GetUser:output_type -> auth.v1.GetUserResponse
-	6, // 10: auth.v1.AuthService.ListUsers:output_type -> auth.v1.ListUsersResponse
-	8, // [8:11] is the sub-list for method output_type
-	5, // [5:8] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	9,  // 0: auth.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	9,  // 1: auth.v1.User.updated_at:type_name -> google.protobuf.Timestamp
+	0,  // 2: auth.v1.CreateUserResponse.user:type_name -> auth.v1.User
+	9,  // 3: auth.v1.IssueJoinGrantResponse.expires_at:type_name -> google.protobuf.Timestamp
+	0,  // 4: auth.v1.GetUserResponse.user:type_name -> auth.v1.User
+	0,  // 5: auth.v1.ListUsersResponse.users:type_name -> auth.v1.User
+	1,  // 6: auth.v1.AuthService.CreateUser:input_type -> auth.v1.CreateUserRequest
+	3,  // 7: auth.v1.AuthService.IssueJoinGrant:input_type -> auth.v1.IssueJoinGrantRequest
+	5,  // 8: auth.v1.AuthService.GetUser:input_type -> auth.v1.GetUserRequest
+	7,  // 9: auth.v1.AuthService.ListUsers:input_type -> auth.v1.ListUsersRequest
+	2,  // 10: auth.v1.AuthService.CreateUser:output_type -> auth.v1.CreateUserResponse
+	4,  // 11: auth.v1.AuthService.IssueJoinGrant:output_type -> auth.v1.IssueJoinGrantResponse
+	6,  // 12: auth.v1.AuthService.GetUser:output_type -> auth.v1.GetUserResponse
+	8,  // 13: auth.v1.AuthService.ListUsers:output_type -> auth.v1.ListUsersResponse
+	10, // [10:14] is the sub-list for method output_type
+	6,  // [6:10] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_auth_v1_user_proto_init() }
@@ -460,7 +606,7 @@ func file_auth_v1_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_auth_v1_user_proto_rawDesc), len(file_auth_v1_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

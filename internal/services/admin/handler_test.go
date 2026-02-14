@@ -207,6 +207,10 @@ func (c *testAuthClient) CreateUser(ctx context.Context, in *authv1.CreateUserRe
 	return &authv1.CreateUserResponse{User: c.user}, nil
 }
 
+func (c *testAuthClient) IssueJoinGrant(ctx context.Context, in *authv1.IssueJoinGrantRequest, opts ...grpc.CallOption) (*authv1.IssueJoinGrantResponse, error) {
+	return &authv1.IssueJoinGrantResponse{}, nil
+}
+
 func (c *testAuthClient) GetUser(ctx context.Context, in *authv1.GetUserRequest, opts ...grpc.CallOption) (*authv1.GetUserResponse, error) {
 	c.lastUserIDReq = in.GetUserId()
 	md, _ := metadata.FromOutgoingContext(ctx)

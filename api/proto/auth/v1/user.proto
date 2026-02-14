@@ -19,6 +19,9 @@ service AuthService {
   // Create a new user record.
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
 
+  // Issue a join grant for a campaign invite.
+  rpc IssueJoinGrant(IssueJoinGrantRequest) returns (IssueJoinGrantResponse);
+
   // Get a user record by ID.
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
 
@@ -32,6 +35,19 @@ message CreateUserRequest {
 
 message CreateUserResponse {
   User user = 1;
+}
+
+message IssueJoinGrantRequest {
+  string user_id = 1;
+  string campaign_id = 2;
+  string invite_id = 3;
+  string participant_id = 4;
+}
+
+message IssueJoinGrantResponse {
+  string join_grant = 1;
+  string jti = 2;
+  google.protobuf.Timestamp expires_at = 3;
 }
 
 message GetUserRequest {
