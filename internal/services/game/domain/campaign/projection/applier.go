@@ -8,6 +8,7 @@ import (
 	"time"
 
 	commonv1 "github.com/louisbranch/fracturing.space/api/gen/go/common/v1"
+	platformi18n "github.com/louisbranch/fracturing.space/internal/platform/i18n"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/character"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/event"
@@ -113,9 +114,14 @@ func (a Applier) applyCampaignCreated(ctx context.Context, evt event.Event) erro
 	if err != nil {
 		return err
 	}
+	locale := platformi18n.DefaultLocale()
+	if parsed, ok := platformi18n.ParseLocale(payload.Locale); ok {
+		locale = parsed
+	}
 
 	input := campaign.CreateCampaignInput{
 		Name:        payload.Name,
+		Locale:      locale,
 		System:      system,
 		GmMode:      gmMode,
 		ThemePrompt: payload.ThemePrompt,
@@ -129,6 +135,7 @@ func (a Applier) applyCampaignCreated(ctx context.Context, evt event.Event) erro
 	c := campaign.Campaign{
 		ID:               evt.EntityID,
 		Name:             normalized.Name,
+		Locale:           normalized.Locale,
 		System:           normalized.System,
 		Status:           campaign.CampaignStatusDraft,
 		GmMode:           normalized.GmMode,

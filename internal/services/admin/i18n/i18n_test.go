@@ -27,8 +27,8 @@ func TestResolveTagPrecedence(t *testing.T) {
 		req.AddCookie(&http.Cookie{Name: LangCookieName, Value: "en"})
 
 		tag, persist := ResolveTag(req)
-		if tag.String() != "en" {
-			t.Fatalf("expected en, got %s", tag.String())
+		if tag.String() != "en-US" {
+			t.Fatalf("expected en-US, got %s", tag.String())
 		}
 		if persist {
 			t.Fatalf("expected persist to be false")

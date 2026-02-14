@@ -14,6 +14,7 @@ import (
 
 	commonv1 "github.com/louisbranch/fracturing.space/api/gen/go/common/v1"
 	apperrors "github.com/louisbranch/fracturing.space/internal/platform/errors"
+	platformi18n "github.com/louisbranch/fracturing.space/internal/platform/i18n"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/character"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign/event"
@@ -260,6 +261,7 @@ func (s *Store) Put(ctx context.Context, c campaign.Campaign) error {
 	return s.q.PutCampaign(ctx, db.PutCampaignParams{
 		ID:               c.ID,
 		Name:             c.Name,
+		Locale:           platformi18n.LocaleString(c.Locale),
 		GameSystem:       gameSystemToString(c.System),
 		Status:           campaignStatusToString(c.Status),
 		GmMode:           gmModeToString(c.GmMode),
@@ -2048,6 +2050,7 @@ func stringToSessionStatus(s string) session.SessionStatus {
 type campaignRowData struct {
 	ID               string
 	Name             string
+	Locale           string
 	GameSystem       string
 	Status           string
 	GmMode           string
@@ -2061,9 +2064,14 @@ type campaignRowData struct {
 }
 
 func campaignRowDataToDomain(row campaignRowData) (campaign.Campaign, error) {
+	locale := platformi18n.DefaultLocale()
+	if parsed, ok := platformi18n.ParseLocale(row.Locale); ok {
+		locale = parsed
+	}
 	c := campaign.Campaign{
 		ID:               row.ID,
 		Name:             row.Name,
+		Locale:           locale,
 		System:           stringToGameSystem(row.GameSystem),
 		Status:           stringToCampaignStatus(row.Status),
 		GmMode:           stringToGmMode(row.GmMode),
@@ -2083,6 +2091,7 @@ func dbCampaignToDomain(row db.Campaign) (campaign.Campaign, error) {
 	return campaignRowDataToDomain(campaignRowData{
 		ID:               row.ID,
 		Name:             row.Name,
+		Locale:           row.Locale,
 		GameSystem:       row.GameSystem,
 		Status:           row.Status,
 		GmMode:           row.GmMode,
@@ -2100,6 +2109,7 @@ func dbGetCampaignRowToDomain(row db.GetCampaignRow) (campaign.Campaign, error) 
 	return campaignRowDataToDomain(campaignRowData{
 		ID:               row.ID,
 		Name:             row.Name,
+		Locale:           row.Locale,
 		GameSystem:       row.GameSystem,
 		Status:           row.Status,
 		GmMode:           row.GmMode,
@@ -2117,6 +2127,7 @@ func dbListCampaignsRowToDomain(row db.ListCampaignsRow) (campaign.Campaign, err
 	return campaignRowDataToDomain(campaignRowData{
 		ID:               row.ID,
 		Name:             row.Name,
+		Locale:           row.Locale,
 		GameSystem:       row.GameSystem,
 		Status:           row.Status,
 		GmMode:           row.GmMode,

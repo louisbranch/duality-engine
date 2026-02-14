@@ -15,6 +15,7 @@ import (
 	authv1 "github.com/louisbranch/fracturing.space/api/gen/go/auth/v1"
 	commonv1 "github.com/louisbranch/fracturing.space/api/gen/go/common/v1"
 	statev1 "github.com/louisbranch/fracturing.space/api/gen/go/game/v1"
+	platformi18n "github.com/louisbranch/fracturing.space/internal/platform/i18n"
 	"github.com/louisbranch/fracturing.space/internal/platform/id"
 	"github.com/louisbranch/fracturing.space/internal/services/admin/i18n"
 	"github.com/louisbranch/fracturing.space/internal/services/admin/templates"
@@ -416,7 +417,11 @@ func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), grpcRequestTimeout)
 	defer cancel()
 
-	response, err := client.CreateUser(ctx, &authv1.CreateUserRequest{DisplayName: displayName})
+	locale := localeFromTag(lang)
+	response, err := client.CreateUser(ctx, &authv1.CreateUserRequest{
+		DisplayName: displayName,
+		Locale:      locale,
+	})
 	if err != nil || response.GetUser() == nil {
 		log.Printf("create user: %v", err)
 		view.Message = loc.Sprintf("error.user_create_failed")
@@ -859,8 +864,10 @@ func (h *Handler) handleCampaignCreate(w http.ResponseWriter, r *http.Request) {
 		ctx = metadata.NewOutgoingContext(ctx, md)
 	}
 
+	locale := localeFromTag(lang)
 	response, err := client.CreateCampaign(ctx, &statev1.CreateCampaignRequest{
 		Name:               view.Name,
+		Locale:             locale,
 		System:             system,
 		GmMode:             gmMode,
 		ThemePrompt:        view.ThemePrompt,
@@ -1877,6 +1884,13 @@ func formatEventDescription(event *statev1.Event, loc *message.Printer) string {
 		return ""
 	}
 	return formatEventType(event.GetType(), loc)
+}
+
+func localeFromTag(tag string) commonv1.Locale {
+	if locale, ok := platformi18n.ParseLocale(tag); ok {
+		return locale
+	}
+	return platformi18n.DefaultLocale()
 }
 
 // handleCharactersList renders the characters list page.

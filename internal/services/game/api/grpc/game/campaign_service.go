@@ -11,6 +11,7 @@ import (
 	commonv1 "github.com/louisbranch/fracturing.space/api/gen/go/common/v1"
 	campaignv1 "github.com/louisbranch/fracturing.space/api/gen/go/game/v1"
 	apperrors "github.com/louisbranch/fracturing.space/internal/platform/errors"
+	platformi18n "github.com/louisbranch/fracturing.space/internal/platform/i18n"
 	"github.com/louisbranch/fracturing.space/internal/platform/id"
 	grpcmeta "github.com/louisbranch/fracturing.space/internal/services/game/api/grpc/metadata"
 	"github.com/louisbranch/fracturing.space/internal/services/game/domain/campaign"
@@ -74,6 +75,7 @@ func (s *CampaignService) CreateCampaign(ctx context.Context, in *campaignv1.Cre
 
 	input := campaign.CreateCampaignInput{
 		Name:        in.GetName(),
+		Locale:      in.GetLocale(),
 		System:      system,
 		GmMode:      gmModeFromProto(in.GetGmMode()),
 		ThemePrompt: in.GetThemePrompt(),
@@ -98,6 +100,7 @@ func (s *CampaignService) CreateCampaign(ctx context.Context, in *campaignv1.Cre
 
 	payload := event.CampaignCreatedPayload{
 		Name:        normalized.Name,
+		Locale:      platformi18n.LocaleString(normalized.Locale),
 		GameSystem:  normalized.System.String(),
 		GmMode:      gmModeToProto(normalized.GmMode).String(),
 		ThemePrompt: normalized.ThemePrompt,

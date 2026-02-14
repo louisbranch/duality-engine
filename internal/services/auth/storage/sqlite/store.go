@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	platformi18n "github.com/louisbranch/fracturing.space/internal/platform/i18n"
 	"github.com/louisbranch/fracturing.space/internal/services/auth/storage"
 	"github.com/louisbranch/fracturing.space/internal/services/auth/storage/sqlite/db"
 	"github.com/louisbranch/fracturing.space/internal/services/auth/storage/sqlite/migrations"
@@ -154,6 +155,7 @@ func (s *Store) PutUser(ctx context.Context, u user.User) error {
 	return s.q.PutUser(ctx, db.PutUserParams{
 		ID:          u.ID,
 		DisplayName: u.DisplayName,
+		Locale:      platformi18n.LocaleString(u.Locale),
 		CreatedAt:   toMillis(u.CreatedAt),
 		UpdatedAt:   toMillis(u.UpdatedAt),
 	})
@@ -250,9 +252,14 @@ func (s *Store) GetAuthStatistics(ctx context.Context, since *time.Time) (storag
 }
 
 func dbUserToDomain(row db.User) (user.User, error) {
+	locale := platformi18n.DefaultLocale()
+	if parsed, ok := platformi18n.ParseLocale(row.Locale); ok {
+		locale = parsed
+	}
 	return user.User{
 		ID:          row.ID,
 		DisplayName: row.DisplayName,
+		Locale:      locale,
 		CreatedAt:   fromMillis(row.CreatedAt),
 		UpdatedAt:   fromMillis(row.UpdatedAt),
 	}, nil

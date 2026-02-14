@@ -11,6 +11,7 @@ import (
 type Campaign struct {
 	ID               string         `json:"id"`
 	Name             string         `json:"name"`
+	Locale           string         `json:"locale"`
 	GameSystem       string         `json:"game_system"`
 	Status           string         `json:"status"`
 	GmMode           string         `json:"gm_mode"`

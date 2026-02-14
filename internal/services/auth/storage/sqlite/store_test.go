@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	commonv1 "github.com/louisbranch/fracturing.space/api/gen/go/common/v1"
+	platformi18n "github.com/louisbranch/fracturing.space/internal/platform/i18n"
 	"github.com/louisbranch/fracturing.space/internal/services/auth/storage"
 	"github.com/louisbranch/fracturing.space/internal/services/auth/user"
 )
@@ -32,6 +34,7 @@ func TestPutGetUserRoundTrip(t *testing.T) {
 	input := user.User{
 		ID:          "user-1",
 		DisplayName: "User",
+		Locale:      commonv1.Locale_LOCALE_PT_BR,
 		CreatedAt:   created,
 		UpdatedAt:   updated,
 	}
@@ -44,7 +47,7 @@ func TestPutGetUserRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("get user: %v", err)
 	}
-	if got.ID != input.ID || got.DisplayName != input.DisplayName {
+	if got.ID != input.ID || got.DisplayName != input.DisplayName || got.Locale != input.Locale {
 		t.Fatalf("unexpected user: %+v", got)
 	}
 }
@@ -86,6 +89,7 @@ func TestListUsersPagination(t *testing.T) {
 		if err := store.PutUser(context.Background(), user.User{
 			ID:          id,
 			DisplayName: "User",
+			Locale:      platformi18n.DefaultLocale(),
 			CreatedAt:   time.Date(2026, 2, 1, 10, 0, 0, 0, time.UTC),
 			UpdatedAt:   time.Date(2026, 2, 1, 10, 0, 0, 0, time.UTC),
 		}); err != nil {
@@ -142,6 +146,7 @@ func TestGetAuthStatisticsSince(t *testing.T) {
 	if err := store.PutUser(context.Background(), user.User{
 		ID:          "user-1",
 		DisplayName: "User",
+		Locale:      platformi18n.DefaultLocale(),
 		CreatedAt:   created,
 		UpdatedAt:   created,
 	}); err != nil {
@@ -165,6 +170,7 @@ func TestGetAuthStatisticsAllTime(t *testing.T) {
 	if err := store.PutUser(context.Background(), user.User{
 		ID:          "user-1",
 		DisplayName: "User",
+		Locale:      platformi18n.DefaultLocale(),
 		CreatedAt:   created,
 		UpdatedAt:   created,
 	}); err != nil {

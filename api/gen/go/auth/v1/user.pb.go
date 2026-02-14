@@ -7,6 +7,7 @@
 package authv1
 
 import (
+	v1 "github.com/louisbranch/fracturing.space/api/gen/go/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
@@ -27,8 +28,9 @@ type User struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	DisplayName   string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Locale        v1.Locale              `protobuf:"varint,3,opt,name=locale,proto3,enum=common.v1.Locale" json:"locale,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -77,6 +79,13 @@ func (x *User) GetDisplayName() string {
 	return ""
 }
 
+func (x *User) GetLocale() v1.Locale {
+	if x != nil {
+		return x.Locale
+	}
+	return v1.Locale(0)
+}
+
 func (x *User) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
@@ -94,6 +103,7 @@ func (x *User) GetUpdatedAt() *timestamppb.Timestamp {
 type CreateUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	DisplayName   string                 `protobuf:"bytes,1,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	Locale        v1.Locale              `protobuf:"varint,2,opt,name=locale,proto3,enum=common.v1.Locale" json:"locale,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -133,6 +143,13 @@ func (x *CreateUserRequest) GetDisplayName() string {
 		return x.DisplayName
 	}
 	return ""
+}
+
+func (x *CreateUserRequest) GetLocale() v1.Locale {
+	if x != nil {
+		return x.Locale
+	}
+	return v1.Locale(0)
 }
 
 type CreateUserResponse struct {
@@ -506,16 +523,18 @@ var File_auth_v1_user_proto protoreflect.FileDescriptor
 
 const file_auth_v1_user_proto_rawDesc = "" +
 	"\n" +
-	"\x12auth/v1/user.proto\x12\aauth.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xaf\x01\n" +
+	"\x12auth/v1/user.proto\x12\aauth.v1\x1a\x16common/v1/locale.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xda\x01\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
-	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x129\n" +
+	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12)\n" +
+	"\x06locale\x18\x03 \x01(\x0e2\x11.common.v1.LocaleR\x06locale\x129\n" +
 	"\n" +
-	"created_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"6\n" +
+	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"a\n" +
 	"\x11CreateUserRequest\x12!\n" +
-	"\fdisplay_name\x18\x01 \x01(\tR\vdisplayName\"7\n" +
+	"\fdisplay_name\x18\x01 \x01(\tR\vdisplayName\x12)\n" +
+	"\x06locale\x18\x02 \x01(\x0e2\x11.common.v1.LocaleR\x06locale\"7\n" +
 	"\x12CreateUserResponse\x12!\n" +
 	"\x04user\x18\x01 \x01(\v2\r.auth.v1.UserR\x04user\"\x95\x01\n" +
 	"\x15IssueJoinGrantRequest\x12\x17\n" +
@@ -571,28 +590,31 @@ var file_auth_v1_user_proto_goTypes = []any{
 	(*GetUserResponse)(nil),        // 6: auth.v1.GetUserResponse
 	(*ListUsersRequest)(nil),       // 7: auth.v1.ListUsersRequest
 	(*ListUsersResponse)(nil),      // 8: auth.v1.ListUsersResponse
-	(*timestamppb.Timestamp)(nil),  // 9: google.protobuf.Timestamp
+	(v1.Locale)(0),                 // 9: common.v1.Locale
+	(*timestamppb.Timestamp)(nil),  // 10: google.protobuf.Timestamp
 }
 var file_auth_v1_user_proto_depIdxs = []int32{
-	9,  // 0: auth.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	9,  // 1: auth.v1.User.updated_at:type_name -> google.protobuf.Timestamp
-	0,  // 2: auth.v1.CreateUserResponse.user:type_name -> auth.v1.User
-	9,  // 3: auth.v1.IssueJoinGrantResponse.expires_at:type_name -> google.protobuf.Timestamp
-	0,  // 4: auth.v1.GetUserResponse.user:type_name -> auth.v1.User
-	0,  // 5: auth.v1.ListUsersResponse.users:type_name -> auth.v1.User
-	1,  // 6: auth.v1.AuthService.CreateUser:input_type -> auth.v1.CreateUserRequest
-	3,  // 7: auth.v1.AuthService.IssueJoinGrant:input_type -> auth.v1.IssueJoinGrantRequest
-	5,  // 8: auth.v1.AuthService.GetUser:input_type -> auth.v1.GetUserRequest
-	7,  // 9: auth.v1.AuthService.ListUsers:input_type -> auth.v1.ListUsersRequest
-	2,  // 10: auth.v1.AuthService.CreateUser:output_type -> auth.v1.CreateUserResponse
-	4,  // 11: auth.v1.AuthService.IssueJoinGrant:output_type -> auth.v1.IssueJoinGrantResponse
-	6,  // 12: auth.v1.AuthService.GetUser:output_type -> auth.v1.GetUserResponse
-	8,  // 13: auth.v1.AuthService.ListUsers:output_type -> auth.v1.ListUsersResponse
-	10, // [10:14] is the sub-list for method output_type
-	6,  // [6:10] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	9,  // 0: auth.v1.User.locale:type_name -> common.v1.Locale
+	10, // 1: auth.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	10, // 2: auth.v1.User.updated_at:type_name -> google.protobuf.Timestamp
+	9,  // 3: auth.v1.CreateUserRequest.locale:type_name -> common.v1.Locale
+	0,  // 4: auth.v1.CreateUserResponse.user:type_name -> auth.v1.User
+	10, // 5: auth.v1.IssueJoinGrantResponse.expires_at:type_name -> google.protobuf.Timestamp
+	0,  // 6: auth.v1.GetUserResponse.user:type_name -> auth.v1.User
+	0,  // 7: auth.v1.ListUsersResponse.users:type_name -> auth.v1.User
+	1,  // 8: auth.v1.AuthService.CreateUser:input_type -> auth.v1.CreateUserRequest
+	3,  // 9: auth.v1.AuthService.IssueJoinGrant:input_type -> auth.v1.IssueJoinGrantRequest
+	5,  // 10: auth.v1.AuthService.GetUser:input_type -> auth.v1.GetUserRequest
+	7,  // 11: auth.v1.AuthService.ListUsers:input_type -> auth.v1.ListUsersRequest
+	2,  // 12: auth.v1.AuthService.CreateUser:output_type -> auth.v1.CreateUserResponse
+	4,  // 13: auth.v1.AuthService.IssueJoinGrant:output_type -> auth.v1.IssueJoinGrantResponse
+	6,  // 14: auth.v1.AuthService.GetUser:output_type -> auth.v1.GetUserResponse
+	8,  // 15: auth.v1.AuthService.ListUsers:output_type -> auth.v1.ListUsersResponse
+	12, // [12:16] is the sub-list for method output_type
+	8,  // [8:12] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_auth_v1_user_proto_init() }

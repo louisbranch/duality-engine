@@ -7,6 +7,7 @@ import (
 
 	commonv1 "github.com/louisbranch/fracturing.space/api/gen/go/common/v1"
 	apperrors "github.com/louisbranch/fracturing.space/internal/platform/errors"
+	platformi18n "github.com/louisbranch/fracturing.space/internal/platform/i18n"
 	"github.com/louisbranch/fracturing.space/internal/platform/id"
 )
 
@@ -56,6 +57,8 @@ var (
 type Campaign struct {
 	ID   string
 	Name string
+	// Locale is the preferred locale for the campaign.
+	Locale commonv1.Locale
 	// System is the game system this campaign uses (required, immutable).
 	System           commonv1.GameSystem
 	Status           CampaignStatus
@@ -77,6 +80,7 @@ type Campaign struct {
 // CreateCampaignInput describes the metadata needed to create a campaign.
 type CreateCampaignInput struct {
 	Name        string
+	Locale      commonv1.Locale
 	System      commonv1.GameSystem
 	GmMode      GmMode
 	ThemePrompt string
@@ -105,6 +109,7 @@ func CreateCampaign(input CreateCampaignInput, now func() time.Time, idGenerator
 	return Campaign{
 		ID:               campaignID,
 		Name:             normalized.Name,
+		Locale:           normalized.Locale,
 		System:           normalized.System,
 		Status:           CampaignStatusDraft,
 		GmMode:           normalized.GmMode,
@@ -192,5 +197,6 @@ func NormalizeCreateCampaignInput(input CreateCampaignInput) (CreateCampaignInpu
 	if input.GmMode == GmModeUnspecified {
 		return CreateCampaignInput{}, ErrInvalidGmMode
 	}
+	input.Locale = platformi18n.NormalizeLocale(input.Locale)
 	return input, nil
 }

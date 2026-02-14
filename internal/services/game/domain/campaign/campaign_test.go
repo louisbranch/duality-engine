@@ -7,6 +7,7 @@ import (
 
 	commonv1 "github.com/louisbranch/fracturing.space/api/gen/go/common/v1"
 	apperrors "github.com/louisbranch/fracturing.space/internal/platform/errors"
+	platformi18n "github.com/louisbranch/fracturing.space/internal/platform/i18n"
 )
 
 func TestCreateCampaignDefaults(t *testing.T) {
@@ -17,9 +18,12 @@ func TestCreateCampaignDefaults(t *testing.T) {
 		ThemePrompt: "moss and mist",
 	}
 
-	_, err := CreateCampaign(input, nil, nil)
+	created, err := CreateCampaign(input, nil, nil)
 	if err != nil {
 		t.Fatalf("create campaign: %v", err)
+	}
+	if created.Locale != platformi18n.DefaultLocale() {
+		t.Fatalf("expected default locale %v, got %v", platformi18n.DefaultLocale(), created.Locale)
 	}
 }
 
@@ -27,6 +31,7 @@ func TestCreateCampaignNormalizesInput(t *testing.T) {
 	fixedTime := time.Date(2026, 1, 23, 10, 0, 0, 0, time.UTC)
 	input := CreateCampaignInput{
 		Name:        "  The Glade  ",
+		Locale:      commonv1.Locale_LOCALE_PT_BR,
 		System:      commonv1.GameSystem_GAME_SYSTEM_DAGGERHEART,
 		GmMode:      GmModeHuman,
 		ThemePrompt: "moss and mist",
@@ -44,6 +49,9 @@ func TestCreateCampaignNormalizesInput(t *testing.T) {
 	}
 	if campaign.Name != "The Glade" {
 		t.Fatalf("expected trimmed name, got %q", campaign.Name)
+	}
+	if campaign.Locale != commonv1.Locale_LOCALE_PT_BR {
+		t.Fatalf("expected locale %v, got %v", commonv1.Locale_LOCALE_PT_BR, campaign.Locale)
 	}
 	if campaign.GmMode != GmModeHuman {
 		t.Fatalf("expected gm mode human, got %v", campaign.GmMode)
