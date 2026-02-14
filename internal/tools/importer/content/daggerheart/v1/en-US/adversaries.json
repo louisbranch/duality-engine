@@ -996,7 +996,7 @@
       "name": "Jagged Knife Lackey",
       "tier": 1,
       "role": "minion",
-      "description": "Athief with simple clothes and small daggers, eager to prove themselves.",
+      "description": "A thief with simple clothes and small daggers, eager to prove themselves.",
       "motives": "Escape, profit, throw smoke",
       "difficulty": 9,
       "major_threshold": 0,
@@ -1507,7 +1507,7 @@
       "armor": 0,
       "attack_modifier": 1,
       "standard_attack": {
-        "name": "OozeAppendage",
+        "name": "Ooze Appendage",
         "range": "melee",
         "damage_dice": [
           {
@@ -1574,7 +1574,7 @@
       "armor": 0,
       "attack_modifier": -1,
       "standard_attack": {
-        "name": "OozeAppendage",
+        "name": "Ooze Appendage",
         "range": "melee",
         "damage_dice": [
           {
@@ -1612,7 +1612,7 @@
       "armor": 0,
       "attack_modifier": 1,
       "standard_attack": {
-        "name": "OozeAppendage",
+        "name": "Ooze Appendage",
         "range": "melee",
         "damage_dice": [
           {
@@ -1671,7 +1671,7 @@
       "armor": 0,
       "attack_modifier": -1,
       "standard_attack": {
-        "name": "OozeAppendage",
+        "name": "Ooze Appendage",
         "range": "melee",
         "damage_dice": [
           {
@@ -2044,7 +2044,7 @@
       "armor": 0,
       "attack_modifier": 2,
       "standard_attack": {
-        "name": "RustyGreatsword",
+        "name": "Rusty Greatsword",
         "range": "melee",
         "damage_dice": [
           {
@@ -2489,8 +2489,8 @@
       ],
       "features": [
         {
-          "id": "adversary-feature.young-dryad-voice-ofthe-forest",
-          "name": "Voice Ofthe Forest",
+          "id": "adversary-feature.young-dryad-voice-of-the-forest",
+          "name": "Voice of the Forest",
           "kind": "action",
           "description": "Mark a Stress to spotlight 1d4 allies within range of a target they can attack without moving. On a success, their attacks deal half damage.",
           "cost_type": "",
@@ -2584,7 +2584,7 @@
       "armor": 0,
       "attack_modifier": 4,
       "standard_attack": {
-        "name": "Too ManyArms",
+        "name": "Too Many Arms",
         "range": "very_close",
         "damage_dice": [
           {
@@ -2601,7 +2601,7 @@
           "modifier": 2
         },
         {
-          "name": "TearThings Apart",
+          "name": "Tear Things Apart",
           "modifier": 2
         }
       ],
@@ -2623,8 +2623,8 @@
           "cost": 0
         },
         {
-          "id": "adversary-feature.patchwork-zombie-hulk-anotherforthe-pile",
-          "name": "Anotherforthe Pile",
+          "id": "adversary-feature.patchwork-zombie-hulk-another-for-the-pile",
+          "name": "Another for the Pile",
           "kind": "action",
           "description": "When the Zombie is within Very Close range of a corpse, they can incorporate it into themselves, clearing a HP and a Stress.",
           "cost_type": "",
@@ -2888,7 +2888,7 @@
       "armor": 0,
       "attack_modifier": 3,
       "standard_attack": {
-        "name": "PoisonedThrowing Dagger",
+        "name": "Poisoned Throwing Dagger",
         "range": "close",
         "damage_dice": [
           {
@@ -2907,8 +2907,8 @@
       ],
       "features": [
         {
-          "id": "adversary-feature.assassin-poisoner-grindletooth-venom",
-          "name": "Grindletooth Venom",
+          "id": "adversary-feature.assassin-poisoner-wyvern-venom",
+          "name": "Wyvern Venom",
           "kind": "passive",
           "description": "Targets who mark HP from the Assassin's attacks are Vulnerable until they clear a HP.",
           "cost_type": "",
@@ -3085,7 +3085,7 @@
       "armor": 0,
       "attack_modifier": 2,
       "standard_attack": {
-        "name": "EnergyBlast",
+        "name": "Energy Blast",
         "range": "close",
         "damage_dice": [
           {
@@ -3266,8 +3266,8 @@
           "cost": 0
         },
         {
-          "id": "adversary-feature.cultadept-shroud-ofthe-fallen",
-          "name": "Shroud Ofthe Fallen",
+          "id": "adversary-feature.cultadept-shroud-of-the-fallen",
+          "name": "Shroud of the Fallen",
           "kind": "action",
           "description": "Mark a Stress to wrap an ally within Close range in a shroud of Protection until the Adept marks their last HP. While Protected, the target has resistance to all damage.",
           "cost_type": "",
@@ -3277,7 +3277,7 @@
           "id": "adversary-feature.cultadept-shadow-shackles",
           "name": "Shadow Shackles",
           "kind": "action",
-          "description": "Spend a Fearand choose a point within Far range. All targets within Close range of that point are Restrained in smoky chains until they break free with a successful Strength or Instinct Roll. Atarget Restrained by this feature must spend a Hope to make an action roll.",
+          "description": "Spend a Fear and choose a point within Far range. All targets within Close range of that point are Restrained in smoky chains until they break free with a successful Strength or Instinct Roll. A target Restrained by this feature must spend a Hope to make an action roll.",
           "cost_type": "",
           "cost": 0
         },
@@ -3824,7 +3824,7 @@
       "armor": 0,
       "attack_modifier": 4,
       "standard_attack": {
-        "name": "SunsearShortbow",
+        "name": "Sunsear Shortbow",
         "range": "far",
         "damage_dice": [
           {
@@ -3885,8 +3885,8 @@
       ]
     },
     {
-      "id": "adversary.juvenile-flickerfly",
-      "name": "Juvenile Flickerfly",
+      "id": "adversary.juvenile-glimmermoth",
+      "name": "Juvenile Glimmermoth",
       "tier": 2,
       "role": "solo",
       "description": "A horse-sized insect with iridescent scales and crystalline wings moving faster than the eye can see.",
@@ -3913,34 +3913,34 @@
       "experiences": [],
       "features": [
         {
-          "id": "adversary-feature.juvenile-flickerfly-relentless-3",
+          "id": "adversary-feature.juvenile-glimmermoth-relentless-3",
           "name": "Relentless (3)",
           "kind": "passive",
-          "description": "The Flickerfly can be spotlighted up to three times per GM turn. Spend Fear as usual to spotlight them.",
+          "description": "The Glimmermoth can be spotlighted up to three times per GM turn. Spend Fear as usual to spotlight them.",
           "cost_type": "fear",
           "cost": 1
         },
         {
-          "id": "adversary-feature.juvenile-flickerfly-peerless-accuracy",
+          "id": "adversary-feature.juvenile-glimmermoth-peerless-accuracy",
           "name": "Peerless Accuracy",
           "kind": "passive",
-          "description": "Before the Flickerfly makes an attack, roll a d6. On a result of 4 or higher, the target's Evasion is halved against this attack.",
+          "description": "Before the Glimmermoth makes an attack, roll a d6. On a result of 4 or higher, the target's Evasion is halved against this attack.",
           "cost_type": "",
           "cost": 0
         },
         {
-          "id": "adversary-feature.juvenile-flickerfly-mind-dance",
+          "id": "adversary-feature.juvenile-glimmermoth-mind-dance",
           "name": "Mind Dance",
           "kind": "action",
-          "description": "Mark a Stress to create a magically dazzling display that grapples the minds of nearby foes. All targets within Close range must make an Instinct Reaction Roll. For each target who failed, you gain a Fear and the Flickerfly learns one of the target's fears.",
+          "description": "Mark a Stress to create a magically dazzling display that grapples the minds of nearby foes. All targets within Close range must make an Instinct Reaction Roll. For each target who failed, you gain a Fear and the Glimmermoth learns one of the target's fears.",
           "cost_type": "",
           "cost": 0
         },
         {
-          "id": "adversary-feature.juvenile-flickerfly-hallucinatory-breath",
+          "id": "adversary-feature.juvenile-glimmermoth-hallucinatory-breath",
           "name": "Hallucinatory Breath",
           "kind": "reaction",
-          "description": "Countdown (Loop 1d6). When the Flickerfly takes damage for the first time, activate the countdown. When it triggers, the Flickerfly breathes hallucinatory gas on all targets in front of them up to Far range. Targets must succeed on an Instinct Reaction Roll or be tormented by fearful hallucinations. Targets whose fears are known to the Flickerfly have disadvantage on this roll. Targets who fail must mark a Stress and lose a Hope.",
+          "description": "Countdown (Loop 1d6). When the Glimmermoth takes damage for the first time, activate the countdown. When it triggers, the Glimmermoth breathes hallucinatory gas on all targets in front of them up to Far range. Targets must succeed on an Instinct Reaction Roll or be tormented by fearful hallucinations. Targets whose fears are known to the Glimmermoth have disadvantage on this roll. Targets who fail must mark a Stress and lose a Hope.",
           "cost_type": "",
           "cost": 0
         }
@@ -4012,8 +4012,8 @@
           "cost": 0
         },
         {
-          "id": "adversary-feature.knight-of-the-realm-forthe-realm",
-          "name": "Forthe Realm!",
+          "id": "adversary-feature.knight-of-the-realm-for-the-realm",
+          "name": "For the Realm!",
           "kind": "action",
           "description": "Mark a Stress to spotlight 1d4+1 allies. Attacks they make while spotlighted in this way deal half damage.",
           "cost_type": "",
@@ -4357,7 +4357,7 @@
           "id": "adversary-feature.secret-keeper-seize-your-moment",
           "name": "Seize Your Moment",
           "kind": "action",
-          "description": "Spend2Fear to spotlight 1d4 allies. Attacks they make while spotlighted in this way deal half damage.",
+          "description": "Spend 2 Fear to spotlight 1d4 allies. Attacks they make while spotlighted in this way deal half damage.",
           "cost_type": "",
           "cost": 0
         },
@@ -4402,7 +4402,7 @@
       "armor": 0,
       "attack_modifier": 2,
       "standard_attack": {
-        "name": "ToothyMaw",
+        "name": "Toothy Maw",
         "range": "very_close",
         "damage_dice": [
           {
@@ -4453,7 +4453,7 @@
       "armor": 0,
       "attack_modifier": 2,
       "standard_attack": {
-        "name": "Distended JawBite",
+        "name": "Distended Jaw Bite",
         "range": "melee",
         "damage_dice": [
           {
@@ -4856,8 +4856,8 @@
       ]
     },
     {
-      "id": "adversary.adult-flickerfly",
-      "name": "Adult Flickerfly",
+      "id": "adversary.adult-glimmermoth",
+      "name": "Adult Glimmermoth",
       "tier": 3,
       "role": "solo",
       "description": "A winged insect the size of a large house with iridescent scales and wings that move too fast to track.",
@@ -4884,58 +4884,58 @@
       "experiences": [],
       "features": [
         {
-          "id": "adversary-feature.adult-flickerfly-relentless-4",
+          "id": "adversary-feature.adult-glimmermoth-relentless-4",
           "name": "Relentless (4)",
           "kind": "passive",
-          "description": "The Flickerfly can be spotlighted up to four times per GM turn. Spend Fear as usual to spotlight them.",
+          "description": "The Glimmermoth can be spotlighted up to four times per GM turn. Spend Fear as usual to spotlight them.",
           "cost_type": "fear",
           "cost": 1
         },
         {
-          "id": "adversary-feature.adult-flickerfly-never-misses",
+          "id": "adversary-feature.adult-glimmermoth-never-misses",
           "name": "Never Misses",
           "kind": "passive",
-          "description": "When the Flickerfly makes an attack, the target's Evasion is halved against the attack.",
+          "description": "When the Glimmermoth makes an attack, the target's Evasion is halved against the attack.",
           "cost_type": "",
           "cost": 0
         },
         {
-          "id": "adversary-feature.adult-flickerfly-deadly-flight",
+          "id": "adversary-feature.adult-glimmermoth-deadly-flight",
           "name": "Deadly Flight",
           "kind": "passive",
-          "description": "While flying, the Flickerfly can move up to Far range instead of Close range before taking an action.",
+          "description": "While flying, the Glimmermoth can move up to Far range instead of Close range before taking an action.",
           "cost_type": "",
           "cost": 0
         },
         {
-          "id": "adversary-feature.adult-flickerfly-whirlwind",
+          "id": "adversary-feature.adult-glimmermoth-whirlwind",
           "name": "Whirlwind",
           "kind": "action",
-          "description": "Spend a Fear to whirl, making an attack against all targets within Very Close range. Targets the Flickerfly succeeds against take 3d8 direct physical damage.",
+          "description": "Spend a Fear to whirl, making an attack against all targets within Very Close range. Targets the Glimmermoth succeeds against take 3d8 direct physical damage.",
           "cost_type": "",
           "cost": 0
         },
         {
-          "id": "adversary-feature.adult-flickerfly-mind-dance",
+          "id": "adversary-feature.adult-glimmermoth-mind-dance",
           "name": "Mind Dance",
           "kind": "action",
-          "description": "Mark a Stress to create a magically dazzling display that grapples the minds of nearby foes. All targets within Close range must make an Instinct Reaction Roll. For each target who failed, you gain a Fear and the Flickerfly learns one of the target's fears.",
+          "description": "Mark a Stress to create a magically dazzling display that grapples the minds of nearby foes. All targets within Close range must make an Instinct Reaction Roll. For each target who failed, you gain a Fear and the Glimmermoth learns one of the target's fears.",
           "cost_type": "",
           "cost": 0
         },
         {
-          "id": "adversary-feature.adult-flickerfly-hallucinatory-breath",
+          "id": "adversary-feature.adult-glimmermoth-hallucinatory-breath",
           "name": "Hallucinatory Breath",
           "kind": "reaction",
-          "description": "Countdown (Loop 1d6). When the Flickerfly takes damage for the first time, activate the countdown. When it triggers, the Flickerfly breathes hallucinatory gas on all targets in front of them up to Far range. Targets must make an Instinct Reaction Roll or be tormented by fearful hallucinations. Targets whose fears are known to the Flickerfly have disadvantage on this roll. Targets who fail lose 2 Hope and take 3d8+3 direct magic damage.",
+          "description": "Countdown (Loop 1d6). When the Glimmermoth takes damage for the first time, activate the countdown. When it triggers, the Glimmermoth breathes hallucinatory gas on all targets in front of them up to Far range. Targets must make an Instinct Reaction Roll or be tormented by fearful hallucinations. Targets whose fears are known to the Glimmermoth have disadvantage on this roll. Targets who fail lose 2 Hope and take 3d8+3 direct magic damage.",
           "cost_type": "",
           "cost": 0
         },
         {
-          "id": "adversary-feature.adult-flickerfly-uncanny-reflexes",
+          "id": "adversary-feature.adult-glimmermoth-uncanny-reflexes",
           "name": "Uncanny Reflexes",
           "kind": "reaction",
-          "description": "When the Flickerfly takes damage from an attack within Close range, you can mark a Stress to take half damage.",
+          "description": "When the Glimmermoth takes damage from an attack within Close range, you can mark a Stress to take half damage.",
           "cost_type": "",
           "cost": 0
         }
@@ -4956,7 +4956,7 @@
       "armor": 0,
       "attack_modifier": 2,
       "standard_attack": {
-        "name": "HungryMaw",
+        "name": "Hungry Maw",
         "range": "melee",
         "damage_dice": [
           {
@@ -5157,7 +5157,7 @@
       "armor": 0,
       "attack_modifier": 4,
       "standard_attack": {
-        "name": "PsychicAssault",
+        "name": "Psychic Assault",
         "range": "far",
         "damage_dice": [
           {
@@ -5291,7 +5291,7 @@
       "armor": 0,
       "attack_modifier": 2,
       "standard_attack": {
-        "name": "Claws andTeeth",
+        "name": "Claws and Teeth",
         "range": "melee",
         "damage_dice": [
           {
@@ -5372,7 +5372,7 @@
           "id": "adversary-feature.dryad-bramble-patch",
           "name": "Bramble Patch",
           "kind": "action",
-          "description": "Mark a Stress to target a point within Far range. Create a patch of thorns that covers an area within Close range of that point. All targets within that area take 2d6+2 physical damage when they act. Atarget must succeed on a Finesse Roll or deal more than 20 damage to the Dryad with an attack to leave the area.",
+          "description": "Mark a Stress to target a point within Far range. Create a patch of thorns that covers an area within Close range of that point. All targets within that area take 2d6+2 physical damage when they act. A target must succeed on a Finesse Roll or deal more than 20 damage to the Dryad with an attack to leave the area.",
           "cost_type": "",
           "cost": 0
         },
@@ -5409,7 +5409,7 @@
       "armor": 0,
       "attack_modifier": 0,
       "standard_attack": {
-        "name": "Bursts ofFire",
+        "name": "Bursts of Fire",
         "range": "close",
         "damage_dice": [],
         "damage_bonus": 5,
@@ -5450,7 +5450,7 @@
       "armor": 0,
       "attack_modifier": 7,
       "standard_attack": {
-        "name": "BoulderFist",
+        "name": "Boulder Fist",
         "range": "very_close",
         "damage_dice": [
           {
@@ -5520,7 +5520,7 @@
       "armor": 0,
       "attack_modifier": 3,
       "standard_attack": {
-        "name": "CrashingWave",
+        "name": "Crashing Wave",
         "range": "very_close",
         "damage_dice": [
           {
@@ -5545,7 +5545,7 @@
           "id": "adversary-feature.greater-water-elemental-drowning-embrace",
           "name": "Drowning Embrace",
           "kind": "action",
-          "description": "Spend a Fear to make an attack against all targets within Very Close range. Targets the Elemental succeeds against become Restrained and Vulnerable as they begin drowning. Atarget can break free, ending both conditions, with a successful Strength or Instinct Roll.",
+          "description": "Spend a Fear to make an attack against all targets within Very Close range. Targets the Elemental succeeds against become Restrained and Vulnerable as they begin drowning. A target can break free, ending both conditions, with a successful Strength or Instinct Roll.",
           "cost_type": "",
           "cost": 0
         },
@@ -5574,7 +5574,7 @@
       "armor": 0,
       "attack_modifier": 3,
       "standard_attack": {
-        "name": "OozeAppendage",
+        "name": "Ooze Appendage",
         "range": "melee",
         "damage_dice": [
           {
@@ -5801,10 +5801,10 @@
           "cost": 0
         },
         {
-          "id": "adversary-feature.stag-knight-blade-ofthe-forest",
-          "name": "Blade Ofthe Forest",
+          "id": "adversary-feature.stag-knight-blade-of-the-forest",
+          "name": "Blade of the Forest",
           "kind": "action",
-          "description": "Spend a Fearto make an attack against all targets within Very Close range. Targets the Knight succeeds against take physical damage equal to 3d4 + the target's Major threshold. ThornyArmor- Reaction: When the Knight takes damage from an attack within Melee range, you can mark a Stress to deal 1d10+5 physical damage to the attacker.",
+          "description": "Spend a Fear to make an attack against all targets within Very Close range. Targets the Knight succeeds against take physical damage equal to 3d4 + the target's Major threshold. ThornyArmor- Reaction: When the Knight takes damage from an attack within Melee range, you can mark a Stress to deal 1d10+5 physical damage to the attacker.",
           "cost_type": "",
           "cost": 0
         }
@@ -6022,7 +6022,7 @@
           "id": "adversary-feature.vampire-draining-bite",
           "name": "Draining Bite",
           "kind": "action",
-          "description": "Make an attack against a target within Melee range. On a success, deal 5d4 physical damage. Atarget who marks HP from this attack loses a Hope and must mark a Stress. The Vampire then clears a HP.",
+          "description": "Make an attack against a target within Melee range. On a success, deal 5d4 physical damage. A target who marks HP from this attack loses a Hope and must mark a Stress. The Vampire then clears a HP.",
           "cost_type": "",
           "cost": 0
         },
@@ -6051,7 +6051,7 @@
       "armor": 0,
       "attack_modifier": 2,
       "standard_attack": {
-        "name": "BodyBash",
+        "name": "Body Bash",
         "range": "very_close",
         "damage_dice": [
           {
@@ -6346,7 +6346,7 @@
           "id": "adversary-feature.arch-necromancer-beam-of-decay",
           "name": "Decaying Beam",
           "kind": "action",
-          "description": "Mark 2 Stress to cause all targets within Far range to make a Strength Reaction Roll. Targets who fail take 2d20+12 magic damage and you gain a Fear. Targets who succeed take half damage. Atarget who marks 2 or more HP must also mark 2 Stress and becomes Vulnerable until they roll with Hope.",
+          "description": "Mark 2 Stress to cause all targets within Far range to make a Strength Reaction Roll. Targets who fail take 2d20+12 magic damage and you gain a Fear. Targets who succeed take half damage. A target who marks 2 or more HP must also mark 2 Stress and becomes Vulnerable until they roll with Hope.",
           "cost_type": "stress",
           "cost": 2
         },
@@ -6391,7 +6391,7 @@
       "armor": 0,
       "attack_modifier": 2,
       "standard_attack": {
-        "name": "CursedAxe",
+        "name": "Cursed Axe",
         "range": "very_close",
         "damage_dice": [],
         "damage_bonus": 12,
@@ -6486,7 +6486,7 @@
           "id": "adversary-feature.fallen-sorcerer-shackles-of-guilt",
           "name": "Shackles of Guilt",
           "kind": "reaction",
-          "description": "Countdown (Loop 2d6). When the Sorcerer is in the spotlight for the first time, activate the countdown. When it triggers, all targets within Far range become Vulnerable and must mark a Stress as they relive their greatest regrets. Atarget can break free from their regret with a successful Presence or Strength Roll. When a PC fails to break free, they lose a Hope.",
+          "description": "Countdown (Loop 2d6). When the Sorcerer is in the spotlight for the first time, activate the countdown. When it triggers, all targets within Far range become Vulnerable and must mark a Stress as they relive their greatest regrets. A target can break free from their regret with a successful Presence or Strength Roll. When a PC fails to break free, they lose a Hope.",
           "cost_type": "",
           "cost": 0
         }
@@ -6507,7 +6507,7 @@
       "armor": 0,
       "attack_modifier": 7,
       "standard_attack": {
-        "name": "BarbedWhip",
+        "name": "Barbed Whip",
         "range": "close",
         "damage_dice": [
           {
@@ -6685,7 +6685,7 @@
       "armor": 0,
       "attack_modifier": 8,
       "standard_attack": {
-        "name": "HolySword",
+        "name": "Holy Sword",
         "range": "very_close",
         "damage_dice": [
           {
@@ -6835,7 +6835,7 @@
       "armor": 0,
       "attack_modifier": 8,
       "standard_attack": {
-        "name": "PsychicAttack",
+        "name": "Psychic Attack",
         "range": "far",
         "damage_dice": [
           {
@@ -7026,7 +7026,7 @@
       "armor": 0,
       "attack_modifier": 3,
       "standard_attack": {
-        "name": "Claws andTeeth",
+        "name": "Claws and Teeth",
         "range": "very_close",
         "damage_dice": [],
         "damage_bonus": 11,

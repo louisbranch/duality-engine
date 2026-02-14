@@ -214,7 +214,7 @@
       "mastery_features": [
         {
           "id": "feature.vengeance-nemesis",
-          "name": "Nemesis",
+          "name": "Nêmesis",
           "description": "Gaste 2 Esperança para Priorizar um adversario ate o proximo descanso. Quando você ataca seu adversario Prioritario, pode trocar os resultados dos seus Dados de Esperança e Medo. Você so pode Priorizar um adversario por vez.",
           "level": 3
         }

@@ -1133,8 +1133,8 @@
       "feature": "Cumbersome: -1 to Finesse. Damage bonus +9."
     },
     {
-      "id": "weapon.flickerfly-blade",
-      "name": "Flickerfly Blade",
+      "id": "weapon.glimmermoth-blade",
+      "name": "Glimmermoth Blade",
       "category": "primary",
       "tier": 3,
       "trait": "Agility",

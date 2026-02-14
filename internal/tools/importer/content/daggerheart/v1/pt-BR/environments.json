@@ -6,7 +6,7 @@
   "items": [
     {
       "id": "environment.ab-and-on-ed-grove",
-      "name": "Ab and on Ed Grove",
+      "name": "Bosque Abandonado",
       "tier": 1,
       "type": "exploration",
       "difficulty": 11,
@@ -18,8 +18,8 @@
       "features": [
         {
           "id": "feature.environment-ab-and-on-ed-grove-overgrown-battlefield",
-          "name": "Overgrown Battlefield",
-          "description": "Passive: There has been a battle here. A PC can make an Instinct Roll to identify evidence of that fight. On a success with Esperanca, learn all three pieces of information below. On a success with Fear, learn two. On a failure, a PC can mark a Estresse to learn one and gain advantage on the next action roll to investigate this environment. A PC with an appropriate background or Experience can learn an additional detail and ask a follow-up question about the scene and get a truthful (if not always complete) answer. - Traces of a battle (broken weapons and branches, gouges in the ground) litter the ground. - A moss-covered tree trunk is actually the corpse of a treant. - Still-standing trees are twisted in strange ways, as if by powerful magic. BarbedVines -Action: Pick a point within the grove. All targets within Very alcance proximo of that point must succeed on an Agility rolagem de Reacao or take 1d8+3 physical damage and become Restrained by barbed vines. Restrained lasts until they're freed with a successful Finesse or Strength roll or by dealing at least 6 damage to the vines. YouAre NotWelcome Here -Action: AYoung Dryad, two Sylvan Soldiers, and a number of MinorTreants equal to the number of PCs appear to confront the party for their intrusion. Defiler-Action: Spend a Fear to summon a Minor Chaos Elemental drawn to the echoes of violence and discord. They appear within alcance longo of a chosen PC and immediately take the spotlight.",
+          "name": "Campo de Batalha Tomado pelo Mato",
+          "description": "Passivo: Houve uma batalha aqui. Um PC pode fazer uma rolagem de Instinto para identificar evidências desse combate. Em um sucesso com Esperança, aprenda as três informações abaixo. Em um sucesso com Medo, aprenda duas. Em uma falha, um PC pode marcar 1 Estresse para aprender uma e ganhar vantagem na próxima rolagem de ação para investigar este ambiente. Um PC com um histórico ou Experiência apropriado pode aprender um detalhe adicional e fazer uma pergunta de acompanhamento sobre a cena e obter uma resposta verdadeira (ainda que nem sempre completa). - Traços de uma batalha (armas e galhos quebrados, sulcos no chão) cobrem o terreno. - Um tronco coberto de musgo é na verdade o cadáver de um ent. - Árvores ainda de pé estão torcidas de maneiras estranhas, como se por magia poderosa. Vinhas Espinhosas - Ação: Escolha um ponto dentro do bosque. Todos os alvos em alcance muito próximo desse ponto devem ter sucesso em uma rolagem de Reação de Agilidade ou sofrer 1d8+3 de dano físico e ficar Restringidos por vinhas espinhosas. Restringido dura até serem libertos com uma rolagem bem-sucedida de Finesse ou Força ou ao causar pelo menos 6 de dano às vinhas. Vocês Não São Bem-Vindos Aqui - Ação: Uma Dríade Jovem, dois Soldados Silvanos e um número de Ents Menores igual ao número de PCs aparecem para confrontar o grupo por sua intrusão. Profanador - Ação: Gaste 1 Medo para invocar um Elemental Menor do Caos atraído pelos ecos de violência e discórdia. Ele aparece em alcance longo de um PC escolhido e imediatamente toma o foco.",
           "level": 1
         }
       ],
@@ -37,7 +37,7 @@
     },
     {
       "id": "environment.ambushed",
-      "name": "Ambushed",
+      "name": "Emboscada",
       "tier": 1,
       "type": "event",
       "difficulty": 0,
@@ -50,8 +50,8 @@
       "features": [
         {
           "id": "feature.environment-ambushed-relative-strength",
-          "name": "Relative Strength",
-          "description": "Passive: The Difficulty of this environment equals that of the adversary with the highest Difficulty. Surprise! -Action: The ambushers reveal themselves to the party, you gain 2 Fear, and the spotlight immediately shifts to one of the ambushing adversaries.",
+          "name": "Força Relativa",
+          "description": "Passivo: A Dificuldade deste ambiente é igual à do adversário com a maior Dificuldade. Surpresa! - Ação: Os emboscadores se revelam ao grupo, você ganha 2 Medo, e o foco imediatamente passa para um dos adversários da emboscada.",
           "level": 1
         }
       ],
@@ -64,7 +64,7 @@
     },
     {
       "id": "environment.ambushers",
-      "name": "Ambushers",
+      "name": "Emboscadores",
       "tier": 1,
       "type": "event",
       "difficulty": 0,
@@ -77,14 +77,14 @@
       "features": [
         {
           "id": "feature.environment-ambushers-relative-strength",
-          "name": "Relative Strength",
-          "description": "Passive: The Difficulty of this environment equals that of the adversary with the highest Difficulty.",
+          "name": "Força Relativa",
+          "description": "Passivo: A Dificuldade deste ambiente é igual à do adversário com a maior Dificuldade.",
           "level": 1
         },
         {
           "id": "feature.environment-ambushers-where-did-they-come-from",
-          "name": "Where Did They Come From?",
-          "description": "Reaction: When a PC starts the ambush on unsuspecting adversaries, you lose 2 Fear and the first attack roll a PC makes has advantage.",
+          "name": "De Onde Eles Vieram?",
+          "description": "Reação: Quando um PC inicia a emboscada contra adversários desavisados, você perde 2 Medo e a primeira rolagem de ataque que um PC fizer tem vantagem.",
           "level": 1
         }
       ],
@@ -97,7 +97,7 @@
     },
     {
       "id": "environment.bustl-in-g-marketplace",
-      "name": "Bustl in G Marketplace",
+      "name": "Mercado Agitado",
       "tier": 1,
       "type": "social",
       "difficulty": 10,
@@ -110,14 +110,14 @@
       "features": [
         {
           "id": "feature.environment-bustl-in-g-marketplace-tipthe-scales",
-          "name": "Tipthe Scales",
-          "description": "Passive: PCs can gain advantage on a Presence Roll by offering a handful of gold as part of the interaction. Unexpected Find -Action: Reveal to the PCs that one of the merchants has something they want or need, such as food from their home, a rare book, magical components, a dubious treasure map, or a magical key. Sticky Fingers -Action: Athief tries to steal something from a PC. The PC must succeed on an Instinct Roll to notice the thief or lose an item of the GM's choice as the thief escapes to a Close distance. To retrieve the stolen item, the PCs must complete a Progress Countdown (6) to chase down the thief before the thief completes a Consequence Countdown (4) and escapes to their hideout.",
+          "name": "Inclinar a Balança",
+          "description": "Passivo: PCs podem ganhar vantagem em uma rolagem de Presença ao oferecer um punhado de ouro como parte da interação. Achado Inesperado - Ação: Revele aos PCs que um dos mercadores tem algo que eles querem ou precisam, como comida de sua terra natal, um livro raro, componentes mágicos, um mapa do tesouro duvidoso ou uma chave mágica. Mãos Leves - Ação: Um ladrão tenta roubar algo de um PC. O PC deve ter sucesso em uma rolagem de Instinto para notar o ladrão ou perder um item à escolha do GM enquanto o ladrão escapa para alcance próximo. Para recuperar o item roubado, os PCs devem completar uma Contagem Regressiva de Progresso (6) para alcançar o ladrão antes que ele complete uma Contagem Regressiva de Consequência (4) e fuja para seu esconderijo.",
           "level": 1
         },
         {
           "id": "feature.environment-bustl-in-g-marketplace-crowd-closes-in",
-          "name": "Crowd Closes In",
-          "description": "Reaction: When one of the PCs splits from the group, the crowds shift and cut them off from the party.",
+          "name": "A Multidão se Fecha",
+          "description": "Reação: Quando um dos PCs se separa do grupo, as multidões se movem e o isolam do restante do grupo.",
           "level": 1
         }
       ],
@@ -133,7 +133,7 @@
     },
     {
       "id": "environment.cliffside-ascent",
-      "name": "Cliffside Ascent",
+      "name": "Subida pela Encosta do Penhasco",
       "tier": 1,
       "type": "traversal",
       "difficulty": 12,
@@ -145,14 +145,14 @@
       "features": [
         {
           "id": "feature.environment-cliffside-ascent-the-climb",
-          "name": "The Climb",
-          "description": "Passive: Climbing up the cliffside uses a Progress Countdown (12). It ticks down according to the following criteria when the PCs make an action roll to climb: - Critical Success: Tick down 3 - Successwith Esperanca: Tick down 2 - Successwith Fear: Tick down 1 - Failurewith Esperanca: No advancement - Failurewith Fear: Tick up 1 When the countdown triggers, the party has made it to the top of the cliff.",
+          "name": "A Escalada",
+          "description": "Passivo: Escalar a encosta do penhasco usa uma Contagem Regressiva de Progresso (12). Ela diminui conforme os seguintes critérios quando os PCs fazem uma rolagem de ação para escalar: - Sucesso Crítico: diminui 3 - Sucesso com Esperança: diminui 2 - Sucesso com Medo: diminui 1 - Falha com Esperança: sem avanço - Falha com Medo: aumenta 1 Quando a contagem é concluída, o grupo chegou ao topo do penhasco.",
           "level": 1
         },
         {
           "id": "feature.environment-cliffside-ascent-pi-to-ns-left-beh-in-d",
-          "name": "Pi to Ns Left Beh in D",
-          "description": "Passive: Previous climbers left behind large metal rods that climbers can use to aid their ascent. If a PC using the pitons fails an action roll to climb, they can mark a Estresse instead of ticking the countdown up. Fall -Action: Spend a Fear to have a PC's handhold fail, plummeting them toward the ground. If they aren't saved on the next action, they hit the ground and tick up the countdown by 2. The PC takes 1d12 physical damage if the countdown is between 8 and 12, 2d12 between 4 and 7, and 3d12 at 3 or lower.",
+          "name": "Pitões Deixados para Trás",
+          "description": "Passivo: Escaladores anteriores deixaram grandes hastes de metal que podem ser usadas para ajudar na subida. Se um PC usando os pitões falhar em uma rolagem de ação para escalar, ele pode marcar 1 Estresse em vez de aumentar a contagem. Queda - Ação: Gaste 1 Medo para fazer a pegada de um PC falhar, lançando-o em direção ao chão. Se ele não for salvo na próxima ação, atinge o chão e a contagem aumenta em 2. O PC sofre 1d12 de dano físico se a contagem estiver entre 8 e 12, 2d12 entre 4 e 7, e 3d12 se estiver em 3 ou menos.",
           "level": 1
         }
       ],
@@ -167,7 +167,7 @@
     },
     {
       "id": "environment.local-tavern",
-      "name": "Local Tavern",
+      "name": "Taverna Local",
       "tier": 1,
       "type": "social",
       "difficulty": 10,
@@ -180,7 +180,7 @@
         {
           "id": "feature.environment-local-tavern-whatsthe-talk-of-the-town",
           "name": "Rumores Locais",
-          "description": "Passive: A PC can ask the bartender, staff, or patrons about local events, rumors, and potential work with a Presence Roll. On a success, they can pick two of the below details to learn-or three if they critically succeed. On a failure, they can pick one and mark a Estresse as the local carries on about something irrelevant. Sing ForYourSupper- Passive: A PC can perform one time for the guests by making a Presence Roll. On a success, they earn 1d4 handfuls of gold (2d4 if they critically succeed). On a failure, they mark a Estresse. Mysterious Stranger-Action: Reveal a stranger concealing their identity, lurking in a shaded booth. Someone ComestoTown -Action: Introduce a significant NPC who wants to hire the party for something or who relates to a PC's background. BarFight! -Action: Spend a Fear to have a bar fight erupt in the tavern. When a PC tries to move through the tavern while the fight persists, they must succeed on an Agility or Presence Roll or take 1d6+2 physical damage from a wild swing or thrown object. A PC can try to activate this feature by succeeding on an action roll that would provoke tavern patrons.",
+          "description": "Passivo: Um PC pode perguntar ao bartender, à equipe ou aos clientes sobre eventos locais, rumores e possíveis trabalhos com uma rolagem de Presença. Em um sucesso, ele pode escolher dois dos detalhes abaixo, ou três se tiver um sucesso crítico. Em uma falha, ele pode escolher um e marcar 1 Estresse enquanto o local divaga sobre algo irrelevante. Cante pelo seu Jantar - Passivo: Um PC pode se apresentar uma vez para os convidados fazendo uma rolagem de Presença. Em um sucesso, ele ganha 1d4 punhados de ouro (2d4 se tiver sucesso crítico). Em uma falha, marca 1 Estresse. Estranho Misterioso - Ação: Revele um estranho ocultando sua identidade, espreitando em uma cabine sombreada. Alguém Chega à Cidade - Ação: Introduza um NPC significativo que quer contratar o grupo para algo ou que se relaciona ao histórico de um PC. Briga de Bar! - Ação: Gaste 1 Medo para fazer uma briga estourar na taverna. Quando um PC tentar atravessar a taverna enquanto a briga persiste, ele deve ter sucesso em uma rolagem de Agilidade ou Presença ou sofre 1d6+2 de dano físico de um golpe perdido ou objeto arremessado. Um PC pode tentar ativar este recurso ao ter sucesso em uma rolagem de ação que provoque os frequentadores.",
           "level": 1
         }
       ],
@@ -201,7 +201,7 @@
     },
     {
       "id": "environment.outpost-town",
-      "name": "Outpost Town",
+      "name": "Cidade de Posto Avançado",
       "tier": 1,
       "type": "social",
       "difficulty": 12,
@@ -213,26 +213,26 @@
       "features": [
         {
           "id": "feature.environment-outpost-town-rumors-abound",
-          "name": "Rumors Abound",
-          "description": "Passive: Gossip is the fastest-traveling currency in the realm. A PC can inquire about major events by making a Presence Roll. What they learn depends on the outcome of their roll, based on the following criteria: - Critical Success: Learn about two major events. The PC can ask one follow-up question about one of the rumors and get a truthful (if not always complete) answer. - Successwith Esperanca: Learn about two events, at least one of which is relevant to the character's background. - Successwith Fear: Learn an alarming rumor related to the character's background. - AnyFailure: The locals respond poorly to their inquiries. The PC must mark a Estresse to learn one relevant rumor.",
+          "name": "Rumores por Toda Parte",
+          "description": "Passivo: A fofoca é a moeda que viaja mais rápido no reino. Um PC pode perguntar sobre eventos importantes fazendo uma rolagem de Presença. O que ele aprende depende do resultado da rolagem, com base nos seguintes critérios: - Sucesso Crítico: Saiba sobre dois eventos importantes. O PC pode fazer uma pergunta de acompanhamento sobre um dos rumores e receber uma resposta verdadeira (ainda que nem sempre completa). - Sucesso com Esperança: Saiba sobre dois eventos, pelo menos um deles relacionado ao histórico do personagem. - Sucesso com Medo: Saiba de um rumor alarmante relacionado ao histórico do personagem. - Qualquer Falha: Os locais reagem mal às perguntas. O PC deve marcar 1 Estresse para aprender um rumor relevante.",
           "level": 1
         },
         {
-          "id": "feature.environment-outpost-town-society-ofthe-broken-compass",
-          "name": "Society Ofthe Broken Compass",
-          "description": "Passive: An adventuring society maintains a chapterhouse here, where heroes trade boasts and rumors, drink to their imagined successes, and scheme to undermine their rivals.",
+          "id": "feature.environment-outpost-town-society-of-the-broken-compass",
+          "name": "Sociedade da Bússola Quebrada",
+          "description": "Passivo: Uma sociedade de aventureiros mantém uma sede aqui, onde heróis trocam bravatas e rumores, bebem pelos sucessos imaginados e tramam para minar seus rivais.",
           "level": 1
         },
         {
           "id": "feature.environment-outpost-town-rival-party",
-          "name": "Rival Party",
-          "description": "Passive: Another adventuring party is here, seeking the same treasure or leads as the PCs. It'd Be a Shame IfSomething HappenedtoYourStore -Action: The PCs witness as agents of a local crime boss shake down a general goods store.",
+          "name": "Grupo Rival",
+          "description": "Passivo: Outro grupo de aventureiros está aqui, buscando o mesmo tesouro ou pistas que os PCs. Seria Uma Pena se Algo Acontecesse com Sua Loja - Ação: Os PCs testemunham agentes de um chefe do crime local extorquindo uma loja de suprimentos gerais.",
           "level": 1
         },
         {
           "id": "feature.environment-outpost-town-wr-on-g-place-wr-on-g-time",
-          "name": "Wr on G Place,Wr on G Time",
-          "description": "Reaction: At night, or when the party is alone in a back alley, you can spend a Fear to introduce a group of thieves who try to rob them. The thieves appear at alcance proximo of a chosen PC and include a Jagged Knife Kneebreaker, as many Lackeys as there are PCs, and a Lieutenant. For a larger party, add a Hexer or Sniper.",
+          "name": "Lugar Errado, Hora Errada",
+          "description": "Reação: À noite, ou quando o grupo está sozinho em um beco, você pode gastar 1 Medo para introduzir um grupo de ladrões que tenta roubá-los. Os ladrões aparecem em alcance próximo de um PC escolhido e incluem um Quebra-joelhos da Faca Serrilhada, tantos Capangas quanto PCs e um Tenente. Para um grupo maior, adicione um Bruxo ou Atirador.",
           "level": 1
         }
       ],
@@ -248,7 +248,7 @@
     },
     {
       "id": "environment.rag-in-g-river",
-      "name": "Rag in G River",
+      "name": "Rio Caudaloso",
       "tier": 1,
       "type": "traversal",
       "difficulty": 10,
@@ -261,8 +261,8 @@
       "features": [
         {
           "id": "feature.environment-rag-in-g-river-dangerous-cross-in-g",
-          "name": "Dangerous Cross in G",
-          "description": "Passive: Crossing the river requires the party to complete a Progress Countdown (4). A PC who rolls a failure with Fear is immediately targeted by the \"Undertow\" action without requiring a Fear to be spent on the feature. Undertow -Action: Spend a Fear to catch a PC in the undertow. They must make an Agility rolagem de Reacao. On a failure, they take 1d6+1 physical damage and are moved a Close distance down the river, becoming Vulnerable until they get out of the river. On a success, they must mark a Estresse. Patient Hunter-Action: Spend a Fear to summon a Glass Snake within alcance proximo of a chosen PC. The Snake appears in or near the river and immediately takes the spotlight to use their \"Spinning Serpent\" action.",
+          "name": "Travessia Perigosa",
+          "description": "Passivo: Atravessar o rio exige que o grupo complete uma Contagem Regressiva de Progresso (4). Um PC que rolar uma falha com Medo é imediatamente alvo da ação \"Correnteza\" sem exigir gasto de Medo no recurso. Correnteza - Ação: Gaste 1 Medo para prender um PC na correnteza. Ele deve fazer uma rolagem de Reação de Agilidade. Em uma falha, sofre 1d6+1 de dano físico e é movido uma distância de alcance próximo rio abaixo, ficando Vulnerável até sair do rio. Em um sucesso, deve marcar 1 Estresse. Caçador Paciente - Ação: Gaste 1 Medo para invocar uma Serpente de Vidro em alcance próximo de um PC escolhido. A Serpente aparece no rio ou perto dele e imediatamente toma o foco para usar sua ação \"Serpente Giratória\".",
           "level": 1
         }
       ],
@@ -277,7 +277,7 @@
     },
     {
       "id": "environment.cult-ritual",
-      "name": "Cult Ritual",
+      "name": "Ritual de Culto",
       "tier": 2,
       "type": "event",
       "difficulty": 14,
@@ -289,26 +289,26 @@
       "features": [
         {
           "id": "feature.environment-cult-ritual-desecrated-ground",
-          "name": "Desecrated Ground",
-          "description": "Passive: Cultists dedicated this place to the Fallen Gods, and their foul influence seeps into it. Reduce the PCs' Esperanca Die to a d10 while in this environment. The desecration can be removed with a Progress Countdown (6). Blasphemous Might -Action: A portion of the ritual's power is diverted into a cult member to fight off interlopers. Choose one adversary to become Imbued with terrible magic until the scene ends or they're defeated. An Imbued adversary immediately takes the spotlight and gains one of the following benefits, or all three if you spend a Fear: - They gain advantage on all attacks. - They deal an extra 1d10 damage on a successful attack.",
+          "name": "Solo Profanado",
+          "description": "Passivo: Cultistas dedicaram este lugar aos Deuses Caídos, e sua influência pútrida se infiltra nele. Reduza o Dado de Esperança dos PCs para d10 enquanto estiverem neste ambiente. A profanação pode ser removida com uma Contagem Regressiva de Progresso (6). Poder Blasfemo - Ação: Uma parte do poder do ritual é desviada para um membro do culto para afastar intrusos. Escolha um adversário para ficar Imbuído de terrível magia até o fim da cena ou até ser derrotado. Um adversário Imbuído imediatamente toma o foco e ganha um dos benefícios abaixo, ou todos eles se você gastar 1 Medo: - Ele ganha vantagem em todos os ataques. - Ele causa 1d10 de dano extra em um ataque bem-sucedido.",
           "level": 2
         },
         {
           "id": "feature.environment-cult-ritual-relentless-2",
-          "name": "Relentless (2)",
-          "description": "Passive. This adversary can be spotlighted up to two times per GM turn. Spend Fear as usual to spotlight them.",
+          "name": "Implacável (2)",
+          "description": "Passivo: Este adversário pode receber foco até duas vezes por turno do GM. Gaste Medo como de costume para colocá-lo em foco.",
           "level": 2
         },
         {
           "id": "feature.environment-cult-ritual-the-summ-on-in-g",
-          "name": "The Summ on in G",
-          "description": "Reaction: Countdown (6). When the PCs enter the scene or the cult begins the ritual to summon a demon, activate the countdown. Designate one adversary to lead the ritual. The countdown ticks down when a PC rolls with Fear. When it triggers, summon a Minor Demon within Very alcance proximo of the ritual's leader. If the leader is defeated, the countdown ends with no effect as the ritual fails.",
+          "name": "A Invocação",
+          "description": "Reação: Contagem Regressiva (6). Quando os PCs entram na cena ou o culto inicia o ritual para invocar um demônio, ative a contagem. Designe um adversário para liderar o ritual. A contagem diminui quando um PC rola com Medo. Quando dispara, invoque um Demônio Menor em alcance muito próximo do líder do ritual. Se o líder for derrotado, a contagem termina sem efeito, pois o ritual falha.",
           "level": 2
         },
         {
           "id": "feature.environment-cult-ritual-completethe-ritual",
-          "name": "Completethe Ritual",
-          "description": "Reaction: If the ritual's leader is targeted by an attack or spell, an ally within Very alcance proximo of them can mark a Estresse to be targeted by that attack or spell instead.",
+          "name": "Completar o Ritual",
+          "description": "Reação: Se o líder do ritual for alvo de um ataque ou feitiço, um aliado em alcance muito próximo dele pode marcar 1 Estresse para ser alvo desse ataque ou feitiço em seu lugar.",
           "level": 2
         }
       ],
@@ -324,7 +324,7 @@
     },
     {
       "id": "environment.hallowed-temple",
-      "name": "Hallowed Temple",
+      "name": "Templo Sagrado",
       "tier": 2,
       "type": "social",
       "difficulty": 13,
@@ -338,25 +338,25 @@
         {
           "id": "feature.environment-hallowed-temple-aplace-of-heal-in-g",
           "name": "Santuário de Descanso",
-          "description": "Passive: A PC who takes a rest in the Hallowed Temple automatically clears all HP.",
+          "description": "Passivo: Um PC que descansa no Templo Sagrado limpa automaticamente todos os PV.",
           "level": 2
         },
         {
           "id": "feature.environment-hallowed-temple-div-in-e-guidance",
-          "name": "Div in E Guidance",
-          "description": "Passive: A PC who prays to a deity while in the Hallowed Temple can make an Instinct Roll to receive answers. If the god they beseech isn't welcome in this temple, the roll is made with disadvantage. - Critical Success: The PC gains clear information. Additionally, they gain 1d4 Esperanca, which can be distributed between the party if they share the vision and guidance they received. - Successwith Esperanca: The PC receives clear information. - Successwith Fear: The PC receives brief flashes of insight and an emotional impression conveying an answer. - AnyFailure: The PC receives onlyvague flashes. They can mark a Estresse to receive one clear image without context.",
+          "name": "Orientação Divina",
+          "description": "Passivo: Um PC que reza a uma divindade enquanto está no Templo Sagrado pode fazer uma rolagem de Instinto para receber respostas. Se o deus a quem ele suplica não é bem-vindo neste templo, a rolagem é feita com desvantagem. - Sucesso Crítico: O PC obtém informações claras. Além disso, ele ganha 1d4 Esperança, que pode ser distribuída entre o grupo se compartilharem a visão e orientação recebidas. - Sucesso com Esperança: O PC recebe informações claras. - Sucesso com Medo: O PC recebe lampejos breves de insight e uma impressão emocional que transmite uma resposta. - Qualquer Falha: O PC recebe apenas lampejos vagos. Ele pode marcar 1 Estresse para receber uma imagem clara sem contexto.",
           "level": 2
         },
         {
           "id": "feature.environment-hallowed-temple-relentless-hope",
-          "name": "Relentless Hope",
-          "description": "Reaction: Once per scene, each PC can mark a Estresse to turn a result with Fear into a result with Esperanca.",
+          "name": "Esperança Implacável",
+          "description": "Reação: Uma vez por cena, cada PC pode marcar 1 Estresse para transformar um resultado com Medo em um resultado com Esperança.",
           "level": 2
         },
         {
           "id": "feature.environment-hallowed-temple-div-in-e-censure",
-          "name": "Div in E Censure",
-          "description": "Reaction: When the PCs have trespassed, blasphemed, or offended the clergy, you can spend a Fear to summon a High Seraph and 1d4 Bladed Guards within alcance proximo of the senior priest to reinforce their will.",
+          "name": "Censura Divina",
+          "description": "Reação: Quando os PCs tiverem invadido, blasfemado ou ofendido o clero, você pode gastar 1 Medo para invocar um Serafim Superior e 1d4 Guardas de Lâmina em alcance próximo do sacerdote sênior para reforçar sua vontade.",
           "level": 2
         }
       ],
@@ -372,7 +372,7 @@
     },
     {
       "id": "environment.haunted-city",
-      "name": "Haunted City",
+      "name": "Cidade Assombrada",
       "tier": 2,
       "type": "exploration",
       "difficulty": 14,
@@ -384,14 +384,14 @@
       "features": [
         {
           "id": "feature.environment-haunted-city-buried-knowledge",
-          "name": "Buried Knowledge",
-          "description": "Passive: The city has countless mysteries to unfold. A PC who seeks knowledge about the fallen city can make an Instinct or Knowledge Roll to learn about this place and discover (potentially haunted) loot. - Critical Success: Gain valuable information and a related useful item. - Successwith Esperanca: Gain valuable information. - Successwith Fear: Uncovervague or incomplete information. - AnyFailure: Mark a Estresse to find a lead after an exhaustive search.",
+          "name": "Conhecimento Enterrado",
+          "description": "Passivo: A cidade tem incontáveis mistérios para revelar. Um PC que busca conhecimento sobre a cidade caída pode fazer uma rolagem de Instinto ou Conhecimento para aprender sobre este lugar e descobrir saque (possivelmente assombrado). - Sucesso Crítico: Ganhe informações valiosas e um item útil relacionado. - Sucesso com Esperança: Ganhe informações valiosas. - Sucesso com Medo: Descubra informações vagas ou incompletas. - Qualquer Falha: Marque 1 Estresse para encontrar uma pista após uma busca exaustiva.",
           "level": 2
         },
         {
           "id": "feature.environment-haunted-city-ghostly-form",
-          "name": "Ghostly Form",
-          "description": "Passive: Adversaries who appear here are of a ghostly form. They have resistance to physical damage and can mark a Estresse to move up to alcance proximo through solid objects. Dead Ends -Action: The ghosts of an earlier era manifest scenes from their bygone era, such as a street festival, a revolution, or a heist. These hauntings change the layout of the city around the PCs, blocking the way behind them, forcing a detour, or presenting them with a challenge, such as mistaking them for rival thieves during the heist. ApocalypseThen -Action: Spend a Fear to manifest the echo of a past disaster that ravaged the city. Activate a Progress Countdown (5) as the disaster replays around the PCs. To complete the countdown and escape the catastrophe, the PCs must overcome threats such as rampaging fires, stampeding civilians, collapsing buildings, or crumbling streets, while recalling history and finding clues to escape the inevitable.",
+          "name": "Forma Fantasmagórica",
+          "description": "Passivo: Adversários que aparecem aqui têm forma fantasmagórica. Eles têm resistência a dano físico e podem marcar 1 Estresse para se mover até alcance próximo através de objetos sólidos. Becos Sem Saída - Ação: Os fantasmas de uma era anterior manifestam cenas de sua época passada, como um festival de rua, uma revolução ou um golpe. Essas assombrações mudam o layout da cidade ao redor dos PCs, bloqueando o caminho atrás deles, forçando um desvio ou apresentando um desafio, como confundi-los com ladrões rivais durante o golpe. Apocalipse de Outrora - Ação: Gaste 1 Medo para manifestar o eco de um desastre passado que devastou a cidade. Ative uma Contagem Regressiva de Progresso (5) enquanto o desastre se repete ao redor dos PCs. Para completar a contagem e escapar da catástrofe, os PCs devem superar ameaças como incêndios desenfreados, civis em debandada, prédios desabando ou ruas ruindo, enquanto recordam a história e encontram pistas para escapar do inevitável.",
           "level": 2
         }
       ],
@@ -409,7 +409,7 @@
     },
     {
       "id": "environment.mountain-pass",
-      "name": "Mountain Pass",
+      "name": "Passagem da Montanha",
       "tier": 2,
       "type": "traversal",
       "difficulty": 15,
@@ -422,20 +422,20 @@
       "features": [
         {
           "id": "feature.environment-mountain-pass-engraved-sigils",
-          "name": "Engraved Sigils",
-          "description": "Passive: Large markings and engravings have been made in the mountainside. A PC with a relevant background or Experience identifies them as weather magic increasing the power of the icy winds. A PC who succeeds on a Knowledge Roll can recall information about the sigils, potential information about their creators, and the knowledge of how to dispel them. If a PC critically succeeds, they recognize that the sigils are of a style created by ridgeborne enchanters and they gain advantage on a roll to dispel the sigils. Avalanche -Action: Spend a Fear to carve the mountain with an icy torrent, causing an avalanche. All PCs in its path must succeed on an Agility or Strength rolagem de Reacao or be bowled over and carried down the mountain. A PC using rope, pitons, or other climbing gear gains advantage on this roll. Targets who fail are knocked down the mountain to alcance longo, take 2d20 physical damage, and must mark a Estresse. Targets who succeed must mark a Estresse.",
+          "name": "Sigilos Gravados",
+          "description": "Passivo: Grandes marcas e gravuras foram feitas na encosta da montanha. Um PC com um histórico ou Experiência relevante as identifica como magia do clima que aumenta o poder dos ventos gelados. Um PC que tiver sucesso em uma rolagem de Conhecimento pode lembrar informações sobre os sigilos, possíveis informações sobre seus criadores e como dissipá-los. Se um PC tiver sucesso crítico, ele reconhece que os sigilos são de um estilo criado por encantadores das cristas e ganha vantagem em uma rolagem para dissipá-los. Avalanche - Ação: Gaste 1 Medo para cortar a montanha com uma torrente gelada, causando uma avalanche. Todos os PCs em seu caminho devem ter sucesso em uma rolagem de Reação de Agilidade ou Força ou serão derrubados e carregados montanha abaixo. Um PC usando cordas, pitões ou outro equipamento de escalada ganha vantagem nessa rolagem. Alvos que falham são arremessados montanha abaixo até alcance longo, sofrem 2d20 de dano físico e devem marcar 1 Estresse. Alvos que têm sucesso devem marcar 1 Estresse.",
           "level": 2
         },
         {
           "id": "feature.environment-mountain-pass-rap-to-r-nest",
-          "name": "Rap to R Nest",
-          "description": "Reaction: When the PCs enter the raptors' hunting grounds, two Giant Eagles appear at Very alcance longo of a chosen PC, identifying the PCs as likely prey.",
+          "name": "Ninho de Aves de Rapina",
+          "description": "Reação: Quando os PCs entram nos terrenos de caça das aves de rapina, duas Águias Gigantes aparecem em alcance muito longo de um PC escolhido, identificando os PCs como provável presa.",
           "level": 2
         },
         {
           "id": "feature.environment-mountain-pass-icy-w-in-ds",
-          "name": "Icy W in Ds",
-          "description": "Reaction: Countdown (Loop 4). When the PCs enter the mountain pass, activate the countdown. When it triggers, all characters traveling through the pass must succeed on a Strength rolagem de Reacao or mark a Estresse. A PC wearing clothes appropriate for extreme cold gains advantage on these rolls.",
+          "name": "Ventos Gelados",
+          "description": "Reação: Contagem Regressiva (Loop 4). Quando os PCs entram na passagem da montanha, ative a contagem. Quando ela dispara, todos os personagens que atravessam a passagem devem ter sucesso em uma rolagem de Reação de Força ou marcar 1 Estresse. Um PC vestindo roupas apropriadas para frio extremo ganha vantagem nessas rolagens.",
           "level": 2
         }
       ],
@@ -453,7 +453,7 @@
     },
     {
       "id": "environment.burn-in-g-heart-of-the-woods",
-      "name": "Burn in G Heart of the Woods",
+      "name": "Coração Ardente da Floresta",
       "tier": 3,
       "type": "exploration",
       "difficulty": 16,
@@ -465,26 +465,26 @@
       "features": [
         {
           "id": "feature.environment-burn-in-g-heart-of-the-woods-chaos-magic-locus",
-          "name": "Chaos Magic Locus",
-          "description": "Passive: When a PC makes a Spellcast Roll, they must roll two Fear Dice and take the higher result.",
+          "name": "Foco de Magia do Caos",
+          "description": "Passivo: Quando um PC faz uma rolagem de Conjuração, deve rolar dois Dados de Medo e ficar com o resultado maior.",
           "level": 3
         },
         {
           "id": "feature.environment-burn-in-g-heart-of-the-woods-the-indigo-flame",
-          "name": "The Indigo Flame",
-          "description": "Passive: PCs who approach the central tree can make a Knowledge Roll to try to identify the magic that consumed this environment. - On a success: They learn three of the below details. On a success with Fear, they learn two. - On a failure: They can mark a Estresse to learn one and gain advantage on the next action roll to investigate this environment. - Details: This is a result of Fallen magic. The corruption is spread through the ashen moss. It can be cleansed only by a ritual of nature magic with a Progress Countdown (8). GraspingVines -Action: Animate vines bristling with thorns whip out from the underbrush to ensnare the PCs. Atarget must succeed on an Agility rolagem de Reacao or become Restrained and Vulnerable until they break free, clearing both conditions, with a successful Finesse or Strength Roll or by dealing 10 damage to the vines. When the target makes a roll to escape, they take 1d8+4 physical damage and lose a Esperanca. Charcoal Constructs -Action: Warped animals wreathed in indigo flame trample through a point of your choice. All targets within alcance proximo of that point must make an Agility rolagem de Reacao. Targets who fail take 3d12+3 physical damage. Targets who succeed take half damage instead.",
+          "name": "A Chama Índigo",
+          "description": "Passivo: PCs que se aproximam da árvore central podem fazer uma rolagem de Conhecimento para tentar identificar a magia que consumiu este ambiente. - Em um sucesso: aprendem três dos detalhes abaixo. Em um sucesso com Medo, aprendem dois. - Em uma falha: podem marcar 1 Estresse para aprender um e ganhar vantagem na próxima rolagem de ação para investigar este ambiente. - Detalhes: Isso é resultado de magia dos Caídos. A corrupção se espalha pelo musgo enegrecido. Ela só pode ser purificada por um ritual de magia da natureza com uma Contagem Regressiva de Progresso (8). Vinhas Agarradoras - Ação: Vinhas animadas cheias de espinhos chicoteiam do sub-bosque para enredar os PCs. Um alvo deve ter sucesso em uma rolagem de Reação de Agilidade ou ficar Restringido e Vulnerável até se soltar, removendo ambas as condições, com uma rolagem bem-sucedida de Finesse ou Força ou ao causar 10 de dano às vinhas. Quando o alvo faz uma rolagem para escapar, ele sofre 1d8+4 de dano físico e perde 1 Esperança. Construtos de Carvão - Ação: Animais deformados envolvidos em chama índigo atropelam um ponto à sua escolha. Todos os alvos em alcance próximo desse ponto devem fazer uma rolagem de Reação de Agilidade. Alvos que falham sofrem 3d12+3 de dano físico. Alvos que têm sucesso sofrem metade do dano.",
           "level": 3
         },
         {
           "id": "feature.environment-burn-in-g-heart-of-the-woods-chok-in-g-ash",
-          "name": "Chok in G Ash",
-          "description": "Reaction: Countdown (Loop ). When the PCs enter the Burning Heart of the Woods, activate the countdown. When it triggers, all characters must make a Strength or Instinct rolagem de Reacao. Targets who fail take 4d6+5 direct physical damage. Targets who succeed take half damage. Protective masks or clothes give advantage on the reaction roll.",
+          "name": "Cinzas Sufocantes",
+          "description": "Reação: Contagem Regressiva (Loop 6). Quando os PCs entram no Coração Ardente da Floresta, ative a contagem. Quando ela dispara, todos os personagens devem fazer uma rolagem de Reação de Força ou Instinto. Alvos que falham sofrem 4d6+5 de dano físico direto. Alvos que têm sucesso sofrem metade do dano. Máscaras protetoras ou roupas dão vantagem na rolagem de reação.",
           "level": 3
         }
       ],
       "prompts": [
         "What does it feel like to work magic in this chaos-touched place?",
-        "What do you fear will happen ifyou lose control of the spell?",
+        "What do you fear will happen if you lose control of the spell?",
         "What Fallen cult corrupted these woods?",
         "What have they already done with the cursed wood and sap from this tree?",
         "What painful memories do the vines bring to the surface as they pierce flesh?",
@@ -495,7 +495,7 @@
     },
     {
       "id": "environment.castle-siege",
-      "name": "Castle Siege",
+      "name": "Cerco ao Castelo",
       "tier": 3,
       "type": "event",
       "difficulty": 17,
@@ -508,14 +508,14 @@
       "features": [
         {
           "id": "feature.environment-castle-siege-secret-entrance",
-          "name": "Secret Entrance",
-          "description": "Passive: A PC can find or recall a secret way into the castle with a successful Instinct or Knowledge Roll. SiegeWeapons (Environment Change) -Action: Consequence Countdown (6). The attacking force deploys siege weapons to try to raze the defenders' fortifications. Activate the countdown when the siege begins (for a protracted siege, make this a long-term countdown instead). When it triggers, the defenders' fortifications have been breached and the attackers flood inside. You gain 2 Fear, then shift to the Pitched Battle environment and spotlight it. Reinforcements! -Action: Summon a Knight of the Realm, a number ofTier 3 Minions equal to the number of PCs, and two adversaries of your choice within alcance longo of a chosen PC as reinforcements. The Knight of the Realm immediately takes the spotlight.",
+          "name": "Entrada Secreta",
+          "description": "Passivo: Um PC pode encontrar ou recordar um caminho secreto para o castelo com uma rolagem bem-sucedida de Instinto ou Conhecimento. Armas de Cerco (Mudança de Ambiente) - Ação: Contagem Regressiva de Consequência (6). A força atacante posiciona armas de cerco para tentar destruir as fortificações dos defensores. Ative a contagem quando o cerco começar (para um cerco prolongado, faça desta uma contagem de longo prazo). Quando ela dispara, as fortificações dos defensores são rompidas e os atacantes invadem. Você ganha 2 Medo e então muda para o ambiente Batalha Campal e o coloca em foco. Reforços! - Ação: Invoque um Cavaleiro do Reino, um número de Lacaios de Patamar 3 igual ao número de PCs e dois adversários de sua escolha em alcance longo de um PC escolhido como reforços. O Cavaleiro do Reino imediatamente toma o foco.",
           "level": 3
         },
         {
           "id": "feature.environment-castle-siege-collateral-damage",
-          "name": "Collateral Damage",
-          "description": "Reaction: When an adversary is defeated, you can spend a Fear to have a stray attack from a siege weapon hit a point on the battlefield. All targets within Very alcance proximo of that point must make an Agility rolagem de Reacao. - Targets who fail take 3d8+3 physical or magic damage and must mark a Estresse. - Targets who succeed must mark a Estresse.",
+          "name": "Danos Colaterais",
+          "description": "Reação: Quando um adversário é derrotado, você pode gastar 1 Medo para fazer um ataque perdido de uma arma de cerco atingir um ponto no campo de batalha. Todos os alvos em alcance muito próximo desse ponto devem fazer uma rolagem de Reação de Agilidade. - Alvos que falham sofrem 3d8+3 de dano físico ou mágico e devem marcar 1 Estresse. - Alvos que têm sucesso devem marcar 1 Estresse.",
           "level": 3
         }
       ],
@@ -533,7 +533,7 @@
     },
     {
       "id": "environment.pitched-battle",
-      "name": "Pitched Battle",
+      "name": "Batalha Campal",
       "tier": 3,
       "type": "event",
       "difficulty": 17,
@@ -547,17 +547,17 @@
       "features": [
         {
           "id": "feature.environment-pitched-battle-adrift-on-a-sea-of-steel",
-          "name": "Adrift on a Sea of Steel",
-          "description": "Passive: Traversing a battlefield during an active combat is extremely dangerous. A PC must succeed on an Agility Roll to move at all, and can only go up to alcance proximo on a success. If an adversary is within alcance corpo a corpo of them, they must mark a Estresse to make an Agility Roll to move. Raze and Pillage -Action: The attacking force raises the stakes by lighting a fire, stealing a valuable asset, kidnapping an important person, or killing the populace. WarMagic -Action: Spend a Fear as a mage from one side uses large-scale destructive magic. Pick a point on the battlefield within Very alcance longo of the mage. All targets within alcance proximo of that point must make an Agility rolagem de Reacao. Targets who fail take 3d12+8 magic damage and must mark a Estresse. Reinforcements! -Action: Summon a Knight of the Realm, a number ofTier 3 Minions equal to the number of PCs, and two adversaries of your choice within alcance longo of a chosen PC as reinforcements. The Knight of the Realm immediately takes the spotlight.",
+          "name": "À Deriva em um Mar de Aço",
+          "description": "Passivo: Atravessar um campo de batalha durante um combate ativo é extremamente perigoso. Um PC deve ter sucesso em uma rolagem de Agilidade para se mover, e só pode ir até alcance próximo em um sucesso. Se um adversário estiver em alcance corpo a corpo dele, ele deve marcar 1 Estresse para fazer uma rolagem de Agilidade para se mover. Arrasar e Saquear - Ação: A força atacante aumenta as apostas ao incendiar um local, roubar um bem valioso, sequestrar uma pessoa importante ou matar a população. Magia de Guerra - Ação: Gaste 1 Medo quando um mago de um dos lados usa magia destrutiva em larga escala. Escolha um ponto no campo de batalha em alcance muito longo do mago. Todos os alvos em alcance próximo desse ponto devem fazer uma rolagem de Reação de Agilidade. Alvos que falham sofrem 3d12+8 de dano mágico e devem marcar 1 Estresse. Reforços! - Ação: Invoque um Cavaleiro do Reino, um número de Lacaios de Patamar 3 igual ao número de PCs e dois adversários de sua escolha em alcance longo de um PC escolhido como reforços. O Cavaleiro do Reino imediatamente toma o foco.",
           "level": 3
         }
       ],
       "prompts": [
-        "Do the combatants mistake you for the enemy or consideryou interlopers?",
-        "Can you tell the diﬀerence between friend and foe in the fray?",
+        "Do the combatants mistake you for the enemy or consider you interlopers?",
+        "Can you tell the difference between friend and foe in the fray?",
         "What is valuable here?",
         "Who is most vulnerable?",
-        "What form does the attack take-fireball, raining acid, a storm of blades?",
+        "What form does the attack take - fireball, raining acid, a storm of blades?",
         "What tactical objective is this attack meant to accomplish, and what comes next?",
         "Who are they targeting first?",
         "What formation do they take?"
@@ -565,7 +565,7 @@
     },
     {
       "id": "environment.chaos-realm",
-      "name": "Chaos Realm",
+      "name": "Reino do Caos",
       "tier": 4,
       "type": "traversal",
       "difficulty": 20,
@@ -578,14 +578,14 @@
       "features": [
         {
           "id": "feature.environment-chaos-realm-impossible-architecture",
-          "name": "Impossible Architecture",
-          "description": "Passive: Up is down, down is right, right is starward. Gravity and directionality themselves are in flux, and any attempt to move through this realm is an odyssey unto itself, requiring a Progress Countdown (8). On a failure, a PC must mark a Estresse in addition to the roll's other consequences. EverythingYouAreThis PlaceWillTakefromYou -Action: Countdown (Loop d). Activate the countdown. When it triggers, all PCs must succeed on a Presence rolagem de Reacao or their highest trait is temporarily reduced by 1d4 unless they mark a number of Estresse equal to its value. Any lost trait points are regained if the PC critically succeeds or escapes the Chaos Realm. Unmaking -Action: Spend a Fear to force a PC to make a Strength rolagem de Reacao. On a failure, they take 4d10 direct magic damage. On a success, they must mark a Estresse. OuterRealms Predators -Action: Spend a Fear to summon an Outer RealmsAbomination, an Outer Realms Corruptor, and 2d6 Outer Realms Thralls, who appear at alcance proximo of a chosen PC in defiance of logic and causality. Immediately spotlight one of these adversaries, and you can spend an additional Fear to automatically succeed on that adversary's standard attack.",
+          "name": "Arquitetura Impossível",
+          "description": "Passivo: Para cima é para baixo, para baixo é para a direita, a direita é para as estrelas. Gravidade e direcionalidade estão em fluxo, e qualquer tentativa de atravessar este reino é uma odisseia em si, exigindo uma Contagem Regressiva de Progresso (8). Em uma falha, um PC deve marcar 1 Estresse além das outras consequências da rolagem. Tudo o que Você É Este Lugar Tirará de Você - Ação: Contagem Regressiva (Loop 1d4). Ative a contagem. Quando ela dispara, todos os PCs devem ter sucesso em uma rolagem de Reação de Presença ou seu maior atributo é temporariamente reduzido em 1d4 a menos que marquem uma quantidade de Estresse igual ao valor reduzido. Quaisquer pontos de atributo perdidos são recuperados se o PC tiver sucesso crítico ou escapar do Reino do Caos. Desfazer - Ação: Gaste 1 Medo para forçar um PC a fazer uma rolagem de Reação de Força. Em uma falha, ele sofre 4d10 de dano mágico direto. Em um sucesso, deve marcar 1 Estresse. Predadores dos Reinos Exteriores - Ação: Gaste 1 Medo para invocar uma Abominação dos Reinos Exteriores, um Corruptor dos Reinos Exteriores e 2d6 Servos dos Reinos Exteriores, que aparecem em alcance próximo de um PC escolhido em desafio à lógica e causalidade. Coloque imediatamente um desses adversários em foco, e você pode gastar um Medo adicional para ter sucesso automático no ataque padrão desse adversário.",
           "level": 4
         },
         {
           "id": "feature.environment-chaos-realm-disorient-in-g-reality",
-          "name": "Disorient in G Reality",
-          "description": "Reaction: On a result with Fear, you can ask the PC to describe which of their fears the Chaos Realm evokes as a vision of reality unmakes and reconstitutes itself to the PC. The PC loses a Esperanca. If it is their last Esperanca, you gain a Fear.",
+          "name": "Realidade Desorientadora",
+          "description": "Reação: Em um resultado com Medo, você pode pedir ao PC que descreva quais de seus medos o Reino do Caos evoca quando uma visão da realidade se desfaz e se reconstitui para o PC. O PC perde 1 Esperança. Se for sua última Esperança, você ganha 1 Medo.",
           "level": 4
         }
       ],
@@ -596,7 +596,7 @@
         "How does this place try to steal from you that which makes you legendary?",
         "What does it feel like to have this power taken from you?",
         "What glimpse of other worlds do you catch while this place tries to unmake you?",
-        "What core facet ofyour personality does the unmaking try to erase?",
+        "What core facet of your personality does the unmaking try to erase?",
         "What half-consumed remnants of the shattered world do these monstrosities cast aside in pursuit of living flesh?",
         "What jagged reflections of former personhood do you catch between moments of unquestioning malice?",
         "What moment do they see?",
@@ -606,7 +606,7 @@
     },
     {
       "id": "environment.div-in-e-usurpation",
-      "name": "Div in E Usurpation",
+      "name": "Usurpação Divina",
       "tier": 4,
       "type": "event",
       "difficulty": 20,
@@ -619,26 +619,26 @@
       "features": [
         {
           "id": "feature.environment-div-in-e-usurpation-f-in-al-preparati-on-s",
-          "name": "F in Al Preparati on S",
-          "description": "Passive: When the environment first takes the spotlight, designate one adversary as the Usurper seeking to overthrow the gods. Activate a Long-Term Countdown (8) as the Usurper assembles what they need to conduct the ritual. When it triggers, spotlight this environment to use the \"Beginning of the End\" feature. While this environment remains in play, you can hold up to 15 Fear.",
+          "name": "Preparativos Finais",
+          "description": "Passivo: Quando o ambiente recebe foco pela primeira vez, designe um adversário como o Usurpador que busca derrubar os deuses. Ative uma Contagem Regressiva de Longo Prazo (8) enquanto o Usurpador reúne o que precisa para conduzir o ritual. Quando ela dispara, coloque este ambiente em foco para usar o recurso \"O Início do Fim\". Enquanto este ambiente permanecer em jogo, você pode manter até 15 Medo.",
           "level": 4
         },
         {
           "id": "feature.environment-div-in-e-usurpation-div-in-e-bless-in-g",
-          "name": "Div in E Bless in G",
-          "description": "Passive: When a PC critically succeeds, they can spend 2 Esperanca to refresh an ability normally limited by uses (such as once per rest, once per session). DefilersAbound -Action: Spend 2 Fear to summon 1d4+2 Fallen Shock Troops that appear within alcance proximo of the Usurper to assist their divine siege. Immediately spotlight the Shock Troops to use a \"Group Attack\" action. Godslayer-Action: If the Divine Siege Countdown (see \"Beginning of the End\") has triggered, you can spend 3 Fear to describe the Usurper slaying one of the gods of the Hallows Above, feasting upon their power and growing stronger. The Usurper clears 2 HP. Increase their Difficulty, damage, attack modifier, or give them a new feature from the slain god.",
+          "name": "Bênção Divina",
+          "description": "Passivo: Quando um PC tem sucesso crítico, ele pode gastar 2 Esperança para renovar uma habilidade normalmente limitada por usos (como uma vez por descanso, uma vez por sessão). Profanadores por Toda Parte - Ação: Gaste 2 Medo para invocar 1d4+2 Tropas de Choque Caídas que aparecem em alcance próximo do Usurpador para auxiliar seu cerco divino. Coloque imediatamente as Tropas de Choque em foco para usar uma ação \"Ataque em Grupo\". Matador de Deuses - Ação: Se a Contagem Regressiva do Cerco Divino (veja \"O Início do Fim\") tiver disparado, você pode gastar 3 Medo para descrever o Usurpador matando um dos deuses dos Sagrados Acima, festejando em seu poder e ficando mais forte. O Usurpador limpa 2 PV. Aumente sua Dificuldade, dano, modificador de ataque ou dê a ele um novo recurso do deus abatido.",
           "level": 4
         },
         {
-          "id": "feature.environment-div-in-e-usurpation-beg-in-n-in-g-ofthe-end",
-          "name": "Beg in N in G Ofthe End",
-          "description": "Reaction: When the \"Final Preparations\" long-term countdown triggers, the Usurper begins hammering on the gates of the Hallows themselves. Activate a Divine Siege Countdown (10). Spotlight the Usurper to describe the Usurper's assault and tick down this countdown by 1. If the Usurper takes Major or greater damage, tick up the countdown by 1. When it triggers, the Usurper shatters the barrier between the Mortal Realm and the Hallows Above to slay the gods and take their place. You gain a Fear for each unmarked HP the Usurper has. You can immediately use the \"Godslayer\" feature without spending Fear to make an additional GM move.",
+          "id": "feature.environment-div-in-e-usurpation-beg-in-n-in-g-of-the-end",
+          "name": "O Início do Fim",
+          "description": "Reação: Quando a contagem de longo prazo \"Preparativos Finais\" dispara, o Usurpador começa a martelar os portões dos próprios Sagrados. Ative uma Contagem Regressiva de Cerco Divino (10). Coloque o Usurpador em foco para descrever o ataque dele e reduzir essa contagem em 1. Se o Usurpador sofrer dano Maior ou superior, aumente a contagem em 1. Quando ela dispara, o Usurpador rompe a barreira entre o Reino Mortal e os Sagrados Acima para matar os deuses e tomar seu lugar. Você ganha 1 Medo para cada PV não marcado do Usurpador. Você pode usar imediatamente o recurso \"Matador de Deuses\" sem gastar Medo para fazer um movimento adicional do GM.",
           "level": 4
         },
         {
           "id": "feature.environment-div-in-e-usurpation-ritual-nexus",
-          "name": "Ritual Nexus",
-          "description": "Reaction: On any failure with Fear against the Usurper, the PC must mark 1d4 Estresse from the backlash of magical power.",
+          "name": "Nexo Ritual",
+          "description": "Reação: Em qualquer falha com Medo contra o Usurpador, o PC deve marcar 1d4 Estresse pelo retorno de poder mágico.",
           "level": 4
         }
       ],
@@ -656,13 +656,13 @@
         "How does the Usurper's new stolen power manifest?",
         "How does the Mortal Realm writhe as the natural order is violated?",
         "What mortals witness this blasphemy from afar?",
-        "What visions of failures past torment you as your eﬀorts fall short?",
+        "What visions of failures past torment you as your efforts fall short?",
         "How are these memories twisted by the Usurper?"
       ]
     },
     {
       "id": "environment.imperial-court",
-      "name": "Imperial Court",
+      "name": "Corte Imperial",
       "tier": 4,
       "type": "social",
       "difficulty": 20,
@@ -674,25 +674,25 @@
       "features": [
         {
           "id": "feature.environment-imperial-court-all-roads-lead-here",
-          "name": "All Roads Lead Here",
-          "description": "Passive: While in the Imperial Court, a PC has disadvantage on Presence Rolls made to take actions that don't fit the imperial way of life or support the empire's dominance.",
+          "name": "Todos os Caminhos Levam Aqui",
+          "description": "Passivo: Enquanto estiver na Corte Imperial, um PC tem desvantagem em rolagens de Presença feitas para realizar ações que não se alinham ao modo de vida imperial ou que não apoiam a dominância do império.",
           "level": 4
         },
         {
           "id": "feature.environment-imperial-court-rival-vassals",
-          "name": "Rival Vassals",
-          "description": "Passive: The PCs can find imperial subjects, vassals, and supplicants in the court, each vying for favor, seeking proximity to power, exchanging favors for loyalty, and elevating their status above others'. Some might be desperate to undermine their rivals, while others might even be open to discussions that verge on sedition. The Gravity ofEmpire -Action: Spend a Fear to present a PC with a golden opportunity or offer to satisfy a major goal in exchange for obeying or supporting the empire. The target must make a Presence rolagem de Reacao. On a failure, they must mark all their Estresse or accept the offer. If they have already marked all their Estresse, they must accept the offer or exile themselves from the empire. On a success, they must mark 1d4 Estresse as they're taxed by temptation. Imperial Decree -Action: Spend a Fear to tick down a long-term countdown related to the empire's agenda by 1d4. If this triggers the countdown, a proclamation related to the agenda is announced at court as the plan is executed.",
+          "name": "Vassalos Rivais",
+          "description": "Passivo: Os PCs podem encontrar súditos imperiais, vassalos e suplicantes na corte, cada um disputando favor, buscando proximidade ao poder, trocando favores por lealdade e elevando seu status acima dos demais. Alguns podem estar desesperados para minar seus rivais, enquanto outros podem até se abrir a discussões que beiram a sedição. A Gravidade do Império - Ação: Gaste 1 Medo para oferecer a um PC uma oportunidade de ouro ou satisfazer um objetivo importante em troca de obedecer ou apoiar o império. O alvo deve fazer uma rolagem de Reação de Presença. Em uma falha, ele deve marcar todo o Estresse ou aceitar a oferta. Se já tiver marcado todo o Estresse, deve aceitar a oferta ou se exilar do império. Em um sucesso, ele deve marcar 1d4 Estresse por ser tentado. Decreto Imperial - Ação: Gaste 1 Medo para reduzir em 1d4 uma contagem de longo prazo relacionada à agenda do império. Se isso disparar a contagem, um decreto relacionado à agenda é anunciado na corte conforme o plano é executado.",
           "level": 4
         },
         {
           "id": "feature.environment-imperial-court-eyes-everywhere",
-          "name": "Eyes Everywhere",
-          "description": "Reaction: On a result with Fear, you can spend a Fear to have someone loyal to the empire overhear seditious talk within the court. A PC must succeed on an Instinct rolagem de Reacao to notice that the group has been overheard so they can try to intercept the witness before the PCs are exposed.",
+          "name": "Olhos em Todo Lugar",
+          "description": "Reação: Em um resultado com Medo, você pode gastar 1 Medo para fazer alguém leal ao império ouvir conversa sediciosa na corte. Um PC deve ter sucesso em uma rolagem de Reação de Instinto para perceber que o grupo foi ouvido e poder tentar interceptar a testemunha antes que os PCs sejam expostos.",
           "level": 4
         }
       ],
       "prompts": [
-        "How does the way language is used make even discussing alternative ways of living diﬃcult?",
+        "How does the way language is used make even discussing alternative ways of living difficult?",
         "What obvious benefits for loyalty create friction when you try to discuss alternatives?",
         "How do they benefit from vassalage, and what has it cost them?",
         "What exploitation drives them to consider opposing the unstoppable?",
@@ -701,7 +701,7 @@
         "What display of power or transfer of wealth was needed to expedite this plan?",
         "Whose lives were disrupted or upended to make this happen?",
         "How has the empire compromised this witness?",
-        "Why is their first impulse to protect the empire, even if doesn't treat them well?"
+        "Why is their first impulse to protect the empire, even if it doesn't treat them well?"
       ]
     },
     {
@@ -720,14 +720,14 @@
       "features": [
         {
           "id": "feature.environment-necromancers-ossuary-no-place-for-the-liv-in-g",
-          "name": "No Place for the Liv in G",
-          "description": "Passive: A feature or action that clears HP requires spending a Esperanca to use. If it already costs Esperanca, a PC must spend an additional Esperanca.",
+          "name": "Sem Lugar para os Vivos",
+          "description": "Passivo: Um recurso ou ação que limpe PV exige gastar 1 Esperança para ser usado. Se já custar Esperança, um PC deve gastar 1 Esperança adicional.",
           "level": 4
         },
         {
           "id": "feature.environment-necromancers-ossuary-centuries-of-knowledge",
-          "name": "Centuries of Knowledge",
-          "description": "Passive: A PC can investigate the library and laboratory and make a Knowledge Roll to learn information related to arcana, local history, and the Necromancer's plans. Skeletal Burst -Action: All targets within alcance proximo of a point you choose in this environment must succeed on an Agility rolagem de Reacao or take 4d8+8 physical damage from skeletal shrapnel as part of the ossuary detonates around them. Aura ofDeath -Action: Once per scene, roll a d4. Each undead within alcance longo of the Necromancer can clear HP and Estresse equal to the result rolled. The undead can choose how that number is divided between HP and Estresse. They Just Keep Coming! -Action: Spend a Fear to summon 1d6 Rotted Zombies, two Perfected Zombies, or a Zombie Legion, who appear at alcance proximo of a chosen PC.",
+          "name": "Séculos de Conhecimento",
+          "description": "Passivo: Um PC pode investigar a biblioteca e o laboratório e fazer uma rolagem de Conhecimento para aprender informações relacionadas à arcana, história local e aos planos do Necromante. Explosão Esquelética - Ação: Todos os alvos em alcance próximo de um ponto que você escolher neste ambiente devem ter sucesso em uma rolagem de Reação de Agilidade ou sofrer 4d8+8 de dano físico de estilhaços esqueléticos enquanto parte do ossuário detona ao redor deles. Aura de Morte - Ação: Uma vez por cena, role 1d4. Cada morto-vivo em alcance longo do Necromante pode limpar PV e Estresse iguais ao resultado. Os mortos-vivos podem escolher como dividir esse número entre PV e Estresse. Eles Não Param de Vir! - Ação: Gaste 1 Medo para invocar 1d6 Zumbis Apodrecidos, dois Zumbis Aperfeiçoados ou uma Legião de Zumbis, que aparecem em alcance próximo de um PC escolhido.",
           "level": 4
         }
       ],

@@ -45,7 +45,7 @@
     },
     {
       "id": "heritage.orc",
-      "name": "Orc",
+      "name": "Orco",
       "kind": "ancestry",
       "features": [
         {
@@ -58,7 +58,7 @@
     },
     {
       "id": "heritage.goblin",
-      "name": "Goblin",
+      "name": "Duende",
       "kind": "ancestry",
       "features": [
         {
