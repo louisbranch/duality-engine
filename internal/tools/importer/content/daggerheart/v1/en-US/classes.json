@@ -218,7 +218,7 @@
         {
           "id": "feature.wizard-strange-patterns",
           "name": "Strange Patterns",
-          "description": "Choose a number from 1–12. When you roll it on a Duality Die, gain a Hope or clear a Stress. You can change the number on a long rest.",
+          "description": "Choose a number from 1-12. When you roll it on a Duality Die, gain a Hope or clear a Stress. You can change the number on a long rest.",
           "level": 1
         }
       ],

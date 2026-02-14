@@ -23,7 +23,7 @@
       "description": "When you succeed on an attack with an arrow stored in this quiver, gain a bonus to the damage roll equal to your current tier."
     },
     {
-      "id": "loot-entry.alistairs-torch",
+      "id": "loot-entry.daybright-torch",
       "name": "Daybright Torch",
       "roll": 4,
       "description": "You can light this magic torch at will. The flame's light fills a much larger space than it should, enough to illuminate a cave bright as day."
@@ -143,7 +143,7 @@
       "description": "You can store the name and details of up to three hostile creatures inside this book. You gain a +1 bonus to action rolls against those creatures."
     },
     {
-      "id": "loot-entry.vial-of-darksmoke-recipe",
+      "id": "loot-entry.smokeguard-vial-recipe",
       "name": "Smokeguard Vial Recipe",
       "roll": 24,
       "description": "As a downtime move, you can mark a Stress to craft a Smokeguard Vial."
@@ -185,7 +185,7 @@
       "description": "This flask can hold two different liquids. You can swap between them by flipping a small switch on the flask's side."
     },
     {
-      "id": "loot-entry.bag-of-ficklesand",
+      "id": "loot-entry.shifting-sand-pouch",
       "name": "Shifting Sand Pouch",
       "roll": 31,
       "description": "You can convince this small bag of sand to be much heavier or lighter with a successful Presence Roll (10). Additionally, on a successful Finesse Roll (10), you can blow a bit of sand into a target's face to make them temporarily Vulnerable."
@@ -203,7 +203,7 @@
       "description": "If you have at least one Phoenix Feather on you when you fall unconscious, you gain a +1 bonus to the roll you make to determine whether you gain a scar."
     },
     {
-      "id": "loot-entry.box-of-many-goods",
+      "id": "loot-entry.lucky-goods-box",
       "name": "Lucky Goods Box",
       "roll": 34,
       "description": "Once per long rest, you can open this small box and roll a d12. On a result of 1-6, it's empty. On a result of 7-10, it contains one random common consumable. On a result of 11-12, it contains two random common consumables."
@@ -221,7 +221,7 @@
       "description": "You can plant this seed in the ground to grow a portal in that spot. The portal is ready to use in 24 hours. You can use this portal to travel to any other location where you planted a portal seed. A portal can be destroyed by dealing any amount of magic damage to it."
     },
     {
-      "id": "loot-entry.paragons-chain",
+      "id": "loot-entry.oathbound-chain",
       "name": "Oathbound Chain",
       "roll": 37,
       "description": "As a downtime move, you can meditate on an ideal or principle you hold dear and focus your will into this chain. Once per long rest, you can spend a Hope to roll a d20 as your Hope Die for rolls that directly align with that principle."
@@ -287,14 +287,14 @@
       "description": "You gain a +1 bonus to an Experience of your choice. You can only carry one relic."
     },
     {
-      "id": "loot-entry.flickerfly-pendant",
-      "name": "Flickerfly Pendant",
+      "id": "loot-entry.glimmermoth-pendant",
+      "name": "Glimmermoth Pendant",
       "roll": 48,
       "description": "While you carry this pendant, your weapons with a Melee range that deal physical damage have a gossamer sheen and can attack targets within Very Close range."
     },
     {
-      "id": "loot-entry.lakestrider-boots",
-      "name": "Lakestrider Boots",
+      "id": "loot-entry.waterstride-boots",
+      "name": "Waterstride Boots",
       "roll": 49,
       "description": "You can walk on the surface of water as if it were soft ground."
     },
@@ -317,43 +317,43 @@
       "description": "Once per long rest, you can spend 2 Hope to recall a domain card from your vault instead of paying its Recall Cost."
     },
     {
-      "id": "loot-entry.gem-of-alacrity",
+      "id": "loot-entry.gem-of-agility",
       "name": "Gem of Agility",
       "roll": 53,
       "description": "You can attach this gem to a weapon, allowing you to use your Agility when making an attack with that weapon."
     },
     {
-      "id": "loot-entry.gem-of-might",
+      "id": "loot-entry.gem-of-strength",
       "name": "Gem of Strength",
       "roll": 54,
       "description": "You can attach this gem to a weapon, allowing you to use your Strength when making an attack with that weapon."
     },
     {
-      "id": "loot-entry.gem-of-precision",
+      "id": "loot-entry.gem-of-finesse",
       "name": "Gem of Finesse",
       "roll": 55,
       "description": "You can attach this gem to a weapon, allowing you to use your Finesse when making an attack with that weapon."
     },
     {
-      "id": "loot-entry.gem-of-insight",
+      "id": "loot-entry.gem-of-instinct",
       "name": "Gem of Instinct",
       "roll": 56,
       "description": "You can attach this gem to a weapon, allowing you to use your Instinct when making an attack with that weapon."
     },
     {
-      "id": "loot-entry.gem-of-audacity",
+      "id": "loot-entry.gem-of-presence",
       "name": "Gem of Presence",
       "roll": 57,
       "description": "You can attach this gem to a weapon, allowing you to use your Presence when making an attack with that weapon."
     },
     {
-      "id": "loot-entry.gem-of-sagacity",
+      "id": "loot-entry.gem-of-knowledge",
       "name": "Gem of Knowledge",
       "roll": 58,
       "description": "You can attach this gem to a weapon, allowing you to use your Knowledge when making an attack with that weapon."
     },
     {
-      "id": "loot-entry.ring-of-unbreakable-resolve",
+      "id": "loot-entry.fearward-ring",
       "name": "Fearward Ring",
       "roll": 59,
       "description": "Once per session, when the GM spends a Fear, you can spend 4 Hope to cancel the effects of that spent Fear."

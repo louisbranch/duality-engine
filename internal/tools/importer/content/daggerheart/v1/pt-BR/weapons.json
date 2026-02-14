@@ -1133,8 +1133,8 @@
       "feature": "Desajeitada: -1 em Finesse. Bônus de dano +9."
     },
     {
-      "id": "weapon.flickerfly-blade",
-      "name": "Lâmina Flickerfly",
+      "id": "weapon.glimmermoth-blade",
+      "name": "Lâmina Glimmermoth",
       "category": "primary",
       "tier": 3,
       "trait": "Agility",

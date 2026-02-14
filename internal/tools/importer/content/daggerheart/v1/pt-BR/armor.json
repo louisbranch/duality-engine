@@ -6,7 +6,7 @@
   "items": [
     {
       "id": "armor.gambeson-armor",
-      "name": "Gambeson Armor",
+      "name": "Armadura de Gambeson",
       "tier": 1,
       "base_major_threshold": 5,
       "base_severe_threshold": 11,
@@ -15,7 +15,7 @@
     },
     {
       "id": "armor.leather-armor",
-      "name": "Leather Armor",
+      "name": "Armadura de Couro",
       "tier": 1,
       "base_major_threshold": 6,
       "base_severe_threshold": 13,
@@ -24,7 +24,7 @@
     },
     {
       "id": "armor.chainmail-armor",
-      "name": "Chainmail Armor",
+      "name": "Armadura de Cota de Malha",
       "tier": 1,
       "base_major_threshold": 7,
       "base_severe_threshold": 15,
@@ -33,7 +33,7 @@
     },
     {
       "id": "armor.full-plate-armor",
-      "name": "Full Plate Armor",
+      "name": "Armadura de Placas Completa",
       "tier": 1,
       "base_major_threshold": 8,
       "base_severe_threshold": 17,
@@ -42,7 +42,7 @@
     },
     {
       "id": "armor.improved-gambeson-armor",
-      "name": "Improved Gambeson Armor",
+      "name": "Armadura de Gambeson Melhorada",
       "tier": 2,
       "base_major_threshold": 7,
       "base_severe_threshold": 16,
@@ -51,7 +51,7 @@
     },
     {
       "id": "armor.improved-leather-armor",
-      "name": "Improved Leather Armor",
+      "name": "Armadura de Couro Melhorada",
       "tier": 2,
       "base_major_threshold": 9,
       "base_severe_threshold": 20,
@@ -60,7 +60,7 @@
     },
     {
       "id": "armor.improved-chainmail-armor",
-      "name": "Improved Chainmail Armor",
+      "name": "Armadura de Cota de Malha Melhorada",
       "tier": 2,
       "base_major_threshold": 11,
       "base_severe_threshold": 24,
@@ -69,7 +69,7 @@
     },
     {
       "id": "armor.improved-full-plate-armor",
-      "name": "Improved Full Plate Armor",
+      "name": "Armadura de Placas Completa Melhorada",
       "tier": 2,
       "base_major_threshold": 13,
       "base_severe_threshold": 28,
@@ -78,7 +78,7 @@
     },
     {
       "id": "armor.elundrian-chain-armor",
-      "name": "Elundrian Chain Armor",
+      "name": "Armadura de Cota de Malha Elundriana",
       "tier": 2,
       "base_major_threshold": 9,
       "base_severe_threshold": 21,
@@ -87,7 +87,7 @@
     },
     {
       "id": "armor.harrowbone-armor",
-      "name": "Harrowbone Armor",
+      "name": "Armadura Harrowbone",
       "tier": 2,
       "base_major_threshold": 9,
       "base_severe_threshold": 21,
@@ -96,7 +96,7 @@
     },
     {
       "id": "armor.irontree-breastplate-armor",
-      "name": "Irontree Breastplate Armor",
+      "name": "Armadura de Peitoral Irontree",
       "tier": 2,
       "base_major_threshold": 9,
       "base_severe_threshold": 20,
@@ -105,7 +105,7 @@
     },
     {
       "id": "armor.runetan-floating-armor",
-      "name": "Runetan Floating Armor",
+      "name": "Armadura Flutuante Runetan",
       "tier": 2,
       "base_major_threshold": 9,
       "base_severe_threshold": 20,
@@ -114,7 +114,7 @@
     },
     {
       "id": "armor.tyris-soft-armor",
-      "name": "Tyris Soft Armor",
+      "name": "Armadura Macia de Tyris",
       "tier": 2,
       "base_major_threshold": 8,
       "base_severe_threshold": 18,
@@ -123,7 +123,7 @@
     },
     {
       "id": "armor.rosewild-armor",
-      "name": "Rosewild Armor",
+      "name": "Armadura Rosewild",
       "tier": 2,
       "base_major_threshold": 11,
       "base_severe_threshold": 23,
@@ -132,7 +132,7 @@
     },
     {
       "id": "armor.advanced-gambeson-armor",
-      "name": "Advanced Gambeson Armor",
+      "name": "Armadura de Gambeson Avançada",
       "tier": 3,
       "base_major_threshold": 9,
       "base_severe_threshold": 23,
@@ -141,7 +141,7 @@
     },
     {
       "id": "armor.advanced-leather-armor",
-      "name": "Advanced Leather Armor",
+      "name": "Armadura de Couro Avançada",
       "tier": 3,
       "base_major_threshold": 11,
       "base_severe_threshold": 27,
@@ -150,7 +150,7 @@
     },
     {
       "id": "armor.advanced-chainmail-armor",
-      "name": "Advanced Chainmail Armor",
+      "name": "Armadura de Cota de Malha Avançada",
       "tier": 3,
       "base_major_threshold": 13,
       "base_severe_threshold": 31,
@@ -159,7 +159,7 @@
     },
     {
       "id": "armor.advanced-full-plate-armor",
-      "name": "Advanced Full Plate Armor",
+      "name": "Armadura de Placas Completa Avançada",
       "tier": 3,
       "base_major_threshold": 15,
       "base_severe_threshold": 35,
@@ -168,7 +168,7 @@
     },
     {
       "id": "armor.bellamoi-fine-armor",
-      "name": "Bellamoi Fine Armor",
+      "name": "Armadura Fina Bellamoi",
       "tier": 3,
       "base_major_threshold": 11,
       "base_severe_threshold": 27,
@@ -177,7 +177,7 @@
     },
     {
       "id": "armor.dragonscale-armor",
-      "name": "Dragonscale Armor",
+      "name": "Armadura de Escamas de Dragão",
       "tier": 3,
       "base_major_threshold": 11,
       "base_severe_threshold": 27,
@@ -186,7 +186,7 @@
     },
     {
       "id": "armor.spiked-plate-armor",
-      "name": "Spiked Plate Armor",
+      "name": "Armadura de Placas com Espinhos",
       "tier": 3,
       "base_major_threshold": 10,
       "base_severe_threshold": 25,
@@ -195,7 +195,7 @@
     },
     {
       "id": "armor.bladefare-armor",
-      "name": "Bladefare Armor",
+      "name": "Armadura Bladefare",
       "tier": 3,
       "base_major_threshold": 16,
       "base_severe_threshold": 39,
@@ -213,7 +213,7 @@
     },
     {
       "id": "armor.runes-of-fortification",
-      "name": "Runes of Fortification",
+      "name": "Runas de Fortificação",
       "tier": 3,
       "base_major_threshold": 17,
       "base_severe_threshold": 43,
@@ -222,7 +222,7 @@
     },
     {
       "id": "armor.legendary-gambeson-armor",
-      "name": "Legendary Gambeson Armor",
+      "name": "Armadura de Gambeson Lendária",
       "tier": 4,
       "base_major_threshold": 11,
       "base_severe_threshold": 32,
@@ -231,7 +231,7 @@
     },
     {
       "id": "armor.legendary-leather-armor",
-      "name": "Legendary Leather Armor",
+      "name": "Armadura de Couro Lendária",
       "tier": 4,
       "base_major_threshold": 13,
       "base_severe_threshold": 36,
@@ -240,7 +240,7 @@
     },
     {
       "id": "armor.legendary-chainmail-armor",
-      "name": "Legendary Chainmail Armor",
+      "name": "Armadura de Cota de Malha Lendária",
       "tier": 4,
       "base_major_threshold": 15,
       "base_severe_threshold": 40,
@@ -249,7 +249,7 @@
     },
     {
       "id": "armor.legendary-full-plate-armor",
-      "name": "Legendary Full Plate Armor",
+      "name": "Armadura de Placas Completa Lendária",
       "tier": 4,
       "base_major_threshold": 17,
       "base_severe_threshold": 44,
@@ -258,7 +258,7 @@
     },
     {
       "id": "armor.dunamis-silkchain",
-      "name": "Dunamis Silkchain",
+      "name": "Cota de Seda Dunamis",
       "tier": 4,
       "base_major_threshold": 13,
       "base_severe_threshold": 36,
@@ -267,7 +267,7 @@
     },
     {
       "id": "armor.channeling-armor",
-      "name": "Channeling Armor",
+      "name": "Armadura de Canalização",
       "tier": 4,
       "base_major_threshold": 13,
       "base_severe_threshold": 36,
@@ -276,7 +276,7 @@
     },
     {
       "id": "armor.emberwoven-armor",
-      "name": "Emberwoven Armor",
+      "name": "Armadura de Trama de Brasa",
       "tier": 4,
       "base_major_threshold": 13,
       "base_severe_threshold": 36,
@@ -285,7 +285,7 @@
     },
     {
       "id": "armor.full-fortified-armor",
-      "name": "Full Fortified Armor",
+      "name": "Armadura Totalmente Fortificada",
       "tier": 4,
       "base_major_threshold": 15,
       "base_severe_threshold": 40,
@@ -294,7 +294,7 @@
     },
     {
       "id": "armor.veritas-opal-armor",
-      "name": "Veritas Opal Armor",
+      "name": "Armadura de Opala Veritas",
       "tier": 4,
       "base_major_threshold": 13,
       "base_severe_threshold": 36,
@@ -303,7 +303,7 @@
     },
     {
       "id": "armor.savior-chainmail",
-      "name": "Savior Chainmail",
+      "name": "Cota de Malha do Salvador",
       "tier": 4,
       "base_major_threshold": 18,
       "base_severe_threshold": 48,

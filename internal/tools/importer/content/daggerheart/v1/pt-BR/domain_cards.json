@@ -6,7 +6,7 @@
   "items": [
     {
       "id": "domain_card.arcana-runeward",
-      "name": "Runeward",
+      "name": "Guarda Rúnica",
       "domain_id": "domain.arcana",
       "level": 1,
       "type": "spell",
@@ -16,7 +16,7 @@
     },
     {
       "id": "domain_card.arcana-unleash-chaos",
-      "name": "Unleash Chaos",
+      "name": "Liberar Caos",
       "domain_id": "domain.arcana",
       "level": 1,
       "type": "spell",
@@ -26,7 +26,7 @@
     },
     {
       "id": "domain_card.arcana-wallwalk",
-      "name": "Wallwalk",
+      "name": "Andar na Parede",
       "domain_id": "domain.arcana",
       "level": 1,
       "type": "spell",
@@ -36,7 +36,7 @@
     },
     {
       "id": "domain_card.arcana-cinder-grasp",
-      "name": "Cinder Grasp",
+      "name": "Garra de Cinzas",
       "domain_id": "domain.arcana",
       "level": 2,
       "type": "spell",
@@ -46,7 +46,7 @@
     },
     {
       "id": "domain_card.arcana-floating-eye",
-      "name": "Floating Eye",
+      "name": "Olho Flutuante",
       "domain_id": "domain.arcana",
       "level": 2,
       "type": "spell",
@@ -56,7 +56,7 @@
     },
     {
       "id": "domain_card.arcana-counterspell",
-      "name": "Counterspell",
+      "name": "Contrafeitiço",
       "domain_id": "domain.arcana",
       "level": 3,
       "type": "spell",
@@ -66,7 +66,7 @@
     },
     {
       "id": "domain_card.arcana-flight",
-      "name": "Flight",
+      "name": "Voo",
       "domain_id": "domain.arcana",
       "level": 3,
       "type": "spell",
@@ -76,7 +76,7 @@
     },
     {
       "id": "domain_card.arcana-blink-out",
-      "name": "Blink Out",
+      "name": "Desaparecer num Piscar",
       "domain_id": "domain.arcana",
       "level": 4,
       "type": "spell",
@@ -86,7 +86,7 @@
     },
     {
       "id": "domain_card.arcana-preservation-blast",
-      "name": "Preservation Blast",
+      "name": "Explosão de Preservação",
       "domain_id": "domain.arcana",
       "level": 4,
       "type": "spell",
@@ -96,7 +96,7 @@
     },
     {
       "id": "domain_card.arcana-chain-lightning",
-      "name": "Chain Lightning",
+      "name": "Relâmpago em Cadeia",
       "domain_id": "domain.arcana",
       "level": 5,
       "type": "spell",
@@ -106,7 +106,7 @@
     },
     {
       "id": "domain_card.arcana-premonition",
-      "name": "Premonition",
+      "name": "Premonição",
       "domain_id": "domain.arcana",
       "level": 5,
       "type": "spell",
@@ -116,7 +116,7 @@
     },
     {
       "id": "domain_card.arcana-riftwalker",
-      "name": "Riftwalker",
+      "name": "Andarilho da Fenda",
       "domain_id": "domain.arcana",
       "level": 6,
       "type": "spell",
@@ -126,7 +126,7 @@
     },
     {
       "id": "domain_card.arcana-telekinesis",
-      "name": "Telekinesis",
+      "name": "Telecinese",
       "domain_id": "domain.arcana",
       "level": 6,
       "type": "spell",
@@ -136,7 +136,7 @@
     },
     {
       "id": "domain_card.arcana-arcana-touched",
-      "name": "Arcana-Tocado",
+      "name": "Tocado pela Arcana",
       "domain_id": "domain.arcana",
       "level": 7,
       "type": "ability",
@@ -146,7 +146,7 @@
     },
     {
       "id": "domain_card.arcana-cloaking-blast",
-      "name": "Cloaking Blast",
+      "name": "Explosão de Camuflagem",
       "domain_id": "domain.arcana",
       "level": 7,
       "type": "spell",
@@ -156,7 +156,7 @@
     },
     {
       "id": "domain_card.arcana-arcane-reflection",
-      "name": "Arcane Reflection",
+      "name": "Reflexão Arcana",
       "domain_id": "domain.arcana",
       "level": 8,
       "type": "spell",
@@ -166,7 +166,7 @@
     },
     {
       "id": "domain_card.arcana-confusing-aura",
-      "name": "Confusing Aura",
+      "name": "Aura Confusora",
       "domain_id": "domain.arcana",
       "level": 8,
       "type": "spell",
@@ -176,7 +176,7 @@
     },
     {
       "id": "domain_card.arcana-earthquake",
-      "name": "Earthquake",
+      "name": "Terremoto",
       "domain_id": "domain.arcana",
       "level": 9,
       "type": "spell",
@@ -186,7 +186,7 @@
     },
     {
       "id": "domain_card.arcana-sensory-projection",
-      "name": "Sensory Projection",
+      "name": "Projeção Sensorial",
       "domain_id": "domain.arcana",
       "level": 9,
       "type": "spell",
@@ -196,7 +196,7 @@
     },
     {
       "id": "domain_card.arcana-adjust-reality",
-      "name": "Adjust Reality",
+      "name": "Ajustar a Realidade",
       "domain_id": "domain.arcana",
       "level": 10,
       "type": "spell",
@@ -206,7 +206,7 @@
     },
     {
       "id": "domain_card.arcana-falling-sky",
-      "name": "Falling Sky",
+      "name": "Céu em Queda",
       "domain_id": "domain.arcana",
       "level": 10,
       "type": "spell",
@@ -216,7 +216,7 @@
     },
     {
       "id": "domain_card.blade-get-back-up",
-      "name": "Get Back Up",
+      "name": "Levante-se",
       "domain_id": "domain.blade",
       "level": 1,
       "type": "ability",
@@ -226,7 +226,7 @@
     },
     {
       "id": "domain_card.blade-not-good-enough",
-      "name": "Not Good Enough",
+      "name": "Não é Bom o Suficiente",
       "domain_id": "domain.blade",
       "level": 1,
       "type": "ability",
@@ -236,7 +236,7 @@
     },
     {
       "id": "domain_card.blade-whirlwind",
-      "name": "Whirlwind",
+      "name": "Redemoinho",
       "domain_id": "domain.blade",
       "level": 1,
       "type": "ability",
@@ -256,7 +256,7 @@
     },
     {
       "id": "domain_card.blade-reckless",
-      "name": "Reckless",
+      "name": "Imprudente",
       "domain_id": "domain.blade",
       "level": 2,
       "type": "ability",
@@ -266,7 +266,7 @@
     },
     {
       "id": "domain_card.blade-scramble",
-      "name": "Scramble",
+      "name": "Correria",
       "domain_id": "domain.blade",
       "level": 3,
       "type": "ability",
@@ -276,7 +276,7 @@
     },
     {
       "id": "domain_card.blade-versatile-fighter",
-      "name": "Versatile Fighter",
+      "name": "Combatente Versátil",
       "domain_id": "domain.blade",
       "level": 3,
       "type": "ability",
@@ -286,7 +286,7 @@
     },
     {
       "id": "domain_card.blade-deadly-focus",
-      "name": "Deadly Focus",
+      "name": "Foco Mortal",
       "domain_id": "domain.blade",
       "level": 4,
       "type": "ability",
@@ -296,7 +296,7 @@
     },
     {
       "id": "domain_card.blade-fortified-armor",
-      "name": "Fortified Armor",
+      "name": "Armadura Fortificada",
       "domain_id": "domain.blade",
       "level": 4,
       "type": "ability",
@@ -316,7 +316,7 @@
     },
     {
       "id": "domain_card.blade-vitality",
-      "name": "Vitality",
+      "name": "Vitalidade",
       "domain_id": "domain.blade",
       "level": 5,
       "type": "ability",
@@ -326,7 +326,7 @@
     },
     {
       "id": "domain_card.blade-battle-hardened",
-      "name": "Battle-Hardened",
+      "name": "Endurecido pela Batalha",
       "domain_id": "domain.blade",
       "level": 6,
       "type": "ability",
@@ -336,7 +336,7 @@
     },
     {
       "id": "domain_card.blade-rage-up",
-      "name": "Rage Up",
+      "name": "Aumentar a Fúria",
       "domain_id": "domain.blade",
       "level": 6,
       "type": "ability",
@@ -346,7 +346,7 @@
     },
     {
       "id": "domain_card.blade-blade-touched",
-      "name": "Lamina-Tocado",
+      "name": "Tocado pela Lâmina",
       "domain_id": "domain.blade",
       "level": 7,
       "type": "ability",
@@ -356,7 +356,7 @@
     },
     {
       "id": "domain_card.blade-glancing-blow",
-      "name": "Glancing Blow",
+      "name": "Golpe de Raspão",
       "domain_id": "domain.blade",
       "level": 7,
       "type": "ability",
@@ -366,7 +366,7 @@
     },
     {
       "id": "domain_card.blade-battle-cry",
-      "name": "Battle Cry",
+      "name": "Grito de Batalha",
       "domain_id": "domain.blade",
       "level": 8,
       "type": "ability",
@@ -376,7 +376,7 @@
     },
     {
       "id": "domain_card.blade-frenzy",
-      "name": "Frenzy",
+      "name": "Frenesi",
       "domain_id": "domain.blade",
       "level": 8,
       "type": "ability",
@@ -386,7 +386,7 @@
     },
     {
       "id": "domain_card.blade-gore-and-glory",
-      "name": "Gore and Glory",
+      "name": "Sangue e Glória",
       "domain_id": "domain.blade",
       "level": 9,
       "type": "ability",
@@ -406,7 +406,7 @@
     },
     {
       "id": "domain_card.blade-battle-monster",
-      "name": "Battle Monster",
+      "name": "Monstro de Batalha",
       "domain_id": "domain.blade",
       "level": 10,
       "type": "ability",
@@ -416,7 +416,7 @@
     },
     {
       "id": "domain_card.blade-onslaught",
-      "name": "Onslaught",
+      "name": "Investida",
       "domain_id": "domain.blade",
       "level": 10,
       "type": "ability",
@@ -426,7 +426,7 @@
     },
     {
       "id": "domain_card.bone-deft-maneuvers",
-      "name": "Deft Maneuvers",
+      "name": "Manobras Ágeis",
       "domain_id": "domain.bone",
       "level": 1,
       "type": "ability",
@@ -436,7 +436,7 @@
     },
     {
       "id": "domain_card.bone-i-see-it-coming",
-      "name": "I See It Coming",
+      "name": "Eu Vi Chegar",
       "domain_id": "domain.bone",
       "level": 1,
       "type": "ability",
@@ -446,7 +446,7 @@
     },
     {
       "id": "domain_card.bone-untouchable",
-      "name": "Untouchable",
+      "name": "Intocável",
       "domain_id": "domain.bone",
       "level": 1,
       "type": "ability",
@@ -456,7 +456,7 @@
     },
     {
       "id": "domain_card.bone-ferocity",
-      "name": "Ferocity",
+      "name": "Ferocidade",
       "domain_id": "domain.bone",
       "level": 2,
       "type": "ability",
@@ -466,7 +466,7 @@
     },
     {
       "id": "domain_card.bone-strategic-approach",
-      "name": "Strategic Approach",
+      "name": "Abordagem Estratégica",
       "domain_id": "domain.bone",
       "level": 2,
       "type": "ability",
@@ -476,7 +476,7 @@
     },
     {
       "id": "domain_card.bone-brace",
-      "name": "Brace",
+      "name": "Firmar-se",
       "domain_id": "domain.bone",
       "level": 3,
       "type": "ability",
@@ -486,7 +486,7 @@
     },
     {
       "id": "domain_card.bone-tactician",
-      "name": "Tactician",
+      "name": "Tático",
       "domain_id": "domain.bone",
       "level": 3,
       "type": "ability",
@@ -496,7 +496,7 @@
     },
     {
       "id": "domain_card.bone-boost",
-      "name": "Boost",
+      "name": "Impulso",
       "domain_id": "domain.bone",
       "level": 4,
       "type": "ability",
@@ -506,7 +506,7 @@
     },
     {
       "id": "domain_card.bone-redirect",
-      "name": "Redirect",
+      "name": "Redirecionar",
       "domain_id": "domain.bone",
       "level": 4,
       "type": "ability",
@@ -516,7 +516,7 @@
     },
     {
       "id": "domain_card.bone-know-thy-enemy",
-      "name": "Know Thy Enemy",
+      "name": "Conheça Seu Inimigo",
       "domain_id": "domain.bone",
       "level": 5,
       "type": "ability",
@@ -526,7 +526,7 @@
     },
     {
       "id": "domain_card.bone-signature-move",
-      "name": "Signature Move",
+      "name": "Golpe Assinatura",
       "domain_id": "domain.bone",
       "level": 5,
       "type": "ability",
@@ -536,7 +536,7 @@
     },
     {
       "id": "domain_card.bone-rapid-riposte",
-      "name": "Rapid Riposte",
+      "name": "Riposta Rápida",
       "domain_id": "domain.bone",
       "level": 6,
       "type": "ability",
@@ -546,7 +546,7 @@
     },
     {
       "id": "domain_card.bone-recovery",
-      "name": "Recovery",
+      "name": "Recuperação",
       "domain_id": "domain.bone",
       "level": 6,
       "type": "ability",
@@ -556,7 +556,7 @@
     },
     {
       "id": "domain_card.bone-bone-touched",
-      "name": "Osso-Tocado",
+      "name": "Tocado pelo Osso",
       "domain_id": "domain.bone",
       "level": 7,
       "type": "ability",
@@ -566,7 +566,7 @@
     },
     {
       "id": "domain_card.bone-cruel-precision",
-      "name": "Cruel Precision",
+      "name": "Precisão Cruel",
       "domain_id": "domain.bone",
       "level": 7,
       "type": "ability",
@@ -576,7 +576,7 @@
     },
     {
       "id": "domain_card.bone-breaking-blow",
-      "name": "Breaking Blow",
+      "name": "Golpe Quebrador",
       "domain_id": "domain.bone",
       "level": 8,
       "type": "ability",
@@ -586,7 +586,7 @@
     },
     {
       "id": "domain_card.bone-wrangle",
-      "name": "Wrangle",
+      "name": "Domar",
       "domain_id": "domain.bone",
       "level": 8,
       "type": "ability",
@@ -596,7 +596,7 @@
     },
     {
       "id": "domain_card.bone-on-the-brink",
-      "name": "On the Brink",
+      "name": "À Beira",
       "domain_id": "domain.bone",
       "level": 9,
       "type": "ability",
@@ -606,7 +606,7 @@
     },
     {
       "id": "domain_card.bone-splintering-strike",
-      "name": "Splintering Strike",
+      "name": "Golpe Estilhaçante",
       "domain_id": "domain.bone",
       "level": 9,
       "type": "ability",
@@ -616,7 +616,7 @@
     },
     {
       "id": "domain_card.bone-deathrun",
-      "name": "Deathrun",
+      "name": "Corrida da Morte",
       "domain_id": "domain.bone",
       "level": 10,
       "type": "ability",
@@ -626,7 +626,7 @@
     },
     {
       "id": "domain_card.bone-swiftstep",
-      "name": "Swiftstep",
+      "name": "Passo Veloz",
       "domain_id": "domain.bone",
       "level": 10,
       "type": "ability",
@@ -636,7 +636,7 @@
     },
     {
       "id": "domain_card.codex-book-of-ava",
-      "name": "Códice da Força e da Geada",
+      "name": "Códice de Força e Gelo",
       "domain_id": "domain.codex",
       "level": 1,
       "type": "grimoire",
@@ -656,7 +656,7 @@
     },
     {
       "id": "domain_card.codex-book-of-tyfar",
-      "name": "Códice de Chama e Neblina",
+      "name": "Códice de Chama e Névoa",
       "domain_id": "domain.codex",
       "level": 1,
       "type": "grimoire",
@@ -696,7 +696,7 @@
     },
     {
       "id": "domain_card.codex-book-of-norai",
-      "name": "Códice de Vínculos e Fogo",
+      "name": "Códice de Laços e Fogo",
       "domain_id": "domain.codex",
       "level": 3,
       "type": "grimoire",
@@ -706,7 +706,7 @@
     },
     {
       "id": "domain_card.codex-book-of-exota",
-      "name": "Códice de Construtos e Salvaguardas",
+      "name": "Códice de Construtos e Proteção",
       "domain_id": "domain.codex",
       "level": 4,
       "type": "grimoire",
@@ -726,7 +726,7 @@
     },
     {
       "id": "domain_card.codex-manifest-wall",
-      "name": "Manifest Wall",
+      "name": "Manifestar Muralha",
       "domain_id": "domain.codex",
       "level": 5,
       "type": "spell",
@@ -736,7 +736,7 @@
     },
     {
       "id": "domain_card.codex-teleport",
-      "name": "Teleport",
+      "name": "Teleporte",
       "domain_id": "domain.codex",
       "level": 5,
       "type": "spell",
@@ -746,7 +746,7 @@
     },
     {
       "id": "domain_card.codex-banish",
-      "name": "Banish",
+      "name": "Banir",
       "domain_id": "domain.codex",
       "level": 6,
       "type": "spell",
@@ -776,7 +776,7 @@
     },
     {
       "id": "domain_card.codex-codex-touched",
-      "name": "Codex-Tocado",
+      "name": "Tocado pelo Códice",
       "domain_id": "domain.codex",
       "level": 7,
       "type": "ability",
@@ -786,7 +786,7 @@
     },
     {
       "id": "domain_card.codex-book-of-vyola",
-      "name": "Códice de Memória",
+      "name": "Códice da Memória",
       "domain_id": "domain.codex",
       "level": 8,
       "type": "grimoire",
@@ -796,7 +796,7 @@
     },
     {
       "id": "domain_card.codex-safe-haven",
-      "name": "Safe Haven",
+      "name": "Refúgio Seguro",
       "domain_id": "domain.codex",
       "level": 8,
       "type": "spell",
@@ -806,7 +806,7 @@
     },
     {
       "id": "domain_card.codex-book-of-ronin",
-      "name": "Códice de Transformação",
+      "name": "Códice da Transformação",
       "domain_id": "domain.codex",
       "level": 9,
       "type": "grimoire",
@@ -816,7 +816,7 @@
     },
     {
       "id": "domain_card.codex-disintegration-wave",
-      "name": "Disintegration Wave",
+      "name": "Onda de Desintegração",
       "domain_id": "domain.codex",
       "level": 9,
       "type": "spell",
@@ -826,7 +826,7 @@
     },
     {
       "id": "domain_card.codex-book-of-yarrow",
-      "name": "Códice de Ruptura do Tempo",
+      "name": "Códice da Ruptura do Tempo",
       "domain_id": "domain.codex",
       "level": 10,
       "type": "grimoire",
@@ -836,7 +836,7 @@
     },
     {
       "id": "domain_card.codex-transcendent-union",
-      "name": "Transcendent Union",
+      "name": "União Transcendente",
       "domain_id": "domain.codex",
       "level": 10,
       "type": "spell",
@@ -846,7 +846,7 @@
     },
     {
       "id": "domain_card.grace-deft-deceiver",
-      "name": "Deft Deceiver",
+      "name": "Enganador Ágil",
       "domain_id": "domain.grace",
       "level": 1,
       "type": "ability",
@@ -856,7 +856,7 @@
     },
     {
       "id": "domain_card.grace-enrapture",
-      "name": "Enrapture",
+      "name": "Encantar",
       "domain_id": "domain.grace",
       "level": 1,
       "type": "spell",
@@ -866,7 +866,7 @@
     },
     {
       "id": "domain_card.grace-inspirational-words",
-      "name": "Inspirational Words",
+      "name": "Palavras Inspiradoras",
       "domain_id": "domain.grace",
       "level": 1,
       "type": "ability",
@@ -876,7 +876,7 @@
     },
     {
       "id": "domain_card.grace-tell-no-lies",
-      "name": "Tell No Lies",
+      "name": "Não Conte Mentiras",
       "domain_id": "domain.grace",
       "level": 2,
       "type": "spell",
@@ -886,7 +886,7 @@
     },
     {
       "id": "domain_card.grace-troublemaker",
-      "name": "Troublemaker",
+      "name": "Criador de Encrenca",
       "domain_id": "domain.grace",
       "level": 2,
       "type": "ability",
@@ -896,7 +896,7 @@
     },
     {
       "id": "domain_card.grace-hypnotic-shimmer",
-      "name": "Hypnotic Shimmer",
+      "name": "Brilho Hipnótico",
       "domain_id": "domain.grace",
       "level": 3,
       "type": "spell",
@@ -906,7 +906,7 @@
     },
     {
       "id": "domain_card.grace-invisibility",
-      "name": "Invisibility",
+      "name": "Invisibilidade",
       "domain_id": "domain.grace",
       "level": 3,
       "type": "spell",
@@ -916,7 +916,7 @@
     },
     {
       "id": "domain_card.grace-soothing-speech",
-      "name": "Soothing Speech",
+      "name": "Discurso Acalmante",
       "domain_id": "domain.grace",
       "level": 4,
       "type": "ability",
@@ -926,7 +926,7 @@
     },
     {
       "id": "domain_card.grace-through-your-eyes",
-      "name": "Through Your Eyes",
+      "name": "Pelos Seus Olhos",
       "domain_id": "domain.grace",
       "level": 4,
       "type": "spell",
@@ -936,7 +936,7 @@
     },
     {
       "id": "domain_card.grace-thought-delver",
-      "name": "Thought Delver",
+      "name": "Explorador de Pensamentos",
       "domain_id": "domain.grace",
       "level": 5,
       "type": "spell",
@@ -946,7 +946,7 @@
     },
     {
       "id": "domain_card.grace-words-of-discord",
-      "name": "Words of Discord",
+      "name": "Palavras de Discórdia",
       "domain_id": "domain.grace",
       "level": 5,
       "type": "spell",
@@ -956,7 +956,7 @@
     },
     {
       "id": "domain_card.grace-never-upstaged",
-      "name": "Never Upstaged",
+      "name": "Nunca Ofuscado",
       "domain_id": "domain.grace",
       "level": 6,
       "type": "ability",
@@ -966,7 +966,7 @@
     },
     {
       "id": "domain_card.grace-share-the-burden",
-      "name": "Share the Burden",
+      "name": "Compartilhar o Fardo",
       "domain_id": "domain.grace",
       "level": 6,
       "type": "spell",
@@ -976,7 +976,7 @@
     },
     {
       "id": "domain_card.grace-endless-charisma",
-      "name": "Endless Charisma",
+      "name": "Carisma Infinito",
       "domain_id": "domain.grace",
       "level": 7,
       "type": "ability",
@@ -986,7 +986,7 @@
     },
     {
       "id": "domain_card.grace-grace-touched",
-      "name": "Graca-Tocado",
+      "name": "Tocado pela Graça",
       "domain_id": "domain.grace",
       "level": 7,
       "type": "ability",
@@ -996,7 +996,7 @@
     },
     {
       "id": "domain_card.grace-astral-projection",
-      "name": "Astral Projection",
+      "name": "Projeção Astral",
       "domain_id": "domain.grace",
       "level": 8,
       "type": "spell",
@@ -1006,7 +1006,7 @@
     },
     {
       "id": "domain_card.grace-mass-enrapture",
-      "name": "Mass Enrapture",
+      "name": "Encantamento em Massa",
       "domain_id": "domain.grace",
       "level": 8,
       "type": "spell",
@@ -1016,7 +1016,7 @@
     },
     {
       "id": "domain_card.grace-copycat",
-      "name": "Copycat",
+      "name": "Imitador",
       "domain_id": "domain.grace",
       "level": 9,
       "type": "spell",
@@ -1026,7 +1026,7 @@
     },
     {
       "id": "domain_card.grace-master-of-the-craft",
-      "name": "Master of the Craft",
+      "name": "Mestre do Ofício",
       "domain_id": "domain.grace",
       "level": 9,
       "type": "ability",
@@ -1036,7 +1036,7 @@
     },
     {
       "id": "domain_card.grace-encore",
-      "name": "Encore",
+      "name": "Bis",
       "domain_id": "domain.grace",
       "level": 10,
       "type": "spell",
@@ -1046,7 +1046,7 @@
     },
     {
       "id": "domain_card.grace-notorious",
-      "name": "Notorious",
+      "name": "Notório",
       "domain_id": "domain.grace",
       "level": 10,
       "type": "ability",
@@ -1056,7 +1056,7 @@
     },
     {
       "id": "domain_card.midnight-pick-and-pull",
-      "name": "Pick and Pull",
+      "name": "Pegar e Puxar",
       "domain_id": "domain.midnight",
       "level": 1,
       "type": "ability",
@@ -1076,7 +1076,7 @@
     },
     {
       "id": "domain_card.midnight-uncanny-disguise",
-      "name": "Uncanny Disguise",
+      "name": "Disfarce Inquietante",
       "domain_id": "domain.midnight",
       "level": 1,
       "type": "spell",
@@ -1086,7 +1086,7 @@
     },
     {
       "id": "domain_card.midnight-midnight-spirit",
-      "name": "Midnight Spirit",
+      "name": "Espírito da Meia-Noite",
       "domain_id": "domain.midnight",
       "level": 2,
       "type": "spell",
@@ -1096,7 +1096,7 @@
     },
     {
       "id": "domain_card.midnight-shadowbind",
-      "name": "Shadowbind",
+      "name": "Vincular Sombras",
       "domain_id": "domain.midnight",
       "level": 2,
       "type": "spell",
@@ -1106,7 +1106,7 @@
     },
     {
       "id": "domain_card.midnight-chokehold",
-      "name": "Chokehold",
+      "name": "Estrangulamento",
       "domain_id": "domain.midnight",
       "level": 3,
       "type": "ability",
@@ -1116,7 +1116,7 @@
     },
     {
       "id": "domain_card.midnight-veil-of-night",
-      "name": "Veil of Night",
+      "name": "Véu da Noite",
       "domain_id": "domain.midnight",
       "level": 3,
       "type": "spell",
@@ -1126,7 +1126,7 @@
     },
     {
       "id": "domain_card.midnight-stealth-expertise",
-      "name": "Stealth Expertise",
+      "name": "Especialista em Furtividade",
       "domain_id": "domain.midnight",
       "level": 4,
       "type": "ability",
@@ -1136,7 +1136,7 @@
     },
     {
       "id": "domain_card.midnight-glyph-of-nightfall",
-      "name": "Glyph of Nightfall",
+      "name": "Glifo do Ocaso",
       "domain_id": "domain.midnight",
       "level": 4,
       "type": "spell",
@@ -1146,7 +1146,7 @@
     },
     {
       "id": "domain_card.midnight-hush",
-      "name": "Hush",
+      "name": "Silêncio",
       "domain_id": "domain.midnight",
       "level": 5,
       "type": "spell",
@@ -1156,7 +1156,7 @@
     },
     {
       "id": "domain_card.midnight-phantom-retreat",
-      "name": "Phantom Retreat",
+      "name": "Retirada Fantasma",
       "domain_id": "domain.midnight",
       "level": 5,
       "type": "spell",
@@ -1166,7 +1166,7 @@
     },
     {
       "id": "domain_card.midnight-dark-whispers",
-      "name": "Dark Whispers",
+      "name": "Sussurros Sombrios",
       "domain_id": "domain.midnight",
       "level": 6,
       "type": "spell",
@@ -1176,7 +1176,7 @@
     },
     {
       "id": "domain_card.midnight-mass-disguise",
-      "name": "Mass Disguise",
+      "name": "Disfarce em Massa",
       "domain_id": "domain.midnight",
       "level": 6,
       "type": "spell",
@@ -1186,7 +1186,7 @@
     },
     {
       "id": "domain_card.midnight-midnight-touched",
-      "name": "Meia-Noite-Tocado",
+      "name": "Tocado pela Meia-Noite",
       "domain_id": "domain.midnight",
       "level": 7,
       "type": "ability",
@@ -1196,7 +1196,7 @@
     },
     {
       "id": "domain_card.midnight-vanishing-dodge",
-      "name": "Vanishing Dodge",
+      "name": "Esquiva Desaparecente",
       "domain_id": "domain.midnight",
       "level": 7,
       "type": "spell",
@@ -1206,7 +1206,7 @@
     },
     {
       "id": "domain_card.midnight-shadowhunter",
-      "name": "Shadowhunter",
+      "name": "Caçador de Sombras",
       "domain_id": "domain.midnight",
       "level": 8,
       "type": "ability",
@@ -1216,7 +1216,7 @@
     },
     {
       "id": "domain_card.midnight-spellcharge",
-      "name": "Spellcharge",
+      "name": "Carga de Feitiço",
       "domain_id": "domain.midnight",
       "level": 8,
       "type": "spell",
@@ -1226,7 +1226,7 @@
     },
     {
       "id": "domain_card.midnight-night-terror",
-      "name": "Night Terror",
+      "name": "Terror Noturno",
       "domain_id": "domain.midnight",
       "level": 9,
       "type": "spell",
@@ -1236,7 +1236,7 @@
     },
     {
       "id": "domain_card.midnight-twilight-toll",
-      "name": "Twilight Toll",
+      "name": "Toque do Crepúsculo",
       "domain_id": "domain.midnight",
       "level": 9,
       "type": "ability",
@@ -1256,7 +1256,7 @@
     },
     {
       "id": "domain_card.midnight-specter-of-the-dark",
-      "name": "Specter of the Dark",
+      "name": "Espectro da Escuridão",
       "domain_id": "domain.midnight",
       "level": 10,
       "type": "spell",
@@ -1266,7 +1266,7 @@
     },
     {
       "id": "domain_card.sage-gifted-tracker",
-      "name": "Gifted Tracker",
+      "name": "Rastreador Talentoso",
       "domain_id": "domain.sage",
       "level": 1,
       "type": "ability",
@@ -1286,7 +1286,7 @@
     },
     {
       "id": "domain_card.sage-vicious-entangle",
-      "name": "Vicious Entangle",
+      "name": "Enredar Vicioso",
       "domain_id": "domain.sage",
       "level": 1,
       "type": "spell",
@@ -1296,7 +1296,7 @@
     },
     {
       "id": "domain_card.sage-conjure-swarm",
-      "name": "Conjure Swarm",
+      "name": "Conjurar Enxame",
       "domain_id": "domain.sage",
       "level": 2,
       "type": "spell",
@@ -1306,7 +1306,7 @@
     },
     {
       "id": "domain_card.sage-natural-familiar",
-      "name": "Natural Familiar",
+      "name": "Familiar Natural",
       "domain_id": "domain.sage",
       "level": 2,
       "type": "spell",
@@ -1316,7 +1316,7 @@
     },
     {
       "id": "domain_card.sage-corrosive-projectile",
-      "name": "Corrosive Projectile",
+      "name": "Projétil Corrosivo",
       "domain_id": "domain.sage",
       "level": 3,
       "type": "spell",
@@ -1326,7 +1326,7 @@
     },
     {
       "id": "domain_card.sage-towering-stalk",
-      "name": "Towering Stalk",
+      "name": "Talos Elevados",
       "domain_id": "domain.sage",
       "level": 3,
       "type": "spell",
@@ -1336,7 +1336,7 @@
     },
     {
       "id": "domain_card.sage-death-grip",
-      "name": "Death Grip",
+      "name": "Aperto da Morte",
       "domain_id": "domain.sage",
       "level": 4,
       "type": "spell",
@@ -1346,7 +1346,7 @@
     },
     {
       "id": "domain_card.sage-healing-field",
-      "name": "Healing Field",
+      "name": "Campo de Cura",
       "domain_id": "domain.sage",
       "level": 4,
       "type": "spell",
@@ -1356,7 +1356,7 @@
     },
     {
       "id": "domain_card.sage-thorn-skin",
-      "name": "Thorn Skin",
+      "name": "Pele de Espinhos",
       "domain_id": "domain.sage",
       "level": 5,
       "type": "spell",
@@ -1366,7 +1366,7 @@
     },
     {
       "id": "domain_card.sage-wild-fortress",
-      "name": "Wild Fortress",
+      "name": "Fortaleza Selvagem",
       "domain_id": "domain.sage",
       "level": 5,
       "type": "spell",
@@ -1376,7 +1376,7 @@
     },
     {
       "id": "domain_card.sage-conjured-steeds",
-      "name": "Conjured Steeds",
+      "name": "Montarias Conjuradas",
       "domain_id": "domain.sage",
       "level": 6,
       "type": "spell",
@@ -1386,7 +1386,7 @@
     },
     {
       "id": "domain_card.sage-forager",
-      "name": "Forager",
+      "name": "Forrageador",
       "domain_id": "domain.sage",
       "level": 6,
       "type": "ability",
@@ -1396,7 +1396,7 @@
     },
     {
       "id": "domain_card.sage-sage-touched",
-      "name": "Sabio-Tocado",
+      "name": "Tocado pelo Sábio",
       "domain_id": "domain.sage",
       "level": 7,
       "type": "ability",
@@ -1406,7 +1406,7 @@
     },
     {
       "id": "domain_card.sage-wild-surge",
-      "name": "Wild Surge",
+      "name": "Surto Selvagem",
       "domain_id": "domain.sage",
       "level": 7,
       "type": "spell",
@@ -1416,7 +1416,7 @@
     },
     {
       "id": "domain_card.sage-forest-sprites",
-      "name": "Forest Sprites",
+      "name": "Espíritos da Floresta",
       "domain_id": "domain.sage",
       "level": 8,
       "type": "spell",
@@ -1426,7 +1426,7 @@
     },
     {
       "id": "domain_card.sage-rejuvenation-barrier",
-      "name": "Rejuvenation Barrier",
+      "name": "Barreira de Rejuvenescimento",
       "domain_id": "domain.sage",
       "level": 8,
       "type": "spell",
@@ -1436,7 +1436,7 @@
     },
     {
       "id": "domain_card.sage-fane-of-the-wilds",
-      "name": "Fane of the Wilds",
+      "name": "Santuário dos Ermos",
       "domain_id": "domain.sage",
       "level": 9,
       "type": "ability",
@@ -1446,7 +1446,7 @@
     },
     {
       "id": "domain_card.sage-plant-dominion",
-      "name": "Plant Dominion",
+      "name": "Domínio das Plantas",
       "domain_id": "domain.sage",
       "level": 9,
       "type": "spell",
@@ -1456,7 +1456,7 @@
     },
     {
       "id": "domain_card.sage-force-of-nature",
-      "name": "Force of Nature",
+      "name": "Força da Natureza",
       "domain_id": "domain.sage",
       "level": 10,
       "type": "spell",
@@ -1466,7 +1466,7 @@
     },
     {
       "id": "domain_card.sage-tempest",
-      "name": "Tempest",
+      "name": "Tempestade",
       "domain_id": "domain.sage",
       "level": 10,
       "type": "spell",
@@ -1476,7 +1476,7 @@
     },
     {
       "id": "domain_card.splendor-bolt-beacon",
-      "name": "Bolt Beacon",
+      "name": "Farol de Raio",
       "domain_id": "domain.splendor",
       "level": 1,
       "type": "spell",
@@ -1486,7 +1486,7 @@
     },
     {
       "id": "domain_card.splendor-mending-touch",
-      "name": "Mending Touch",
+      "name": "Toque Restaurador",
       "domain_id": "domain.splendor",
       "level": 1,
       "type": "spell",
@@ -1496,7 +1496,7 @@
     },
     {
       "id": "domain_card.splendor-reassurance",
-      "name": "Reassurance",
+      "name": "Reafirmação",
       "domain_id": "domain.splendor",
       "level": 1,
       "type": "ability",
@@ -1506,7 +1506,7 @@
     },
     {
       "id": "domain_card.splendor-final-words",
-      "name": "Final Words",
+      "name": "Palavras Finais",
       "domain_id": "domain.splendor",
       "level": 2,
       "type": "spell",
@@ -1516,7 +1516,7 @@
     },
     {
       "id": "domain_card.splendor-healing-hands",
-      "name": "Healing Hands",
+      "name": "Mãos Curativas",
       "domain_id": "domain.splendor",
       "level": 2,
       "type": "spell",
@@ -1526,7 +1526,7 @@
     },
     {
       "id": "domain_card.splendor-second-wind",
-      "name": "Second Wind",
+      "name": "Segundo Fôlego",
       "domain_id": "domain.splendor",
       "level": 3,
       "type": "ability",
@@ -1536,7 +1536,7 @@
     },
     {
       "id": "domain_card.splendor-voice-of-reason",
-      "name": "Voice of Reason",
+      "name": "Voz da Razão",
       "domain_id": "domain.splendor",
       "level": 3,
       "type": "ability",
@@ -1546,7 +1546,7 @@
     },
     {
       "id": "domain_card.splendor-divination",
-      "name": "Divination",
+      "name": "Adivinhação",
       "domain_id": "domain.splendor",
       "level": 4,
       "type": "spell",
@@ -1556,7 +1556,7 @@
     },
     {
       "id": "domain_card.splendor-lifeward",
-      "name": "Lifeward",
+      "name": "Guarda da Vida",
       "domain_id": "domain.splendor",
       "level": 4,
       "type": "spell",
@@ -1566,7 +1566,7 @@
     },
     {
       "id": "domain_card.splendor-shape-material",
-      "name": "Shape Material",
+      "name": "Moldar Material",
       "domain_id": "domain.splendor",
       "level": 5,
       "type": "spell",
@@ -1576,7 +1576,7 @@
     },
     {
       "id": "domain_card.splendor-smite",
-      "name": "Smite",
+      "name": "Golpe Divino",
       "domain_id": "domain.splendor",
       "level": 5,
       "type": "spell",
@@ -1586,7 +1586,7 @@
     },
     {
       "id": "domain_card.splendor-restoration",
-      "name": "Restoration",
+      "name": "Restauração",
       "domain_id": "domain.splendor",
       "level": 6,
       "type": "spell",
@@ -1596,7 +1596,7 @@
     },
     {
       "id": "domain_card.splendor-zone-of-protection",
-      "name": "Zone of Protection",
+      "name": "Zona de Proteção",
       "domain_id": "domain.splendor",
       "level": 6,
       "type": "spell",
@@ -1606,7 +1606,7 @@
     },
     {
       "id": "domain_card.splendor-healing-strike",
-      "name": "Healing Strike",
+      "name": "Golpe Curativo",
       "domain_id": "domain.splendor",
       "level": 7,
       "type": "spell",
@@ -1616,7 +1616,7 @@
     },
     {
       "id": "domain_card.splendor-splendor-touched",
-      "name": "Esplendor-Tocado",
+      "name": "Tocado pelo Esplendor",
       "domain_id": "domain.splendor",
       "level": 7,
       "type": "ability",
@@ -1626,7 +1626,7 @@
     },
     {
       "id": "domain_card.splendor-shield-aura",
-      "name": "Shield Aura",
+      "name": "Aura de Escudo",
       "domain_id": "domain.splendor",
       "level": 8,
       "type": "spell",
@@ -1636,7 +1636,7 @@
     },
     {
       "id": "domain_card.splendor-stunning-sunlight",
-      "name": "Stunning Sunlight",
+      "name": "Luz Solar Atordoante",
       "domain_id": "domain.splendor",
       "level": 8,
       "type": "spell",
@@ -1646,7 +1646,7 @@
     },
     {
       "id": "domain_card.splendor-overwhelming-aura",
-      "name": "Overwhelming Aura",
+      "name": "Aura Avassaladora",
       "domain_id": "domain.splendor",
       "level": 9,
       "type": "spell",
@@ -1656,7 +1656,7 @@
     },
     {
       "id": "domain_card.splendor-salvation-beam",
-      "name": "Salvation Beam",
+      "name": "Raio de Salvação",
       "domain_id": "domain.splendor",
       "level": 9,
       "type": "spell",
@@ -1666,7 +1666,7 @@
     },
     {
       "id": "domain_card.splendor-invigoration",
-      "name": "Invigoration",
+      "name": "Revigoramento",
       "domain_id": "domain.splendor",
       "level": 10,
       "type": "spell",
@@ -1676,7 +1676,7 @@
     },
     {
       "id": "domain_card.splendor-resurrection",
-      "name": "Resurrection",
+      "name": "Ressurreição",
       "domain_id": "domain.splendor",
       "level": 10,
       "type": "spell",
@@ -1686,7 +1686,7 @@
     },
     {
       "id": "domain_card.valor-bare-bones",
-      "name": "Bare Bones",
+      "name": "O Básico",
       "domain_id": "domain.valor",
       "level": 1,
       "type": "ability",
@@ -1696,7 +1696,7 @@
     },
     {
       "id": "domain_card.valor-forceful-push",
-      "name": "Forceful Push",
+      "name": "Empurrão Poderoso",
       "domain_id": "domain.valor",
       "level": 1,
       "type": "ability",
@@ -1706,7 +1706,7 @@
     },
     {
       "id": "domain_card.valor-i-am-your-shield",
-      "name": "I Am Your Shield",
+      "name": "Eu Sou Seu Escudo",
       "domain_id": "domain.valor",
       "level": 1,
       "type": "ability",
@@ -1716,7 +1716,7 @@
     },
     {
       "id": "domain_card.valor-body-basher",
-      "name": "Body Basher",
+      "name": "Esmaga-Corpos",
       "domain_id": "domain.valor",
       "level": 2,
       "type": "ability",
@@ -1726,7 +1726,7 @@
     },
     {
       "id": "domain_card.valor-bold-presence",
-      "name": "Bold Presence",
+      "name": "Presença Ousada",
       "domain_id": "domain.valor",
       "level": 2,
       "type": "ability",
@@ -1736,7 +1736,7 @@
     },
     {
       "id": "domain_card.valor-critical-inspiration",
-      "name": "Critical Inspiration",
+      "name": "Inspiração Crítica",
       "domain_id": "domain.valor",
       "level": 3,
       "type": "ability",
@@ -1746,7 +1746,7 @@
     },
     {
       "id": "domain_card.valor-lean-on-me",
-      "name": "Lean on Me",
+      "name": "Apoie-se em Mim",
       "domain_id": "domain.valor",
       "level": 3,
       "type": "ability",
@@ -1756,7 +1756,7 @@
     },
     {
       "id": "domain_card.valor-goad-them-on",
-      "name": "Goad Them On",
+      "name": "Incite-os",
       "domain_id": "domain.valor",
       "level": 4,
       "type": "ability",
@@ -1766,7 +1766,7 @@
     },
     {
       "id": "domain_card.valor-support-tank",
-      "name": "Support Tank",
+      "name": "Tanque de Suporte",
       "domain_id": "domain.valor",
       "level": 4,
       "type": "ability",
@@ -1776,7 +1776,7 @@
     },
     {
       "id": "domain_card.valor-armorer",
-      "name": "Armorer",
+      "name": "Armeiro",
       "domain_id": "domain.valor",
       "level": 5,
       "type": "ability",
@@ -1786,7 +1786,7 @@
     },
     {
       "id": "domain_card.valor-rousing-strike",
-      "name": "Rousing Strike",
+      "name": "Golpe Estimulante",
       "domain_id": "domain.valor",
       "level": 5,
       "type": "ability",
@@ -1796,7 +1796,7 @@
     },
     {
       "id": "domain_card.valor-inevitable",
-      "name": "Inevitable",
+      "name": "Inevitável",
       "domain_id": "domain.valor",
       "level": 6,
       "type": "ability",
@@ -1806,7 +1806,7 @@
     },
     {
       "id": "domain_card.valor-rise-up",
-      "name": "Rise Up",
+      "name": "Erga-se",
       "domain_id": "domain.valor",
       "level": 6,
       "type": "ability",
@@ -1816,7 +1816,7 @@
     },
     {
       "id": "domain_card.valor-shrug-it-off",
-      "name": "Shrug It Off",
+      "name": "Dê de Ombros",
       "domain_id": "domain.valor",
       "level": 7,
       "type": "ability",
@@ -1826,7 +1826,7 @@
     },
     {
       "id": "domain_card.valor-valor-touched",
-      "name": "Valor-Tocado",
+      "name": "Tocado pelo Valor",
       "domain_id": "domain.valor",
       "level": 7,
       "type": "ability",
@@ -1836,7 +1836,7 @@
     },
     {
       "id": "domain_card.valor-full-surge",
-      "name": "Full Surge",
+      "name": "Surto Total",
       "domain_id": "domain.valor",
       "level": 8,
       "type": "ability",
@@ -1846,7 +1846,7 @@
     },
     {
       "id": "domain_card.valor-ground-pound",
-      "name": "Ground Pound",
+      "name": "Golpe no Chão",
       "domain_id": "domain.valor",
       "level": 8,
       "type": "ability",
@@ -1856,7 +1856,7 @@
     },
     {
       "id": "domain_card.valor-hold-the-line",
-      "name": "Hold the Line",
+      "name": "Segure a Linha",
       "domain_id": "domain.valor",
       "level": 9,
       "type": "ability",
@@ -1866,7 +1866,7 @@
     },
     {
       "id": "domain_card.valor-lead-by-example",
-      "name": "Lead by Example",
+      "name": "Lidere pelo Exemplo",
       "domain_id": "domain.valor",
       "level": 9,
       "type": "ability",
@@ -1876,7 +1876,7 @@
     },
     {
       "id": "domain_card.valor-unbreakable",
-      "name": "Unbreakable",
+      "name": "Inquebrável",
       "domain_id": "domain.valor",
       "level": 10,
       "type": "ability",
@@ -1886,7 +1886,7 @@
     },
     {
       "id": "domain_card.valor-unyielding-armor",
-      "name": "Unyielding Armor",
+      "name": "Armadura Inabalável",
       "domain_id": "domain.valor",
       "level": 10,
       "type": "ability",
