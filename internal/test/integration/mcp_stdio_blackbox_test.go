@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/louisbranch/fracturing.space/internal/seed"
+	"github.com/louisbranch/fracturing.space/internal/tools/seed"
 )
 
 // TestMCPStdioBlackbox validates the stdio MCP surface using the shared fixture.

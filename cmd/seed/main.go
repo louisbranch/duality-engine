@@ -15,8 +15,8 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/louisbranch/fracturing.space/internal/seed"
-	"github.com/louisbranch/fracturing.space/internal/seed/generator"
+	"github.com/louisbranch/fracturing.space/internal/tools/seed"
+	"github.com/louisbranch/fracturing.space/internal/tools/seed/generator"
 )
 
 func main() {
