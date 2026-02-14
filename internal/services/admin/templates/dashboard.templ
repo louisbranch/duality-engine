@@ -32,16 +32,19 @@ templ DashboardContent(stats DashboardStats, activities []ActivityEvent, loc Loc
 // DashboardStatsCards renders the stat cards grid using PaperCSS flexbox.
 templ DashboardStatsCards(stats DashboardStats, loc Localizer) {
 	<div class="row">
-		<div class="sm-6 md-3 col">
+		<div class="sm-6 md-2 col">
+			@StatCard(T(loc, "dashboard.stats.users"), stats.TotalUsers, "")
+		</div>
+		<div class="sm-6 md-2 col">
 			@StatCard(T(loc, "dashboard.stats.campaigns"), stats.TotalCampaigns, "")
 		</div>
-		<div class="sm-6 md-3 col">
+		<div class="sm-6 md-2 col">
 			@StatCard(T(loc, "dashboard.stats.sessions"), stats.TotalSessions, "")
 		</div>
-		<div class="sm-6 md-3 col">
+		<div class="sm-6 md-2 col">
 			@StatCard(T(loc, "dashboard.stats.characters"), stats.TotalCharacters, "")
 		</div>
-		<div class="sm-6 md-3 col">
+		<div class="sm-6 md-2 col">
 			@StatCard(T(loc, "dashboard.stats.participants"), stats.TotalParticipants, "")
 		</div>
 	</div>

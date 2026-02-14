@@ -32,6 +32,7 @@ func init() {
 		"dashboard.stats.sessions":               "Sessions",
 		"dashboard.stats.characters":             "Characters",
 		"dashboard.stats.participants":           "Participants",
+		"dashboard.stats.users":                  "Users",
 		"dashboard.table.campaign":               "Campaign",
 		"dashboard.table.event":                  "Event",
 		"dashboard.table.time":                   "Time",

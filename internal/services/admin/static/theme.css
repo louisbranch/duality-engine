@@ -3,6 +3,10 @@ html.dark body {
   background: #41403e;
 }
 
+.container {
+  max-width: 1200px;
+}
+
 /* Fixed navbar offset */
 nav.fixed ~ * {
   margin-top: 4rem;

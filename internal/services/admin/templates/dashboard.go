@@ -6,6 +6,7 @@ type DashboardStats struct {
 	TotalSessions     string
 	TotalCharacters   string
 	TotalParticipants string
+	TotalUsers        string
 }
 
 // ActivityEvent represents a recent event for the activity feed.
