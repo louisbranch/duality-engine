@@ -1,6 +1,6 @@
 PROTO_DIR := api/proto
 GEN_GO_DIR := api/gen/go
-COVER_EXCLUDE_REGEX := (api/gen/|_templ\.go|internal/services/game/storage/sqlite/db/|internal/seed/)
+COVER_EXCLUDE_REGEX := (api/gen/|_templ\.go|internal/services/game/storage/sqlite/db/|internal/tools/seed/)
 
 PROTO_FILES := \
 	$(wildcard $(PROTO_DIR)/common/v1/*.proto) \

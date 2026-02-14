@@ -12,7 +12,7 @@ import (
 	authv1 "github.com/louisbranch/fracturing.space/api/gen/go/auth/v1"
 	commonv1 "github.com/louisbranch/fracturing.space/api/gen/go/common/v1"
 	statev1 "github.com/louisbranch/fracturing.space/api/gen/go/game/v1"
-	"github.com/louisbranch/fracturing.space/internal/seed/worldbuilder"
+	"github.com/louisbranch/fracturing.space/internal/tools/seed/worldbuilder"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

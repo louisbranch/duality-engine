@@ -25,7 +25,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/louisbranch/fracturing.space/internal/seed"
+	"github.com/louisbranch/fracturing.space/internal/tools/seed"
 )
 
 const blackboxFixtureGlob = "internal/test/integration/fixtures/blackbox_*.json"
