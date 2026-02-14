@@ -4,7 +4,7 @@ Single source of agent directives and project context.
 
 ## Preflight
 
-- At the start of a session, verify you are not on `main` with `git branch --show-current`; if you are on `main`, create another branch.
+- At the start of a session, verify you are not on `main` with `git branch --show-current`; if you are on `main`, stop, and ask for instructions.
 
 ## Safety
 
@@ -13,9 +13,15 @@ Single source of agent directives and project context.
 
 ## Documentation culture
 
-- Maintain a domain-driven design vision in the docs; keep domain language and boundaries intentional.
-- Use `docs/` for high-level decisions, domain language changes, and architecture evolution.
-- Keep code comments focused on the why for non-obvious behavior; promote durable knowledge to `docs/`.
+- Maintain a domain-driven design vision; keep domain language and boundaries intentional.
+- Offer to promote high-level decisions, domain language changes, and architecture evolution to `docs/` .
+- Document code, including non exported functions and types, focused on why not how.
+
+## Test-Driven Development
+
+- **Red**: Write one small test that defines a single behavior and verify it fails before writing any implementation code.
+- **Green**: Implement the minimum code necessary to make that test pass—no extra features or generalization.
+- **Refactor**: Improve structure and clarity while keeping all tests passing and without changing behavior.
 
 ## Planning sessions
 
