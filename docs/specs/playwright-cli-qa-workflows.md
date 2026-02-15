@@ -1,3 +1,9 @@
+---
+title: "Playwright CLI QA Workflows"
+parent: "Specs"
+nav_order: 2
+---
+
 # Playwright CLI QA Workflows
 
 These specs are lightweight, readable automation scripts for Playwright CLI.

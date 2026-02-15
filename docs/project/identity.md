@@ -1,3 +1,9 @@
+---
+title: "Identity and Recovery"
+parent: "Project"
+nav_order: 9
+---
+
 # Identity and Recovery
 
 This document captures the identity model and recovery flows for authentication.

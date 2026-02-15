@@ -25,7 +25,13 @@ func main() {
 		output = filepath.Join(root, outPath)
 	}
 
-	content := icons.CatalogMarkdown()
+	content := fmt.Sprintf(`---
+title: "Icon Catalog"
+parent: "Project"
+nav_order: 30
+---
+
+%s`, icons.CatalogMarkdown())
 	if err := os.MkdirAll(filepath.Dir(output), 0o755); err != nil {
 		fatal(fmt.Errorf("create output dir: %w", err))
 	}

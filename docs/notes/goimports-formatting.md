@@ -1,5 +1,7 @@
 ---
 title: "Goimports Formatting Baseline"
+parent: "Notes"
+nav_order: 1
 ---
 
 ## Description

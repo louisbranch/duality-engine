@@ -1,3 +1,9 @@
+---
+title: "Testing Scenarios"
+parent: "Project"
+nav_order: 20
+---
+
 # Testing Scenarios
 
 Game-only scenarios live under `internal/test/game/scenarios/*.lua`. Each file returns a `Scenario` instance that describes player/GM/adversary interactions at a high level. The runner (in `internal/test/game`) expands each move into gRPC calls and performs minimal auto-assertions (event types + projection deltas).

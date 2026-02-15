@@ -1,3 +1,9 @@
+---
+title: "Scenario Missing Mechanics"
+parent: "Project"
+nav_order: 22
+---
+
 # Scenario Missing Mechanics
 
 This document tracks mechanics gaps discovered while running the scenario suite. It focuses on game-system behavior that is missing or incorrect even when the DSL bindings exist.

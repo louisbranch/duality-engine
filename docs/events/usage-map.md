@@ -1,3 +1,9 @@
+---
+title: "Event Usage Map"
+parent: "Events"
+nav_order: 3
+---
+
 # Event Usage Map
 
 ## Regenerating

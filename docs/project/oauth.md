@@ -1,3 +1,9 @@
+---
+title: "OAuth System"
+parent: "Project"
+nav_order: 10
+---
+
 # OAuth System
 
 This document describes the OAuth surface owned by the auth service and the MCP protected resource integration.
