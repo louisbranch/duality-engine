@@ -1,4 +1,10 @@
-# Event Catalog
+---
+title: "Event Catalog Generator"
+parent: "Events"
+nav_order: 2
+---
+
+# Event Catalog Generator
 
 ## Regenerating the catalog
 Run the generator from the repo root:

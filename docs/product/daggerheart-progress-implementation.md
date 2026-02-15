@@ -1,3 +1,9 @@
+---
+title: "Daggerheart Progress Implementation"
+parent: "Product"
+nav_order: 2
+---
+
 # Daggerheart Progress Implementation
 
 ## Purpose
@@ -5,7 +11,6 @@ Describe implemented mechanics, current PRD coverage, and remaining Phase 2 work
 
 ## Sources
 - PRD: [Daggerheart PRD](daggerheart-PRD.md)
-- SRD mechanics extraction: `.ai/plans/daggerheart-srd-mechanics.md`
 
 ## Implemented Outcomes (Phase 0/1)
 - Deterministic action roll engine and duality outcome evaluation with explain/probability surfaces.
@@ -61,4 +66,3 @@ Describe implemented mechanics, current PRD coverage, and remaining Phase 2 work
 
 ## References
 - PRD: [Daggerheart PRD](daggerheart-PRD.md)
-- SRD mechanics extraction: `.ai/plans/daggerheart-srd-mechanics.md`

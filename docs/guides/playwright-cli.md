@@ -1,3 +1,9 @@
+---
+title: "Playwright CLI"
+parent: "Guides"
+nav_order: 1
+---
+
 # Playwright-CLI: Learnings & Patterns
 
 Concise reference for using `playwright-cli` for exploratory testing, spike QA,

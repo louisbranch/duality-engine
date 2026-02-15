@@ -1,3 +1,9 @@
+---
+title: "Admin Smoke Spec"
+parent: "Specs"
+nav_order: 1
+---
+
 # Admin Smoke Spec (Playwright CLI)
 
 ## Purpose

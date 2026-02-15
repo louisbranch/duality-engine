@@ -1,3 +1,9 @@
+---
+title: "Daggerheart PRD"
+parent: "Product"
+nav_order: 1
+---
+
 # Daggerheart PRD: Core Mechanics (Setting-Agnostic)
 
 ## Purpose
